@@ -4,7 +4,7 @@
 			<div class="col-sm-12">
 				<% thisClient = Client.find(@invoice.clientid) %>
 				<% thisProject = Project.find(@invoice.projectid) %>
-				<% if 1 == 2 %>
+				<% if !thisClient.logo.blank? %>
 				<%= image_tag(thisClient.logo.url(:medium), class: 'pull-right hidden-xs') %>
 				<% end %>
 				<h1>Invoice #<%= @invoice.id %></h1>
@@ -16,9 +16,11 @@
 					<strong>Project:</strong>
 					<%= link_to thisProject do %><%= thisProject.name %><% end %>
 				</p>
+				<p><strong>Description:</strong></p>
+				<p><%= @invoice.description %></p>
 				<p>
 					<strong>Date:</strong>
-					<%= @invoice.date %>
+					<%= @invoice.date.to_formatted_s(:long) %>
 				</p>
 				<p>
 					<strong>Work Type:</strong>
@@ -32,25 +34,23 @@
 					<strong>Paid?:</strong>
 					<% if @invoice.paid == true %><i class="fa fa-check green"></i><% else %><span class="spread red">Not Paid</span><% end %>
 				</p>
+				<% if @invoice.paid == true %>
 				<p>
 					<strong>Paid Date:</strong>
-					<%= @invoice.paiddate %>
+					<%= @invoice.paiddate.to_formatted_s(:long) %>
 				</p>
 				<p>
 					<strong>Payment Type:</strong>
 					<%= @invoice.paymenttype %>
 				</p>
-				<p>
-					<strong>Description:</strong>
-					<%= @invoice.description %>
-				</p>
+				<% end %>
 			</div>
 		</div>
 		<div class="row hidden-print">
 			<div class="col-sm-12">
-				<button id="print-invoice-button" class="pull-right btn btn-success"><i class="fa fa-print left"></i>Print</button>
-				 <p><%= link_to edit_invoice_path(@invoice), { :class => 'btn btn-warning' } do %><i class="fa fa-pencil-square-o left"></i>Edit<% end %> <%= link_to invoice_path(@invoice), method: :delete, data: { confirm: "Are you sure you would like to delete Invoice ##{@invoice.id}?" }, class: 'btn btn-danger' do %><i class="fa fa-trash-o left"></i>Delete<% end %></p>
-				 <p><%= link_to 'Back', invoices_path %></p>
+				<%= link_to invoice_path(:format=>'pdf'), { :class => 'pull-right btn btn-success' } do %><i class="fa fa-file-o left"></i>PDF<% end %>
+				<p><%= link_to edit_invoice_path(@invoice), { :class => 'btn btn-warning' } do %><i class="fa fa-pencil-square-o left"></i>Edit<% end %> <%= link_to invoice_path(@invoice), method: :delete, data: { confirm: "Are you sure you would like to delete Invoice ##{@invoice.id}?" }, class: 'btn btn-danger' do %><i class="fa fa-trash-o left"></i>Delete<% end %></p>
+				<p><%= link_to 'Back', invoices_path %></p>
 			</div>
 		</div>
 	</div>

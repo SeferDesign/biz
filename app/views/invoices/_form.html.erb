@@ -19,7 +19,7 @@
 		<div class="col-lg-4 col-sm-6">
 			<div class="form-group">
 				<%= f.label :projectid, 'Project' %>
-				<%= collection_select(:invoice, 'projectid', Project.all, :id, :name, {}, { :class => 'form-control' }) %>
+				<%= collection_select(:invoice, 'projectid', Project.all, :id, :project_client_and_name, {}, { :class => 'form-control' }) %>
 			</div>
 		</div>
 		<div class="col-lg-2 col-sm-6">

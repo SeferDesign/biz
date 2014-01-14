@@ -2,7 +2,8 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-sm-12 text-center">
-				<p><%= company_full_name %></p>
+				<p>&copy; <%= company_full_name %></p>
+				<%= wicked_pdf_image_tag company_logo_url %>
 				<a href="<%= company_site_url %>" title="<%= company_full_name %>" class="hidden-print"><img id="footer-logo" src="<%= company_logo_url %>" alt="<%= company_full_name %>"></a>
 			</div>
 		</div>

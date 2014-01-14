@@ -46,3 +46,6 @@ end
 
 # Paperclip - handles image uploads. requires ImageMagick
 gem 'paperclip', :git => 'git://github.com/thoughtbot/paperclip.git'
+
+gem 'wkhtmltopdf-binary'
+gem 'wicked_pdf'

@@ -13,16 +13,16 @@
 						<table class="table table-condensed">
 							<thead>
 								<tr>
-									<th>Project</th>
 									<th>Client</th>
+									<th>Project</th>
 									<th class="text-center">Completed?</th>
 								</tr>
 							</thead>
 							<tbody>
 								<% @projects.sort { |a,b| a.name <=> b.name }.each do |project| %>
 								<tr id="projectrow<%= project.id %>">
-									<td><%= link_to project do %><%= project.name %><% end %></td>
 									<td><%= link_to Client.find(project.clientid) do %><%= Client.find(project.clientid).name %><% end %></td>
+									<td><%= link_to project do %><%= project.name %><% end %></td>
 									<td class="text-center"><% if project.completed == true %><i class="fa fa-check green"></i><% else %><span class="spread red">No</span><% end %></td>
 								</tr>
 								<% end %>
