@@ -1,0 +1,53 @@
+<section id="invoice-show">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12">
+				<% thisClient = Client.find(@invoice.clientid) %>
+				<% thisProject = Project.find(@invoice.projectid) %>
+				<div>
+					<% if !thisClient.logo.blank? %>
+					<div class="pull-right"><%= wicked_pdf_image_tag thisClient.logo.url(:thumb) %></div>
+					<% end %>
+					<h1>Invoice</h1>
+				</div>
+				<div class="clearfix"></div>
+				<p class="text-right"><%= @invoice.date.to_formatted_s(:long) %></p>
+				<div>
+					<div class="pull-right text-right">
+						<p>Attention: <%= thisClient.contact %></p>
+						<p><%= thisClient.name %></p>
+					</div>
+					<p><%= company_email %></p>
+					<p><%= company_phone %></p>
+				</div>
+				<p><strong>Project:</strong> <%= thisProject.name %></p>
+				<p><strong>Description:</strong></p>
+				<p><%= @invoice.description %></p>
+				
+				<p>
+					<strong>Work Type:</strong>
+					<%= @invoice.worktype %>
+				</p>
+				<p>
+					<strong>Cost:</strong>
+					$<%= number_with_precision(@invoice.cost, :precision => 2, :delimiter => ',') %>
+				</p>
+				<% if @invoice.paid == false %>
+				<p><span class="spread red">Not Paid</span></p>
+				<p>This payment can be made to "<%= company_pay_to %>".</p>
+				<p><%= company_street %><br><%= company_city %>, <%= company_state_abbrv %> <%= company_zipcode %></p>
+				<% end %>
+				<% if @invoice.paid == true %>
+				<p>
+					<strong>Paid Date:</strong>
+					<%= @invoice.paiddate.to_formatted_s(:long) %>
+				</p>
+				<p>
+					<strong>Payment Type:</strong>
+					<%= @invoice.paymenttype %>
+				</p>
+				<% end %>
+			</div>
+		</div>
+	</div>
+</section>

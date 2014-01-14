@@ -7,9 +7,18 @@
   <%= wicked_pdf_stylesheet_link_tag "bootstrap.min" %>
   <%= wicked_pdf_stylesheet_link_tag "bootstrap-mods" %>
   <%= wicked_pdf_stylesheet_link_tag "style" %>
+  <%= wicked_pdf_stylesheet_link_tag "pdf-style" %>
   <style>
-  	button {
+  	.hidden-print {
 	  	display: none;
+  	}
+  	
+  	.spread {
+	  	letter-spacing: 0px;
+  	}
+  	
+  	footer img {
+	  	width: 12%;
   	}
   </style>
   <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
@@ -19,7 +28,16 @@
 
 <%= yield %>
 
-<%= render 'layouts/footer' %>
+<footer>
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12 text-center">
+				<p>&copy; <%= company_full_name %></p>
+				<%= wicked_pdf_image_tag company_logo_url %>
+			</div>
+		</div>
+	</div>
+</footer>
 
 </body>
 </html>

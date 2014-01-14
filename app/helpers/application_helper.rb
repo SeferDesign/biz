@@ -17,4 +17,25 @@ module ApplicationHelper
 	def company_pay_to
 		company_pay_to = 'Robert Sefer'
 	end
+	def company_phone
+		company_phone = '(630) 204-0013'
+	end
+	def company_email
+		company_email = 'rsefer@gmail.com'
+	end
+	def company_street
+		company_street = '1 E. Scott #2006'
+	end
+	def company_city
+		company_city = 'Chicago'
+	end
+	def company_state
+		company_city = 'Illinois'
+	end
+	def company_state_abbrv
+		company_city = 'IL'
+	end
+	def company_zipcode
+		company_city = '60610'
+	end
 end

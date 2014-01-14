@@ -11,8 +11,9 @@ class InvoicesController < ApplicationController
       format.pdf do
         render 	:pdf => 'file',
         				:disposition => 'inline',
+        				:page_size => 'Letter',
         				:layout => 'layouts/pdf/pdf.html',
-        				:template => 'invoices/show.html.erb',
+        				:template => 'invoices/show.pdf.erb',
         				:user_style_sheet => '/invoices/style.css',
         				:disable_internal_links => true,
         				:disable_external_links => true,
