@@ -1,0 +1,47 @@
+<%= form_for @client, :html => { :multipart => true } do |f| %>
+	<% if @client.errors.any? %>
+	<div id="error_explanation">
+		<h2><%= pluralize(@client.errors.count, "error") %> prohibited this client from being saved:</h2>
+		<ul>
+			<% @client.errors.full_messages.each do |msg| %>
+			<li><%= msg %></li>
+			<% end %>
+		</ul>
+	</div>
+	<% end %>
+	<div class="row">
+		<div class="col-sm-4">
+			<div class="form-group">
+				<%= f.label :name %>
+				<%= f.text_field :name, class: 'form-control' %>
+			</div>
+		</div>
+		<div class="col-sm-4">
+			<div class="form-group">
+				<%= f.label :contact %>
+				<%= f.text_field :contact, class: 'form-control' %>
+			</div>
+		</div>
+		<div class="col-sm-4">
+			<div class="form-group">
+				<%= f.label :site_url, 'Site' %>
+				<%= f.text_field :site_url, class: 'form-control' %>
+			</div>
+		</div>
+		<div class="col-sm-4">
+			<div class="form-group">
+				<%= f.label :logo, 'Logo' %>
+				<%= f.file_field :logo %>
+			</div>
+		</div>
+		<div class="col-sm-4">
+			<% if !@client.logo.blank? %>
+			<%= image_tag(@client.logo.url) %>
+			<% end %>
+		</div>
+	</div>
+	<hr>
+	<div class="form-group">
+		<button type="submit" class="btn btn-success"><i class="fa fa-save left"></i>Save</button>
+	</div>
+<% end %>

@@ -1,0 +1,59 @@
+<%= form_for @project do |f| %>
+	<% if @project.errors.any? %>
+	<div id="error_explanation">
+		<h2><%= pluralize(@project.errors.count, "error") %> prohibited this project from being saved:</h2>
+		<ul>
+			<% @project.errors.full_messages.each do |msg| %>
+			<li><%= msg %></li>
+			<% end %>
+		</ul>
+	</div>
+	<% end %>
+	<div class="row">
+		<div class="col-sm-4">
+			<div class="form-group">
+				<%= f.label :name %>
+				<%= f.text_field :name, class: 'form-control' %>
+			</div>
+		</div>
+		<div class="col-sm-4">
+			<div class="form-group">
+				<%= f.label :clientid, 'Client' %>
+				<%= collection_select(:project, 'clientid', Client.all, :id, :name, {}, { :class => 'form-control' }) %>
+			</div>
+		</div>
+		<div class="col-sm-4">
+			<div class="form-group">
+				<%= f.label :completed, 'Project Status' %><br>
+				<%= radio_button('project', 'completed', true) %>
+				<%= label_tag(:project_completed_true, 'Completed') %>
+				<%= radio_button('project', 'completed', false) %>
+				<%= label_tag(:project_completed_false, 'Not') %>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-4">
+			<div class="form-group">
+				<%= f.label :startdate, 'Start Date' %>
+				<div class="input-group">
+					<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					<%= f.date_select :startdate, class: 'form-control' %>
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-4">
+			<div class="form-group">
+				<%= f.label :enddate, 'End Date' %>
+				<div class="input-group">
+					<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					<%= f.date_select :enddate, class: 'form-control' %>
+				</div>
+			</div>
+		</div>
+	</div>
+	<hr>
+	<div class="form-group">
+		<button type="submit" class="btn btn-success"><i class="fa fa-save left"></i>Save</button>
+	</div>
+<% end %>

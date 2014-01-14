@@ -1,0 +1,37 @@
+<section id="projects-list">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12">
+				<h1>Projects</h1>
+				<p><%= link_to 'Home', root_path %></p>
+				<p><%= link_to new_project_path, { :class => 'btn btn-success' } do %><i class="fa fa-plus left"></i>New Project<% end %></p>
+				<% if @projects.blank? %>
+				<p class="lead">No projects.</p>
+				<% else %>
+				<div class="row">
+					<div class="col-sm-6">
+						<table class="table table-condensed">
+							<thead>
+								<tr>
+									<th>Project</th>
+									<th>Client</th>
+									<th class="text-center">Completed?</th>
+								</tr>
+							</thead>
+							<tbody>
+								<% @projects.sort { |a,b| a.name <=> b.name }.each do |project| %>
+								<tr id="projectrow<%= project.id %>">
+									<td><%= link_to project do %><%= project.name %><% end %></td>
+									<td><%= link_to Client.find(project.clientid) do %><%= Client.find(project.clientid).name %><% end %></td>
+									<td class="text-center"><% if project.completed == true %><i class="fa fa-check green"></i><% else %><span class="spread red">No</span><% end %></td>
+								</tr>
+								<% end %>
+							</tbody>
+						</table>
+						<% end %>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>

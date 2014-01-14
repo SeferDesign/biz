@@ -1,0 +1,93 @@
+<%
+	clientInvoiceTotal = 0
+%>
+<section id="client-show">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12">
+				<% if !@client.logo.blank? %>
+				<%= image_tag(@client.logo.url(:medium), class: 'pull-right hidden-xs') %>
+				<% end %>
+				<h1><%= @client.name %></h1>
+				<p>
+					<strong>Client ID:</strong>
+					<%= @client.id %>
+				</p>
+				<p>
+					<strong>Contact:</strong>
+					<%= @client.contact %>
+				</p>
+				<p>
+					<strong>Site:</strong>
+					<a href="<%= @client.site_url %>" title="<%= @client.site_url %>"><%= @client.site_url %></a>
+				</p>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-6">
+				<h3>Projects</h3>
+				<% if Project.where(clientid: @client.id).blank? %>
+				<p class="lead">No projects.</p>
+				<% else %>
+				<table class="table table-condensed">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th class="text-center">Completed?</th>
+						</tr>
+					</thead>
+					<tbody>
+						<% Project.where(clientid: @client.id).each do |project| %>
+						<tr id="projectrow<%= project.id %>">
+							<td><%= link_to project do %><%= project.name %><% end %></td>
+							<td class="text-center"><% if project.completed == true %><i class="fa fa-check green"></i><% else %><span class="spread red">No</span><% end %></td>
+						</tr>
+						<% end %>
+					</tbody>
+				</table>
+				<% end %>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-6">
+				<h3>Invoices</h3>
+				<% if Invoice.where(clientid: @client.id).blank? %>
+				<p class="lead">No invoices.</p>
+				<% else %>
+				<table class="table table-condensed">
+					<thead>
+						<tr>
+							<th>Date</th>
+							<th class="text-center hidden-xs">Type</th>
+							<th class="text-right">Cost</th>
+							<th class="text-center">Paid?</th>
+						</tr>
+					</thead>
+					<tbody>
+						<% Invoice.where(clientid: @client.id).each do |invoice| %>
+						<tr id="invoicerow<%= invoice.id %>">
+							<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
+							<td class="text-center hidden-xs"><%= invoice.worktype %></td>
+							<td class="text-right"><% if invoice.cost %>$<%= number_with_precision(invoice.cost, :precision => 2, :delimiter => ',') %><% clientInvoiceTotal += invoice.cost else %>&mdash;<% end %></td>
+							<td class="text-center"><% if invoice.paid == true %><i class="fa fa-check green"></i><% else %><span class="spread red">Not Paid</span><% end %></td>
+						</tr>
+						<% end %>
+						<tr>
+							<td>&nbsp;</td>
+							<td class="text-center"><strong>Total</strong></td>
+							<td class="text-right"><strong>$<%= number_with_precision(clientInvoiceTotal, :precision => 2, :delimiter => ',') %></strong></td>
+							<td>&nbsp;</td>
+						</tr>
+					</tbody>
+				</table>
+				<% end %>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-12">
+				<p><%= link_to edit_client_path(@client), { :class => 'btn btn-warning' } do %><i class="fa fa-pencil-square-o left"></i>Edit<% end %> <%= link_to client_path(@client), method: :delete, data: { confirm: "Are you sure you would like to delete Client ##{@client.id}?" }, class: 'btn btn-danger' do %><i class="fa fa-trash-o left"></i>Delete<% end %>
+				<p><%= link_to 'Back', clients_path %></p>
+			</div>
+		</div>
+	</div>
+</section>

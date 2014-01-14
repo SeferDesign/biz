@@ -1,0 +1,93 @@
+<%= form_for @invoice do |f| %>
+	<% if @invoice.errors.any? %>
+	<div id="error_explanation">
+		<h2><%= pluralize(@invoice.errors.count, "error") %> prohibited this invoice from being saved:</h2>
+		<ul>
+			<% @invoice.errors.full_messages.each do |msg| %>
+			<li><%= msg %></li>
+			<% end %>
+		</ul>
+	</div>
+	<% end %>
+	<div class="row">
+		<div class="col-lg-4 col-sm-6">
+			<div class="form-group">
+				<%= f.label :clientid, 'Client' %>
+				<%= collection_select(:invoice, 'clientid', Client.all, :id, :name, {}, { :class => 'form-control' }) %>
+			</div>
+		</div>
+		<div class="col-lg-4 col-sm-6">
+			<div class="form-group">
+				<%= f.label :projectid, 'Project' %>
+				<%= collection_select(:invoice, 'projectid', Project.all, :id, :name, {}, { :class => 'form-control' }) %>
+			</div>
+		</div>
+		<div class="col-lg-2 col-sm-6">
+			<div class="form-group">
+				<%= f.label :date, 'Invoice Date' %>
+				<div class="input-group">
+					<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					<%= f.text_field :date, class: 'form-control' %>
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-2 col-sm-6">
+			<div class="form-group">
+				<%= f.label :cost %>
+				<div class="input-group">
+					<span class="input-group-addon"><i class="fa fa-usd"></i></span>
+					<%= f.text_field :cost, class: 'form-control text-right' %>
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-4">
+			<div class="form-group">
+				<%= f.label :worktype, 'Work Type' %><br>
+				<%= radio_button('invoice', 'worktype', 'Contract') %>
+				<%= label_tag(:invoice_worktype_contract, 'Contract') %>
+				<%= radio_button('invoice', 'worktype', 'Hourly') %>
+				<%= label_tag(:invoice_worktype_hourly, 'Hourly') %>
+			</div>
+		</div>
+		<div class="col-sm-8">
+			<div class="form-group">
+				<%= f.label :description %>
+				<%= f.text_area :description, class: 'form-control' %>
+			</div>
+		</div>
+	</div>
+	<hr>
+	<div class="row">
+		<div class="col-lg-2 col-sm-6">
+			<div class="form-group">
+				<%= f.label :paid, 'Paid Status' %><br>
+				<%= radio_button('invoice', 'paid', true) %>
+				<%= label_tag(:invoice_paid_true, 'Paid') %>
+				<%= radio_button('invoice', 'paid', false) %>
+				<%= label_tag(:invoice_paid_false, 'Not Paid') %>
+			</div>
+		</div>
+		<div class="col-lg-2 col-sm-6">
+			<div class="form-group">
+				<%= f.label :paiddate, 'Paid Date' %>
+				<div class="input-group">
+					<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					<%= f.text_field :paiddate, class: 'form-control' %>
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-2 col-sm-6">
+			<div class="form-group">
+				<%= f.label :paymenttype, 'Payment Type' %>
+				<%= select(:invoice, 'paymenttype', ['Check', 'Cash', 'Credit Card', 'Chase Quick Pay', 'PayPal', 'Other'], { :include_blank => 'None' }, { :class => 'form-control' }) %>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="form-group">
+				<button type="submit" class="btn btn-success"><i class="fa fa-save left"></i>Save</button>
+			</div>
+		</div>
+	</div>
+<% end %>
