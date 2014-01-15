@@ -9,11 +9,13 @@
 				<p class="lead">No clients.</p>
 				<% else %>
 				<div class="row">
-					<div class="col-sm-6">
+					<div class="col-sm-12">
 						<table class="table table-condensed">
 							<thead>
 								<tr>
 									<th>Client</th>
+									<th class="hidden-xs">Contact</th>
+									<th class="hidden-xs">Site</th>
 									<th class="text-right">Billed</th>
 								</tr>
 							</thead>
@@ -21,6 +23,8 @@
 								<% @clients.sort { |a,b| a.name <=> b.name }.each do |client| %>
 								<tr id="clientrow<%= client.id %>">
 									<td><%= link_to client do %><%= client.name %><% end %></td>
+									<td class="hidden-xs"><%= client.contact %></td>
+									<td class="hidden-xs"><%= link_to client.site_url do %><%= client.site_url %><% end %></td>
 									<td class="text-right">$<%= number_with_precision(Invoice.where(clientid: client.id).sum('cost'), :precision => 2, :delimiter => ',') %></td>
 								</tr>
 								<% end %>
