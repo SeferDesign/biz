@@ -1,0 +1,44 @@
+<%= form_for([@invoice, @invoice.lines.build]) do |f| %>
+<div class="row">
+  <div class="col-sm-4">
+  	<div class="form-group">
+	    <%= f.text_field :description, :required => true, :placeholder => 'Description', class: 'form-control' %>
+  	</div>
+  </div>
+  <div class="col-sm-2">
+  	<div class="form-group">
+	    <%= f.text_field :hours, :placeholder => 'Hours', class: 'form-control' %>
+  	</div>
+  </div>
+  <div class="col-sm-2">
+  	<div class="form-group">
+  		<div class="input-group">
+				<span class="input-group-addon"><i class="fa fa-usd"></i></span>
+				<%= f.text_field :rate, :placeholder => 'Rate', class: 'form-control' %>
+			</div>
+  	</div>
+  </div>
+  <div class="col-sm-2">
+    <div class="form-group">
+    	<div class="input-group">
+				<span class="input-group-addon"><i class="fa fa-usd"></i></span>
+				<%= f.text_field :total, :required => true, :placeholder => 'Total', class: 'form-control' %>
+			</div>
+    </div>
+  </div>
+  <div class="col-sm-2">
+  	<div class="form-group">
+    	<button type="submit" class="btn btn-success btn-block"><i class="fa fa-save left"></i>Create</button>
+  	</div>
+  </div>
+  <%= hidden_field(:comment, :hourly) %>
+</div>
+<% end %>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+	$('#line_hours, #line_rate').change(function() {
+		var totalCharged = $('#line_hours').val() * $('#line_rate').val();
+		$('#line_total').val(totalCharged);
+	});
+});
+</script>

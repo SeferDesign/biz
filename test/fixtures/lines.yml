@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  description: MyString
+  hourly: false
+  hours: 1.5
+  rate: 1.5
+  total: 1.5
+  invoice_id: 
+
+two:
+  description: MyString
+  hourly: false
+  hours: 1.5
+  rate: 1.5
+  total: 1.5
+  invoice_id: 

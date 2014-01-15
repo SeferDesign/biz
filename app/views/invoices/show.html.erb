@@ -46,6 +46,27 @@
 				<% end %>
 			</div>
 		</div>
+		<table class="table table-condensed">
+      <thead>
+        <tr>
+        	<th>&nbsp;</th>
+          <th>Description</th>
+          <th class="text-center">Hours</th>
+          <th class="text-center">Rate / Hour ($)</th>
+          <th class="text-center">Cost</th>
+        </tr>
+      </thead>
+      <tbody>
+	      <%= render @invoice.lines %>
+	      <tr>
+	      	<td>&nbsp;</td>
+	        <td class="text-right" colspan="3"><strong>Total</strong>&nbsp;&nbsp;</td>
+	        <td><strong><div class="pull-right"><%= number_with_precision(@invoice.lines.sum('total'), :precision => 2) %></div>$</strong></td>
+	      </tr>
+	    </tbody>
+	  </table>
+		<h2>Add a line:</h2>
+		<%= render 'lines/form' %>
 		<div class="row hidden-print">
 			<div class="col-sm-12">
 				<%= link_to invoice_path(:format=>'pdf'), { :class => 'pull-right btn btn-success' } do %><i class="fa fa-file-o left"></i>PDF<% end %>

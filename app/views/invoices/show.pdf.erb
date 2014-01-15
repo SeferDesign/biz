@@ -27,7 +27,6 @@
 					<p><%= @invoice.date.to_formatted_s(:long) %></p>
 				</div>
 				<div class="clearfix"></div>
-				<p class="text-right"></p>
 				<div>
 					<p><%= company_email %></p>
 					<p><%= company_phone %></p>
@@ -36,61 +35,46 @@
 				<p><strong>Project:</strong> <%= thisProject.name %></p>
 				<p><strong>Description:</strong></p>
 				<p><%= @invoice.description %></p>
-				
-				<p>
-					<strong>Work Type:</strong>
-					<%= @invoice.worktype %>
-				</p>
-				<p>
-					<strong>Cost:</strong>
-					$<%= number_with_precision(@invoice.cost, :precision => 2, :delimiter => ',') %>
-				</p>
+				<p><strong>Work Type:</strong> <%= @invoice.worktype %></p>
+				<p><strong>Cost:</strong> $<%= number_with_precision(@invoice.cost, :precision => 2, :delimiter => ',') %></p>
 				<% if @invoice.paid == false %>
 				<p><span class="spread red">Not Paid</span></p>
 				<p>This payment can be made to "<%= company_pay_to %>".</p>
 				<p><%= company_street %><br><%= company_city %>, <%= company_state_abbrv %> <%= company_zipcode %></p>
 				<% end %>
 				<% if @invoice.paid == true %>
-				<p>
-					<strong>Paid Date:</strong>
-					<%= @invoice.paiddate.to_formatted_s(:long) %>
-				</p>
-				<p>
-					<strong>Payment Type:</strong>
-					<%= @invoice.paymenttype %>
-				</p>
+				<p><strong>Paid Date:</strong> <%= @invoice.paiddate.to_formatted_s(:long) %></p>
+				<p><strong>Payment Type:</strong> <%= @invoice.paymenttype %></p>
 				<% end %>
 				<table class="table table-condensed">
-	        <thead>
-	          <tr>
-	            <th>#</th>
-	            <th>Description</th>
-	            <th class="text-center">Hours</th>
-	            <th class="text-center">Rate / Hour ($)</th>
-	            <th class="text-center">Cost</th>
-	          </tr>
-	        </thead>
-	        <tbody>
-	          <tr>
-	            <td>1</td>
-	            <td>Initial Work</td>
-	            <td class="text-center">1</td>
-	            <td class="text-center">40</td></td>
-	            <td><div class="pull-right">40</div>$</td>
-	          </tr>
-	          <tr>
-	            <td>2</td>
-	            <td>Hourly Work</td>
-	            <td class="text-center">2</td>
-	            <td class="text-center">25</td>
-	            <td><div class="pull-right">50</div>$</td>
-	          </tr>
-	          <tr>
-	            <td class="text-right" colspan="4"><strong>Total</strong>&nbsp;&nbsp;</td>
-	            <td><strong><div class="pull-right">90</div>$</strong></td>
-	          </tr>
-	        </tbody>
-	      </table>
+		      <thead>
+		        <tr>
+		          <th>Description</th>
+		          <th class="text-center">Hours</th>
+		          <th class="text-center">Rate / Hour ($)</th>
+		          <th class="text-center">Cost</th>
+		        </tr>
+		      </thead>
+		      <tbody>
+		      	<% @invoice.lines.each do |line| %>
+			      <tr>
+						  <td><%= line.description %></td>
+						  <% if line.hourly == true %>
+						  <td class="text-center"><%= line.hours %></td>
+						  <td class="text-center"><%= number_with_precision(line.rate, :precision => 2) %></td>
+						  <% else %>
+						  <td class="text-center">&mdash;</td>
+						  <td class="text-center">&mdash;</td>
+						  <% end %>
+						  <td><div class="pull-right"><%= number_with_precision(line.total, :precision => 2) %></div>$</td>
+						</tr>
+						<% end %>
+			      <tr>
+			        <td class="text-right" colspan="3"><strong>Total</strong>&nbsp;&nbsp;</td>
+			        <td><strong><div class="pull-right"><%= number_with_precision(@invoice.lines.sum('total'), :precision => 2) %></div>$</strong></td>
+			      </tr>
+			    </tbody>
+			  </table>
 			</div>
 		</div>
 	</div>
