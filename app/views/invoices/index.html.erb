@@ -36,12 +36,23 @@
 						<% end %>
 					</div>
 					<div class="col-sm-6">
-						<h3>Paid: <span class="pull-right currency green">$<%= number_with_precision(@totalPaid, :precision => 2, :delimiter => ',') %></span></h3>
-						<h3>Owed: <span class="pull-right currency red">$<%= number_with_precision(@totalOwed, :precision => 2, :delimiter => ',') %></span></h3>
-						<hr>
-						<h3>Contract: <span class="pull-right currency text-info">$<%= number_with_precision(@totalContract, :precision => 2, :delimiter => ',') %></span></h3>
-						<h3>Hourly: <span class="pull-right currency text-warning">$<%= number_with_precision(@totalHourly, :precision => 2, :delimiter => ',') %></span></h3>
-						<canvas id="chartHourlyContract" class="chart"></canvas>
+						<p class="lead text-center">Total Owed: <span class="currency red">$<%= number_with_precision(Invoice.where(:paid => false).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+						<div class="row">
+							<div class="col-sm-6">
+								<% @today = Date.today %>
+								<h3 class="text-center"><%= @today.strftime('%B') %></h3>
+								<p class="lead">Paid: <span class="pull-right currency green">$<%= number_with_precision(Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ?", @today.month).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+								<hr>
+								<p class="lead">Contract: <span class="pull-right currency text-info">$<%= number_with_precision(Invoice.where(worktype: 'Contract').where("strftime('%m', date) + 0 = ?", @today.month).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+								<p class="lead">Hourly: <span class="pull-right currency text-warning">$<%= number_with_precision(Invoice.where(worktype: 'Hourly').where("strftime('%m', date) + 0 = ?", @today.month).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+							</div>
+							<div class="col-sm-6">
+								<h3 class="text-center"><%= @today.year %></h3>
+								<p class="lead">Paid: <span class="pull-right currency green">$<%= number_with_precision(Invoice.where(:paid => true).where("strftime('%Y', paiddate) + 0 = ?", @today.year).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+								<hr>
+								<p class="lead">Contract: <span class="pull-right currency text-info">$<%= number_with_precision(Invoice.where(worktype: 'Contract').where("strftime('%Y', date) + 0 = ?", @today.year).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+								<p class="lead">Hourly: <span class="pull-right currency text-warning">$<%= number_with_precision(Invoice.where(worktype: 'Hourly').where("strftime('%Y', date) + 0 = ?", @today.year).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+							</div>
 					</div>
 				</div>
 			</div>
