@@ -47,6 +47,8 @@
 				<%= label_tag(:invoice_worktype_contract, 'Contract') %>
 				<%= radio_button('invoice', 'worktype', 'Hourly') %>
 				<%= label_tag(:invoice_worktype_hourly, 'Hourly') %>
+				<%= radio_button('invoice', 'worktype', 'Retainer') %>
+				<%= label_tag(:invoice_worktype_retainer, 'Retainer') %>
 			</div>
 		</div>
 		<div class="col-sm-8">
@@ -79,7 +81,7 @@
 		<div class="col-lg-2 col-sm-6">
 			<div class="form-group">
 				<%= f.label :paymenttype, 'Payment Type' %>
-				<%= select(:invoice, 'paymenttype', ['Check', 'Cash', 'Credit Card', 'Chase Quick Pay', 'PayPal', 'Other'], { :include_blank => 'None' }, { :class => 'form-control' }) %>
+				<%= select(:invoice, 'paymenttype', ['Check', 'Cash', 'Credit Card', 'Chase Quick Pay', 'PayPal', 'ACH', 'Other'], { :include_blank => 'None' }, { :class => 'form-control' }) %>
 			</div>
 		</div>
 	</div>

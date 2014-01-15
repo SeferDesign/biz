@@ -5,9 +5,10 @@
 				<h1>Invoices</h1>
 				<p><%= link_to 'Home', root_path %></p>
 				<p><%= link_to new_invoice_path, { :class => 'btn btn-success' } do %><i class="fa fa-plus left"></i>New Invoice<% end %></p>
-				<% @totalOwed = @totalPaid = @totalContract = @totalHourly = 0 %>
+				<% @today = Date.today %>
+				<h2><%= @today.year %> Invoices</h2>
 				<div class="row">
-					<div class="col-sm-6">
+					<div class="col-sm-9">
 						<% if @invoices.blank? %>
 						<p class="lead">No invoices.</p>
 						<% else %>
@@ -22,62 +23,60 @@
 								</tr>
 							</thead>
 							<tbody>
-								<% @invoices.sort { |a,b| a.date <=> b.date }.each do |invoice| %>
+								<% @invoices.where("strftime('%Y', date) + 0 = ?", @today.year).sort { |a,b| a.date <=> b.date }.each do |invoice| %>
 								<tr id="invoicerow<%= invoice.id %>">
 									<td><%= link_to Client.find(invoice.clientid) do %><%= Client.find(invoice.clientid).name %><% end %></td>
 									<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
-									<td class="text-center hidden-xs"><% if invoice.worktype == 'Contract' %>C<% @totalContract += invoice.cost elsif invoice.worktype == 'Hourly' %>H<% @totalHourly += invoice.cost end %></td>
+									<td class="text-center hidden-xs"><% if invoice.worktype == 'Contract' %>C<% elsif invoice.worktype == 'Hourly' %>H<% elsif invoice.worktype == 'Retainer' %>R<% end %></td>
 									<td class="text-right hidden-xs"><% if invoice.cost %>$<%= number_with_precision(invoice.cost, :precision => 2, :delimiter => ',') %><% else %>&mdash;<% end %></td>
-									<td class="text-center"><% if invoice.paid == true %><i class="fa fa-check green"></i><% @totalPaid += invoice.cost else @totalOwed += invoice.cost %><span class="spread red">Not Paid</span><% end %></td>
+									<td class="text-center"><% if invoice.paid == true %><i class="fa fa-check green"></i><% else %><span class="spread red">Not Paid</span><% end %></td>
 								</tr>
 								<% end %>
 							</tbody>
 						</table>
 						<% end %>
 					</div>
-					<div class="col-sm-6">
-						<p class="lead text-center">Total Owed: <span class="currency red">$<%= number_with_precision(Invoice.where(:paid => false).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
-						<div class="row">
-							<div class="col-sm-6">
-								<% @today = Date.today %>
-								<h3 class="text-center"><%= @today.strftime('%B') %></h3>
-								<p class="lead">Paid: <span class="pull-right currency green">$<%= number_with_precision(Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ?", @today.month).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
-								<hr>
-								<p class="lead">Contract: <span class="pull-right currency text-info">$<%= number_with_precision(Invoice.where(worktype: 'Contract').where("strftime('%m', date) + 0 = ?", @today.month).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
-								<p class="lead">Hourly: <span class="pull-right currency text-warning">$<%= number_with_precision(Invoice.where(worktype: 'Hourly').where("strftime('%m', date) + 0 = ?", @today.month).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
-							</div>
-							<div class="col-sm-6">
-								<h3 class="text-center"><%= @today.year %></h3>
-								<p class="lead">Paid: <span class="pull-right currency green">$<%= number_with_precision(Invoice.where(:paid => true).where("strftime('%Y', paiddate) + 0 = ?", @today.year).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
-								<hr>
-								<p class="lead">Contract: <span class="pull-right currency text-info">$<%= number_with_precision(Invoice.where(worktype: 'Contract').where("strftime('%Y', date) + 0 = ?", @today.year).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
-								<p class="lead">Hourly: <span class="pull-right currency text-warning">$<%= number_with_precision(Invoice.where(worktype: 'Hourly').where("strftime('%Y', date) + 0 = ?", @today.year).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
-							</div>
+					<div class="col-sm-3">
+						<p class="lead text-center">Total Owed: <span class="currency red">$<%= number_with_precision(Invoice.where(:paid => false).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>	
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-3">
+						<h3 class="text-center"><%= @today.strftime('%B') %></h3>
+						<p class="lead">Paid: <span class="pull-right currency green">$<%= number_with_precision(Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ?", @today.month).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+						<hr>
+						<p class="lead">Contract: <span class="pull-right currency text-info">$<%= number_with_precision(Invoice.where(worktype: 'Contract').where("strftime('%m', date) + 0 = ?", @today.month).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+						<p class="lead">Hourly: <span class="pull-right currency text-warning">$<%= number_with_precision(Invoice.where(worktype: 'Hourly').where("strftime('%m', date) + 0 = ?", @today.month).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+						<p class="lead">Retainer: <span class="pull-right currency text-warning">$<%= number_with_precision(Invoice.where(worktype: 'Retainer').where("strftime('%m', date) + 0 = ?", @today.month).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+					</div>
+					<div class="col-sm-3">
+						<h3 class="text-center"><%= @today.year %> YTD</h3>
+						<p class="lead">Paid: <span class="pull-right currency green">$<%= number_with_precision(Invoice.where(:paid => true).where("strftime('%Y', paiddate) + 0 = ?", @today.year).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+						<hr>
+						<p class="lead">Contract: <span class="pull-right currency text-info">$<%= number_with_precision(Invoice.where(worktype: 'Contract').where("strftime('%Y', date) + 0 = ?", @today.year).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+						<p class="lead">Hourly: <span class="pull-right currency text-warning">$<%= number_with_precision(Invoice.where(worktype: 'Hourly').where("strftime('%Y', date) + 0 = ?", @today.year).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+						<p class="lead">Retainer: <span class="pull-right currency text-warning">$<%= number_with_precision(Invoice.where(worktype: 'Retainer').where("strftime('%Y', date) + 0 = ?", @today.year).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+					</div>
+					<% @lastmonth = 1.month.ago %>
+					<div class="col-sm-3">
+						<h3 class="text-center"><%= @lastmonth.strftime('%B') %>&nbsp;<%= @lastmonth.strftime('%Y') %></h3>
+						<p class="lead">Paid: <span class="pull-right currency green">$<%= number_with_precision(Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ?", @lastmonth.month).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+						<hr>
+						<p class="lead">Contract: <span class="pull-right currency text-info">$<%= number_with_precision(Invoice.where(worktype: 'Contract').where("strftime('%m', date) + 0 = ?", @lastmonth.month).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+						<p class="lead">Hourly: <span class="pull-right currency text-warning">$<%= number_with_precision(Invoice.where(worktype: 'Hourly').where("strftime('%m', date) + 0 = ?", @lastmonth.month).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+						<p class="lead">Retainer: <span class="pull-right currency text-warning">$<%= number_with_precision(Invoice.where(worktype: 'Retainer').where("strftime('%m', date) + 0 = ?", @lastmonth.month).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+					</div>
+					<% @lastyear = Date.today.year - 1 %>
+					<div class="col-sm-3">
+						<h3 class="text-center"><%= @lastyear %></h3>
+						<p class="lead">Paid: <span class="pull-right currency green">$<%= number_with_precision(Invoice.where(:paid => true).where("strftime('%Y', paiddate) + 0 = ?", @lastyear).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+						<hr>
+						<p class="lead">Contract: <span class="pull-right currency text-info">$<%= number_with_precision(Invoice.where(worktype: 'Contract').where("strftime('%Y', date) + 0 = ?", @lastyear).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+						<p class="lead">Hourly: <span class="pull-right currency text-warning">$<%= number_with_precision(Invoice.where(worktype: 'Hourly').where("strftime('%Y', date) + 0 = ?", @lastyear).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+						<p class="lead">Retainer: <span class="pull-right currency text-warning">$<%= number_with_precision(Invoice.where(worktype: 'Retainer').where("strftime('%Y', date) + 0 = ?", @lastyear).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 </section>
-
-<script type="text/javascript">
-
-	var options = {
-		segmentShowStroke: true,
-		segmentStrokeColor: '#fff',
-		segmentStrokeWidth: 2,
-		animation: false
-	}
-	
-	var dataChartHourlyContract = [{
-		value: <%= (@totalContract / (@totalContract + @totalHourly)) * 100 %>,
-		color: '#3a87ad'
-	}, {
-		value : <%= (@totalHourly / (@totalContract + @totalHourly)) * 100 %>,
-		color : '#c09853'
-	}]
-	
-	var ctx1 = document.getElementById('chartHourlyContract').getContext('2d');
-	var chartHourlyContract = new Chart(ctx1).Pie(dataChartHourlyContract, options);
-
-</script>
