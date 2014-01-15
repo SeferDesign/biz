@@ -47,7 +47,7 @@
 						<hr>
 						<p class="lead">Contract: <span class="pull-right currency text-info">$<%= number_with_precision(Invoice.where(worktype: 'Contract').where("strftime('%m', date) + 0 = ?", @today.month).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
 						<p class="lead">Hourly: <span class="pull-right currency text-warning">$<%= number_with_precision(Invoice.where(worktype: 'Hourly').where("strftime('%m', date) + 0 = ?", @today.month).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
-						<p class="lead">Retainer: <span class="pull-right currency text-warning">$<%= number_with_precision(Invoice.where(worktype: 'Retainer').where("strftime('%m', date) + 0 = ?", @today.month).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+						<p class="lead">Retainer: <span class="pull-right currency text-muted">$<%= number_with_precision(Invoice.where(worktype: 'Retainer').where("strftime('%m', date) + 0 = ?", @today.month).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
 					</div>
 					<div class="col-sm-3">
 						<h3 class="text-center"><%= @today.year %> YTD</h3>
@@ -55,7 +55,7 @@
 						<hr>
 						<p class="lead">Contract: <span class="pull-right currency text-info">$<%= number_with_precision(Invoice.where(worktype: 'Contract').where("strftime('%Y', date) + 0 = ?", @today.year).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
 						<p class="lead">Hourly: <span class="pull-right currency text-warning">$<%= number_with_precision(Invoice.where(worktype: 'Hourly').where("strftime('%Y', date) + 0 = ?", @today.year).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
-						<p class="lead">Retainer: <span class="pull-right currency text-warning">$<%= number_with_precision(Invoice.where(worktype: 'Retainer').where("strftime('%Y', date) + 0 = ?", @today.year).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+						<p class="lead">Retainer: <span class="pull-right currency text-muted">$<%= number_with_precision(Invoice.where(worktype: 'Retainer').where("strftime('%Y', date) + 0 = ?", @today.year).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
 					</div>
 					<% @lastmonth = 1.month.ago %>
 					<div class="col-sm-3">
@@ -64,7 +64,7 @@
 						<hr>
 						<p class="lead">Contract: <span class="pull-right currency text-info">$<%= number_with_precision(Invoice.where(worktype: 'Contract').where("strftime('%m', date) + 0 = ?", @lastmonth.month).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
 						<p class="lead">Hourly: <span class="pull-right currency text-warning">$<%= number_with_precision(Invoice.where(worktype: 'Hourly').where("strftime('%m', date) + 0 = ?", @lastmonth.month).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
-						<p class="lead">Retainer: <span class="pull-right currency text-warning">$<%= number_with_precision(Invoice.where(worktype: 'Retainer').where("strftime('%m', date) + 0 = ?", @lastmonth.month).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+						<p class="lead">Retainer: <span class="pull-right currency text-muted">$<%= number_with_precision(Invoice.where(worktype: 'Retainer').where("strftime('%m', date) + 0 = ?", @lastmonth.month).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
 					</div>
 					<% @lastyear = Date.today.year - 1 %>
 					<div class="col-sm-3">
@@ -73,7 +73,7 @@
 						<hr>
 						<p class="lead">Contract: <span class="pull-right currency text-info">$<%= number_with_precision(Invoice.where(worktype: 'Contract').where("strftime('%Y', date) + 0 = ?", @lastyear).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
 						<p class="lead">Hourly: <span class="pull-right currency text-warning">$<%= number_with_precision(Invoice.where(worktype: 'Hourly').where("strftime('%Y', date) + 0 = ?", @lastyear).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
-						<p class="lead">Retainer: <span class="pull-right currency text-warning">$<%= number_with_precision(Invoice.where(worktype: 'Retainer').where("strftime('%Y', date) + 0 = ?", @lastyear).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+						<p class="lead">Retainer: <span class="pull-right currency text-muted">$<%= number_with_precision(Invoice.where(worktype: 'Retainer').where("strftime('%Y', date) + 0 = ?", @lastyear).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
 					</div>
 				</div>
 			</div>

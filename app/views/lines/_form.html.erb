@@ -7,14 +7,17 @@
   </div>
   <div class="col-sm-2">
   	<div class="form-group">
-	    <%= f.text_field :hours, :placeholder => 'Hours', class: 'form-control' %>
+  		<div class="input-group">
+				<span class="input-group-addon"><i class="fa fa-clock-o"></i></span>
+				<%= f.text_field :hours, :placeholder => 'Hours', class: 'form-control text-center' %>
+			</div>
   	</div>
   </div>
   <div class="col-sm-2">
   	<div class="form-group">
   		<div class="input-group">
 				<span class="input-group-addon"><i class="fa fa-usd"></i></span>
-				<%= f.text_field :rate, :placeholder => 'Rate', class: 'form-control' %>
+				<%= f.text_field :rate, :placeholder => 'Rate', class: 'form-control text-center' %>
 			</div>
   	</div>
   </div>
@@ -22,7 +25,7 @@
     <div class="form-group">
     	<div class="input-group">
 				<span class="input-group-addon"><i class="fa fa-usd"></i></span>
-				<%= f.text_field :total, :required => true, :placeholder => 'Total', class: 'form-control' %>
+				<%= f.text_field :total, :required => true, :placeholder => 'Total', class: 'form-control text-center' %>
 			</div>
     </div>
   </div>
