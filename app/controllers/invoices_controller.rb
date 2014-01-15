@@ -9,17 +9,15 @@ class InvoicesController < ApplicationController
   	respond_to do |format|
       format.html
       format.pdf do
-        render 	:pdf => 'file',
+        render 	:pdf => Client.find(@invoice.clientid).name.gsub(/[^0-9A-Za-z]/, '') + @invoice.date.to_s,
         				:disposition => 'inline',
         				:page_size => 'Letter',
-        				:layout => 'layouts/pdf/pdf.html',
+        				:layout => 'layouts/pdf/invoice.html',
         				:template => 'invoices/show.pdf.erb',
-        				:user_style_sheet => '/invoices/style.css',
         				:disable_internal_links => true,
         				:disable_external_links => true,
-        				:header => {
-        					:center => 'Sefer Design Company'
-        				}
+        				:greyscale => false,
+        				:lowquality => false
       end
     end
   end
