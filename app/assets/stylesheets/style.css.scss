@@ -1,6 +1,14 @@
 $green: #5cb85c;
 $red: #d9534f;
 
+body {
+	font-family: '';
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-family: 'brandon-grotesque', sans-serif;
+}
+
 img {
 	max-width: 100%;
 }
@@ -25,8 +33,8 @@ ul {
 	letter-spacing: 1px;
 }
 
-footer {
-	margin: 2em 0px;
+.pad {
+	padding: 2em 0px;
 }
 
 footer .container {
@@ -45,4 +53,8 @@ footer #footer-logo {
 
 .chart a.canvasjs-chart-credit {
 	display: none !important;
+}
+
+.doicons i {
+	vertical-align: middle;
 }

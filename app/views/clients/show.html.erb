@@ -9,6 +9,10 @@
 				<%= image_tag(@client.logo.url(:medium), class: 'pull-right hidden-xs') %>
 				<% end %>
 				<h1><%= @client.name %></h1>
+				<p class="doicons">
+					<%= link_to edit_client_path(@client), title: 'Edit' do %><i class="fa fa-fw fa-2x fa-pencil-square-o text-warning"></i><% end %>
+					<%= link_to client_path(@client), title: 'Delete', method: :delete, data: { confirm: "Are you sure you would like to delete Client ##{@client.id}?" } do %><i class="fa fa-fw fa-2x fa-trash-o text-danger"></i><% end %>
+				</p>
 				<p>
 					<strong>Client ID:</strong>
 					<%= @client.id %>
@@ -85,7 +89,7 @@
 		</div>
 		<div class="row">
 			<div class="col-sm-12">
-				<p><%= link_to edit_client_path(@client), { :class => 'btn btn-warning' } do %><i class="fa fa-pencil-square-o left"></i>Edit<% end %> <%= link_to client_path(@client), method: :delete, data: { confirm: "Are you sure you would like to delete Client ##{@client.id}?" }, class: 'btn btn-danger' do %><i class="fa fa-trash-o left"></i>Delete<% end %>
+				
 				<p><%= link_to 'Back', clients_path %></p>
 			</div>
 		</div>

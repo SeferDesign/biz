@@ -8,6 +8,11 @@
 				<%= image_tag(thisClient.logo.url(:medium), class: 'pull-right hidden-xs') %>
 				<% end %>
 				<h1>Invoice #<%= @invoice.id %></h1>
+				<p class="doicons">
+					<%= link_to invoice_path(:format=>'pdf'), title: 'PDF' do %><i class="fa fa-fw fa-2x fa-file text-success"></i><% end %>
+					<%= link_to edit_invoice_path(@invoice), title: 'Edit' do %><i class="fa fa-fw fa-2x fa-pencil-square-o text-warning"></i><% end %>
+					<%= link_to invoice_path(@invoice), title: 'Delete', method: :delete, data: { confirm: "Are you sure you would like to delete Invoice ##{@invoice.id}?" } do %><i class="fa fa-fw fa-2x fa-trash-o text-danger"></i><% end %>
+				</p>
 				<p>
 					<strong>Client:</strong>
 					<%= link_to thisClient do %><%= thisClient.name %><% end %>
@@ -69,8 +74,6 @@
 		<%= render 'lines/form' %>
 		<div class="row hidden-print">
 			<div class="col-sm-12">
-				<%= link_to invoice_path(:format=>'pdf'), { :class => 'pull-right btn btn-success' } do %><i class="fa fa-file-o left"></i>PDF<% end %>
-				<p><%= link_to edit_invoice_path(@invoice), { :class => 'btn btn-warning' } do %><i class="fa fa-pencil-square-o left"></i>Edit<% end %> <%= link_to invoice_path(@invoice), method: :delete, data: { confirm: "Are you sure you would like to delete Invoice ##{@invoice.id}?" }, class: 'btn btn-danger' do %><i class="fa fa-trash-o left"></i>Delete<% end %></p>
 				<p><%= link_to 'Back', invoices_path %></p>
 			</div>
 		</div>

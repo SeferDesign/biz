@@ -16,6 +16,11 @@
 			</div>
 		</div>
 		<hr>
+		<div class="row">
+			<div class="col-sm-12">
+				<p class="lead text-center">Total Owed: <span class="currency red">$<%= number_with_precision(Invoice.where(:paid => false).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
+			</div>
+		</div>
 		<% @today = Date.today %>
 		<%= render 'layouts/financialdash' %>
 	</div>
