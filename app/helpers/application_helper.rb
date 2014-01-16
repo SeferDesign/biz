@@ -14,6 +14,9 @@ module ApplicationHelper
 	def company_logo_url
 		company_logo_url = '/images/sdc_block_light.png'
 	end
+	def company_favicon_url
+		company_favicon_url = '/images/sdc_favicon_144.png'
+	end
 	def company_pay_to
 		company_pay_to = 'Robert Sefer'
 	end
