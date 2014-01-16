@@ -76,7 +76,73 @@
 						<p class="lead">Retainer: <span class="pull-right currency text-muted">$<%= number_with_precision(Invoice.where(worktype: 'Retainer').where("strftime('%Y', date) + 0 = ?", @lastyear).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>
 					</div>
 				</div>
+				<div class="row">
+					<div class="col-sm-8 col-sm-offset-2">
+						<div id="monthlyRevenueChart" class="chart"></div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
 </section>
+
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+  var chart = new CanvasJS.Chart('monthlyRevenueChart', {
+  	title: {
+  		fontFamily: 'Helvetica Neue, Helvetica, sans-serif',
+  		fontSize: 24,
+  		text: 'Revenue by Month'
+  	},
+  	axisX: {
+  		lineThickness: 1,
+	  	gridThickness: 0
+  	},
+  	axisY: {
+  		lineThickness: 1,
+  		gridThickness: 0,
+  		prefix: '$'
+  	},
+    data: [{
+    	name: 'Hourly',
+    	toolTipContent: '{name}: ${y}',
+    	type: 'stackedArea',
+    	color: '#8a6d3b',
+    	dataPoints: [
+    		{ label: '<%= 4.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Hourly').where("strftime('%m', paiddate) + 0 = ?", 4.month.ago.month).sum('cost') %> },
+    		{ label: '<%= 3.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Hourly').where("strftime('%m', paiddate) + 0 = ?", 3.month.ago.month).sum('cost') %> },
+    		{ label: '<%= 2.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Hourly').where("strftime('%m', paiddate) + 0 = ?", 2.month.ago.month).sum('cost') %> },
+    		{ label: '<%= 1.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Hourly').where("strftime('%m', paiddate) + 0 = ?", 1.month.ago.month).sum('cost') %> },
+    		{ label: '<%= 0.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Hourly').where("strftime('%m', paiddate) + 0 = ?", 0.month.ago.month).sum('cost') %> }
+      ]
+    },
+    {
+    	name: 'Contract',
+    	toolTipContent: '{name}: ${y}',
+    	type: 'stackedArea',
+    	color: '#31708f',
+    	dataPoints: [
+    		{ label: '<%= 4.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Contract').where("strftime('%m', paiddate) + 0 = ?", 4.month.ago.month).sum('cost') %> },
+    		{ label: '<%= 3.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Contract').where("strftime('%m', paiddate) + 0 = ?", 3.month.ago.month).sum('cost') %> },
+    		{ label: '<%= 2.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Contract').where("strftime('%m', paiddate) + 0 = ?", 2.month.ago.month).sum('cost') %> },
+    		{ label: '<%= 1.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Contract').where("strftime('%m', paiddate) + 0 = ?", 1.month.ago.month).sum('cost') %> },
+    		{ label: '<%= 0.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Contract').where("strftime('%m', paiddate) + 0 = ?", 0.month.ago.month).sum('cost') %> }
+      ]
+    },
+    {
+    	name: 'Retainer',
+    	toolTipContent: '{name}: ${y}',
+    	type: 'stackedArea',
+    	color: '#999999',
+    	dataPoints: [
+    		{ label: '<%= 4.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Retainer').where("strftime('%m', paiddate) + 0 = ?", 4.month.ago.month).sum('cost') %> },
+    		{ label: '<%= 3.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Retainer').where("strftime('%m', paiddate) + 0 = ?", 3.month.ago.month).sum('cost') %> },
+    		{ label: '<%= 2.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Retainer').where("strftime('%m', paiddate) + 0 = ?", 2.month.ago.month).sum('cost') %> },
+    		{ label: '<%= 1.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Retainer').where("strftime('%m', paiddate) + 0 = ?", 1.month.ago.month).sum('cost') %> },
+    		{ label: '<%= 0.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Retainer').where("strftime('%m', paiddate) + 0 = ?", 0.month.ago.month).sum('cost') %> }
+      ]
+    }]
+  });
+  chart.render();
+});
+</script>

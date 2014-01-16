@@ -13,6 +13,7 @@
 //= require jquery
 //= require jquery_ujs
 //= require bootstrap.min
+//= require canvasjs.min
 //= require scripts
 //= require turbolinks
 //= require_tree .
