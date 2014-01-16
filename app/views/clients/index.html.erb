@@ -16,6 +16,7 @@
 									<th>Client</th>
 									<th class="hidden-xs">Contact</th>
 									<th class="hidden-xs">Site</th>
+									<th class="text-right hidden-xs">Unpaid</th>
 									<th class="text-right">Billed</th>
 								</tr>
 							</thead>
@@ -25,7 +26,8 @@
 									<td><%= link_to client do %><%= client.name %><% end %></td>
 									<td class="hidden-xs"><%= client.contact %></td>
 									<td class="hidden-xs"><%= link_to client.site_url do %><%= client.site_url %><% end %></td>
-									<td class="text-right">$<%= number_with_precision(Invoice.where(clientid: client.id).sum('cost'), :precision => 2, :delimiter => ',') %></td>
+									<td class="text-right hidden-xs"><% if Invoice.where(:clientid => client.id, :paid=> false).sum('cost') > 0 %><span class="spread red">$<%= number_with_precision(Invoice.where(:clientid => client.id, :paid=> false).sum('cost'), :precision => 2, :delimiter => ',') %></span><% else %>&mdash;<% end %></td>
+									<td class="text-right">$<%= number_with_precision(Invoice.where(:clientid => client.id).sum('cost'), :precision => 2, :delimiter => ',') %></td>
 								</tr>
 								<% end %>
 							</tbody>
