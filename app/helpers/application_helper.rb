@@ -1,4 +1,5 @@
 module ApplicationHelper
+
 	def company_full_name
 		company_full_name = 'Sefer Design Company'      
 	end
@@ -13,6 +14,9 @@ module ApplicationHelper
 	end
 	def company_logo_url
 		company_logo_url = '/images/sdc_block_light.png'
+	end
+	def company_text_logo_url
+		company_text_logo_url = '/images/sdc_text.png'
 	end
 	def company_favicon_url
 		company_favicon_url = '/images/sdc_favicon_144.png'
@@ -41,4 +45,9 @@ module ApplicationHelper
 	def company_zipcode
 		company_city = '60610'
 	end
+	
+	def total_invoiced_unpaid
+		total_invoiced_unpaid = Invoice.where(:paid => false).sum('cost')
+	end
+	
 end

@@ -20,32 +20,24 @@
 			<div class="col-sm-12">
 				<div>
 					<div class="pull-right text-right">
-						<p>Attention: <%= thisClient.contact %></p>
-						<p><%= thisClient.name %></p>
+						<p>Attention: <%= thisClient.contact %><br><%= thisClient.name %></p>
 					</div>
 					<h1>Invoice</h1>
 					<p><%= @invoice.date.to_formatted_s(:long) %></p>
 				</div>
 				<div class="clearfix"></div>
-				<div>
-					<p><%= company_email %></p>
-					<p><%= company_phone %></p>
-				</div>
-				<hr>
-				<p><strong>Project:</strong> <%= thisProject.name %></p>
-				<p><strong>Description:</strong></p>
-				<p><%= @invoice.description %></p>
-				<p><strong>Work Type:</strong> <%= @invoice.worktype %></p>
-				<p><strong>Cost:</strong> $<%= number_with_precision(@invoice.cost, :precision => 2, :delimiter => ',') %></p>
 				<% if @invoice.paid == false %>
-				<p><span class="spread red">Not Paid</span></p>
-				<p>This payment can be made to "<%= company_pay_to %>".</p>
-				<p><%= company_street %><br><%= company_city %>, <%= company_state_abbrv %> <%= company_zipcode %></p>
-				<% end %>
-				<% if @invoice.paid == true %>
-				<p><strong>Paid Date:</strong> <%= @invoice.paiddate.to_formatted_s(:long) %></p>
+				<p><strong>Status:</strong> <span class="spread red">Not Paid</span></p>
+				<p>This payment can be made to:</p>
+				<p><%= company_pay_to %><br><%= company_street %><br><%= company_city %>, <%= company_state_abbrv %> <%= company_zipcode %></p>
+				<% else %>
+				<p><strong>Status:</strong> <span class="spread green">Paid</span> on <%= @invoice.paiddate.to_formatted_s(:long) %></p>
 				<p><strong>Payment Type:</strong> <%= @invoice.paymenttype %></p>
 				<% end %>
+				<hr>
+				<p><%= @invoice.description %> Find below a cost-breakdown for the recent work completed. Please make payment at your earliest convenience, and do not hesitate to contact me with any questions.</p>
+				<p class="indent">Thank you,<br><%= company_pay_to %><br><%= company_full_name %><br><%= company_email %><br><%= company_phone %></p>
+				<hr>
 				<table class="table table-condensed">
 		      <thead>
 		        <tr>

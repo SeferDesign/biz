@@ -37,7 +37,7 @@
 						<% end %>
 					</div>
 					<div class="col-sm-3">
-						<p class="lead text-center">Total Owed: <span class="currency red">$<%= number_with_precision(Invoice.where(:paid => false).sum('cost'), :precision => 2, :delimiter => ',') %></span></p>	
+						<p class="lead text-center">Total Owed: <span class="currency red">$<%= number_with_precision(total_invoiced_unpaid, :precision => 2, :delimiter => ',') %></span></p>	
 					</div>
 				</div>
 				<%= render 'layouts/financialdash' %>
