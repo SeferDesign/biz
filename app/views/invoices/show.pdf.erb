@@ -35,7 +35,7 @@
 				<p><strong>Payment Type:</strong> <%= @invoice.paymenttype %></p>
 				<% end %>
 				<hr>
-				<p><%= @invoice.description %> Find below a cost-breakdown for the recent work completed. Please make payment at your earliest convenience, and do not hesitate to contact me with any questions.</p>
+				<p><%= @invoice.description %> <%= invoice_description_suffix %></p>
 				<p class="indent">Thank you,<br><%= company_pay_to %><br><%= company_full_name %><br><%= company_email %><br><%= company_phone %></p>
 				<hr>
 				<table class="table table-condensed">

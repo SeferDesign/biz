@@ -13,10 +13,16 @@ module ApplicationHelper
 		company_site_url = 'http://seferdesign.com'      
 	end
 	def company_logo_url
-		company_logo_url = '/images/sdc_block_light.png'
+		company_logo_url = '/images/sdc_block_dark.png'
+	end
+	def company_logo_alt_url
+		company_logo_alt_url = '/images/sdc_block_white.png'
 	end
 	def company_text_logo_url
-		company_text_logo_url = '/images/sdc_text.png'
+		company_text_logo_url = '/images/sdc_text_dark.png'
+	end
+	def company_text_logo_alt_url
+		company_text_logo_alt_url = '/images/sdc_text_white.png'
 	end
 	def company_favicon_url
 		company_favicon_url = '/images/sdc_favicon_144.png'
@@ -48,6 +54,10 @@ module ApplicationHelper
 	
 	def total_invoiced_unpaid
 		total_invoiced_unpaid = Invoice.where(:paid => false).sum('cost')
+	end
+	
+	def invoice_description_suffix
+		invoice_description_suffix = 'Find below a cost-breakdown for the recent work completed. Please make payment at your earliest convenience, and do not hesitate to contact me with any questions.'
 	end
 	
 end

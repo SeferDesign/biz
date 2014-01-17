@@ -2,7 +2,8 @@ $green: #5cb85c;
 $red: #d9534f;
 
 body {
-	font-family: '';
+	color: #ffffff;
+	background: #323232;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -37,13 +38,36 @@ ul {
 	padding: 2em 0px;
 }
 
-footer .container {
-	padding-top: 2em;
-	border-top: 1px solid rgba(0,0,0,0.2);
+section {
+	color: #000000;
+	background: #ffffff;
+	padding: 1em 0px;
 }
 
 footer #footer-logo {
 	max-width: 100px;
+}
+
+#footer-nav {
+	margin-bottom: 1em;
+}
+
+#footer-nav a {
+	color: #ffffff;
+}
+
+#footer-nav ul li {
+	display: inline;
+}
+
+#footer-nav ul li:after {
+	content: '\2022';
+	margin: 0px 0.5em;
+}
+
+#footer-nav ul li:last-child:after {
+	content: '';
+	margin: 0px;
 }
 
 #monthlyRevenueChart {
@@ -57,4 +81,11 @@ footer #footer-logo {
 
 .doicons i {
 	vertical-align: middle;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio: 2) {
+	
+	body {
+	}
+	
 }

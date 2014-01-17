@@ -2,8 +2,13 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-sm-12 text-center">
+				<nav id="footer-nav">
+					<ul>
+						<li><%= link_to 'Clients', clients_path %></li><li><%= link_to 'Projects', projects_path %></li><li><%= link_to 'Invoices', invoices_path %></li>
+					</ul>
+				</nav>
 				<p>&copy; <%= company_full_name %></p>
-				<a href="<%= company_site_url %>" title="<%= company_full_name %>" class="hidden-print"><img id="footer-logo" src="<%= company_logo_url %>" alt="<%= company_full_name %>"></a>
+				<a href="<%= company_site_url %>" title="<%= company_full_name %>" class="hidden-print"><img id="footer-logo" src="<%= company_logo_alt_url %>" alt="<%= company_full_name %>"></a>
 			</div>
 		</div>
 	</div>
