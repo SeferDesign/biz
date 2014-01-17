@@ -54,7 +54,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<% Invoice.where(projectid: @project.id).each do |invoice| %>
+						<% Invoice.where(projectid: @project.id).sort { |a,b| a.date <=> b.date }.each do |invoice| %>
 						<tr id="invoicerow<%= invoice.id %>">
 							<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
 							<td class="text-right"><% if invoice.cost %>$<%= number_with_precision(invoice.cost, :precision => 2, :delimiter => ',') %><% projectInvoiceTotal += invoice.cost else %>&mdash;<% end %></td>
