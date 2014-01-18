@@ -54,7 +54,11 @@
 		<div class="col-sm-8">
 			<div class="form-group">
 				<%= f.label :description %>
+				<% if @invoice.description.blank? %>
 				<%= f.text_area :description, class: 'form-control', value: 'This invoice represents work on ' %>
+				<% else %>
+				<%= f.text_area :description, class: 'form-control' %>
+				<% end %>
 			</div>
 		</div>
 	</div>

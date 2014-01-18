@@ -32,7 +32,7 @@
 				<p><%= company_pay_to %><br><%= company_street %><br><%= company_city %>, <%= company_state_abbrv %> <%= company_zipcode %></p>
 				<% else %>
 				<p><strong>Status:</strong> <span class="spread green">Paid</span> on <%= @invoice.paiddate.to_formatted_s(:long) %></p>
-				<p><strong>Payment Type:</strong> <%= @invoice.paymenttype %></p>
+				<p><strong>Payment Method:</strong> <%= @invoice.paymenttype %></p>
 				<% end %>
 				<hr>
 				<p><%= @invoice.description %> <%= invoice_description_suffix %></p>
