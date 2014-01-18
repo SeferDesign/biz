@@ -36,13 +36,19 @@
 		<div class="col-sm-4">
 			<div class="form-group">
 				<%= f.label :startdate, 'Start Date' %>
-				<%= f.date_select :startdate, class: 'form-control' %>
+				<div class="input-group">
+					<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					<%= f.text_field :startdate, :placeholder => 'YYYY-MM-DD', class: 'form-control datepicker' %>
+				</div>
 			</div>
 		</div>
 		<div class="col-sm-4">
 			<div class="form-group">
 				<%= f.label :enddate, 'End Date' %>
-				<%= f.date_select :enddate, class: 'form-control' %>
+				<div class="input-group">
+					<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					<%= f.text_field :enddate, :placeholder => 'YYYY-MM-DD', class: 'form-control datepicker' %>
+				</div>
 			</div>
 		</div>
 	</div>

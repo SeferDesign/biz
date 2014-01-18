@@ -14,6 +14,7 @@
 //= require jquery_ujs
 //= require bootstrap.min
 //= require canvasjs.min
+//= require bootstrap-datepicker
 //= require scripts
 //= require turbolinks
 //= require_tree .
