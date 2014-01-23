@@ -64,6 +64,19 @@ jQuery(document).ready(function($) {
   		prefix: '$'
   	},
     data: [{
+    	name: 'Total',
+    	toolTipContent: '{name}: ${y}',
+    	type: 'line',
+    	color: '#666666',
+    	dataPoints: [
+    		{ label: '<%= 4.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ?", 4.month.ago.month).sum('cost') %> },
+    		{ label: '<%= 3.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ?", 3.month.ago.month).sum('cost') %> },
+    		{ label: '<%= 2.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ?", 2.month.ago.month).sum('cost') %> },
+    		{ label: '<%= 1.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ?", 1.month.ago.month).sum('cost') %> },
+    		{ label: '<%= 0.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ?", 0.month.ago.month).sum('cost') %> }
+      ]
+    },
+    {
     	name: 'Hourly',
     	toolTipContent: '{name}: ${y}',
     	type: 'stackedArea',
