@@ -6,7 +6,7 @@
 				<p><%= link_to 'Home', root_path %></p>
 				<p><%= link_to new_invoice_path, { :class => 'btn btn-success' } do %><i class="fa fa-plus left"></i>New Invoice<% end %></p>
 				<% @today = Date.today %>
-				<h2><%= @today.year %> Invoices</h2>
+				<h2>Recent &amp; Unpaid Invoices</h2>
 				<div class="row">
 					<div class="col-sm-12">
 						<% if @invoices.blank? %>
@@ -24,7 +24,7 @@
 								</tr>
 							</thead>
 							<tbody>
-								<% @invoices.where("strftime('%Y', date) + 0 = ?", @today.year).sort { |a,b| a.date <=> b.date }.each do |invoice| %>
+								<% @invoices.where("paid != ? OR strftime('%m', date) + 0 = ?", true, @today.month).sort { |a,b| a.date <=> b.date }.each do |invoice| %>
 								<tr id="invoicerow<%= invoice.id %>">
 									<td><%= link_to Client.find(invoice.clientid) do %><%= Client.find(invoice.clientid).name %><% end %></td>
 									<td class="hidden-xs"><%= link_to Project.find(invoice.projectid) do %><%= Project.find(invoice.projectid).name %><% end %></td>
