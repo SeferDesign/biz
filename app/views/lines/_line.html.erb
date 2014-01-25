@@ -1,7 +1,7 @@
 <tr>
 	<td><%= link_to [line.invoice, line], method: :delete, data: { confirm: 'Are you sure?' } do %><i class="fa fa-trash-o red"></i><% end %></td>
   <td><%= line.description %></td>
-  <% if @invoice.worktype == 'Hourly' %>
+  <% if line.hours > 0 %>
   <td class="text-center"><%= line.hours %></td>
   <td class="text-center"><%= number_with_precision(line.rate, :precision => 2) %></td>
   <% else %>
