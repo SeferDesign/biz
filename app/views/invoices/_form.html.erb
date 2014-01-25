@@ -36,7 +36,7 @@
 				<%= f.label :cost %>
 				<div class="input-group">
 					<span class="input-group-addon"><i class="fa fa-usd"></i></span>
-					<%= f.text_field :cost, :placeholder => '0.00',class: 'form-control text-right' %>
+					<%= f.text_field :cost, :placeholder => '0.00', class: 'form-control text-right' %>
 				</div>
 			</div>
 		</div>
@@ -69,7 +69,11 @@
 				<%= f.label :paid, 'Paid Status' %><br>
 				<%= radio_button('invoice', 'paid', true) %>
 				<%= label_tag(:invoice_paid_true, 'Paid') %>
+				<% unless @invoice.paid %>
+				<%= radio_button('invoice', 'paid', false, :checked => 'checked') %>
+				<% else %>
 				<%= radio_button('invoice', 'paid', false) %>
+				<% end %>
 				<%= label_tag(:invoice_paid_false, 'Not Paid') %>
 			</div>
 		</div>
