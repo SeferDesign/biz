@@ -1,0 +1,90 @@
+<%
+	@actualAmount = 0
+	if @goal.timeperiod == 'Year'
+		if @goal.goaltype == 'Total'
+			@actualAmount = Invoice.where(:paid => true).where("strftime('%Y', paiddate) + 0 = ?", @goal.enddate.year).sum('cost')
+		elsif @goal.goaltype == 'Contract'
+			@actualAmount = Invoice.where(:paid => true, :worktype => 'Contract').where("strftime('%Y', paiddate) + 0 = ?", @goal.enddate.year).sum('cost')
+		elsif @goal.goaltype == 'Hourly'
+			@actualAmount = Invoice.where(:paid => true, :worktype => 'Hourly').where("strftime('%Y', paiddate) + 0 = ?", @goal.enddate.year).sum('cost')
+		elsif @goal.goaltype == 'Retainer'
+			@actualAmount = Invoice.where(:paid => true, :worktype => 'Retainer').where("strftime('%Y', paiddate) + 0 = ?", @goal.enddate.year).sum('cost')
+		end
+	elsif @goal.timeperiod == 'Month'
+		if @goal.goaltype == 'Total'
+			@actualAmount = Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ?", @goal.enddate.month).sum('cost')
+		elsif @goal.goaltype == 'Contract'
+			@actualAmount = Invoice.where(:paid => true, :worktype => 'Contract').where("strftime('%m', paiddate) + 0 = ?", @goal.enddate.month).sum('cost')
+		elsif @goal.goaltype == 'Hourly'
+			@actualAmount = Invoice.where(:paid => true, :worktype => 'Hourly').where("strftime('%m', paiddate) + 0 = ?", @goal.enddate.month).sum('cost')
+		elsif @goal.goaltype == 'Retainer'
+			@actualAmount = Invoice.where(:paid => true, :worktype => 'Retainer').where("strftime('%m', paiddate) + 0 = ?", @goal.enddate.month).sum('cost')
+		end
+	end
+%>
+<section id="goal-show">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12">
+				<h1>Goal #<%= @goal.id %></h1>
+				<p class="doicons">
+					<%= link_to edit_goal_path(@goal), title: 'Edit' do %><i class="fa fa-fw fa-2x fa-pencil-square-o text-warning"></i><% end %>
+					<%= link_to goal_path(@goal), title: 'Delete', method: :delete, data: { confirm: "Are you sure you would like to delete Goal ##{@goal.id}?" } do %><i class="fa fa-fw fa-2x fa-trash-o text-danger"></i><% end %>
+				</p>
+				<p>
+				  <strong>Start Date:</strong>
+				  <%= @goal.startdate %>
+				</p>
+				
+				<p>
+				  <strong>End Date:</strong>
+				  <%= @goal.enddate %>
+				</p>
+				
+				<p>
+				  <strong>Status:</strong>
+				  <%= @goal.status %>
+				</p>
+				
+				<p>
+				  <strong>Met?</strong>
+				  <% if @goal.status == 'Past' %>
+						<% if @goal.met %>
+						<i class="fa fa-check green"></i>
+						<% else %>
+						<span class="red"><strong>&times;</strong></span>
+						<% end %>
+					<% elsif @goal.status == 'Current' %>
+						<% if @goal.timeperiod == 'Year' %>
+						<%= number_to_percentage(@actualAmount / @goal.amount * 100, :strip_insignificant_zeros => true, :precision => 2) %>
+						<% elsif @goal.timeperiod == 'Month' %>
+						<%= number_to_percentage(@actualAmount / @goal.amount * 100, :strip_insignificant_zeros => true, :precision => 2) %>
+						<% end %>
+					<% elsif @goal.status == 'Future' %>
+					&mdash;
+					<% end %>
+				</p>
+				
+				<p>
+				  <strong>Timeperiod:</strong>
+				  <%= @goal.timeperiod %>
+				</p>
+				
+				<p>
+				  <strong>Type:</strong>
+				  <%= @goal.goaltype %>
+				</p>
+				
+				<p>
+				  <strong>Amount:</strong>
+				  $<%= number_with_precision(@goal.amount, :precision => 2, :delimiter => ',') %>
+				</p>
+			</div>
+		</div>
+		<div class="row hidden-print">
+			<div class="col-sm-12">
+				<p><%= link_to 'Back', goals_path %></p>
+			</div>
+		</div>
+	</div>
+</section>

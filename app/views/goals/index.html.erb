@@ -1,0 +1,82 @@
+<section id="goals-list">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12">
+				<h1>Goals</h1>
+				<p><%= link_to 'Home', root_path %></p>
+				<p><%= link_to new_goal_path, { :class => 'btn btn-success' } do %><i class="fa fa-plus left"></i>New Goal<% end %></p>
+				<% if @goals.blank? %>
+				<p class="lead">No goals.</p>
+				<% else %>
+				<div class="row">
+					<div class="col-sm-12">
+						<table class="table table-condensed">
+							<thead>
+								<tr>
+									<th>Period</th>
+									<th>Type</th>
+									<th class="text-right">Goal Amount</th>
+									<th class="text-right hidden-xs">Actual Amount</th>
+									<th class="text-center">Met?</th>
+								</tr>
+							</thead>
+							<tbody>
+								<% @goals.sort { |a,b| b.enddate <=> a.enddate }.each do |goal| %>
+								<%
+									@actualAmount = 0
+									if goal.timeperiod == 'Year'
+										if goal.goaltype == 'Total'
+											@actualAmount = Invoice.where(:paid => true).where("strftime('%Y', paiddate) + 0 = ?", goal.enddate.year).sum('cost')
+										elsif goal.goaltype == 'Contract'
+											@actualAmount = Invoice.where(:paid => true, :worktype => 'Contract').where("strftime('%Y', paiddate) + 0 = ?", goal.enddate.year).sum('cost')
+										elsif goal.goaltype == 'Hourly'
+											@actualAmount = Invoice.where(:paid => true, :worktype => 'Hourly').where("strftime('%Y', paiddate) + 0 = ?", goal.enddate.year).sum('cost')
+										elsif goal.goaltype == 'Retainer'
+											@actualAmount = Invoice.where(:paid => true, :worktype => 'Retainer').where("strftime('%Y', paiddate) + 0 = ?", goal.enddate.year).sum('cost')
+										end
+									elsif goal.timeperiod == 'Month'
+										if goal.goaltype == 'Total'
+											@actualAmount = Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ?", goal.enddate.month).sum('cost')
+										elsif goal.goaltype == 'Contract'
+											@actualAmount = Invoice.where(:paid => true, :worktype => 'Contract').where("strftime('%m', paiddate) + 0 = ?", goal.enddate.month).sum('cost')
+										elsif goal.goaltype == 'Hourly'
+											@actualAmount = Invoice.where(:paid => true, :worktype => 'Hourly').where("strftime('%m', paiddate) + 0 = ?", goal.enddate.month).sum('cost')
+										elsif goal.goaltype == 'Retainer'
+											@actualAmount = Invoice.where(:paid => true, :worktype => 'Retainer').where("strftime('%m', paiddate) + 0 = ?", goal.enddate.month).sum('cost')
+										end
+									end
+								%>
+								<tr>
+									<td><%= link_to goal do %><% if goal.timeperiod == 'Year' %>Year <%= goal.enddate.year %><% elsif goal.timeperiod == 'Month' %><%= goal.enddate.strftime('%B') %>&nbsp;<%= goal.enddate.year %><% end %><% end %></td>
+									<td><%= goal.goaltype %></td>
+									<td class="text-right">$<%= number_with_precision(goal.amount, :precision => 2, :delimiter => ',') %></td>
+									<td class="text-right hidden-xs">$<%= number_with_precision(@actualAmount, :precision => 2, :delimiter => ',') %></td>
+									<td class="text-center">
+										<% if goal.status == 'Past' %>
+											<% if goal.met %>
+											<i class="fa fa-check green"></i>
+											<% else %>
+											<span class="red"><strong>&times;</strong></span>
+											<% end %>
+										<% elsif goal.status == 'Current' %>
+											<% if goal.timeperiod == 'Year' %>
+											<%= number_to_percentage(@actualAmount / goal.amount * 100, :strip_insignificant_zeros => true, :precision => 2) %>
+											<% elsif goal.timeperiod == 'Month' %>
+											<%= number_to_percentage(@actualAmount / goal.amount * 100, :strip_insignificant_zeros => true, :precision => 2) %>
+											<% end %>
+										<% elsif goal.status == 'Future' %>
+										&mdash;
+										<% end %>
+									</td>
+								</tr>
+								<% end %>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<% end %>
+			</div>
+		</div>
+	</div>
+</section>
+

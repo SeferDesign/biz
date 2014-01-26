@@ -1,5 +1,7 @@
 Biz::Application.routes.draw do
 
+  resources :goals
+
   resources :invoices do
   	resources :lines
   end

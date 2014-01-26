@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  startdate: 2014-01-25 21:03:59
+  enddate: 2014-01-25 21:03:59
+  status: MyString
+  met: false
+  timeperiod: MyString
+  goaltype: 
+  amount: 1.5
+
+two:
+  startdate: 2014-01-25 21:03:59
+  enddate: 2014-01-25 21:03:59
+  status: MyString
+  met: false
+  timeperiod: MyString
+  goaltype: 
+  amount: 1.5

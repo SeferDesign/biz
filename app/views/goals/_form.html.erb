@@ -1,0 +1,81 @@
+<%= form_for(@goal) do |f| %>
+  <% if @goal.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@goal.errors.count, "error") %> prohibited this goal from being saved:</h2>
+
+      <ul>
+      <% @goal.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+  
+  <div class="row">
+		<div class="col-lg-4 col-sm-6">
+			<div class="form-group">
+				<%= f.label :startdate, 'Start Date' %>
+				<div class="input-group">
+					<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					<%= f.text_field :startdate, :placeholder => 'YYYY-MM-DD', class: 'form-control datepicker' %>
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-4 col-sm-6">
+			<div class="form-group">
+				<%= f.label :enddate, 'End Date' %>
+				<div class="input-group">
+					<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					<%= f.text_field :enddate, :placeholder => 'YYYY-MM-DD', class: 'form-control datepicker' %>
+				</div>
+			</div>
+		</div>
+  </div>
+  <div class="col-lg-2 col-sm-6">
+		<div class="form-group">
+			<%= f.label :amount %>
+			<div class="input-group">
+				<span class="input-group-addon"><i class="fa fa-usd"></i></span>
+				<%= f.text_field :amount, :placeholder => '0.00', class: 'form-control text-right' %>
+			</div>
+		</div>
+	</div>
+	<div class="col-lg-2 col-sm-6">
+		<div class="form-group">
+			<%= f.label :met, 'Result' %><br>
+			<%= radio_button('goal', 'met', true) %>
+			<%= label_tag(:goal_met_true, 'Met') %>
+			<% unless @goal.met %>
+			<%= radio_button('goal', 'met', false, :checked => 'checked') %>
+			<% else %>
+			<%= radio_button('goal', 'met', false) %>
+			<% end %>
+			<%= label_tag(:goal_met_false, 'Failed') %>
+		</div>
+	</div>
+	<div class="col-lg-2 col-sm-6">
+		<div class="form-group">
+			<%= f.label :timeperiod, 'Time Period' %>
+			<%= select(:goal, 'timeperiod', ['Month', 'Year'], { :include_blank => 'None' }, { :class => 'form-control' }) %>
+		</div>
+	</div>
+	<div class="col-lg-2 col-sm-6">
+		<div class="form-group">
+			<%= f.label :goaltype, 'Type' %>
+			<%= select(:goal, 'goaltype', ['Total', 'Contract', 'Hourly', 'Retainer'], { :class => 'form-control' }) %>
+		</div>
+	</div>
+  <div class="col-lg-2 col-sm-6">
+		<div class="form-group">
+			<%= f.label :status, 'Status' %>
+			<%= select(:goal, 'status', ['Future', 'Current', 'Past'], { :class => 'form-control' }) %>
+		</div>
+	</div>
+  <div class="row">
+		<div class="col-sm-12">
+			<div class="form-group">
+				<button type="submit" class="btn btn-success"><i class="fa fa-save left"></i>Save</button>
+			</div>
+		</div>
+	</div>
+<% end %>
