@@ -12,7 +12,7 @@
   <% end %>
   
   <div class="row">
-		<div class="col-lg-4 col-sm-6">
+		<div class="col-lg-3 col-sm-6">
 			<div class="form-group">
 				<%= f.label :startdate, 'Start Date' %>
 				<div class="input-group">
@@ -21,7 +21,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="col-lg-4 col-sm-6">
+		<div class="col-lg-3 col-sm-6">
 			<div class="form-group">
 				<%= f.label :enddate, 'End Date' %>
 				<div class="input-group">
@@ -30,45 +30,47 @@
 				</div>
 			</div>
 		</div>
-  </div>
-  <div class="col-lg-2 col-sm-6">
-		<div class="form-group">
-			<%= f.label :amount %>
-			<div class="input-group">
-				<span class="input-group-addon"><i class="fa fa-usd"></i></span>
-				<%= f.text_field :amount, :placeholder => '0.00', class: 'form-control text-right' %>
+		<div class="col-lg-3 col-sm-6">
+			<div class="form-group">
+				<%= f.label :timeperiod, 'Time Period' %>
+				<%= select(:goal, 'timeperiod', ['Month', 'Year'], { :include_blank => 'None' }, { :class => 'form-control' }) %>
 			</div>
 		</div>
-	</div>
-	<div class="col-lg-2 col-sm-6">
-		<div class="form-group">
-			<%= f.label :met, 'Result' %><br>
-			<%= radio_button('goal', 'met', true) %>
-			<%= label_tag(:goal_met_true, 'Met') %>
-			<% unless @goal.met %>
-			<%= radio_button('goal', 'met', false, :checked => 'checked') %>
-			<% else %>
-			<%= radio_button('goal', 'met', false) %>
-			<% end %>
-			<%= label_tag(:goal_met_false, 'Failed') %>
+	  <div class="col-lg-3 col-sm-6">
+			<div class="form-group">
+				<%= f.label :amount %>
+				<div class="input-group">
+					<span class="input-group-addon"><i class="fa fa-usd"></i></span>
+					<%= f.text_field :amount, :placeholder => '0.00', class: 'form-control text-right' %>
+				</div>
+			</div>
 		</div>
-	</div>
-	<div class="col-lg-2 col-sm-6">
-		<div class="form-group">
-			<%= f.label :timeperiod, 'Time Period' %>
-			<%= select(:goal, 'timeperiod', ['Month', 'Year'], { :include_blank => 'None' }, { :class => 'form-control' }) %>
+  </div>
+  <div class="row">
+		<div class="col-lg-3 col-sm-6">
+			<div class="form-group">
+				<%= f.label :goaltype, 'Type' %>
+				<%= select(:goal, 'goaltype', ['Total', 'Contract', 'Hourly', 'Retainer'], {}, { :class => 'form-control' }) %>
+			</div>
 		</div>
-	</div>
-	<div class="col-lg-2 col-sm-6">
-		<div class="form-group">
-			<%= f.label :goaltype, 'Type' %>
-			<%= select(:goal, 'goaltype', ['Total', 'Contract', 'Hourly', 'Retainer'], { :class => 'form-control' }) %>
+	  <div class="col-lg-3 col-sm-6">
+			<div class="form-group">
+				<%= f.label :status, 'Status' %>
+				<%= select(:goal, 'status', ['Future', 'Current', 'Past'], {}, { :class => 'form-control' }) %>
+			</div>
 		</div>
-	</div>
-  <div class="col-lg-2 col-sm-6">
-		<div class="form-group">
-			<%= f.label :status, 'Status' %>
-			<%= select(:goal, 'status', ['Future', 'Current', 'Past'], { :class => 'form-control' }) %>
+		<div class="col-lg-3 col-sm-6">
+			<div class="form-group">
+				<%= f.label :met, 'Result' %><br>
+				<%= radio_button('goal', 'met', true) %>
+				<%= label_tag(:goal_met_true, 'Met') %>
+				<% unless @goal.met %>
+				<%= radio_button('goal', 'met', false, :checked => 'checked') %>
+				<% else %>
+				<%= radio_button('goal', 'met', false) %>
+				<% end %>
+				<%= label_tag(:goal_met_false, 'Failed') %>
+			</div>
 		</div>
 	</div>
   <div class="row">
