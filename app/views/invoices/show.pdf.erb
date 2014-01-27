@@ -21,19 +21,30 @@
 				<div>
 					<div class="pull-right text-right">
 						<p>Attention: <%= thisClient.contact %><br><%= thisClient.name %></p>
+						<% if !thisClient.address1.blank? %>
+						<p>
+							<%= thisClient.address1 %>
+							<% if !thisClient.address2.blank? %>
+							<br><%= thisClient.address2 %>
+							<% end %>
+							<br><%= thisClient.city %><% if !thisClient.state.blank? %>, <%= thisClient.state %><% end %> <%= thisClient.zipcode %>
+							<% if !thisClient.intinfo.blank? %>
+							<br><%= thisClient.intinfo %>
+							<% end %>
+						<% end %>
 					</div>
 					<h1>Invoice</h1>
 					<p><%= @invoice.date.to_formatted_s(:long) %></p>
+					<% if @invoice.paid == true %>
+					<p><strong>Status:</strong> <span class="spread green">Paid</span> on <%= @invoice.paiddate.to_formatted_s(:long) %></p>
+					<p><strong>Payment Method:</strong> <%= @invoice.paymenttype %></p>
+					<% else %>
+					<p><strong>Status:</strong> <span class="spread red">Not Paid</span></p>
+					<p>This payment can be made out to:</p>
+					<p><%= company_pay_to %><br><%= company_street %><br><%= company_city %>, <%= company_state_abbrv %> <%= company_zipcode %></p>
+					<% end %>
 				</div>
 				<div class="clearfix"></div>
-				<% if @invoice.paid == false %>
-				<p><strong>Status:</strong> <span class="spread red">Not Paid</span></p>
-				<p>This payment can be made to:</p>
-				<p><%= company_pay_to %><br><%= company_street %><br><%= company_city %>, <%= company_state_abbrv %> <%= company_zipcode %></p>
-				<% else %>
-				<p><strong>Status:</strong> <span class="spread green">Paid</span> on <%= @invoice.paiddate.to_formatted_s(:long) %></p>
-				<p><strong>Payment Method:</strong> <%= @invoice.paymenttype %></p>
-				<% end %>
 				<hr>
 				<p><%= @invoice.description %> <%= invoice_description_suffix %></p>
 				<p class="indent">Thank you,<br><%= company_pay_to %><br><%= company_full_name %><br><%= company_email %><br><%= company_phone %></p>
@@ -51,7 +62,7 @@
 		      	<% @invoice.lines.each do |line| %>
 			      <tr>
 						  <td><%= line.description %></td>
-						  <% if @invoice.worktype == 'Hourly' %>
+						  <% if !line.hours.blank? %>
 						  <td class="text-center"><%= line.hours %></td>
 						  <td class="text-center"><%= number_with_precision(line.rate, :precision => 2) %></td>
 						  <% else %>

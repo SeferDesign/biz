@@ -21,10 +21,27 @@
 					<strong>Contact:</strong>
 					<%= @client.contact %>
 				</p>
+				<% if !@client.site_url.blank? %>
 				<p>
 					<strong>Site:</strong>
 					<a href="<%= @client.site_url %>" title="<%= @client.site_url %>"><%= @client.site_url %></a>
 				</p>
+				<% end %>
+				<% if !@client.address1.blank? %>
+				<p><strong>Address:</strong></p>
+				<p>
+					<%= @client.address1 %>
+					<% if !@client.address2.blank? %>
+					<br><%= @client.address2 %>
+					<% end %>
+					<br><%= @client.city %><% if !@client.state.blank? %>, <%= @client.state %><% end %> <%= @client.zipcode %>
+					<% if !@client.intinfo.blank? %>
+					<br><%= @client.intinfo %>
+					<% end %>
+				<% end %>
+				<% if @client.international %>
+				<p><strong>International Client</strong></p>
+				<% end %>
 			</div>
 		</div>
 		<div class="row">

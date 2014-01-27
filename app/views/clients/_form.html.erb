@@ -30,14 +30,44 @@
 		</div>
 		<div class="col-sm-4">
 			<div class="form-group">
-				<%= f.label :logo, 'Logo' %>
-				<%= f.file_field :logo %>
+				<%= f.label :address1, 'Address' %>
+				<%= f.text_field :address1, class: 'form-control' %>
 			</div>
+			<div class="form-group">
+				<%= f.label :address2, 'Address 2' %>
+				<%= f.text_field :address2, class: 'form-control' %>
+			</div>
+			<div class="form-group">
+				<%= f.label :city, 'City' %>
+				<%= f.text_field :city, class: 'form-control' %>
+			</div>
+			<div class="form-group">
+				<%= f.label :state, 'State' %>
+				<%= select(:client, 'state', us_states, { :include_blank => 'None' }, { :class => 'form-control' } ) %>
+			</div>
+			<div class="form-group">
+				<%= f.label :zipcode, 'Zipcode' %>
+				<%= f.text_field :zipcode, class: 'form-control' %>
+			</div>
+			<div class="form-group">
+				<%= check_box(:client, :international, {}, true, false) %>
+				<%= f.label :international, 'International?' %>
+			</div>
+			<% if @client.international %>
+			<div class="form-group">
+				<%= f.label :intinfo, 'International Info' %>
+				<%= f.text_field :intinfo, class: 'form-control' %>
+			</div>
+			<% end %>
 		</div>
 		<div class="col-sm-4">
-			<% if !@client.logo.blank? %>
-			<%= image_tag(@client.logo.url) %>
-			<% end %>
+			<div class="form-group">
+				<%= f.label :logo, 'Logo' %>
+				<%= f.file_field :logo %>
+				<% if !@client.logo.blank? %>
+				<div class="clientimage"><%= image_tag(@client.logo.url) %></div>
+				<% end %>
+			</div>
 		</div>
 	</div>
 	<hr>
