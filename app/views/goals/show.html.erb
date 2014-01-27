@@ -35,17 +35,14 @@
 				  <strong>Start Date:</strong>
 				  <%= @goal.startdate %>
 				</p>
-				
 				<p>
 				  <strong>End Date:</strong>
 				  <%= @goal.enddate %>
 				</p>
-				
 				<p>
 				  <strong>Status:</strong>
 				  <%= @goal.status %>
 				</p>
-				
 				<p>
 				  <strong>Met?</strong>
 				  <% if @goal.status == 'Past' %>
@@ -64,20 +61,17 @@
 					&mdash;
 					<% end %>
 				</p>
-				
 				<p>
-				  <strong>Timeperiod:</strong>
+				  <strong>Time Period:</strong>
 				  <%= @goal.timeperiod %>
 				</p>
-				
 				<p>
 				  <strong>Type:</strong>
 				  <%= @goal.goaltype %>
 				</p>
-				
 				<p>
 				  <strong>Amount:</strong>
-				  $<%= number_with_precision(@goal.amount, :precision => 2, :delimiter => ',') %>
+				  <%= number_to_currency(@goal.amount, { :negative_format => '(%n)' }) %>
 				</p>
 			</div>
 		</div>
