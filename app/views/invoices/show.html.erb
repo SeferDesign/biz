@@ -33,7 +33,7 @@
 				</p>
 				<p>
 					<strong>Cost:</strong>
-					$<%= number_with_precision(@invoice.cost, :precision => 2, :delimiter => ',') %>
+					<%= number_to_currency(@invoice.cost, { :negative_format => '(%n)' }) %>
 				</p>
 				<p>
 					<strong>Paid?:</strong>
@@ -57,7 +57,7 @@
         	<th>&nbsp;</th>
           <th>Description</th>
           <th class="text-center">Hours</th>
-          <th class="text-center">Rate / Hour ($)</th>
+          <th class="text-center">Rate ($) per Hour</th>
           <th class="text-center">Cost</th>
         </tr>
       </thead>
@@ -66,7 +66,7 @@
 	      <tr>
 	      	<td>&nbsp;</td>
 	        <td class="text-right" colspan="3"><strong>Total</strong>&nbsp;&nbsp;</td>
-	        <td><strong><div class="pull-right"><%= number_with_precision(@invoice.lines.sum('total'), :precision => 2) %></div>$</strong></td>
+	        <td><strong><div class="pull-right"><%= number_to_currency(@invoice.lines.sum('total'), { :unit => '', :negative_format => '(%n)' }) %></div>$</strong></td>
 	      </tr>
 	    </tbody>
 	  </table>

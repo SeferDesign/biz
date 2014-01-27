@@ -26,8 +26,8 @@
 									<td><%= link_to client do %><%= client.name %><% end %></td>
 									<td class="hidden-xs"><%= client.contact %></td>
 									<td class="hidden-xs"><%= link_to client.site_url do %><%= client.site_url %><% end %></td>
-									<td class="text-right hidden-xs"><% if Invoice.where(:clientid => client.id, :paid=> false).sum('cost') > 0 %><span class="spread red">$<%= number_with_precision(Invoice.where(:clientid => client.id, :paid=> false).sum('cost'), :precision => 2, :delimiter => ',') %></span><% else %>&mdash;<% end %></td>
-									<td class="text-right">$<%= number_with_precision(Invoice.where(:clientid => client.id).sum('cost'), :precision => 2, :delimiter => ',') %></td>
+									<td class="text-right hidden-xs"><% if Invoice.where(:clientid => client.id, :paid=> false).sum('cost') > 0 %><span class="spread red"><%= number_to_currency(Invoice.where(:clientid => client.id, :paid=> false).sum('cost'), { :negative_format => '(%n)' }) %></span><% else %>&mdash;<% end %></td>
+									<td class="text-right"><%= number_to_currency(Invoice.where(:clientid => client.id).sum('cost'), { :negative_format => '(%n)' }) %></td>
 								</tr>
 								<% end %>
 							</tbody>

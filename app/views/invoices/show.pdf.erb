@@ -54,7 +54,7 @@
 		        <tr>
 		          <th>Description</th>
 		          <th class="text-center">Hours</th>
-		          <th class="text-center">Rate / Hour ($)</th>
+		          <th class="text-center">Rate ($) per Hour</th>
 		          <th class="text-center">Cost</th>
 		        </tr>
 		      </thead>
@@ -64,17 +64,17 @@
 						  <td><%= line.description %></td>
 						  <% if !line.hours.blank? %>
 						  <td class="text-center"><%= line.hours %></td>
-						  <td class="text-center"><%= number_with_precision(line.rate, :precision => 2) %></td>
+						  <td class="text-center"><%= number_to_currency(line.rate, { :unit => ''}) %></td>
 						  <% else %>
 						  <td class="text-center">&mdash;</td>
 						  <td class="text-center">&mdash;</td>
 						  <% end %>
-						  <td><div class="pull-right"><%= number_with_precision(line.total, :precision => 2) %></div>$</td>
+						  <td><div class="pull-right"><%= number_to_currency(line.total, { :unit => '', :negative_format => '(%n)' }) %></div>$</td>
 						</tr>
 						<% end %>
 			      <tr>
 			        <td class="text-right" colspan="3"><strong>Total</strong>&nbsp;&nbsp;</td>
-			        <td><strong><div class="pull-right"><%= number_with_precision(@invoice.lines.sum('total'), :precision => 2) %></div>$</strong></td>
+			        <td><strong><div class="pull-right"><%= number_to_currency(@invoice.lines.sum('total'), { :unit => '', :negative_format => '(%n)' }) %></div>$</strong></td>
 			      </tr>
 			    </tbody>
 			  </table>
