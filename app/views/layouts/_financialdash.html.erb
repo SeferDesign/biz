@@ -7,8 +7,8 @@
 <div class="row">
 	<div class="col-sm-3">
 		<h3 class="text-center"><%= @today.strftime('%B') %></h3>
-		<p class="lead">Paid: <span class="pull-right currency green"><%= number_to_currency(Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ?", @today.month).sum('cost'), { :negative_format => '(%n)' }) %></span></p>
-		<hr>
+		<p class="lead halfbottom">Paid: <span class="pull-right currency green"><%= number_to_currency(Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ?", @today.month).sum('cost'), { :negative_format => '(%n)' }) %></span></p>
+		<hr class="halfbottom">
 		<p class="lead">
 			Contract: <span class="pull-right currency text-info"><%= number_to_currency(Invoice.where(worktype: 'Contract').where("strftime('%m', date) + 0 = ?", @today.month).sum('cost'), { :negative_format => '(%n)' }) %></span><br>
 			Hourly: <span class="pull-right currency text-warning"><%= number_to_currency(Invoice.where(worktype: 'Hourly').where("strftime('%m', date) + 0 = ?", @today.month).sum('cost'), { :negative_format => '(%n)' }) %></span><br>
@@ -18,8 +18,8 @@
 	<% @lastmonth = 1.month.ago %>
 	<div class="col-sm-3">
 		<h3 class="text-center"><%= @lastmonth.strftime('%B') %>&nbsp;<%= @lastmonth.strftime('%Y') %></h3>
-		<p class="lead">Paid: <span class="pull-right currency green"><%= number_to_currency(Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ?", @lastmonth.month).sum('cost'), { :negative_format => '(%n)' }) %></span></p>
-		<hr>
+		<p class="lead halfbottom">Paid: <span class="pull-right currency green"><%= number_to_currency(Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ?", @lastmonth.month).sum('cost'), { :negative_format => '(%n)' }) %></span></p>
+		<hr class="halfbottom">
 		<p class="lead">
 			Contract: <span class="pull-right currency text-info"><%= number_to_currency(Invoice.where(worktype: 'Contract').where("strftime('%m', date) + 0 = ?", @lastmonth.month).sum('cost'), { :negative_format => '(%n)' }) %></span><br>
 			Hourly: <span class="pull-right currency text-warning"><%= number_to_currency(Invoice.where(worktype: 'Hourly').where("strftime('%m', date) + 0 = ?", @lastmonth.month).sum('cost'), { :negative_format => '(%n)' }) %></span><br>
@@ -28,8 +28,8 @@
 	</div>
 	<div class="col-sm-3">
 		<h3 class="text-center"><%= @today.year %> YTD</h3>
-		<p class="lead">Paid: <span class="pull-right currency green"><%= number_to_currency(Invoice.where(:paid => true).where("strftime('%Y', paiddate) + 0 = ?", @today.year).sum('cost'), { :negative_format => '(%n)' }) %></span></p>
-		<hr>
+		<p class="lead halfbottom">Paid: <span class="pull-right currency green"><%= number_to_currency(Invoice.where(:paid => true).where("strftime('%Y', paiddate) + 0 = ?", @today.year).sum('cost'), { :negative_format => '(%n)' }) %></span></p>
+		<hr class="halfbottom">
 		<p class="lead">
 			Contract: <span class="pull-right currency text-info"><%= number_to_currency(Invoice.where(worktype: 'Contract').where("strftime('%Y', date) + 0 = ?", @today.year).sum('cost'), { :negative_format => '(%n)' }) %></span><br>
 			Hourly: <span class="pull-right currency text-warning"><%= number_to_currency(Invoice.where(worktype: 'Hourly').where("strftime('%Y', date) + 0 = ?", @today.year).sum('cost'), { :negative_format => '(%n)' }) %></span><br>
@@ -39,8 +39,8 @@
 	<% @lastyear = Date.today.year - 1 %>
 	<div class="col-sm-3">
 		<h3 class="text-center"><%= @lastyear %></h3>
-		<p class="lead">Paid: <span class="pull-right currency green"><%= number_to_currency(Invoice.where(:paid => true).where("strftime('%Y', paiddate) + 0 = ?", @lastyear).sum('cost'), { :negative_format => '(%n)' }) %></span></p>
-		<hr>
+		<p class="lead halfbottom">Paid: <span class="pull-right currency green"><%= number_to_currency(Invoice.where(:paid => true).where("strftime('%Y', paiddate) + 0 = ?", @lastyear).sum('cost'), { :negative_format => '(%n)' }) %></span></p>
+		<hr class="halfbottom">
 		<p class="lead">
 			Contract: <span class="pull-right currency text-info"><%= number_to_currency(Invoice.where(worktype: 'Contract').where("strftime('%Y', date) + 0 = ?", @lastyear).sum('cost'), { :negative_format => '(%n)' }) %></span><br>
 			Hourly: <span class="pull-right currency text-warning"><%= number_to_currency(Invoice.where(worktype: 'Hourly').where("strftime('%Y', date) + 0 = ?", @lastyear).sum('cost'), { :negative_format => '(%n)' }) %></span><br>
