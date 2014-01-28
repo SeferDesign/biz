@@ -50,7 +50,7 @@
 				<%= f.text_field :zipcode, class: 'form-control' %>
 			</div>
 			<div class="form-group">
-				<%= check_box(:client, :international, {}, true, false) %>
+				<%= check_box(:client, :international, {}, 'true', 'false') %>
 				<%= f.label :international, 'International?' %>
 			</div>
 			<% if @client.international %>
