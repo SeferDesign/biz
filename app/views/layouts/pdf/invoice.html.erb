@@ -2,7 +2,7 @@
 <html>
 <head>
   <title><%= company_abbrv_name %> Biz Admin</title>
-  <%= stylesheet_link_tag    "application", media: "all", "data-turbolinks-track" => true %>
+  <%= stylesheet_link_tag "application", media: "all", "data-turbolinks-track" => true %>
   <%= wicked_pdf_stylesheet_link_tag "font-awesome.min" %>
   <%= wicked_pdf_stylesheet_link_tag "bootstrap.min" %>
   <%= wicked_pdf_stylesheet_link_tag "style" %>
@@ -24,6 +24,10 @@
   	header img {
 	  	max-width: 100px;
 	  	max-height: 80px;
+  	}
+  	
+  	#clientlogo-wrap img {
+	  	max-width: 200px;
   	}
   	
   	p.indent {

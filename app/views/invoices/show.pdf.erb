@@ -7,7 +7,7 @@
 			<div class="col-sm-12">
 				<%= wicked_pdf_image_tag company_logo_url %>
 				<% if !thisClient.logo.blank? %>
-				<div class="pull-right"><%= wicked_pdf_image_tag thisClient.logo.url(:medium) %></div>
+				<div class="pull-right"><div id="clientlogo-wrap"><%= wicked_pdf_image_tag thisClient.logo.url(:medium) %></div></div>
 				<% end %>
 			</div>
 		</div>
