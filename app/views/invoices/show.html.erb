@@ -51,6 +51,7 @@
 				<% end %>
 			</div>
 		</div>
+		<% if !@invoice.lines.blank? %>
 		<table class="table table-condensed">
       <thead>
         <tr>
@@ -70,6 +71,7 @@
 	      </tr>
 	    </tbody>
 	  </table>
+	  <% end %>
 		<h2>Add a line:</h2>
 		<%= render 'lines/form' %>
 		<div class="row hidden-print">
