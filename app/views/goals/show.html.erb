@@ -31,48 +31,55 @@
 					<%= link_to edit_goal_path(@goal), title: 'Edit' do %><i class="fa fa-fw fa-2x fa-pencil-square-o text-warning"></i><% end %>
 					<%= link_to goal_path(@goal), title: 'Delete', method: :delete, data: { confirm: "Are you sure you would like to delete Goal ##{@goal.id}?" } do %><i class="fa fa-fw fa-2x fa-trash-o text-danger"></i><% end %>
 				</p>
-				<p>
-				  <strong>Start Date:</strong>
-				  <%= @goal.startdate %>
-				</p>
-				<p>
-				  <strong>End Date:</strong>
-				  <%= @goal.enddate %>
-				</p>
-				<p>
-				  <strong>Status:</strong>
-				  <%= @goal.status %>
-				</p>
-				<p>
-				  <strong>Met?</strong>
-				  <% if @goal.status == 'Past' %>
-						<% if @goal.met %>
-						<i class="fa fa-check green"></i>
-						<% else %>
-						<span class="red"><strong>&times;</strong></span>
+				<div class="row">
+					<div class="col-sm-4">
+						<p><strong>Time Period:</strong> <%= @goal.timeperiod %></p>
+						<p><strong>Start Date:</strong> <%= @goal.startdate %></p>
+						<p><strong>End Date:</strong> <%= @goal.enddate %></p>
+					</div>
+					<div class="col-sm-4">
+						<p><strong>Type:</strong> <%= @goal.goaltype %></p>
+						<p><strong>Amount:</strong> <%= number_to_currency(@goal.amount, { :negative_format => '(%n)' }) %></p>
+						<p><strong>Status:</strong> <%= @goal.status %></p>
+					</div>
+					<div class="col-sm-4">
+						<%
+							if @goal.timeperiod == 'Year'
+								@progress = number_to_percentage(@actualAmount / @goal.amount * 100, :strip_insignificant_zeros => true, :precision => 2)
+							elsif @goal.timeperiod == 'Month'
+								@progress = number_to_percentage(@actualAmount / @goal.amount * 100, :strip_insignificant_zeros => true, :precision => 2)
+							end
+						%>
+						<% if @goal.status == 'Past' %>
+						<p>
+							<strong>Met?</strong>
+							<% if @goal.met %>
+							<i class="fa fa-check green"></i>
+							<% else %>
+							<span class="red"><strong>&times;</strong></span>
+							<% end %>
+						</p>
+						<% elsif @goal.status == 'Current' %>
+						<%
+							@fullPeriodDays = (@goal.enddate - @goal.startdate + 1).to_f
+							@paceDays = (Date.today - @goal.startdate + 1).to_f
+						%>
+						<p><strong>Pace:</strong> <%= number_to_percentage(@paceDays / @fullPeriodDays * 100, :strip_insignificant_zeros => true, :precision => 2) %></p>
+						<p><strong>Progress:</strong> <%= @progress %></p>
+						<% elsif @goal.status == 'Future' %>
+						<p>
+							<strong>Progress:</strong> &mdash;
+						</p>
 						<% end %>
-					<% elsif @goal.status == 'Current' %>
-						<% if @goal.timeperiod == 'Year' %>
-						<%= number_to_percentage(@actualAmount / @goal.amount * 100, :strip_insignificant_zeros => true, :precision => 2) %>
-						<% elsif @goal.timeperiod == 'Month' %>
-						<%= number_to_percentage(@actualAmount / @goal.amount * 100, :strip_insignificant_zeros => true, :precision => 2) %>
+						<% if @goal.status == 'Current' %>
+							<div class="progress">
+								<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="<%= @progress %>" aria-valuemin="0" aria-valuemax="100" style="width: <%= @progress %>">
+									<span class="sr-only"><%= @progress %> Complete (success)</span>
+								</div>
+							</div>
 						<% end %>
-					<% elsif @goal.status == 'Future' %>
-					&mdash;
-					<% end %>
-				</p>
-				<p>
-				  <strong>Time Period:</strong>
-				  <%= @goal.timeperiod %>
-				</p>
-				<p>
-				  <strong>Type:</strong>
-				  <%= @goal.goaltype %>
-				</p>
-				<p>
-				  <strong>Amount:</strong>
-				  <%= number_to_currency(@goal.amount, { :negative_format => '(%n)' }) %>
-				</p>
+					</div>
+				</div>
 			</div>
 		</div>
 		<div class="row hidden-print">
