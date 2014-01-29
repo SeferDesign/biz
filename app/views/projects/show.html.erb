@@ -1,3 +1,4 @@
+<% provide(:title, "Project ##{@project.id} | ") %>
 <%
 	thisClient = Client.find(@project.clientid)
 	projectInvoiceTotal = 0
