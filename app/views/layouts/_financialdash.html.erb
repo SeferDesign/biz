@@ -15,7 +15,7 @@
 			Retainer: <span class="pull-right currency text-muted"><%= number_to_currency(Invoice.where(worktype: 'Retainer').where("strftime('%m', date) + 0 = ?", @today.month).sum('cost'), { :negative_format => '(%n)' }) %></span>
 		</p>
 	</div>
-	<div class="col-sm-6">
+	<div class="col-sm-4 col-sm-offset-1">
 		<h3 class="text-center">Active Goals</h3>
 		<% Goal.where('startdate <= ? AND enddate >=  ?', @today, @today).order('enddate DESC, amount DESC').each_with_index do |goal, index| %>
 			<% if index == 0 %>
@@ -26,7 +26,7 @@
 			<% end %>
 		<% end %>
 	</div>
-	<div class="col-sm-3">
+	<div class="col-sm-3 col-sm-offset-1">
 		<h3 class="text-center"><%= @today.year %> YTD</h3>
 		<p class="lead halfbottom">Paid: <span class="pull-right currency green"><%= number_to_currency(Invoice.where(:paid => true).where("strftime('%Y', paiddate) + 0 = ?", @today.year).sum('cost'), { :negative_format => '(%n)' }) %></span></p>
 		<hr class="halfbottom">
