@@ -7,6 +7,8 @@ Biz::Application.routes.draw do
   resources :projects
   resources :clients
 
-	root "welcome#index"
+	root 'welcome#index'
+	
+	get ':action' => 'welcome#:action'
 	
 end
