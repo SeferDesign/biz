@@ -76,7 +76,7 @@ jQuery(document).ready(function($) {
     {
     	name: 'Hourly',
     	toolTipContent: '{name}: ${y}',
-    	type: 'stackedArea',
+    	type: 'stackedColumn',
     	color: '#8a6d3b',
     	dataPoints: [
     		{ label: '<%= 4.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Hourly').where("strftime('%m', paiddate) + 0 = ?", 4.month.ago.month).sum('cost') %> },
@@ -89,7 +89,7 @@ jQuery(document).ready(function($) {
     {
     	name: 'Contract',
     	toolTipContent: '{name}: ${y}',
-    	type: 'stackedArea',
+    	type: 'stackedColumn',
     	color: '#31708f',
     	dataPoints: [
     		{ label: '<%= 4.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Contract').where("strftime('%m', paiddate) + 0 = ?", 4.month.ago.month).sum('cost') %> },
@@ -102,7 +102,7 @@ jQuery(document).ready(function($) {
     {
     	name: 'Retainer',
     	toolTipContent: '{name}: ${y}',
-    	type: 'stackedArea',
+    	type: 'stackedColumn',
     	color: '#999999',
     	dataPoints: [
     		{ label: '<%= 4.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Retainer').where("strftime('%m', paiddate) + 0 = ?", 4.month.ago.month).sum('cost') %> },

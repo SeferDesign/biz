@@ -1,6 +1,6 @@
 <%
 	@activeYear = 2014
-	@yearTaxRate = 0.35
+	@yearTaxRate = 0.40
 	
 	@incomeYear = Invoice.where(:paid => true).where("paiddate >= ? AND paiddate <= ?", Date.new(@activeYear, 1, 1), Date.new(@activeYear, 12, 31)).sum('cost')
 	@incomeQ1 = 	Invoice.where(:paid => true).where("paiddate >= ? AND paiddate <= ?", Date.new(@activeYear, 1, 1), Date.new(@activeYear, 3, 31)).sum('cost')
