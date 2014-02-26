@@ -22,7 +22,7 @@
 								</tr>
 							</thead>
 							<tbody>
-								<% @goals.sort { |a,b| b.enddate <=> a.enddate }.each do |goal| %>
+								<% @goals.each do |goal| %>
 								<%
 									@actualAmount = 0
 									if goal.timeperiod == 'Year'

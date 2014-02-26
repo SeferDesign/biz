@@ -48,7 +48,7 @@
 		<div class="row">
 			<div class="col-sm-6">
 				<h3>Projects</h3>
-				<% if Project.where(clientid: @client.id).blank? %>
+				<% if @projects.blank? %>
 				<p class="lead">No projects.</p>
 				<% else %>
 				<table class="table table-condensed">
@@ -59,7 +59,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<% Project.where(clientid: @client.id).each do |project| %>
+						<% @projects.each do |project| %>
 						<tr id="projectrow<%= project.id %>">
 							<td><%= link_to project do %><%= project.name %><% end %></td>
 							<td class="text-center"><% if project.completed == true %><i class="fa fa-check green"></i><% else %><span class="spread red">No</span><% end %></td>
@@ -73,7 +73,7 @@
 		<div class="row">
 			<div class="col-sm-6">
 				<h3>Invoices</h3>
-				<% if Invoice.where(clientid: @client.id).blank? %>
+				<% if @invoices.blank? %>
 				<p class="lead">No invoices.</p>
 				<% else %>
 				<table class="table table-condensed">
@@ -86,7 +86,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<% Invoice.where(clientid: @client.id).sort { |a,b| a.date <=> b.date }.each do |invoice| %>
+						<% @invoices.each do |invoice| %>
 						<tr id="invoicerow<%= invoice.id %>">
 							<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
 							<td class="text-center hidden-xs"><%= invoice.worktype %></td>

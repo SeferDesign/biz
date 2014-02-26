@@ -6,6 +6,9 @@ class ClientsController < ApplicationController
   end
 
   def show
+  	@client = Client.find(params[:id])
+  	@projects = Project.where(clientid: @client.id)
+  	@invoices = Invoice.where(clientid: @client.id).sort { |a,b| a.date <=> b.date }
   end
 
   def new
