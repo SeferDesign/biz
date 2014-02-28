@@ -1,0 +1,21 @@
+<% provide(:title, 'Years | ') %>
+<section id="years-list">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12">
+				<h1>Years</h1>
+				<p><%= link_to 'Home', root_path %></p>
+				<p><%= link_to new_year_path, { :class => 'btn btn-success' } do %><i class="fa fa-plus left"></i>New Year<% end %></p>
+				<% if @years.blank? %>
+				<p class="lead">No years.</p>
+				<% else %>
+				<ul>
+					<% @years.each do |year| %>
+					<li><%= link_to year do %><%= year.year %><% end %></li>
+					<% end %>
+				</ul>
+				<% end%>
+			</div>
+		</div>
+	</div>
+</section>

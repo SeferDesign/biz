@@ -1,0 +1,100 @@
+<% provide(:title, "Year #{@year.year} | ") %>
+<%
+	@incomeYear = Invoice.where(:paid => true).where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 1, 1), Date.new(@year.year, 12, 31)).sum('cost')
+	@incomeQ1 = 	Invoice.where(:paid => true).where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 1, 1), Date.new(@year.year, 3, 31)).sum('cost')
+	@incomeQ2 = 	Invoice.where(:paid => true).where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 4, 1), Date.new(@year.year, 6, 30)).sum('cost')
+	@incomeQ3 = 	Invoice.where(:paid => true).where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 7, 1), Date.new(@year.year, 9, 30)).sum('cost')
+	@incomeQ4 = 	Invoice.where(:paid => true).where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 10, 1), Date.new(@year.year, 12, 31)).sum('cost')
+%>
+<section id="year<%= @year.year %>" class="yearsummary">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12">
+				<h1>Year <%= @year.year %> Summary</h1>
+			</div>
+			<div class="col-sm-8 col-sm-offset-2">
+				<p class="lead">Total Income: <span class="pull-right currency green"><%= number_to_currency(@incomeYear, { :negative_format => '(%n)' }) %></span></p>
+				<p class="lead">Tax Rate*: <span class="pull-right currency"><%= number_to_percentage(@year.taxrate * 100, :precision => 2) %></span></p>
+				<p class="lead">Tax Estimate*: <span class="pull-right currency red"><%= number_to_currency(@incomeYear * @year.taxrate, { :negative_format => '(%n)' }) %></span></p>
+				<p><small>*Tax rate and estimates are conservative and independent of expenses.</small></p>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-lg-3 col-md-6">
+				<h3 class="text-center">Quarter 1</h3>
+				<h4 class="text-center">January - March</h4>
+				<p class="lead">Income: <span class="pull-right currency green"><%= number_to_currency(@incomeQ1, { :negative_format => '(%n)' }) %></span></p>
+				<p class="lead">Tax Estimate: <span class="pull-right currency red"><%= number_to_currency(@incomeQ1 * @year.taxrate, { :negative_format => '(%n)' }) %></span></p>
+				<hr class="hidden-lg hidden-md">
+			</div>
+			<div class="col-lg-3 col-md-6">
+				<h3 class="text-center">Quarter 2</h3>
+				<h4 class="text-center">April - June</h4>
+				<p class="lead">Income: <span class="pull-right currency green"><%= number_to_currency(@incomeQ2, { :negative_format => '(%n)' }) %></span></p>
+				<p class="lead">Tax Estimate: <span class="pull-right currency red"><%= number_to_currency(@incomeQ2 * @year.taxrate, { :negative_format => '(%n)' }) %></span></p>
+				<hr class="hidden-lg hidden-md">
+			</div>
+			<div class="col-lg-3 col-md-6">
+				<h3 class="text-center">Quarter 3</h3>
+				<h4 class="text-center">July - September</h4>
+				<p class="lead">Income: <span class="pull-right currency green"><%= number_to_currency(@incomeQ3, { :negative_format => '(%n)' }) %></span></p>
+				<p class="lead">Tax Estimate: <span class="pull-right currency red"><%= number_to_currency(@incomeQ3 * @year.taxrate, { :negative_format => '(%n)' }) %></span></p>
+				<hr class="hidden-lg hidden-md">
+			</div>
+			<div class="col-lg-3 col-md-6">
+				<h3 class="text-center">Quarter 4</h3>
+				<h4 class="text-center">October - December</h4>
+				<p class="lead">Income: <span class="pull-right currency green"><%= number_to_currency(@incomeQ4, { :negative_format => '(%n)' }) %></span></p>
+				<p class="lead">Tax Estimate: <span class="pull-right currency red"><%= number_to_currency(@incomeQ4 * @year.taxrate, { :negative_format => '(%n)' }) %></span></p>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-8 col-sm-offset-2">
+				<div id="monthlyRevenueChart" class="chart"></div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+  var chart = new CanvasJS.Chart('monthlyRevenueChart', {
+  	title: {
+  		fontFamily: 'brandon-grotesque, sans-serif',
+  		fontSize: 24,
+  		fontWeight: 'normal',
+  		text: 'Revenue by Month'
+  	},
+  	axisX: {
+  		lineThickness: 1,
+	  	gridThickness: 0
+  	},
+  	axisY: {
+  		lineThickness: 1,
+  		gridThickness: 0,
+  		prefix: '$'
+  	},
+    data: [{
+    	name: 'Total',
+    	toolTipContent: '{label}: ${y}',
+    	type: 'column',
+    	color: '#666666',
+    	dataPoints: [
+    		{ label: '<%= Date.new(@year.year, 1, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ? AND strftime('%Y', paiddate) + 0 = ?", Date.new(@year.year, 1, 1).month, @year.year).sum('cost') %> },
+    		{ label: '<%= Date.new(@year.year, 2, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ? AND strftime('%Y', paiddate) + 0 = ?", Date.new(@year.year, 2, 1).month, @year.year).sum('cost') %> },
+    		{ label: '<%= Date.new(@year.year, 3, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ? AND strftime('%Y', paiddate) + 0 = ?", Date.new(@year.year, 3, 1).month, @year.year).sum('cost') %> },
+    		{ label: '<%= Date.new(@year.year, 4, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ? AND strftime('%Y', paiddate) + 0 = ?", Date.new(@year.year, 4, 1).month, @year.year).sum('cost') %> },
+    		{ label: '<%= Date.new(@year.year, 5, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ? AND strftime('%Y', paiddate) + 0 = ?", Date.new(@year.year, 5, 1).month, @year.year).sum('cost') %> },
+    		{ label: '<%= Date.new(@year.year, 6, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ? AND strftime('%Y', paiddate) + 0 = ?", Date.new(@year.year, 6, 1).month, @year.year).sum('cost') %> },
+    		{ label: '<%= Date.new(@year.year, 7, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ? AND strftime('%Y', paiddate) + 0 = ?", Date.new(@year.year, 7, 1).month, @year.year).sum('cost') %> },
+    		{ label: '<%= Date.new(@year.year, 8, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ? AND strftime('%Y', paiddate) + 0 = ?", Date.new(@year.year, 8, 1).month, @year.year).sum('cost') %> },
+    		{ label: '<%= Date.new(@year.year, 9, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ? AND strftime('%Y', paiddate) + 0 = ?", Date.new(@year.year, 9, 1).month, @year.year).sum('cost') %> },
+    		{ label: '<%= Date.new(@year.year, 10, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ? AND strftime('%Y', paiddate) + 0 = ?", Date.new(@year.year, 10, 1).month, @year.year).sum('cost') %> },
+    		{ label: '<%= Date.new(@year.year, 11, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ? AND strftime('%Y', paiddate) + 0 = ?", Date.new(@year.year, 11, 1).month, @year.year).sum('cost') %> },
+    		{ label: '<%= Date.new(@year.year, 12, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ? AND strftime('%Y', paiddate) + 0 = ?", Date.new(@year.year, 12, 1).month, @year.year).sum('cost') %> },
+      ]
+    }]
+  });
+  chart.render();
+});
+</script>

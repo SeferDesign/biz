@@ -1,5 +1,6 @@
 Biz::Application.routes.draw do
 
+  resources :years
   resources :goals
   resources :invoices do
   	resources :lines

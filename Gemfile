@@ -19,3 +19,4 @@ end
 gem 'paperclip'
 gem 'wkhtmltopdf-binary'
 gem 'wicked_pdf'
+gem 'friendly_id'

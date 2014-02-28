@@ -1,0 +1,12 @@
+<% provide(:title, "Edit Year #{@year.year} | ") %>
+<section id="year-edit">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12">
+				<h1>Edit Year <%= @year.year %></h1>
+				<%= render 'form' %>
+				<p><%= link_to 'Back', years_path %></p>
+			</div>
+		</div>
+	</div>
+</section>

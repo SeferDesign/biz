@@ -4,7 +4,7 @@
 			<div class="col-sm-12 text-center">
 				<nav id="footer-nav">
 					<ul>
-						<li><%= link_to 'Clients', clients_path %></li><li><%= link_to 'Projects', projects_path %></li><li><%= link_to 'Invoices', invoices_path %></li><li><%= link_to 'Goals', goals_path %></li><li><a href="/year2014" title="2014">2014</a></li>
+						<li><%= link_to 'Clients', clients_path %></li><li><%= link_to 'Projects', projects_path %></li><li><%= link_to 'Invoices', invoices_path %></li><li><%= link_to 'Goals', goals_path %></li><li><%= link_to Date.today.year, year_path(Date.today.year) %></li>
 					</ul>
 				</nav>
 				<p>&copy; <%= company_full_name %></p>
