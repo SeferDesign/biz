@@ -7,6 +7,8 @@ class YearsController < ApplicationController
 
   def show
   	@year = Year.friendly.find(params[:id])
+  	@invoices = Invoice.where(:paid => true).where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 1, 1), Date.new(@year.year, 12, 31))
+  	@invoicesUnpaid = Invoice.where(:paid => false).where("date >= ? AND date <= ?", Date.new(@year.year, 1, 1), Date.new(@year.year, 12, 31))
   end
 
   def new
