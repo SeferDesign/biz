@@ -37,11 +37,12 @@
 						<p><strong>Time Period:</strong> <%= @goal.timeperiod %></p>
 						<p><strong>Start Date:</strong> <%= @goal.startdate %></p>
 						<p><strong>End Date:</strong> <%= @goal.enddate %></p>
+						<p><strong>Status:</strong> <%= @goal.status %></p>
 					</div>
 					<div class="col-sm-4">
 						<p><strong>Type:</strong> <%= @goal.goaltype %></p>
 						<p><strong>Amount:</strong> <%= number_to_currency(@goal.amount, { :negative_format => '(%n)' }) %></p>
-						<p><strong>Status:</strong> <%= @goal.status %></p>
+						<% if @goal.status == 'Current' or @goal.status == 'Past' %><p><strong>Actual:</strong> <%= number_to_currency(@actualAmount, { :negative_format => '(%n)' }) %></p><% end %>
 					</div>
 					<div class="col-sm-4">
 						<%
