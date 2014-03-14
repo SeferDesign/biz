@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140228152341) do
+ActiveRecord::Schema.define(version: 20140314035438) do
 
   create_table "clients", force: true do |t|
     t.string   "name"
@@ -40,7 +40,7 @@ ActiveRecord::Schema.define(version: 20140228152341) do
     t.boolean  "met"
     t.string   "timeperiod"
     t.string   "goaltype"
-    t.float    "amount"
+    t.decimal  "amount",     precision: 8, scale: 2
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -50,7 +50,7 @@ ActiveRecord::Schema.define(version: 20140228152341) do
     t.integer  "projectid"
     t.date     "date"
     t.string   "worktype"
-    t.float    "cost"
+    t.decimal  "cost",        precision: 8, scale: 2
     t.boolean  "paid"
     t.date     "paiddate"
     t.string   "paymenttype"
@@ -63,8 +63,8 @@ ActiveRecord::Schema.define(version: 20140228152341) do
     t.string   "description"
     t.boolean  "hourly"
     t.float    "hours"
-    t.float    "rate"
-    t.float    "total"
+    t.decimal  "rate",        precision: 8, scale: 2
+    t.decimal  "total",       precision: 8, scale: 2
     t.integer  "invoice_id"
     t.datetime "created_at"
     t.datetime "updated_at"
