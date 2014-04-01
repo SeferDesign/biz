@@ -74,7 +74,7 @@
 						<tr id="invoicerow<%= invoice.id %>">
 							<td><%= link_to Client.find(invoice.clientid) do %><%= Client.find(invoice.clientid).name %><% end %></td>
 							<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
-							<td class="text-center"><%= Date.today.day - invoice.date.day %></td>
+							<td class="text-center"><%= (Date.today - invoice.date).to_i %></td>
 							<td class="text-center hidden-xs"><%= invoice.worktype %></td>
 							<td class="text-right"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
 						</tr>
