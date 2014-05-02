@@ -1,0 +1,40 @@
+class InvoiceMailer < ActionMailer::Base
+
+  default from: "Sefer Design Co. <info@seferdesign.com>"
+  helper :application
+
+  def invoice_email(invoice)
+    @invoice = invoice
+    @client = Client.find(@invoice.clientid)
+
+    @ourCCEmail = 'Robert Sefer <rsefer@gmail.com>'
+
+    if !@client.email_accounting_2.blank?
+      @emailCC = @client.email_accounting_2 + ', ' + @ourCCEmail
+    else
+      @emailCC = @ourCCEmail
+    end
+
+    @emailSubject = 'Invoice from Sefer Design Co.'
+    @pdfFileName = @client.name.gsub(/[^0-9A-Za-z]/, '') + @invoice.date.to_s
+
+    if @invoice.paid == true
+      @pdfFileName = @pdfFileName + '_paid'
+    end
+
+    attachments[@pdfFileName + '.pdf'] = WickedPdf.new.pdf_from_string(
+      render_to_string(
+        :pdf => @pdfFileName,
+        :layout => 'pdf/invoice.html',
+        :template => 'invoices/show.pdf.erb'
+      )
+    )
+
+    mail(
+      to: @client.email_accounting,
+      cc: @emailCC,
+      subject: @emailSubject
+    )
+  end
+
+end

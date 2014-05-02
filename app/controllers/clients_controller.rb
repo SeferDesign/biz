@@ -39,7 +39,7 @@ class ClientsController < ApplicationController
       end
     end
   end
-  
+
   def destroy
     @client.destroy
     respond_to do |format|
@@ -53,6 +53,6 @@ class ClientsController < ApplicationController
     end
 
     def client_params
-      params.require(:client).permit(:name, :contact, :site_url, :logo, :address1, :address2, :city, :state, :zipcode, :international, :intinfo)
+      params.require(:client).permit(:name, :contact, :email_accounting, :email_accounting_2, :site_url, :logo, :address1, :address2, :city, :state, :zipcode, :international, :intinfo)
     end
 end

@@ -1,5 +1,5 @@
 class InvoicesController < ApplicationController
-  before_action :set_invoice, only: [:show, :edit, :update, :destroy]
+  before_action :set_invoice, only: [:show, :edit, :email, :update, :destroy]
 
   def index
     @invoices = Invoice.all
@@ -27,6 +27,10 @@ class InvoicesController < ApplicationController
   end
 
   def edit
+  end
+
+  def email
+    InvoiceMailer.invoice_email(@invoice).deliver
   end
 
   def create

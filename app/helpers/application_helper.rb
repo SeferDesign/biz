@@ -1,16 +1,16 @@
 module ApplicationHelper
 
 	def company_full_name
-		company_full_name = 'Sefer Design Company'      
+		company_full_name = 'Sefer Design Company'
 	end
-	def company_abbrv_name 
-		company_abbrv_name = 'Sefer Design Co.'      
+	def company_abbrv_name
+		company_abbrv_name = 'Sefer Design Co.'
 	end
 	def company_initialed_name
-		company_initialed_name = 'SDC'      
+		company_initialed_name = 'SDC'
 	end
 	def company_site_url
-		company_site_url = 'http://seferdesign.com'      
+		company_site_url = 'http://seferdesign.com'
 	end
 	def company_logo_url
 		company_logo_url = '/images/sdc_block_dark.png'
@@ -36,6 +36,9 @@ module ApplicationHelper
 	def company_email
 		company_email = 'rsefer@gmail.com'
 	end
+	def company_email_invoice
+		company_email_invoice = 'info@seferdesign.com'
+	end
 	def company_street
 		company_street = '1 E. Scott #2006'
 	end
@@ -51,15 +54,19 @@ module ApplicationHelper
 	def company_zipcode
 		company_city = '60610'
 	end
-	
+
 	def total_invoiced_unpaid
 		total_invoiced_unpaid = Invoice.where(:paid => false).sum('cost')
 	end
-	
+
 	def invoice_description_suffix
-		invoice_description_suffix = 'Find below a cost-breakdown for the recent work completed. Please make payment at your earliest convenience, and do not hesitate to contact me with any questions.'
+		invoice_description_suffix = 'Find below a cost-breakdown for the recent work completed.'
 	end
-	
+
+	def invoice_description_suffix_pleasepay
+		invoice_description_suffix_pleasepay = 'Please make payment at your earliest convenience, and do not hesitate to contact me with any questions.'
+	end
+
 	def us_states
     [
       ['Alabama', 'AL'],
@@ -116,5 +123,5 @@ module ApplicationHelper
       ['Wyoming', 'WY']
     ]
 	end
-	
+
 end

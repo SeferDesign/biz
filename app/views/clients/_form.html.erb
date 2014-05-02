@@ -15,17 +15,17 @@
 				<%= f.label :name %>
 				<%= f.text_field :name, class: 'form-control' %>
 			</div>
-		</div>
-		<div class="col-sm-4">
 			<div class="form-group">
 				<%= f.label :contact %>
 				<%= f.text_field :contact, class: 'form-control' %>
 			</div>
-		</div>
-		<div class="col-sm-4">
 			<div class="form-group">
-				<%= f.label :site_url, 'Site' %>
-				<%= f.text_field :site_url, class: 'form-control' %>
+				<%= f.label :email_accounting, 'Accounting Email' %>
+				<%= f.text_field :email_accounting, class: 'form-control' %>
+			</div>
+			<div class="form-group">
+				<%= f.label :email_accounting_2, 'Accounting Email 2' %>
+				<%= f.text_field :email_accounting_2, class: 'form-control' %>
 			</div>
 		</div>
 		<div class="col-sm-4">
@@ -61,6 +61,10 @@
 			<% end %>
 		</div>
 		<div class="col-sm-4">
+			<div class="form-group">
+				<%= f.label :site_url, 'Site' %>
+				<%= f.text_field :site_url, class: 'form-control' %>
+			</div>
 			<div class="form-group">
 				<%= f.label :logo, 'Logo' %>
 				<%= f.file_field :logo %>

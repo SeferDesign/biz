@@ -22,6 +22,12 @@
 					<strong>Contact:</strong>
 					<%= @client.contact %>
 				</p>
+				<% if !@client.email_accounting.blank? %>
+				<p>
+					<strong>Accounting Email(s):</strong><br>
+					<%= @client.email_accounting %><% if !@client.email_accounting_2.blank? %>, <%= @client.email_accounting_2 %><% end %>
+				</p>
+				<% end %>
 				<% if !@client.site_url.blank? %>
 				<p>
 					<strong>Site:</strong>
@@ -107,7 +113,7 @@
 		</div>
 		<div class="row">
 			<div class="col-sm-12">
-				
+
 				<p><%= link_to 'Back', clients_path %></p>
 			</div>
 		</div>

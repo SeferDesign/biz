@@ -16,5 +16,6 @@
 /tmp
 
 config/secrets.yml
+/.powenv
 
 /public/system/clients/logos/
