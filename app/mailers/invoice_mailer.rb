@@ -34,7 +34,10 @@ class InvoiceMailer < ActionMailer::Base
       to: @client.email_accounting,
       cc: @emailCC,
       subject: @emailSubject
-    )
+    ) do |format|
+      format.html { render 'invoice_email.html' }
+      #format.text { render text: 'invoice_email.txt' }
+    end
   end
 
 end
