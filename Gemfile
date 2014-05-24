@@ -15,6 +15,10 @@ group :doc do
   gem 'sdoc', require: false
 end
 
+group :development do
+  gem 'guard-livereload', require: false
+end
+
 # Paperclip - handles image uploads. requires ImageMagick
 gem 'paperclip'
 gem 'wkhtmltopdf-binary'

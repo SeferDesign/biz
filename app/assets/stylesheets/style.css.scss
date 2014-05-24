@@ -2,13 +2,16 @@
 @import "bootstrap-mods";
 
 /* Main Style */
-
+$black: #000000;
+$white: #ffffff;
+$grey: #333333;
 $green: #5cb85c;
 $red: #d9534f;
 
+
 body {
-	color: #ffffff;
-	background: #323232;
+	color: $white;
+	background: $grey;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -57,7 +60,7 @@ hr.halfbottom {
 
 section {
 	color: #000000;
-	background: #ffffff;
+	background: $white;
 	padding: 1em 0px;
 }
 
@@ -70,7 +73,7 @@ footer #footer-logo {
 }
 
 #footer-nav a {
-	color: #ffffff;
+	color: $white;
 }
 
 #footer-nav ul li {
@@ -105,8 +108,8 @@ footer #footer-logo {
 }
 
 @media screen and (-webkit-min-device-pixel-ratio: 2) {
-	
+
 	body {
 	}
-	
+
 }
