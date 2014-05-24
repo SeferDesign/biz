@@ -13,16 +13,16 @@ module ApplicationHelper
 		company_site_url = 'http://seferdesign.com'
 	end
 	def company_logo_url
-		company_logo_url = '/images/sdc_block_dark.png'
+		company_logo_url = '/images/sdc_block_dark.svg'
 	end
 	def company_logo_alt_url
-		company_logo_alt_url = '/images/sdc_block_white.png'
+		company_logo_alt_url = '/images/sdc_block_white.svg'
 	end
 	def company_text_logo_url
-		company_text_logo_url = '/images/sdc_text_dark.png'
+		company_text_logo_url = '/images/sdc_text_dark.svg'
 	end
 	def company_text_logo_alt_url
-		company_text_logo_alt_url = '/images/sdc_text_white.png'
+		company_text_logo_alt_url = '/images/sdc_text_white.svg'
 	end
 	def company_favicon_url
 		company_favicon_url = '/images/sdc_favicon_144.png'
