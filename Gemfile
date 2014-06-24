@@ -19,6 +19,10 @@ group :development do
   gem 'guard-livereload', require: false
 end
 
+group :production do
+  gem 'rails_12factor'
+end
+
 gem 'devise'
 gem 'paperclip' # Paperclip - handles image uploads. requires ImageMagick
 gem 'wkhtmltopdf-binary'
