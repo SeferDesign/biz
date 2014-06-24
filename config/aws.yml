@@ -1,0 +1,8 @@
+development:
+  access_key_id: <%= ENV["aws_s3_key_id"] %>
+  secret_access_key: <%= ENV["aws_s3_secret"] %>
+  bucket: SeferBiz
+production:
+  access_key_id: <%= ENV["aws_s3_key_id"] %>
+  secret_access_key: <%= ENV["aws_s3_secret"] %>
+  bucket: SeferBiz
