@@ -1,5 +1,6 @@
 Biz::Application.routes.draw do
 
+  devise_for :users, :skip => [:registrations]
   resources :years
   resources :goals
   resources :invoices do

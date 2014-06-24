@@ -25,7 +25,13 @@
 								</tr>
 							</thead>
 							<tbody>
-								<% @invoices.where("paid != ? OR strftime('%m', date) + 0 = ?", true, @today.month).sort { |a,b| a.date <=> b.date }.each do |invoice| %>
+								<%
+									@unpaidInvoices = @invoices.where("paid != ?", true)
+									@recentInvoices = @invoices.where("SELECT extract(MONTH FROM paiddate) = ?", @today.month)
+									@notableInvoices = @unpaidInvoices + @recentInvoices
+									@notableInvoices.sort { |a,b| a.date <=> b.date }.each do |invoice|
+								%>
+
 								<tr id="invoicerow<%= invoice.id %>">
 									<td><%= link_to Client.find(invoice.clientid) do %><%= Client.find(invoice.clientid).name %><% end %></td>
 									<td class="hidden-xs"><%= link_to Project.find(invoice.projectid) do %><%= Project.find(invoice.projectid).name %><% end %></td>
@@ -45,4 +51,3 @@
 		</div>
 	</div>
 </section>
-

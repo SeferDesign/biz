@@ -3,23 +3,23 @@
 	@actualAmount = 0
 	if @goal.timeperiod == 'Year'
 		if @goal.goaltype == 'Total'
-			@actualAmount = Invoice.where(:paid => true).where("strftime('%Y', paiddate) + 0 = ?", @goal.enddate.year).sum('cost')
+			@actualAmount = Invoice.where(:paid => true).where("SELECT extract(YEAR FROM paiddate) = ?", @goal.enddate.year).sum('cost')
 		elsif @goal.goaltype == 'Contract'
-			@actualAmount = Invoice.where(:paid => true, :worktype => 'Contract').where("strftime('%Y', paiddate) + 0 = ?", @goal.enddate.year).sum('cost')
+			@actualAmount = Invoice.where(:paid => true, :worktype => 'Contract').where("SELECT extract(YEAR FROM paiddate) = ?", @goal.enddate.year).sum('cost')
 		elsif @goal.goaltype == 'Hourly'
-			@actualAmount = Invoice.where(:paid => true, :worktype => 'Hourly').where("strftime('%Y', paiddate) + 0 = ?", @goal.enddate.year).sum('cost')
+			@actualAmount = Invoice.where(:paid => true, :worktype => 'Hourly').where("SELECT extract(YEAR FROM paiddate) = ?", @goal.enddate.year).sum('cost')
 		elsif @goal.goaltype == 'Retainer'
-			@actualAmount = Invoice.where(:paid => true, :worktype => 'Retainer').where("strftime('%Y', paiddate) + 0 = ?", @goal.enddate.year).sum('cost')
+			@actualAmount = Invoice.where(:paid => true, :worktype => 'Retainer').where("SELECT extract(YEAR FROM paiddate) = ?", @goal.enddate.year).sum('cost')
 		end
 	elsif @goal.timeperiod == 'Month'
 		if @goal.goaltype == 'Total'
-			@actualAmount = Invoice.where(:paid => true).where("strftime('%m', paiddate) + 0 = ?", @goal.enddate.month).sum('cost')
+			@actualAmount = Invoice.where(:paid => true).where("SELECT extract(MONTH FROM paiddate) = ?", @goal.enddate.month).sum('cost')
 		elsif @goal.goaltype == 'Contract'
-			@actualAmount = Invoice.where(:paid => true, :worktype => 'Contract').where("strftime('%m', paiddate) + 0 = ?", @goal.enddate.month).sum('cost')
+			@actualAmount = Invoice.where(:paid => true, :worktype => 'Contract').where("SELECT extract(MONTH FROM paiddate) = ?", @goal.enddate.month).sum('cost')
 		elsif @goal.goaltype == 'Hourly'
-			@actualAmount = Invoice.where(:paid => true, :worktype => 'Hourly').where("strftime('%m', paiddate) + 0 = ?", @goal.enddate.month).sum('cost')
+			@actualAmount = Invoice.where(:paid => true, :worktype => 'Hourly').where("SELECT extract(MONTH FROM paiddate) = ?", @goal.enddate.month).sum('cost')
 		elsif @goal.goaltype == 'Retainer'
-			@actualAmount = Invoice.where(:paid => true, :worktype => 'Retainer').where("strftime('%m', paiddate) + 0 = ?", @goal.enddate.month).sum('cost')
+			@actualAmount = Invoice.where(:paid => true, :worktype => 'Retainer').where("SELECT extract(MONTH FROM paiddate) = ?", @goal.enddate.month).sum('cost')
 		end
 	end
 %>
