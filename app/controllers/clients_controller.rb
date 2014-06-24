@@ -7,8 +7,8 @@ class ClientsController < ApplicationController
 
   def show
   	@client = Client.find(params[:id])
-  	@projects = Project.where(clientid: @client.id)
-  	@invoices = Invoice.where(clientid: @client.id).sort { |a,b| a.date <=> b.date }
+  	@projects = Project.where(client_id: @client.id)
+  	@invoices = Invoice.where(client_id: @client.id).sort { |a,b| a.date <=> b.date }
   end
 
   def new

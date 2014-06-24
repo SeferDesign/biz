@@ -7,7 +7,7 @@ class ProjectsController < ApplicationController
 
   def show
   	@project = Project.find(params[:id])
-  	@invoices = Invoice.where(projectid: @project.id).sort { |a,b| a.date <=> b.date }
+  	@invoices = Invoice.where(project_id: @project.id).sort { |a,b| a.date <=> b.date }
   end
 
   def new
@@ -52,6 +52,6 @@ class ProjectsController < ApplicationController
     end
 
     def project_params
-      params.require(:project).permit(:name, :clientid, :startdate, :enddate, :completed)
+      params.require(:project).permit(:name, :client_id, :startdate, :enddate, :completed)
     end
 end

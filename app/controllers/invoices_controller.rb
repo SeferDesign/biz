@@ -9,7 +9,7 @@ class InvoicesController < ApplicationController
   	respond_to do |format|
       format.html
       format.pdf do
-        render 	:pdf => Client.find(@invoice.clientid).name.gsub(/[^0-9A-Za-z]/, '') + @invoice.date.to_s,
+        render 	:pdf => Client.find(@invoice.client_id).name.gsub(/[^0-9A-Za-z]/, '') + @invoice.date.to_s,
         				:disposition => 'inline',
         				:page_size => 'Letter',
         				:layout => 'layouts/pdf/invoice.html',
@@ -68,6 +68,6 @@ class InvoicesController < ApplicationController
     end
 
     def invoice_params
-      params.require(:invoice).permit(:clientid, :projectid, :date, :worktype, :cost, :paid, :paiddate, :paymenttype, :description)
+      params.require(:invoice).permit(:client_id, :project_id, :date, :worktype, :cost, :paid, :paiddate, :paymenttype, :description)
     end
 end

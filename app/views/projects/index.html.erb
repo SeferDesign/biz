@@ -22,7 +22,7 @@
 							<tbody>
 								<% @projects.where.not(:completed => true).sort { |b,a| a.startdate <=> b.startdate }.each do |project| %>
 								<tr id="projectrow<%= project.id %>">
-									<td><%= link_to Client.find(project.clientid) do %><%= Client.find(project.clientid).name %><% end %></td>
+									<td><%= link_to Client.find(project.client_id) do %><%= Client.find(project.client_id).name %><% end %></td>
 									<td><%= link_to project do %><%= project.name %><% end %></td>
 								</tr>
 								<% end %>
@@ -41,7 +41,7 @@
 							<tbody>
 								<% @projects.where(:completed => true).sort { |b,a| a.startdate <=> b.startdate }.each do |project| %>
 								<tr id="projectrow<%= project.id %>">
-									<td><%= link_to Client.find(project.clientid) do %><%= Client.find(project.clientid).name %><% end %></td>
+									<td><%= link_to Client.find(project.client_id) do %><%= Client.find(project.client_id).name %><% end %></td>
 									<td><%= link_to project do %><%= project.name %><% end %></td>
 								</tr>
 								<% end %>

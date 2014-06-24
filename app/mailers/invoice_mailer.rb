@@ -5,7 +5,7 @@ class InvoiceMailer < ActionMailer::Base
 
   def invoice_email(invoice)
     @invoice = invoice
-    @client = Client.find(@invoice.clientid)
+    @client = Client.find(@invoice.client_id)
 
     @ourCCEmail = 'Robert Sefer <rsefer@gmail.com>'
 

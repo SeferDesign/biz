@@ -12,14 +12,14 @@
 	<div class="row">
 		<div class="col-lg-4 col-sm-6">
 			<div class="form-group">
-				<%= f.label :clientid, 'Client' %>
-				<%= collection_select(:invoice, 'clientid', Client.all, :id, :name, {}, { :class => 'form-control' }) %>
+				<%= f.label :client_id, 'Client' %>
+				<%= collection_select(:invoice, 'client_id', Client.all, :id, :name, {}, { :class => 'form-control' }) %>
 			</div>
 		</div>
 		<div class="col-lg-4 col-sm-6">
 			<div class="form-group">
-				<%= f.label :projectid, 'Project' %>
-				<%= collection_select(:invoice, 'projectid', Project.all, :id, :project_client_and_name, {}, { :class => 'form-control' }) %>
+				<%= f.label :project_id, 'Project' %>
+				<%= collection_select(:invoice, 'project_id', Project.all, :id, :project_client_and_name, {}, { :class => 'form-control' }) %>
 			</div>
 		</div>
 		<div class="col-lg-2 col-sm-6">

@@ -18,8 +18,8 @@
 		</div>
 		<div class="col-sm-4">
 			<div class="form-group">
-				<%= f.label :clientid, 'Client' %>
-				<%= collection_select(:project, 'clientid', Client.all, :id, :name, {}, { :class => 'form-control' }) %>
+				<%= f.label :client_id, 'Client' %>
+				<%= collection_select(:project, 'client_id', Client.all, :id, :name, {}, { :class => 'form-control' }) %>
 			</div>
 		</div>
 		<div class="col-sm-4">

@@ -1,6 +1,6 @@
 <% provide(:title, "Project ##{@project.id} | ") %>
 <%
-	thisClient = Client.find(@project.clientid)
+	thisClient = Client.find(@project.client_id)
 	projectInvoiceTotal = 0
 %>
 <section id="project-show">

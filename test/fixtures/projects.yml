@@ -2,14 +2,14 @@
 
 one:
   name: MyString
-  clientid: 1
+  client_id: 1
   startdate: 2014-01-13
   endate: 2014-01-13
   completed: false
 
 two:
   name: MyString
-  clientid: 1
+  client_id: 1
   startdate: 2014-01-13
   endate: 2014-01-13
   completed: false

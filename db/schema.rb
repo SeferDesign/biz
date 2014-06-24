@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140623234822) do
+ActiveRecord::Schema.define(version: 20140624033103) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -51,8 +51,8 @@ ActiveRecord::Schema.define(version: 20140623234822) do
   end
 
   create_table "invoices", force: true do |t|
-    t.integer  "clientid"
-    t.integer  "projectid"
+    t.integer  "client_id"
+    t.integer  "project_id"
     t.date     "date"
     t.string   "worktype"
     t.decimal  "cost",        precision: 8, scale: 2
@@ -79,7 +79,7 @@ ActiveRecord::Schema.define(version: 20140623234822) do
 
   create_table "projects", force: true do |t|
     t.string   "name"
-    t.integer  "clientid"
+    t.integer  "client_id"
     t.date     "startdate"
     t.date     "enddate"
     t.boolean  "completed"
