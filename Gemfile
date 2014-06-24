@@ -23,6 +23,7 @@ group :production do
   gem 'rails_12factor'
 end
 
+gem 'figaro'
 gem 'devise'
 gem 'paperclip' # Paperclip - handles image uploads. requires ImageMagick
 gem 'wkhtmltopdf-binary'

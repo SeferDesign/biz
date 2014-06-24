@@ -19,3 +19,6 @@ config/secrets.yml
 /.powenv
 
 /public/system/clients/logos/
+
+# Ignore application configuration
+/config/application.yml
