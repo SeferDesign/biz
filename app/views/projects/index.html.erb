@@ -10,39 +10,43 @@
 				<p class="lead">No projects.</p>
 				<% else %>
 				<div class="row">
-					<div class="col-sm-6">
+					<div class="col-sm-12">
 						<h3 class="text-center red"><i class="fa fa-refresh left"></i>In-Progress</h3>
 						<table class="table table-condensed">
 							<thead>
 								<tr>
 									<th>Client</th>
 									<th>Project</th>
+									<th>Start Date</th>
 								</tr>
 							</thead>
 							<tbody>
-								<% @projects.where.not(:completed => true).sort { |b,a| a.startdate <=> b.startdate }.each do |project| %>
+								<% @projects.incomplete.sort { |b,a| a.startdate <=> b.startdate }.each do |project| %>
 								<tr id="projectrow<%= project.id %>">
 									<td><%= link_to Client.find(project.client_id) do %><%= Client.find(project.client_id).name %><% end %></td>
 									<td><%= link_to project do %><%= project.name %><% end %></td>
+									<td><%= project.startdate %></td>
 								</tr>
 								<% end %>
 							</tbody>
 						</table>
 					</div>
-					<div class="col-sm-6">
+					<div class="col-sm-12">
 						<h3 class="text-center green"><i class="fa fa-check left"></i>Completed</h3>
 						<table class="table table-condensed">
 							<thead>
 								<tr>
 									<th>Client</th>
 									<th>Project</th>
+									<th>End Date</th>
 								</tr>
 							</thead>
 							<tbody>
-								<% @projects.where(:completed => true).sort { |b,a| a.startdate <=> b.startdate }.each do |project| %>
+								<% @projects.complete.sort { |b,a| a.startdate <=> b.startdate }.each do |project| %>
 								<tr id="projectrow<%= project.id %>">
 									<td><%= link_to Client.find(project.client_id) do %><%= Client.find(project.client_id).name %><% end %></td>
 									<td><%= link_to project do %><%= project.name %><% end %></td>
+									<td><%= project.enddate %></td>
 								</tr>
 								<% end %>
 							</tbody>
