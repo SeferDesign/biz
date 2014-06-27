@@ -1,4 +1,7 @@
-<% @today = Date.today %>
+<%
+	@today = Date.today
+	@monthsBack = 4
+%>
 <div class="row">
 	<div class="col-sm-12">
 		<p class="lead text-center">Total Receivable: <span class="currency red"><%= number_to_currency(total_invoiced_unpaid, { :negative_format => '(%n)' }) %></span></p>
@@ -7,12 +10,12 @@
 <div class="row">
 	<div class="col-lg-3 col-lg-offset-0 col-md-8 col-md-offset-2">
 		<h3 class="text-center"><%= @today.strftime('%B') %></h3>
-		<span class="lead">Paid: <span class="pull-right currency green"><%= number_to_currency(Invoice.where(:paid => true).where("SELECT extract(MONTH FROM paiddate) = ?", @today.month).sum('cost'), { :negative_format => '(%n)' }) %></span></span>
+		<span class="lead">Paid: <span class="pull-right currency green"><%= number_to_currency(Invoice.paidByMonth(@today.month).sum('cost'), { :negative_format => '(%n)' }) %></span></span>
 		<hr class="halfbottom">
 		<span class="lead">
-			Contract: <span class="pull-right currency text-info"><%= number_to_currency(Invoice.where(worktype: 'Contract').where("SELECT extract(MONTH FROM paiddate) = ?", @today.month).sum('cost'), { :negative_format => '(%n)' }) %></span><br>
-			Hourly: <span class="pull-right currency text-warning"><%= number_to_currency(Invoice.where(worktype: 'Hourly').where("SELECT extract(MONTH FROM paiddate) = ?", @today.month).sum('cost'), { :negative_format => '(%n)' }) %></span><br>
-			Retainer: <span class="pull-right currency text-muted"><%= number_to_currency(Invoice.where(worktype: 'Retainer').where("SELECT extract(MONTH FROM paiddate) = ?", @today.month).sum('cost'), { :negative_format => '(%n)' }) %></span>
+			Contract: <span class="pull-right currency text-info"><%= number_to_currency(Invoice.paidByMonth(@today.month).contract.sum('cost'), { :negative_format => '(%n)' }) %></span><br>
+			Hourly: <span class="pull-right currency text-warning"><%= number_to_currency(Invoice.paidByMonth(@today.month).hourly.sum('cost'), { :negative_format => '(%n)' }) %></span><br>
+			Retainer: <span class="pull-right currency text-muted"><%= number_to_currency(Invoice.paidByMonth(@today.month).retainer.sum('cost'), { :negative_format => '(%n)' }) %></span>
 		</span>
 	</div>
 	<div class="col-lg-4 col-lg-offset-1 col-md-8 col-md-offset-2">
@@ -28,12 +31,12 @@
 	</div>
 	<div class="col-lg-3 col-lg-offset-1 col-md-8 col-md-offset-2">
 		<h3 class="text-center"><%= @today.year %> YTD</h3>
-		<span class="lead">Paid: <span class="pull-right currency green"><%= number_to_currency(Invoice.where(:paid => true).where("SELECT extract(YEAR FROM paiddate) = ?", @today.year).sum('cost'), { :negative_format => '(%n)' }) %></span></span>
+		<span class="lead">Paid: <span class="pull-right currency green"><%= number_to_currency(Invoice.paidByYear(@today.year).sum('cost'), { :negative_format => '(%n)' }) %></span></span>
 		<hr class="halfbottom">
 		<span class="lead">
-			Contract: <span class="pull-right currency text-info"><%= number_to_currency(Invoice.where(worktype: 'Contract').where("SELECT extract(YEAR FROM paiddate) = ?", @today.year).sum('cost'), { :negative_format => '(%n)' }) %></span><br>
-			Hourly: <span class="pull-right currency text-warning"><%= number_to_currency(Invoice.where(worktype: 'Hourly').where("SELECT extract(YEAR FROM paiddate) = ?", @today.year).sum('cost'), { :negative_format => '(%n)' }) %></span><br>
-			Retainer: <span class="pull-right currency text-muted"><%= number_to_currency(Invoice.where(worktype: 'Retainer').where("SELECT extract(YEAR FROM paiddate) = ?", @today.year).sum('cost'), { :negative_format => '(%n)' }) %></span>
+			Contract: <span class="pull-right currency text-info"><%= number_to_currency(Invoice.paidByYear(@today.year).contract.sum('cost'), { :negative_format => '(%n)' }) %></span><br>
+			Hourly: <span class="pull-right currency text-warning"><%= number_to_currency(Invoice.paidByYear(@today.year).hourly.sum('cost'), { :negative_format => '(%n)' }) %></span><br>
+			Retainer: <span class="pull-right currency text-muted"><%= number_to_currency(Invoice.paidByYear(@today.year).retainer.sum('cost'), { :negative_format => '(%n)' }) %></span>
 		</span>
 	</div>
 </div>
@@ -66,11 +69,9 @@ jQuery(document).ready(function($) {
     	type: 'line',
     	color: '#666666',
     	dataPoints: [
-    		{ label: '<%= 4.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("SELECT extract(MONTH FROM paiddate) = ?", 4.month.ago.month).sum('cost') %> },
-    		{ label: '<%= 3.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("SELECT extract(MONTH FROM paiddate) = ?", 3.month.ago.month).sum('cost') %> },
-    		{ label: '<%= 2.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("SELECT extract(MONTH FROM paiddate) = ?", 2.month.ago.month).sum('cost') %> },
-    		{ label: '<%= 1.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("SELECT extract(MONTH FROM paiddate) = ?", 1.month.ago.month).sum('cost') %> },
-    		{ label: '<%= 0.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("SELECT extract(MONTH FROM paiddate) = ?", 0.month.ago.month).sum('cost') %> }
+			<% @monthsBack.downto(0).each do |m| %>
+			{ label: '<%= m.month.ago.strftime('%B') %>', y: <%= Invoice.paidByMonth(m.month.ago.month).sum('cost') %> },
+			<% end %>
       ]
     },
     {
@@ -79,11 +80,9 @@ jQuery(document).ready(function($) {
     	type: 'stackedColumn',
     	color: '#8a6d3b',
     	dataPoints: [
-    		{ label: '<%= 4.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Hourly').where("SELECT extract(MONTH FROM paiddate) = ?", 4.month.ago.month).sum('cost') %> },
-    		{ label: '<%= 3.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Hourly').where("SELECT extract(MONTH FROM paiddate) = ?", 3.month.ago.month).sum('cost') %> },
-    		{ label: '<%= 2.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Hourly').where("SELECT extract(MONTH FROM paiddate) = ?", 2.month.ago.month).sum('cost') %> },
-    		{ label: '<%= 1.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Hourly').where("SELECT extract(MONTH FROM paiddate) = ?", 1.month.ago.month).sum('cost') %> },
-    		{ label: '<%= 0.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Hourly').where("SELECT extract(MONTH FROM paiddate) = ?", 0.month.ago.month).sum('cost') %> }
+			<% @monthsBack.downto(0).each do |m| %>
+			{ label: '<%= m.month.ago.strftime('%B') %>', y: <%= Invoice.paidByMonth(m.month.ago.month).hourly.sum('cost') %> },
+			<% end %>
       ]
     },
     {
@@ -92,11 +91,9 @@ jQuery(document).ready(function($) {
     	type: 'stackedColumn',
     	color: '#31708f',
     	dataPoints: [
-    		{ label: '<%= 4.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Contract').where("SELECT extract(MONTH FROM paiddate) = ?", 4.month.ago.month).sum('cost') %> },
-    		{ label: '<%= 3.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Contract').where("SELECT extract(MONTH FROM paiddate) = ?", 3.month.ago.month).sum('cost') %> },
-    		{ label: '<%= 2.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Contract').where("SELECT extract(MONTH FROM paiddate) = ?", 2.month.ago.month).sum('cost') %> },
-    		{ label: '<%= 1.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Contract').where("SELECT extract(MONTH FROM paiddate) = ?", 1.month.ago.month).sum('cost') %> },
-    		{ label: '<%= 0.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Contract').where("SELECT extract(MONTH FROM paiddate) = ?", 0.month.ago.month).sum('cost') %> }
+			<% @monthsBack.downto(0).each do |m| %>
+			{ label: '<%= m.month.ago.strftime('%B') %>', y: <%= Invoice.paidByMonth(m.month.ago.month).contract.sum('cost') %> },
+			<% end %>
       ]
     },
     {
@@ -105,11 +102,9 @@ jQuery(document).ready(function($) {
     	type: 'stackedColumn',
     	color: '#999999',
     	dataPoints: [
-    		{ label: '<%= 4.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Retainer').where("SELECT extract(MONTH FROM paiddate) = ?", 4.month.ago.month).sum('cost') %> },
-    		{ label: '<%= 3.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Retainer').where("SELECT extract(MONTH FROM paiddate) = ?", 3.month.ago.month).sum('cost') %> },
-    		{ label: '<%= 2.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Retainer').where("SELECT extract(MONTH FROM paiddate) = ?", 2.month.ago.month).sum('cost') %> },
-    		{ label: '<%= 1.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Retainer').where("SELECT extract(MONTH FROM paiddate) = ?", 1.month.ago.month).sum('cost') %> },
-    		{ label: '<%= 0.month.ago.strftime('%B') %>', y: <%= Invoice.where(:paid => true, :worktype => 'Retainer').where("SELECT extract(MONTH FROM paiddate) = ?", 0.month.ago.month).sum('cost') %> }
+			<% @monthsBack.downto(0).each do |m| %>
+			{ label: '<%= m.month.ago.strftime('%B') %>', y: <%= Invoice.paidByMonth(m.month.ago.month).retainer.sum('cost') %> },
+			<% end %>
       ]
     }]
   });

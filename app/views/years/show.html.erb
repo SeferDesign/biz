@@ -1,11 +1,4 @@
 <% provide(:title, "Year #{@year.year} | ") %>
-<%
-	@incomeYear = Invoice.where(:paid => true).where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 1, 1), Date.new(@year.year, 12, 31)).sum('cost')
-	@incomeQ1 = 	Invoice.where(:paid => true).where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 1, 1), Date.new(@year.year, 3, 31)).sum('cost')
-	@incomeQ2 = 	Invoice.where(:paid => true).where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 4, 1), Date.new(@year.year, 6, 30)).sum('cost')
-	@incomeQ3 = 	Invoice.where(:paid => true).where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 7, 1), Date.new(@year.year, 9, 30)).sum('cost')
-	@incomeQ4 = 	Invoice.where(:paid => true).where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 10, 1), Date.new(@year.year, 12, 31)).sum('cost')
-%>
 <section id="year<%= @year.year %>" class="yearsummary">
 	<div class="container">
 		<div class="row">
@@ -87,7 +80,7 @@
 		<div class="row">
 			<div class="col-sm-12">
 				<h3>Paid Invoices</h3>
-				<% if @invoices.blank? %>
+				<% if @invoicesPaid.blank? %>
 				<p class="lead">No invoices.</p>
 				<% else %>
 				<table class="table table-condensed">
@@ -102,7 +95,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<% @invoices.each do |invoice| %>
+						<% @invoicesPaid.each do |invoice| %>
 						<tr id="invoicerow<%= invoice.id %>">
 							<td><%= link_to Client.find(invoice.client_id) do %><%= Client.find(invoice.client_id).name %><% end %></td>
 							<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
@@ -144,18 +137,9 @@ jQuery(document).ready(function($) {
     	type: 'column',
     	color: '#666666',
     	dataPoints: [
-    		{ label: '<%= Date.new(@year.year, 1, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("SELECT extract(MONTH FROM paiddate) = ?", Date.new(@year.year, 1, 1).month).where("SELECT extract(YEAR FROM paiddate) = ?", @year.year).sum('cost') %> },
-				{ label: '<%= Date.new(@year.year, 2, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("SELECT extract(MONTH FROM paiddate) = ?", Date.new(@year.year, 2, 1).month).where("SELECT extract(YEAR FROM paiddate) = ?", @year.year).sum('cost') %> },
-				{ label: '<%= Date.new(@year.year, 3, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("SELECT extract(MONTH FROM paiddate) = ?", Date.new(@year.year, 3, 1).month).where("SELECT extract(YEAR FROM paiddate) = ?", @year.year).sum('cost') %> },
-				{ label: '<%= Date.new(@year.year, 4, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("SELECT extract(MONTH FROM paiddate) = ?", Date.new(@year.year, 4, 1).month).where("SELECT extract(YEAR FROM paiddate) = ?", @year.year).sum('cost') %> },
-				{ label: '<%= Date.new(@year.year, 5, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("SELECT extract(MONTH FROM paiddate) = ?", Date.new(@year.year, 5, 1).month).where("SELECT extract(YEAR FROM paiddate) = ?", @year.year).sum('cost') %> },
-				{ label: '<%= Date.new(@year.year, 6, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("SELECT extract(MONTH FROM paiddate) = ?", Date.new(@year.year, 6, 1).month).where("SELECT extract(YEAR FROM paiddate) = ?", @year.year).sum('cost') %> },
-				{ label: '<%= Date.new(@year.year, 7, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("SELECT extract(MONTH FROM paiddate) = ?", Date.new(@year.year, 7, 1).month).where("SELECT extract(YEAR FROM paiddate) = ?", @year.year).sum('cost') %> },
-				{ label: '<%= Date.new(@year.year, 8, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("SELECT extract(MONTH FROM paiddate) = ?", Date.new(@year.year, 8, 1).month).where("SELECT extract(YEAR FROM paiddate) = ?", @year.year).sum('cost') %> },
-				{ label: '<%= Date.new(@year.year, 9, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("SELECT extract(MONTH FROM paiddate) = ?", Date.new(@year.year, 9, 1).month).where("SELECT extract(YEAR FROM paiddate) = ?", @year.year).sum('cost') %> },
-				{ label: '<%= Date.new(@year.year, 10, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("SELECT extract(MONTH FROM paiddate) = ?", Date.new(@year.year, 10, 1).month).where("SELECT extract(YEAR FROM paiddate) = ?", @year.year).sum('cost') %> },
-				{ label: '<%= Date.new(@year.year, 11, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("SELECT extract(MONTH FROM paiddate) = ?", Date.new(@year.year, 11, 1).month).where("SELECT extract(YEAR FROM paiddate) = ?", @year.year).sum('cost') %> },
-				{ label: '<%= Date.new(@year.year, 12, 1).strftime('%B') %>', y: <%= Invoice.where(:paid => true).where("SELECT extract(MONTH FROM paiddate) = ?", Date.new(@year.year, 12, 1).month).where("SELECT extract(YEAR FROM paiddate) = ?", @year.year).sum('cost') %> }
+				<% (1..12).each do |month| %>
+				{ label: '<%= Date.new(@year.year, month, 1).strftime('%B') %>', y: <%= Invoice.paidByYear(@year.year).paidByMonth(month).sum('cost') %> },
+				<% end %>
       ]
     }]
   });

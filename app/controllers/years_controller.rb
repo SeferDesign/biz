@@ -7,8 +7,17 @@ class YearsController < ApplicationController
 
   def show
   	@year = Year.friendly.find(params[:id])
-  	@invoices = Invoice.where(:paid => true).where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 1, 1), Date.new(@year.year, 12, 31))
+
+  	@invoicesPaid = Invoice.paidByYear(@year.year)
+		@incomeYear = @invoicesPaid.sum('cost')
+
   	@invoicesUnpaid = Invoice.where(:paid => false).where("date >= ? AND date <= ?", Date.new(@year.year, 1, 1), Date.new(@year.year, 12, 31))
+
+		@incomeQ1 = 	Invoice.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 1, 1), Date.new(@year.year, 3, 31)).sum('cost')
+		@incomeQ2 = 	Invoice.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 4, 1), Date.new(@year.year, 6, 30)).sum('cost')
+		@incomeQ3 = 	Invoice.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 7, 1), Date.new(@year.year, 9, 30)).sum('cost')
+		@incomeQ4 = 	Invoice.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 10, 1), Date.new(@year.year, 12, 31)).sum('cost')
+
   end
 
   def new
@@ -39,7 +48,7 @@ class YearsController < ApplicationController
       end
     end
   end
-  
+
   def destroy
     @year.destroy
     respond_to do |format|

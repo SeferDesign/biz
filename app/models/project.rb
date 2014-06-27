@@ -9,4 +9,8 @@ class Project < ActiveRecord::Base
 		self.client.name + " - " + self.name
 	end
 
+	def invoiceTotal
+		self.invoices.sum(:cost)
+	end
+
 end

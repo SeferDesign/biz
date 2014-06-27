@@ -23,35 +23,11 @@
 							</thead>
 							<tbody>
 								<% @goals.each do |goal| %>
-								<%
-									@actualAmount = 0
-									if goal.timeperiod == 'Year'
-										if goal.goaltype == 'Total'
-											@actualAmount = Invoice.where(:paid => true).where("SELECT extract(YEAR FROM paiddate) = ?", goal.enddate.year).sum('cost')
-										elsif goal.goaltype == 'Contract'
-											@actualAmount = Invoice.where(:paid => true, :worktype => 'Contract').where("SELECT extract(YEAR FROM paiddate) = ?", goal.enddate.year).sum('cost')
-										elsif goal.goaltype == 'Hourly'
-											@actualAmount = Invoice.where(:paid => true, :worktype => 'Hourly').where("SELECT extract(YEAR FROM paiddate) = ?", goal.enddate.year).sum('cost')
-										elsif goal.goaltype == 'Retainer'
-											@actualAmount = Invoice.where(:paid => true, :worktype => 'Retainer').where("SELECT extract(YEAR FROM paiddate) = ?", goal.enddate.year).sum('cost')
-										end
-									elsif goal.timeperiod == 'Month'
-										if goal.goaltype == 'Total'
-											@actualAmount = Invoice.where(:paid => true).where("SELECT extract(MONTH FROM paiddate) = ?", goal.enddate.month).sum('cost')
-										elsif goal.goaltype == 'Contract'
-											@actualAmount = Invoice.where(:paid => true, :worktype => 'Contract').where("SELECT extract(MONTH FROM paiddate) = ?", goal.enddate.month).sum('cost')
-										elsif goal.goaltype == 'Hourly'
-											@actualAmount = Invoice.where(:paid => true, :worktype => 'Hourly').where("SELECT extract(MONTH FROM paiddate) = ?", goal.enddate.month).sum('cost')
-										elsif goal.goaltype == 'Retainer'
-											@actualAmount = Invoice.where(:paid => true, :worktype => 'Retainer').where("SELECT extract(MONTH FROM paiddate) = ?", goal.enddate.month).sum('cost')
-										end
-									end
-								%>
 								<tr>
 									<td><%= link_to goal do %><% if goal.timeperiod == 'Year' %>Year <%= goal.enddate.year %><% elsif goal.timeperiod == 'Month' %><%= goal.enddate.strftime('%B') %>&nbsp;<%= goal.enddate.year %><% end %><% end %></td>
 									<td><%= goal.goaltype %></td>
 									<td class="text-right"><%= number_to_currency(goal.amount, { :negative_format => '(%n)' }) %></td>
-									<td class="text-right hidden-xs"><%= number_to_currency(@actualAmount, { :negative_format => '(%n)' }) %></td>
+									<td class="text-right hidden-xs"><%= number_to_currency(goal.actualamount, { :negative_format => '(%n)' }) %></td>
 									<td class="text-center">
 										<% if goal.status == 'Past' %>
 											<% if goal.met %>
@@ -61,9 +37,9 @@
 											<% end %>
 										<% elsif goal.status == 'Current' %>
 											<% if goal.timeperiod == 'Year' %>
-											<%= number_to_percentage(@actualAmount / goal.amount * 100, :strip_insignificant_zeros => true, :precision => 2) %>
+											<%= number_to_percentage(goal.actualamount / goal.amount * 100, :strip_insignificant_zeros => true, :precision => 2) %>
 											<% elsif goal.timeperiod == 'Month' %>
-											<%= number_to_percentage(@actualAmount / goal.amount * 100, :strip_insignificant_zeros => true, :precision => 2) %>
+											<%= number_to_percentage(goal.actualamount / goal.amount * 100, :strip_insignificant_zeros => true, :precision => 2) %>
 											<% end %>
 										<% elsif goal.status == 'Future' %>
 										&mdash;

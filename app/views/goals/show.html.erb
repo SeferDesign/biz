@@ -1,28 +1,4 @@
 <% provide(:title, "Goal ##{@goal.id} | ") %>
-<%
-	@actualAmount = 0
-	if @goal.timeperiod == 'Year'
-		if @goal.goaltype == 'Total'
-			@actualAmount = Invoice.where(:paid => true).where("SELECT extract(YEAR FROM paiddate) = ?", @goal.enddate.year).sum('cost')
-		elsif @goal.goaltype == 'Contract'
-			@actualAmount = Invoice.where(:paid => true, :worktype => 'Contract').where("SELECT extract(YEAR FROM paiddate) = ?", @goal.enddate.year).sum('cost')
-		elsif @goal.goaltype == 'Hourly'
-			@actualAmount = Invoice.where(:paid => true, :worktype => 'Hourly').where("SELECT extract(YEAR FROM paiddate) = ?", @goal.enddate.year).sum('cost')
-		elsif @goal.goaltype == 'Retainer'
-			@actualAmount = Invoice.where(:paid => true, :worktype => 'Retainer').where("SELECT extract(YEAR FROM paiddate) = ?", @goal.enddate.year).sum('cost')
-		end
-	elsif @goal.timeperiod == 'Month'
-		if @goal.goaltype == 'Total'
-			@actualAmount = Invoice.where(:paid => true).where("SELECT extract(MONTH FROM paiddate) = ?", @goal.enddate.month).sum('cost')
-		elsif @goal.goaltype == 'Contract'
-			@actualAmount = Invoice.where(:paid => true, :worktype => 'Contract').where("SELECT extract(MONTH FROM paiddate) = ?", @goal.enddate.month).sum('cost')
-		elsif @goal.goaltype == 'Hourly'
-			@actualAmount = Invoice.where(:paid => true, :worktype => 'Hourly').where("SELECT extract(MONTH FROM paiddate) = ?", @goal.enddate.month).sum('cost')
-		elsif @goal.goaltype == 'Retainer'
-			@actualAmount = Invoice.where(:paid => true, :worktype => 'Retainer').where("SELECT extract(MONTH FROM paiddate) = ?", @goal.enddate.month).sum('cost')
-		end
-	end
-%>
 <section id="goal-show">
 	<div class="container">
 		<div class="row">
@@ -42,11 +18,11 @@
 					<div class="col-sm-4">
 						<p><strong>Type:</strong> <%= @goal.goaltype %></p>
 						<p><strong>Amount:</strong> <%= number_to_currency(@goal.amount, { :negative_format => '(%n)' }) %></p>
-						<% if @goal.status == 'Current' or @goal.status == 'Past' %><p><strong>Actual:</strong> <%= number_to_currency(@actualAmount, { :negative_format => '(%n)' }) %></p><% end %>
+						<% if @goal.status == 'Current' or @goal.status == 'Past' %><p><strong>Actual:</strong> <%= number_to_currency(@goal.actualamount, { :negative_format => '(%n)' }) %></p><% end %>
 					</div>
 					<div class="col-sm-4">
 						<%
-							@progressRaw = @actualAmount / @goal.amount
+							@progressRaw = @goal.actualamount / @goal.amount
 							@progress = number_to_percentage(@progressRaw * 100, :strip_insignificant_zeros => true, :precision => 2)
 						%>
 						<% if @goal.status == 'Past' %>
