@@ -1,13 +1,6 @@
 @import "partials/mixins";
-@import "bootstrap-mods";
-
-/* Main Style */
-$black: #000000;
-$white: #ffffff;
-$grey: #333333;
-$green: #5cb85c;
-$red: #d9534f;
-
+@import "partials/colors";
+@import "partials/bootstrap-mods";
 
 body {
 	color: $white;

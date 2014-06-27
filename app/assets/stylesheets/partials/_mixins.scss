@@ -1,25 +1,25 @@
-@mixin border-radius($radius) {
-  -webkit-border-radius: $radius;
-  -moz-border-radius: $radius;
-  border-radius: $radius;
+@mixin image-circle() {
+  border-radius: 50%;
 }
-@mixin border-radius-top-left($radius) {
-  -webkit-border-top-left-radius: $radius;
-  -moz-border-radius-topleft: $radius;
-  border-top-left-radius: $radius;
+
+// Media Queries
+@mixin min($width) {
+  @media all and (min-width: $width) {
+    @content;
+  }
 }
-@mixin border-radius-top-right($radius) {
-  -webkit-border-top-right-radius: $radius;
-  -moz-border-radius-topright: $radius;
-  border-top-right-radius: $radius;
+@mixin max($width) {
+  @media all and (max-width: $width) {
+    @content;
+  }
 }
-@mixin border-radius-bottom-left($radius) {
-  -webkit-border-bottom-left-radius: $radius;
-  -moz-border-radius-bottomleft: $radius;
-  border-bottom-left-radius: $radius;
+@mixin between($min-width, $max-width) {
+  @media all and (min-width: $min-width) and (max-width: $max-width) {
+    @content;
+  }
 }
-@mixin border-radius-bottom-right($radius) {
-  -webkit-border-bottom-right-radius: $radius;
-  -moz-border-radius-bottomright: $radius;
-  border-bottom-right-radius: $radius;
+@mixin highres() {
+  @media all and (-webkit-min-device-pixel-ratio: 1.5) {
+    @content;
+  }
 }

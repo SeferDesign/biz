@@ -31,3 +31,7 @@ gem 'paperclip' # Paperclip - handles image uploads. requires ImageMagick
 gem 'wkhtmltopdf-binary'
 gem 'wicked_pdf'
 gem 'friendly_id'
+
+gem 'bootstrap-sass'
+gem 'font-awesome-sass'
+gem 'autoprefixer-rails'
