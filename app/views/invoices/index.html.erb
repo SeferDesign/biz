@@ -6,7 +6,6 @@
 				<h1>Invoices</h1>
 				<p><%= link_to 'Home', root_path %></p>
 				<p><%= link_to new_invoice_path, { :class => 'btn btn-success' } do %><i class="fa fa-plus left"></i>New Invoice<% end %></p>
-				<% @today = Date.today %>
 				<h2>Recent &amp; Unpaid Invoices</h2>
 				<div class="row">
 					<div class="col-sm-12">
@@ -25,13 +24,7 @@
 								</tr>
 							</thead>
 							<tbody>
-								<%
-									@unpaidInvoices = @invoices.where("paid != ?", true)
-									@recentInvoices = @invoices.where("SELECT extract(MONTH FROM paiddate) = ?", @today.month)
-									@notableInvoices = @unpaidInvoices + @recentInvoices
-									@notableInvoices.sort { |a,b| a.date <=> b.date }.each do |invoice|
-								%>
-
+								<% @notableInvoices.each do |invoice| %>
 								<tr id="invoicerow<%= invoice.id %>">
 									<td><%= link_to Client.find(invoice.client_id) do %><%= Client.find(invoice.client_id).name %><% end %></td>
 									<td class="hidden-xs"><%= link_to Project.find(invoice.project_id) do %><%= Project.find(invoice.project_id).name %><% end %></td>

@@ -3,6 +3,8 @@ class InvoicesController < ApplicationController
 
   def index
     @invoices = Invoice.all
+    @notableInvoices = @invoices.unpaid + @invoices.recent
+    @notableInvoices.sort { |a,b| a.date <=> b.date }
   end
 
   def show
