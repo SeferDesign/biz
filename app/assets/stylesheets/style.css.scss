@@ -1,4 +1,6 @@
 @import "partials/mixins";
+@import "partials/sizing";
+@import "partials/typography";
 @import "partials/colors";
 @import "partials/bootstrap-mods";
 
@@ -7,8 +9,12 @@ body {
 	background: $grey;
 }
 
-h1, h2, h3, h4, h5, h6 {
-	font-family: 'brandon-grotesque', sans-serif;
+.pad {
+	padding: 2em 0px;
+}
+
+header, footer {
+	@extend .pad;
 }
 
 h1 {
@@ -39,9 +45,7 @@ ul {
 	letter-spacing: 1px;
 }
 
-.pad {
-	padding: 2em 0px;
-}
+
 
 p.lead.halfbottom {
 	margin-bottom: 10px;
@@ -57,52 +61,59 @@ section {
 	padding: 1em 0px;
 }
 
-footer #footer-logo {
-	max-width: 100px;
-}
+footer {
 
-#footer-nav {
-	margin-bottom: 1em;
-}
+	#footer-logo {
+		max-width: 100px;
+	}
 
-#footer-nav a {
-	color: $white;
-}
+	#footer-nav {
 
-#footer-nav ul li {
-	display: inline;
-}
+		margin-bottom: 1em;
 
-#footer-nav ul li:after {
-	content: '\2022';
-	margin: 0px 0.5em;
-}
+		a {
+			color: $white;
+		}
 
-#footer-nav ul li:last-child:after {
-	content: '';
-	margin: 0px;
+		ul {
+
+			li {
+
+				display: inline;
+			}
+
+			li:not(:last-child):after {
+				content: '\2022';
+				margin: 0px 0.5em;
+			}
+
+		}
+
+	}
+
 }
 
 #client-edit .clientimage {
 	margin-top: 15px;
 }
 
-#monthlyRevenueChart {
-	width: 100%;
-	min-height: 300px;
-}
+.chart {
 
-.chart a.canvasjs-chart-credit {
-	display: none !important;
+	&#monthlyRevenueChart {
+		width: 100%;
+		min-height: 300px;
+	}
+
+	a.canvasjs-chart-credit {
+		display: none !important;
+	}
+
 }
 
 .doicons i {
 	vertical-align: middle;
 }
 
-@media screen and (-webkit-min-device-pixel-ratio: 2) {
-
-	body {
-	}
+@include min($width-sm) {
 
 }
