@@ -21,6 +21,7 @@ gem 'font-awesome-sass'
 gem 'autoprefixer-rails'
 
 group :development do
+  gem 'spring'
   gem 'guard-livereload', require: false
   gem 'better_errors'
   gem 'binding_of_caller'
