@@ -1,7 +1,3 @@
-<%
-	@today = Date.today
-	@monthsBack = 4
-%>
 <div class="row">
 	<div class="col-sm-12">
 		<p class="lead text-center">Total Receivable: <span class="currency red"><%= number_to_currency(total_invoiced_unpaid, { :negative_format => '(%n)' }) %></span></p>
@@ -9,18 +5,18 @@
 </div>
 <div class="row">
 	<div class="col-lg-3 col-lg-offset-0 col-md-8 col-md-offset-2">
-		<h3 class="text-center"><%= @today.strftime('%B') %></h3>
-		<span class="lead">Paid: <span class="pull-right currency green"><%= number_to_currency(Invoice.paidByMonth(@today.month).sum('cost'), { :negative_format => '(%n)' }) %></span></span>
+		<h3 class="text-center"><%= today.strftime('%B') %></h3>
+		<span class="lead">Paid: <span class="pull-right currency green"><%= number_to_currency(Invoice.paidByMonth(today.month).sum('cost'), { :negative_format => '(%n)' }) %></span></span>
 		<hr class="halfbottom">
 		<span class="lead">
-			Contract: <span class="pull-right currency text-info"><%= number_to_currency(Invoice.paidByMonth(@today.month).contract.sum('cost'), { :negative_format => '(%n)' }) %></span><br>
-			Hourly: <span class="pull-right currency text-warning"><%= number_to_currency(Invoice.paidByMonth(@today.month).hourly.sum('cost'), { :negative_format => '(%n)' }) %></span><br>
-			Retainer: <span class="pull-right currency text-muted"><%= number_to_currency(Invoice.paidByMonth(@today.month).retainer.sum('cost'), { :negative_format => '(%n)' }) %></span>
+			Contract: <span class="pull-right currency text-info"><%= number_to_currency(Invoice.paidByMonth(today.month).contract.sum('cost'), { :negative_format => '(%n)' }) %></span><br>
+			Hourly: <span class="pull-right currency text-warning"><%= number_to_currency(Invoice.paidByMonth(today.month).hourly.sum('cost'), { :negative_format => '(%n)' }) %></span><br>
+			Retainer: <span class="pull-right currency text-muted"><%= number_to_currency(Invoice.paidByMonth(today.month).retainer.sum('cost'), { :negative_format => '(%n)' }) %></span>
 		</span>
 	</div>
 	<div class="col-lg-4 col-lg-offset-1 col-md-8 col-md-offset-2">
 		<h3 class="text-center">Active Goals</h3>
-		<% Goal.where('startdate <= ? AND enddate >=  ?', @today, @today).order('enddate DESC, amount DESC').each_with_index do |goal, index| %>
+		<% Goal.where('startdate <= ? AND enddate >=  ?', today, today).order('enddate DESC, amount DESC').each_with_index do |goal, index| %>
 			<% if index == 0 %>
 			<span class="lead"><%= goal.timeperiod %> (<%= goal.goaltype %>): <span class="pull-right currency"><%= number_to_currency(goal.amount, { :negative_format => '(%n)' }) %></span></span>
 			<hr class="halfbottom">
@@ -30,84 +26,60 @@
 		<% end %>
 	</div>
 	<div class="col-lg-3 col-lg-offset-1 col-md-8 col-md-offset-2">
-		<h3 class="text-center"><%= @today.year %> YTD</h3>
-		<span class="lead">Paid: <span class="pull-right currency green"><%= number_to_currency(Invoice.paidByYear(@today.year).sum('cost'), { :negative_format => '(%n)' }) %></span></span>
+		<h3 class="text-center"><%= today.year %> YTD</h3>
+		<span class="lead">Paid: <span class="pull-right currency green"><%= number_to_currency(Invoice.paidByYear(today.year).sum('cost'), { :negative_format => '(%n)' }) %></span></span>
 		<hr class="halfbottom">
 		<span class="lead">
-			Contract: <span class="pull-right currency text-info"><%= number_to_currency(Invoice.paidByYear(@today.year).contract.sum('cost'), { :negative_format => '(%n)' }) %></span><br>
-			Hourly: <span class="pull-right currency text-warning"><%= number_to_currency(Invoice.paidByYear(@today.year).hourly.sum('cost'), { :negative_format => '(%n)' }) %></span><br>
-			Retainer: <span class="pull-right currency text-muted"><%= number_to_currency(Invoice.paidByYear(@today.year).retainer.sum('cost'), { :negative_format => '(%n)' }) %></span>
+			Contract: <span class="pull-right currency text-info"><%= number_to_currency(Invoice.paidByYear(today.year).contract.sum('cost'), { :negative_format => '(%n)' }) %></span><br>
+			Hourly: <span class="pull-right currency text-warning"><%= number_to_currency(Invoice.paidByYear(today.year).hourly.sum('cost'), { :negative_format => '(%n)' }) %></span><br>
+			Retainer: <span class="pull-right currency text-muted"><%= number_to_currency(Invoice.paidByYear(today.year).retainer.sum('cost'), { :negative_format => '(%n)' }) %></span>
 		</span>
 	</div>
 </div>
 <div class="row">
-	<div class="col-sm-8 col-sm-offset-2">
-		<div id="monthlyRevenueChart" class="chart"></div>
+	<div class="nopad-side col-sm-8 col-sm-offset-2">
+		<canvas id="monthlyRevenueChart" class="chart"></canvas>
 	</div>
 </div>
 <script type="text/javascript">
 jQuery(document).ready(function($) {
-  var chart = new CanvasJS.Chart('monthlyRevenueChart', {
-  	title: {
-  		fontFamily: 'brandon-grotesque, sans-serif',
-  		fontSize: 24,
-  		fontWeight: 'normal',
-  		text: 'Revenue by Month'
-  	},
-  	axisX: {
-  		lineThickness: 1,
-	  	gridThickness: 0
-  	},
-  	axisY: {
-  		lineThickness: 1,
-  		gridThickness: 0,
-  		prefix: '$'
-  	},
-    data: [{
-    	name: 'Total',
-    	toolTipContent: '{name}: ${y}',
-    	type: 'line',
-    	color: '#666666',
-    	dataPoints: [
-			<% @monthsBack.downto(0).each do |m| %>
-			{ label: '<%= m.month.ago.strftime('%B') %>', y: <%= Invoice.paidByMonth(m.month.ago.month).sum('cost') %> },
-			<% end %>
-      ]
-    },
-    {
-    	name: 'Hourly',
-    	toolTipContent: '{name}: ${y}',
-    	type: 'stackedColumn',
-    	color: '#8a6d3b',
-    	dataPoints: [
-			<% @monthsBack.downto(0).each do |m| %>
-			{ label: '<%= m.month.ago.strftime('%B') %>', y: <%= Invoice.paidByMonth(m.month.ago.month).hourly.sum('cost') %> },
-			<% end %>
-      ]
-    },
-    {
-    	name: 'Contract',
-    	toolTipContent: '{name}: ${y}',
-    	type: 'stackedColumn',
-    	color: '#31708f',
-    	dataPoints: [
-			<% @monthsBack.downto(0).each do |m| %>
-			{ label: '<%= m.month.ago.strftime('%B') %>', y: <%= Invoice.paidByMonth(m.month.ago.month).contract.sum('cost') %> },
-			<% end %>
-      ]
-    },
-    {
-    	name: 'Retainer',
-    	toolTipContent: '{name}: ${y}',
-    	type: 'stackedColumn',
-    	color: '#999999',
-    	dataPoints: [
-			<% @monthsBack.downto(0).each do |m| %>
-			{ label: '<%= m.month.ago.strftime('%B') %>', y: <%= Invoice.paidByMonth(m.month.ago.month).retainer.sum('cost') %> },
-			<% end %>
-      ]
-    }]
-  });
-  chart.render();
+
+	var data = {
+    labels: [<% monthsBack.downto(0).each do |m| %>'<%= m.month.ago.strftime("%B") %>',<% end %>],
+    datasets: [
+      {
+        label: 'Total',
+				fillColor: 'rgba(92,184,92,0.5)',
+				strokeColor: 'rgba(92,184,92,0.5)',
+				pointColor: 'rgba(92,184,92,0.8)',
+        data: [<% monthsBack.downto(0).each do |m| %><%= Invoice.paidByMonth(m.month.ago.month).sum('cost') %>,<% end %>]
+      },
+      {
+				label: 'Hourly',
+				fillColor: 'rgba(138,109,59,0.5)',
+				strokeColor: 'rgba(138,109,59,0.5)',
+				pointColor: 'rgba(138,109,59,0.8)',
+				data: [<% monthsBack.downto(0).each do |m| %><%= Invoice.paidByMonth(m.month.ago.month).hourly.sum('cost') %>,<% end %>]
+			},
+			{
+				label: 'Contract',
+				fillColor: 'rgba(49,112,143,0.5)',
+				strokeColor: 'rgba(49,112,143,0.5)',
+				pointColor: 'rgba(49,112,143,0.8)',
+				data: [<% monthsBack.downto(0).each do |m| %><%= Invoice.paidByMonth(m.month.ago.month).contract.sum('cost') %>,<% end %>]
+			},
+			{
+				label: 'Retainer',
+				fillColor: 'rgba(153,153,153,0.5)',
+				strokeColor: 'rgba(153,153,153,0.5)',
+				pointColor: 'rgba(153,153,153,0.8)',
+				data: [<% monthsBack.downto(0).each do |m| %><%= Invoice.paidByMonth(m.month.ago.month).retainer.sum('cost') %>,<% end %>]
+			}
+    ]
+	};
+	var ctx = document.getElementById('monthlyRevenueChart').getContext('2d');
+	var monthlyRevenueChart = new Chart(ctx).Line(data, {
+		bezierCurve: false
+	});
 });
 </script>

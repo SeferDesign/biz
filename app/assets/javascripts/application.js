@@ -13,7 +13,10 @@
 //= require jquery
 //= require jquery_ujs
 //= require bootstrap.min
-//= require canvasjs.min
+//= require Chart
 //= require bootstrap-datepicker
 //= require scripts
 //= require_tree .
+
+Chart.defaults.global.responsive = true;
+Chart.defaults.global.animation = false;

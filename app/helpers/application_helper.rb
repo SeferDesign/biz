@@ -124,4 +124,12 @@ module ApplicationHelper
     ]
 	end
 
+	def today
+		Date.today
+	end
+
+	def monthsBack
+		4
+	end
+
 end

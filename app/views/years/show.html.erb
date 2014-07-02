@@ -43,7 +43,7 @@
 		</div>
 		<div class="row">
 			<div class="col-sm-8 col-sm-offset-2">
-				<div id="monthlyRevenueChart" class="chart"></div>
+				<canvas id="monthlyRevenueChart" class="chart"></canvas>
 			</div>
 		</div>
 		<div class="row">
@@ -115,34 +115,18 @@
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
-  var chart = new CanvasJS.Chart('monthlyRevenueChart', {
-  	title: {
-  		fontFamily: 'brandon-grotesque, sans-serif',
-  		fontSize: 24,
-  		fontWeight: 'normal',
-  		text: 'Revenue by Month'
-  	},
-  	axisX: {
-  		lineThickness: 1,
-	  	gridThickness: 0
-  	},
-  	axisY: {
-  		lineThickness: 1,
-  		gridThickness: 0,
-  		prefix: '$'
-  	},
-    data: [{
-    	name: 'Total',
-    	toolTipContent: '{label}: ${y}',
-    	type: 'column',
-    	color: '#666666',
-    	dataPoints: [
-				<% (1..12).each do |month| %>
-				{ label: '<%= Date.new(@year.year, month, 1).strftime('%B') %>', y: <%= Invoice.paidByYear(@year.year).paidByMonth(month).sum('cost') %> },
-				<% end %>
-      ]
-    }]
-  });
-  chart.render();
+	var data = {
+		labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+		datasets: [
+			{
+				fillColor: 'rgba(92,184,92,0.5)',
+				strokeColor: 'rgba(92,184,92,0.5)',
+				pointColor: 'rgba(92,184,92,0.8)',
+				data: [<% (1..12).each do |month| %><%= Invoice.paidByYear(@year.year).paidByMonth(month).sum('cost') %>,<% end %>]
+			}
+		]
+	};
+	var ctx = document.getElementById('monthlyRevenueChart').getContext('2d');
+	var monthlyRevenueChart = new Chart(ctx).Bar(data, {});
 });
 </script>
