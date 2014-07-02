@@ -13,6 +13,11 @@ body {
 	padding: 2em 0px;
 }
 
+.nopad-side {
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
 header, footer {
 	@extend .pad;
 }
@@ -44,8 +49,6 @@ ul {
 .currency {
 	letter-spacing: 1px;
 }
-
-
 
 p.lead.halfbottom {
 	margin-bottom: 10px;
@@ -98,22 +101,11 @@ footer {
 }
 
 .chart {
-
-	&#monthlyRevenueChart {
-		width: 100%;
-		min-height: 300px;
-	}
-
-	a.canvasjs-chart-credit {
-		display: none !important;
-	}
-
+	width: 100%;
+	height: 300px;
+	margin-top: 20px;
 }
 
 .doicons i {
 	vertical-align: middle;
-}
-
-@include min($width-sm) {
-
 }
