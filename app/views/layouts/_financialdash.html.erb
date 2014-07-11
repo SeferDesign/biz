@@ -6,12 +6,12 @@
 <div class="row">
 	<div class="col-lg-3 col-lg-offset-0 col-md-8 col-md-offset-2">
 		<h3 class="text-center"><%= today.strftime('%B') %></h3>
-		<span class="lead">Paid: <span class="pull-right currency green"><%= number_to_currency(Invoice.paidByMonth(today.month).sum('cost'), { :negative_format => '(%n)' }) %></span></span>
+		<span class="lead">Paid: <span class="pull-right currency green"><%= number_to_currency(Invoice.paidByMonth(today).sum('cost'), { :negative_format => '(%n)' }) %></span></span>
 		<hr class="halfbottom">
 		<span class="lead">
-			Contract: <span class="pull-right currency text-info"><%= number_to_currency(Invoice.paidByMonth(today.month).contract.sum('cost'), { :negative_format => '(%n)' }) %></span><br>
-			Hourly: <span class="pull-right currency text-warning"><%= number_to_currency(Invoice.paidByMonth(today.month).hourly.sum('cost'), { :negative_format => '(%n)' }) %></span><br>
-			Retainer: <span class="pull-right currency text-muted"><%= number_to_currency(Invoice.paidByMonth(today.month).retainer.sum('cost'), { :negative_format => '(%n)' }) %></span>
+			Contract: <span class="pull-right currency text-info"><%= number_to_currency(Invoice.paidByMonth(today).contract.sum('cost'), { :negative_format => '(%n)' }) %></span><br>
+			Hourly: <span class="pull-right currency text-warning"><%= number_to_currency(Invoice.paidByMonth(today).hourly.sum('cost'), { :negative_format => '(%n)' }) %></span><br>
+			Retainer: <span class="pull-right currency text-muted"><%= number_to_currency(Invoice.paidByMonth(today).retainer.sum('cost'), { :negative_format => '(%n)' }) %></span>
 		</span>
 	</div>
 	<div class="col-lg-4 col-lg-offset-1 col-md-8 col-md-offset-2">
@@ -52,28 +52,28 @@ jQuery(document).ready(function($) {
 				fillColor: 'rgba(92,184,92,0.5)',
 				strokeColor: 'rgba(92,184,92,0.5)',
 				pointColor: 'rgba(92,184,92,0.8)',
-        data: [<% monthsBack.downto(0).each do |m| %><%= Invoice.paidByMonth(m.month.ago.month).sum('cost') %>,<% end %>]
+        data: [<% monthsBack.downto(0).each do |m| %><%= Invoice.paidByMonth(m.month.ago).sum('cost') %>,<% end %>]
       },
       {
 				label: 'Hourly',
 				fillColor: 'rgba(138,109,59,0.5)',
 				strokeColor: 'rgba(138,109,59,0.5)',
 				pointColor: 'rgba(138,109,59,0.8)',
-				data: [<% monthsBack.downto(0).each do |m| %><%= Invoice.paidByMonth(m.month.ago.month).hourly.sum('cost') %>,<% end %>]
+				data: [<% monthsBack.downto(0).each do |m| %><%= Invoice.paidByMonth(m.month.ago).hourly.sum('cost') %>,<% end %>]
 			},
 			{
 				label: 'Contract',
 				fillColor: 'rgba(49,112,143,0.5)',
 				strokeColor: 'rgba(49,112,143,0.5)',
 				pointColor: 'rgba(49,112,143,0.8)',
-				data: [<% monthsBack.downto(0).each do |m| %><%= Invoice.paidByMonth(m.month.ago.month).contract.sum('cost') %>,<% end %>]
+				data: [<% monthsBack.downto(0).each do |m| %><%= Invoice.paidByMonth(m.month.ago).contract.sum('cost') %>,<% end %>]
 			},
 			{
 				label: 'Retainer',
 				fillColor: 'rgba(153,153,153,0.5)',
 				strokeColor: 'rgba(153,153,153,0.5)',
 				pointColor: 'rgba(153,153,153,0.8)',
-				data: [<% monthsBack.downto(0).each do |m| %><%= Invoice.paidByMonth(m.month.ago.month).retainer.sum('cost') %>,<% end %>]
+				data: [<% monthsBack.downto(0).each do |m| %><%= Invoice.paidByMonth(m.month.ago).retainer.sum('cost') %>,<% end %>]
 			}
     ]
 	};

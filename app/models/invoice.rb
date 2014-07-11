@@ -10,7 +10,6 @@ class Invoice < ActiveRecord::Base
 	scope :retainer, -> { where(worktype: 'Retainer') }
 
 	scope :paidByYear, -> (year) { paid.where("SELECT extract(YEAR FROM paiddate) = ?", year) }
-	scope :paidByMonth, -> (month) { paid.where("SELECT extract(MONTH FROM paiddate) = ?", month) }
-	#scope :paidByQuarter, -> (quarter) { paid.where("SELECT extract(MONTH FROM paiddate) = ?", month) }
+	scope :paidByMonth, -> (date) { paid.where("SELECT extract(YEAR FROM paiddate) = ? AND extract(MONTH FROM paiddate) = ?", date.year, date.month) }
 
 end

@@ -13,13 +13,13 @@ class Goal < ActiveRecord::Base
       end
     elsif self.timeperiod == 'Month'
       if self.goaltype == 'Total'
-        Invoice.paidByMonth(self.enddate.month).sum('cost')
+        Invoice.paidByMonth(self.enddate).sum('cost')
       elsif self.goaltype == 'Contract'
-        Invoice.paidByMonth(self.enddate.month).contract.sum('cost')
+        Invoice.paidByMonth(self.enddate).contract.sum('cost')
       elsif self.goaltype == 'Hourly'
-        Invoice.paidByMonth(self.enddate.month).hourly.sum('cost')
+        Invoice.paidByMonth(self.enddate).hourly.sum('cost')
       elsif self.goaltype == 'Retainer'
-        Invoice.paidByMonth(self.enddate.month).retainer.sum('cost')
+        Invoice.paidByMonth(self.enddate).retainer.sum('cost')
       end
     else
       0
