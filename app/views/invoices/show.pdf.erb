@@ -20,7 +20,7 @@
 			<div class="col-sm-12">
 				<div>
 					<div class="pull-right text-right">
-						<p>Attention: <%= thisClient.contact %><br><%= thisClient.name %></p>
+						<p>Attention: <%= thisClient.contact %><% if !thisClient.name.blank? and thisClient.name != thisClient.contact %><br><%= thisClient.name %><% end %></p>
 						<% if !thisClient.address1.blank? %>
 						<p>
 							<%= thisClient.address1 %>
@@ -46,7 +46,7 @@
 				</div>
 				<div class="clearfix"></div>
 				<hr>
-				<p><%= @invoice.description %> <%= invoice_description_suffix %><% if @invoice.paid != true %> <%= invoice_description_suffix_pleasepay %><% end %></p>
+				<p><%= @invoice.description %><% if @invoice.paid != true %>  <%= invoice_description_suffix_pleasepay %><% end %></p>
 				<p class="indent">Thank you,<br><%= company_pay_to %><br><%= company_full_name %><br><%= company_email %><br><%= company_phone %></p>
 				<hr>
 				<% if !@invoice.lines.blank? %>
