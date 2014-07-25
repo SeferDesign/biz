@@ -14,6 +14,7 @@
 //= require jquery_ujs
 //= require bootstrap.min
 //= require Chart
+//= require Chart.StackedBar
 //= require bootstrap-datepicker
 //= require scripts
 //= require_tree .
