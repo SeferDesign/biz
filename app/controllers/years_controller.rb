@@ -18,6 +18,14 @@ class YearsController < ApplicationController
 		@incomeQ3 = 	Invoice.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 7, 1), Date.new(@year.year, 9, 30)).sum('cost')
 		@incomeQ4 = 	Invoice.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 10, 1), Date.new(@year.year, 12, 31)).sum('cost')
 
+		respond_to do |format|
+			format.html
+			format.csv do
+				headers['Content-Disposition'] = "attachment; filename=\"#{@year.year}paidinvoices\""
+				headers['Content-Type'] ||= 'text/csv'
+			end
+		end
+
   end
 
   def new

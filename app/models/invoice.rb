@@ -1,5 +1,6 @@
 class Invoice < ActiveRecord::Base
 	has_many :lines, :dependent => :destroy
+	belongs_to :client
 
 	scope :paid, -> { where(paid: true) }
 	scope :unpaid, -> { where.not(paid: true) }

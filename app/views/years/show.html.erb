@@ -4,6 +4,7 @@
 		<div class="row">
 			<div class="col-sm-12">
 				<h1>Year <%= @year.year %> Summary</h1>
+				<p><%= link_to "Download CSV", year_path(@year, format: "csv") %></p>
 			</div>
 			<div class="col-sm-8 col-sm-offset-2">
 				<p class="lead">Total Income: <span class="pull-right currency green"><%= number_to_currency(@incomeYear, { :negative_format => '(%n)' }) %></span></p>
