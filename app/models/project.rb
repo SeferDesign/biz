@@ -2,6 +2,8 @@ class Project < ActiveRecord::Base
 	belongs_to :client
 	has_many :invoices, :dependent => :destroy
 
+	default_scope { order('name ASC') }
+
 	scope :complete, -> { where(completed: true) }
 	scope :incomplete, -> { where.not(completed: true) }
 

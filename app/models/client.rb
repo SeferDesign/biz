@@ -11,6 +11,8 @@ class Client < ActiveRecord::Base
     :path => '/images/:id/:style.:extension'
 	validates_attachment_content_type :logo, :content_type => %w(image/jpeg image/jpg image/png)
 
+	default_scope { order('name ASC') }
+
 	def invoiceTotal
 		self.invoices.sum(:cost)
 	end
