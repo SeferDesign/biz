@@ -12,8 +12,10 @@ Biz::Application.routes.draw do
   resources :projects
   resources :clients
 
-	root 'welcome#index'
+  root 'welcome#index'
 
-	get ':action' => 'welcome#:action'
+  get ':action' => 'welcome#:action'
+
+  get 'invoices_controller/update_projects', to: 'invoices#update_projects'
 
 end
