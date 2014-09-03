@@ -35,8 +35,8 @@ class InvoicesController < ApplicationController
     InvoiceMailer.invoice_email(@invoice).deliver
   end
 
-  def update_projects
-    @projects = Project.where(client_id: params[:client_id])
+  def populate
+    @client = Client.find(params[:client_id])
     respond_to do |format|
       format.js
     end

@@ -6,7 +6,6 @@ class ClientsController < ApplicationController
   end
 
   def show
-  	@client = Client.find(params[:id])
   	@projects = Project.where(client_id: @client.id)
   	@invoices = Invoice.where(client_id: @client.id).sort { |a,b| a.date <=> b.date }
   end
@@ -53,6 +52,6 @@ class ClientsController < ApplicationController
     end
 
     def client_params
-      params.require(:client).permit(:name, :contact, :email_accounting, :email_accounting_2, :site_url, :logo, :address1, :address2, :city, :state, :zipcode, :international, :intinfo)
+      params.require(:client).permit(:name, :contact, :email_accounting, :email_accounting_2, :site_url, :logo, :address1, :address2, :city, :state, :zipcode, :international, :intinfo, :preferred_paymenttype)
     end
 end

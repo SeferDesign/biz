@@ -16,6 +16,6 @@ Biz::Application.routes.draw do
 
   get ':action' => 'welcome#:action'
 
-  get 'invoices_controller/update_projects', to: 'invoices#update_projects'
+  get 'invoices_controller/populate', to: 'invoices#populate'
 
 end

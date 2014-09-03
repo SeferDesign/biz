@@ -1,6 +1,6 @@
 $ ->
   $(document).on 'change', '#invoice_client_id', (evt) ->
-    $.ajax '/invoices_controller/update_projects',
+    $.ajax '/invoices_controller/populate',
       type: 'GET'
       dataType: 'script'
       data: {
