@@ -67,6 +67,19 @@ module ApplicationHelper
 		'Please make payment at your earliest convenience, and do not hesitate to contact me with any questions.'
 	end
 
+	def payment_types
+		[
+			'Check',
+			'Cash',
+			'Credit Card',
+			'Chase Quick Pay',
+			'PayPal',
+			'ACH',
+			'Venmo',
+			'Other'
+		]
+	end
+
 	def us_states
     [
       ['Alabama', 'AL'],

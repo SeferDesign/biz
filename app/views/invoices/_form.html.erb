@@ -89,7 +89,7 @@
 		<div class="col-lg-2 col-sm-6">
 			<div class="form-group">
 				<%= f.label :paymenttype, 'Payment Type' %>
-				<%= select(:invoice, 'paymenttype', ['Check', 'Cash', 'Credit Card', 'Chase Quick Pay', 'PayPal', 'ACH', 'Venmo', 'Other'], { :include_blank => 'None' }, { :class => 'form-control' }) %>
+				<%= select(:invoice, 'paymenttype', payment_types, { :include_blank => 'None' }, { :class => 'form-control' }) %>
 			</div>
 		</div>
 	</div>
