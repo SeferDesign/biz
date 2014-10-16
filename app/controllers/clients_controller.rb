@@ -7,7 +7,7 @@ class ClientsController < ApplicationController
 
   def show
   	@projects = Project.where(client_id: @client.id)
-  	@invoices = Invoice.where(client_id: @client.id).sort { |a,b| a.date <=> b.date }
+  	@invoices = Invoice.where(client_id: @client.id)
   end
 
   def new

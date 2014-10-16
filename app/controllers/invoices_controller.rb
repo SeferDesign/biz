@@ -2,9 +2,7 @@ class InvoicesController < ApplicationController
   before_action :set_invoice, only: [:show, :edit, :email, :update, :destroy]
 
   def index
-    @invoices = Invoice.all
-    @notableInvoices = @invoices.unpaid + @invoices.recent
-    @notableInvoices.sort { |a,b| a.date <=> b.date }
+    @notableInvoices = Invoice.all.unpaid + Invoice.all.recent
   end
 
   def show
