@@ -1,5 +1,7 @@
 source 'https://rubygems.org'
 
+ruby '2.1.5'
+
 gem 'rails', '4.1.4'
 gem 'pg'
 gem 'sass-rails', '~> 4.0.2'
@@ -12,7 +14,7 @@ gem 'jbuilder', '~> 1.2'
 gem 'aws-sdk'
 gem 'figaro'
 gem 'devise'
-gem 'paperclip' # Paperclip - handles image uploads. requires ImageMagick
+gem 'paperclip'
 gem 'wkhtmltopdf-binary'
 gem 'wicked_pdf'
 gem 'friendly_id'
