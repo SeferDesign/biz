@@ -68,6 +68,37 @@
 					</div>
 				</div>
 			</div>
+			<div class="col-sm-12">
+				<h3>Paid Invoices</h3>
+				<% if @invoicesPaid.blank? %>
+				<p class="lead">No paid invoices.</p>
+				<% else %>
+				<table class="table table-condensed">
+					<thead>
+						<tr>
+							<th>Client</th>
+							<th>Issue Date</th>
+							<th>Paid Date</th>
+							<th class="text-center hidden-xs">Type</th>
+							<th class="text-right">Cost</th>
+							<th class="text-center">Paid?</th>
+						</tr>
+					</thead>
+					<tbody>
+						<% @invoicesPaid.each do |invoice| %>
+						<tr id="invoicerow<%= invoice.id %>">
+							<td><%= link_to Client.find(invoice.client_id) do %><%= Client.find(invoice.client_id).name %><% end %></td>
+							<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
+							<td><%= invoice.paiddate %></td>
+							<td class="text-center hidden-xs"><%= invoice.worktype %></td>
+							<td class="text-right"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
+							<td class="text-center"><% if invoice.paid == true %><i class="fa fa-check green"></i><% else %><span class="spread red">Not Paid</span><% end %></td>
+						</tr>
+						<% end %>
+					</tbody>
+				</table>
+				<% end %>
+			</div>
 		</div>
 		<div class="row hidden-print">
 			<div class="col-sm-12">

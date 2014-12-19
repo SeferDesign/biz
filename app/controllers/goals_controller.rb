@@ -6,6 +6,11 @@ class GoalsController < ApplicationController
   end
 
   def show
+    if @goal.timeperiod == 'Month'
+      @invoicesPaid = Invoice.paidByMonth(@goal.startdate)
+    elsif @goal.timeperiod == 'Year'
+      @invoicesPaid = Invoice.paidByYear(@goal.startdate.year)
+    end
   end
 
   def new
