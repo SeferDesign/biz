@@ -80,10 +80,29 @@
 		</div>
 		<div class="row">
 			<div class="col-sm-12">
-				<h3>Paid Invoices</h3>
 				<% if @invoicesPaid.blank? %>
 				<p class="lead">No invoices.</p>
 				<% else %>
+				<h3>Paid Invoices By Client</h3>
+				<table class="table table-condensed">
+					<thead>
+						<tr>
+							<th>Client</th>
+							<th class="text-center"># of Invoices</th>
+							<th class="text-right">Cost</th>
+						</tr>
+					</thead>
+					<tbody>
+						<% @paidClients.each do |client| %>
+						<tr>
+							<td><%= link_to client.name, client %></td>
+							<td class="text-center"><%= @invoicesPaid.where(client_id: client.id).count %></td>
+							<td class="text-right"><%= number_to_currency(@invoicesPaid.where(client_id: client.id).sum(:cost)) %></td>
+						</tr>
+						<% end %>
+					</tbody>
+				</table>
+				<h3>All Paid Invoices</h3>
 				<table class="table table-condensed">
 					<thead>
 						<tr>

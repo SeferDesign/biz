@@ -11,12 +11,17 @@ class YearsController < ApplicationController
   	@invoicesPaid = Invoice.paidByYear(@year.year)
 		@incomeYear = @invoicesPaid.sum('cost')
 
+		@paidClients = Set.new
+		@invoicesPaid.each do |invoice|
+			@paidClients.add(invoice.client)
+		end
+
   	@invoicesUnpaid = Invoice.unpaid.where("date >= ? AND date <= ?", Date.new(@year.year, 1, 1), Date.new(@year.year, 12, 31))
 
-		@incomeQ1 = 	Invoice.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 1, 1), Date.new(@year.year, 3, 31)).sum('cost')
-		@incomeQ2 = 	Invoice.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 4, 1), Date.new(@year.year, 6, 30)).sum('cost')
-		@incomeQ3 = 	Invoice.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 7, 1), Date.new(@year.year, 9, 30)).sum('cost')
-		@incomeQ4 = 	Invoice.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 10, 1), Date.new(@year.year, 12, 31)).sum('cost')
+		@incomeQ1 = Invoice.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 1, 1), Date.new(@year.year, 3, 31)).sum('cost')
+		@incomeQ2 = Invoice.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 4, 1), Date.new(@year.year, 6, 30)).sum('cost')
+		@incomeQ3 = Invoice.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 7, 1), Date.new(@year.year, 9, 30)).sum('cost')
+		@incomeQ4 = Invoice.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 10, 1), Date.new(@year.year, 12, 31)).sum('cost')
 
 		respond_to do |format|
 			format.html
