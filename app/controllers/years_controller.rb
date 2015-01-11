@@ -1,35 +1,35 @@
 class YearsController < ApplicationController
-	before_action :set_year, only: [:show, :edit, :update, :destroy]
+  before_action :set_year, only: [:show, :edit, :update, :destroy]
 
   def index
     @years = Year.all.sort { |a,b| a.year <=> b.year }
   end
 
   def show
-  	@year = Year.friendly.find(params[:id])
+    @year = Year.friendly.find(params[:id])
 
-  	@invoicesPaid = Invoice.paidByYear(@year.year)
-		@incomeYear = @invoicesPaid.sum('cost')
+    @invoicesPaid = Invoice.paidByYear(@year.year)
+    @incomeYear = @invoicesPaid.sum('cost')
 
-		@paidClients = Set.new
-		@invoicesPaid.each do |invoice|
-			@paidClients.add(invoice.client)
-		end
+    @paidClients = SortedSet.new
+    @invoicesPaid.each do |invoice|
+      @paidClients.add(invoice.client)
+    end
 
-  	@invoicesUnpaid = Invoice.unpaid.where("date >= ? AND date <= ?", Date.new(@year.year, 1, 1), Date.new(@year.year, 12, 31))
+    @invoicesUnpaid = Invoice.unpaid.where("date >= ? AND date <= ?", Date.new(@year.year, 1, 1), Date.new(@year.year, 12, 31))
 
-		@incomeQ1 = Invoice.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 1, 1), Date.new(@year.year, 3, 31)).sum('cost')
-		@incomeQ2 = Invoice.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 4, 1), Date.new(@year.year, 6, 30)).sum('cost')
-		@incomeQ3 = Invoice.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 7, 1), Date.new(@year.year, 9, 30)).sum('cost')
-		@incomeQ4 = Invoice.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 10, 1), Date.new(@year.year, 12, 31)).sum('cost')
+    @incomeQ1 = Invoice.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 1, 1), Date.new(@year.year, 3, 31)).sum('cost')
+    @incomeQ2 = Invoice.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 4, 1), Date.new(@year.year, 6, 30)).sum('cost')
+    @incomeQ3 = Invoice.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 7, 1), Date.new(@year.year, 9, 30)).sum('cost')
+    @incomeQ4 = Invoice.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(@year.year, 10, 1), Date.new(@year.year, 12, 31)).sum('cost')
 
-		respond_to do |format|
-			format.html
-			format.csv do
-				headers['Content-Disposition'] = "attachment; filename=\"#{@year.year}paidinvoices\""
-				headers['Content-Type'] ||= 'text/csv'
-			end
-		end
+    respond_to do |format|
+      format.html
+      format.csv do
+        headers['Content-Disposition'] = "attachment; filename=\"#{@year.year}paidinvoices\.csv\""
+        headers['Content-Type'] ||= 'text/csv'
+      end
+    end
 
   end
 

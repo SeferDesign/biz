@@ -21,4 +21,8 @@ class Client < ActiveRecord::Base
 		self.invoices.unpaid.sum(:cost)
 	end
 
+	def yearPaidInvoices(year)
+		self.invoices.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(year, 1, 1), Date.new(year, 12, 31))
+	end
+
 end

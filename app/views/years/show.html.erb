@@ -96,8 +96,8 @@
 						<% @paidClients.each do |client| %>
 						<tr>
 							<td><%= link_to client.name, client %></td>
-							<td class="text-center"><%= @invoicesPaid.where(client_id: client.id).count %></td>
-							<td class="text-right"><%= number_to_currency(@invoicesPaid.where(client_id: client.id).sum(:cost)) %></td>
+							<td class="text-center"><%= client.yearPaidInvoices(@year.year).count %></td>
+							<td class="text-right"><%= number_to_currency(client.yearPaidInvoices(@year.year).sum(:cost)) %></td>
 						</tr>
 						<% end %>
 					</tbody>
