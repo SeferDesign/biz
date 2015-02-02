@@ -20,6 +20,7 @@ gem 'wicked_pdf'
 gem 'friendly_id'
 gem 'bootstrap-sass'
 gem 'autoprefixer-rails'
+gem 'faraday'
 
 group :development do
   gem 'spring'

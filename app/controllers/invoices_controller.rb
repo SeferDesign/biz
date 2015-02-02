@@ -31,6 +31,39 @@ class InvoicesController < ApplicationController
 
   def email
     InvoiceMailer.invoice_email(@invoice).deliver
+    conn = Faraday.new(:url => 'https://hooks.slack.com') do |faraday|
+      faraday.request  :url_encoded
+      faraday.response :logger
+      faraday.adapter  Faraday.default_adapter
+    end
+    response = conn.post '/services/' + Figaro.env.slack_accounting_webhook_id, { :payload => '{
+      "attachments":[{
+        "pretext":"Invoice sent.",
+        "fallback":"Invoice for $' + sprintf("%.2f", @invoice.cost) + ' sent to ' + @invoice.client.contact + ' at ' + @invoice.client.name + '.",
+        "fields":[
+          {
+            "title":"Company",
+            "value":"<http://' + request.domain + '/clients/' + @invoice.client.id.to_s + '|' + @invoice.client.name + '>",
+            "short": true
+          },
+          {
+            "title":"Amount",
+            "value":"$' + sprintf("%.2f", @invoice.cost) + '",
+            "short": true
+          },
+          {
+            "title":"Recipient",
+            "value": "<mailto:' + @invoice.client.email_accounting + '|' + @invoice.client.contact + '>",
+            "short":true
+          },
+          {
+            "title":"URL",
+            "value":"<http://' + request.domain + '/invoices/' + @invoice.id.to_s + '|/invoices/' + @invoice.id.to_s + '>",
+            "short":true
+          }
+        ]
+      }]
+    }'}
   end
 
   def populate
