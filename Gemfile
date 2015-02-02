@@ -19,7 +19,6 @@ gem 'wkhtmltopdf-binary'
 gem 'wicked_pdf'
 gem 'friendly_id'
 gem 'bootstrap-sass'
-gem 'font-awesome-sass'
 gem 'autoprefixer-rails'
 
 group :development do
