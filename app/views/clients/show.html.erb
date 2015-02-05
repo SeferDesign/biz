@@ -46,6 +46,12 @@
 				<% if @client.international %>
 				<p><strong><i class="fa fa-globe left"></i>International Client</strong></p>
 				<% end %>
+				<% if !@client.currentrate.blank? %>
+				<p>
+					<strong>Current Hourly Rate:</strong><br>
+					<%= number_to_currency(@client.currentrate) %>
+				</p>
+				<% end %>
 			</div>
 		</div>
 		<div class="row">

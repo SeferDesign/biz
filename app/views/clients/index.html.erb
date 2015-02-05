@@ -16,7 +16,7 @@
 								<tr>
 									<th>Client</th>
 									<th class="hidden-xs">Contact</th>
-									<th class="hidden-xs">Site</th>
+									<th>Hourly</th>
 									<th class="text-right hidden-xs">Unpaid</th>
 									<th class="text-right">Billed</th>
 								</tr>
@@ -26,7 +26,7 @@
 								<tr id="clientrow<%= client.id %>">
 									<td><%= link_to client do %><%= client.name %><% end %></td>
 									<td class="hidden-xs"><%= client.contact %></td>
-									<td class="hidden-xs"><%= link_to client.site_url do %><%= client.site_url %><% end %></td>
+									<td><% if client.currentrate %><%= number_to_currency(client.currentrate) %><% else %>&mdash;<% end %></td>
 									<td class="text-right hidden-xs"><% if client.unpaidTotal > 0 %><span class="spread red"><%= number_to_currency(client.unpaidTotal, { :negative_format => '(%n)' }) %></span><% else %>&mdash;<% end %></td>
 									<td class="text-right"><%= number_to_currency(client.invoiceTotal, { :negative_format => '(%n)' }) %></td>
 								</tr>
