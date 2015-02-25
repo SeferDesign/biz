@@ -21,10 +21,6 @@
 						<% if @goal.status == 'Current' or @goal.status == 'Past' %><p><strong>Actual:</strong> <%= number_to_currency(@goal.actualamount, { :negative_format => '(%n)' }) %></p><% end %>
 					</div>
 					<div class="col-sm-4">
-						<%
-							@progressRaw = @goal.actualamount / @goal.amount
-							@progress = number_to_percentage(@progressRaw * 100, :strip_insignificant_zeros => true, :precision => 2)
-						%>
 						<% if @goal.status == 'Past' %>
 						<p>
 							<strong>Met?</strong>
@@ -35,34 +31,17 @@
 							<% end %>
 						</p>
 						<% elsif @goal.status == 'Current' %>
-						<%
-							@fullPeriodDays = (@goal.enddate - @goal.startdate + 1).to_f
-							@paceDays = (Date.today - @goal.startdate + 1).to_f
-							@paceRaw = @paceDays / @fullPeriodDays
-							@pace = number_to_percentage(@paceRaw * 100, :strip_insignificant_zeros => true, :precision => 2)
-						%>
-						<p><strong>Goal Pace:</strong> <%=  @pace %></p>
-						<p><strong>Actual Progress:</strong> <%= @progress %></p>
+						<p><strong>Goal Pace:</strong> <%= number_to_percentage(@pace, :strip_insignificant_zeros => true, :precision => 2) %></p>
+						<p><strong>Actual Progress:</strong> <%= number_to_percentage(@progress, :strip_insignificant_zeros => true, :precision => 2) %></p>
 						<% elsif @goal.status == 'Future' %>
 						<p>
 							<strong>Actual Progress:</strong> &mdash;
 						</p>
 						<% end %>
 						<% if @goal.status == 'Current' %>
-							<%
-								if @progressRaw > @paceRaw
-									@firstLengthRaw = @paceRaw
-									@firstLength = @pace
-									@secondLength = number_to_percentage((@progressRaw - @paceRaw) * 100, :strip_insignificant_zeros => true, :precision => 2)
-								else
-									@firstLengthRaw = @progressRaw
-									@firstLength = @progress
-									@secondLength = number_to_percentage((@paceRaw - @firstLengthRaw) * 100, :strip_insignificant_zeros => true, :precision => 2)
-								end
-							%>
 							<div class="progress progress-striped">
-								<div class="progress-bar progress-bar-primary" role="progressbar" aria-valuenow="<%= @firstLength %>" aria-valuemin="0" aria-valuemax="100" style="width: <%= @firstLength %>"></div>
-								<div class="progress-bar progress-bar-<% if @progressRaw > @paceRaw %>success<% else %>danger<% end %>" role="progressbar" aria-valuenow="<%= @secondLength %>" aria-valuemin="0" aria-valuemax="100" style="width: <%= @secondLength %>"></div>
+								<div class="progress-bar progress-bar-primary" role="progressbar" style="width: <%= number_to_percentage(@firstLength, :strip_insignificant_zeros => true, :precision => 2) %>"></div>
+								<div class="progress-bar progress-bar-<% if @progressRaw > @paceRaw %>success<% else %>danger<% end %>" role="progressbar"style="width: <%= number_to_percentage(@secondLength, :strip_insignificant_zeros => true, :precision => 2) %>"></div>
 							</div>
 						<% end %>
 					</div>

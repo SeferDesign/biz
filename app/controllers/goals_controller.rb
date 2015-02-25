@@ -11,6 +11,29 @@ class GoalsController < ApplicationController
     elsif @goal.timeperiod == 'Year'
       @invoicesPaid = Invoice.paidByYear(@goal.startdate.year)
     end
+
+    @progressRaw = @goal.actualamount / @goal.amount
+    @progress = @progressRaw * 100
+
+    if @goal.status == 'Current'
+
+      @fullPeriodDays = (@goal.enddate - @goal.startdate + 1).to_f
+      @paceDays = (Date.today - @goal.startdate + 1).to_f
+      @paceRaw = @paceDays / @fullPeriodDays
+      @pace = @paceRaw * 100
+
+      if @progressRaw > @paceRaw
+        @firstLengthRaw = @paceRaw
+        @firstLength = @pace
+        @secondLength = (@progressRaw - @paceRaw) * 100
+      else
+        @firstLengthRaw = @progressRaw
+        @firstLength = @progress
+        @secondLength = (@paceRaw - @firstLengthRaw) * 100
+      end
+
+    end
+
   end
 
   def new
