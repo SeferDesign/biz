@@ -5,8 +5,8 @@
 			<div class="col-sm-12">
 				<h1>Goal #<%= @goal.id %></h1>
 				<p class="doicons">
-					<%= link_to edit_goal_path(@goal), title: 'Edit' do %><i class="fa fa-fw fa-2x fa-pencil-square-o text-warning"></i><% end %>
-					<%= link_to goal_path(@goal), title: 'Delete', method: :delete, data: { confirm: "Are you sure you would like to delete Goal ##{@goal.id}?" } do %><i class="fa fa-fw fa-2x fa-trash-o text-danger"></i><% end %>
+					<%= link_to edit_goal_path, title: 'Edit' do %><i class="fa fa-fw fa-2x fa-pencil-square-o text-warning"></i><% end %>
+					<%= link_to goal_path, title: 'Delete', method: :delete, data: { confirm: "Are you sure you would like to delete Goal ##{@goal.id}?" } do %><i class="fa fa-fw fa-2x fa-trash-o text-danger"></i><% end %>
 				</p>
 				<div class="row">
 					<div class="col-sm-4">
@@ -66,7 +66,7 @@
 					<tbody>
 						<% @invoicesPaid.each do |invoice| %>
 						<tr id="invoicerow<%= invoice.id %>">
-							<td><%= link_to Client.find(invoice.client_id) do %><%= Client.find(invoice.client_id).name %><% end %></td>
+							<td><%= link_to invoice.client do %><%= invoice.client.name %><% end %></td>
 							<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
 							<td><%= invoice.paiddate %></td>
 							<td class="text-center hidden-xs"><%= invoice.worktype %></td>
