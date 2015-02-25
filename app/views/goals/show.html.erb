@@ -41,11 +41,11 @@
 							@paceRaw = @paceDays / @fullPeriodDays
 							@pace = number_to_percentage(@paceRaw * 100, :strip_insignificant_zeros => true, :precision => 2)
 						%>
-						<p><strong>Pace:</strong> <%=  @pace %></p>
-						<p><strong>Progress:</strong> <%= @progress %></p>
+						<p><strong>Goal Pace:</strong> <%=  @pace %></p>
+						<p><strong>Actual Progress:</strong> <%= @progress %></p>
 						<% elsif @goal.status == 'Future' %>
 						<p>
-							<strong>Progress:</strong> &mdash;
+							<strong>Actual Progress:</strong> &mdash;
 						</p>
 						<% end %>
 						<% if @goal.status == 'Current' %>
