@@ -6,6 +6,12 @@ class InvoicesController < ApplicationController
   end
 
   def show
+    if @invoice.client.currentrate
+      currentrate = sprintf("%.2f", @invoice.client.currentrate)
+      @ratePlaceholder = "Rate ($#{currentrate})"
+    else
+      @ratePlaceholder = 'Rate'
+    end
   	respond_to do |format|
       format.html
       format.pdf do
