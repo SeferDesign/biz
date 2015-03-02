@@ -1,6 +1,7 @@
 class Invoice < ActiveRecord::Base
 	has_many :lines, :dependent => :destroy
 	belongs_to :client
+	belongs_to :project
 
 	default_scope { order('paiddate DESC') }
 

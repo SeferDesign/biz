@@ -3,10 +3,8 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-sm-12">
-				<% thisClient = Client.find(@invoice.client_id) %>
-				<% thisProject = Project.find(@invoice.project_id) %>
-				<% if !thisClient.logo.blank? %>
-				<%= image_tag(thisClient.logo.url(:medium), class: 'pull-right hidden-xs') %>
+				<% if @invoice.client.logo.present? %>
+				<%= image_tag(@invoice.client.logo.url(:medium), class: 'pull-right hidden-xs') %>
 				<% end %>
 				<h1>Invoice #<%= @invoice.id %></h1>
 				<p class="doicons">
@@ -17,11 +15,11 @@
 				</p>
 				<p>
 					<strong>Client:</strong>
-					<%= link_to thisClient do %><%= thisClient.name %><% end %>
+					<%= link_to @invoice.client do %><%= @invoice.client.name %><% end %>
 				</p>
 				<p>
 					<strong>Project:</strong>
-					<%= link_to thisProject do %><%= thisProject.name %><% end %>
+					<%= link_to @invoice.project do %><%= @invoice.project.name %><% end %>
 				</p>
 				<p><strong>Description:</strong></p>
 				<p><%= @invoice.description %></p>

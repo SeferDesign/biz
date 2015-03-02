@@ -3,9 +3,7 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-sm-12">
-				<% thisClient = Client.find(@invoice.client_id) %>
-				<% thisProject = Project.find(@invoice.project_id) %>
-				<p>An invoice email has been sent to <%= thisClient.name %>.</p>
+				<p>An invoice email has been sent to <%= @invoice.client.name %>.</p>
 			</div>
 		</div>
 		<div class="row hidden-print">

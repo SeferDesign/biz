@@ -1,13 +1,10 @@
-<% thisClient = Client.find(@invoice.client_id) %>
-<% thisProject = Project.find(@invoice.project_id) %>
-
 <header class="pad">
 	<div class="container">
 		<div class="row">
 			<div class="col-sm-12">
 				<%= wicked_pdf_image_tag company_logo_url %>
-				<% if !thisClient.logo.blank? %>
-				<div class="pull-right"><div id="clientlogo-wrap"><%= image_tag(thisClient.logo.url(:medium)) %></div></div>
+				<% if @invoice.client.logo.present? %>
+				<div class="pull-right"><div id="clientlogo-wrap"><%= image_tag(@invoice.client.logo.url(:medium)) %></div></div>
 				<% end %>
 			</div>
 		</div>
@@ -20,16 +17,16 @@
 			<div class="col-sm-12">
 				<div>
 					<div class="pull-right text-right">
-						<p>Attention: <%= thisClient.contact %><% if !thisClient.name.blank? and thisClient.name != thisClient.contact %><br><%= thisClient.name %><% end %></p>
-						<% if !thisClient.address1.blank? %>
+						<p>Attention: <%= @invoice.client.contact %><% if @invoice.client.name.present? and @invoice.client.name != @invoice.client.contact %><br><%= @invoice.client.name %><% end %></p>
+						<% if @invoice.client.address1.present? %>
 						<p>
-							<%= thisClient.address1 %>
-							<% if !thisClient.address2.blank? %>
-							<br><%= thisClient.address2 %>
+							<%= @invoice.client.address1 %>
+							<% if @invoice.client.address2.present? %>
+							<br><%= @invoice.client.address2 %>
 							<% end %>
-							<br><%= thisClient.city %><% if !thisClient.state.blank? %>, <%= thisClient.state %><% end %> <%= thisClient.zipcode %>
-							<% if !thisClient.intinfo.blank? %>
-							<br><%= thisClient.intinfo %>
+							<br><%= @invoice.client.city %><% if @invoice.client.state.present? %>, <%= @invoice.client.state %><% end %> <%= @invoice.client.zipcode %>
+							<% if @invoice.client.intinfo.present? %>
+							<br><%= @invoice.client.intinfo %>
 							<% end %>
 						<% end %>
 					</div>
@@ -49,7 +46,7 @@
 				<p><%= @invoice.description %><% if @invoice.paid != true %>  <%= invoice_description_suffix_pleasepay %><% end %></p>
 				<p class="indent">Thank you,<br><%= company_pay_to %><br><%= company_full_name %><br><%= company_email %><br><%= company_phone %></p>
 				<hr>
-				<% if !@invoice.lines.blank? %>
+				<% if @invoice.lines.present? %>
 				<table class="table table-condensed">
 		      <thead>
 		        <tr>
@@ -63,7 +60,7 @@
 		      	<% @invoice.lines.each do |line| %>
 			      <tr>
 						  <td><%= line.description %></td>
-						  <% if !line.hours.blank? %>
+						  <% if line.hours.present? %>
 						  <td class="text-center"><%= line.hours %></td>
 						  <td class="text-center"><%= number_to_currency(line.rate, { :unit => ''}) %></td>
 						  <% else %>
