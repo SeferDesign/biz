@@ -49,7 +49,7 @@ class InvoicesController < ApplicationController
         "fields":[
           {
             "title":"Company",
-            "value":"<http://' + request.domain + '/clients/' + @invoice.client.id.to_s + '|' + @invoice.client.name + '>",
+            "value":"<http://' + request.host + '/clients/' + @invoice.client.id.to_s + '|' + @invoice.client.name + '>",
             "short": true
           },
           {
@@ -64,7 +64,7 @@ class InvoicesController < ApplicationController
           },
           {
             "title":"URL",
-            "value":"<http://' + request.domain + '/invoices/' + @invoice.id.to_s + '|/invoices/' + @invoice.id.to_s + '>",
+            "value":"<http://' + request.host + '/invoices/' + @invoice.id.to_s + '|/invoices/' + @invoice.id.to_s + '>",
             "short":true
           }
         ]
