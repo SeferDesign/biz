@@ -38,39 +38,6 @@
 </div>
 <div class="row">
 	<div class="nopad-side col-sm-8 col-sm-offset-2">
-		<canvas id="monthlyRevenueChart" class="chart"></canvas>
+		<%= high_chart('incomeChart', @incomeChart) %>
 	</div>
 </div>
-<script type="text/javascript">
-jQuery(document).ready(function($) {
-
-	var data = {
-    labels: [<% monthsBack.downto(0).each do |m| %>'<%= m.month.ago.strftime("%B") %>',<% end %>],
-    datasets: [
-      {
-				label: 'Hourly',
-				fillColor: 'rgba(138,109,59,0.5)',
-				strokeColor: 'rgba(138,109,59,0.5)',
-				pointColor: 'rgba(138,109,59,0.8)',
-				data: [<% monthsBack.downto(0).each do |m| %><%= Invoice.paidByMonth(m.month.ago).hourly.sum('cost') %>,<% end %>]
-			},
-			{
-				label: 'Contract',
-				fillColor: 'rgba(49,112,143,0.5)',
-				strokeColor: 'rgba(49,112,143,0.5)',
-				pointColor: 'rgba(49,112,143,0.8)',
-				data: [<% monthsBack.downto(0).each do |m| %><%= Invoice.paidByMonth(m.month.ago).contract.sum('cost') %>,<% end %>]
-			},
-			{
-				label: 'Retainer',
-				fillColor: 'rgba(153,153,153,0.5)',
-				strokeColor: 'rgba(153,153,153,0.5)',
-				pointColor: 'rgba(153,153,153,0.8)',
-				data: [<% monthsBack.downto(0).each do |m| %><%= Invoice.paidByMonth(m.month.ago).retainer.sum('cost') %>,<% end %>]
-			}
-    ]
-	};
-	var ctx = document.getElementById('monthlyRevenueChart').getContext('2d');
-	var monthlyRevenueChart = new Chart(ctx).StackedBar(data, {});
-});
-</script>

@@ -21,6 +21,7 @@ gem 'friendly_id'
 gem 'bootstrap-sass'
 gem 'autoprefixer-rails'
 gem 'faraday'
+gem 'lazy_high_charts'
 
 group :development do
   gem 'spring'
