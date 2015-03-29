@@ -141,8 +141,4 @@ module ApplicationHelper
 		Date.today
 	end
 
-	def monthsBack
-		4
-	end
-
 end
