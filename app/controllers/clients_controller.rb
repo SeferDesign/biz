@@ -6,8 +6,6 @@ class ClientsController < ApplicationController
   end
 
   def show
-  	@projects = Project.where(client_id: @client.id)
-  	@invoices = Invoice.where(client_id: @client.id)
   end
 
   def new

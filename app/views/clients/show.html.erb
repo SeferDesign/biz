@@ -57,7 +57,7 @@
 		<div class="row">
 			<div class="col-sm-6">
 				<h3>Projects</h3>
-				<% if @projects.blank? %>
+				<% if @client.projects.blank? %>
 				<p class="lead">No projects.</p>
 				<% else %>
 				<table class="table table-condensed">
@@ -68,7 +68,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<% @projects.each do |project| %>
+						<% @client.projects.each do |project| %>
 						<tr id="projectrow<%= project.id %>">
 							<td><%= link_to project do %><%= project.name %><% end %></td>
 							<td class="text-center"><% if project.completed == true %><i class="fa fa-check green"></i><% else %><span class="spread red">No</span><% end %></td>
@@ -82,7 +82,7 @@
 		<div class="row">
 			<div class="col-sm-6">
 				<h3>Invoices</h3>
-				<% if @invoices.blank? %>
+				<% if @client.invoices.blank? %>
 				<p class="lead">No invoices.</p>
 				<% else %>
 				<table class="table table-condensed">
@@ -95,7 +95,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<% @invoices.each do |invoice| %>
+						<% @client.invoices.each do |invoice| %>
 						<tr id="invoicerow<%= invoice.id %>">
 							<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
 							<td class="text-center hidden-xs"><%= invoice.worktype %></td>
