@@ -3,8 +3,13 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-sm-12">
-				<h1>Clients</h1>
+				<h1><% if params[:inactive] == 'true' %>Inactive<% else %>Active<% end %> Clients</h1>
 				<p><%= link_to 'Home', root_path %></p>
+				<% if params[:inactive] == 'true' %>
+				<p><%= link_to 'Active Clients', clients_path %></p>
+				<% else %>
+				<p><%= link_to 'Inactive Clients', clients_path(:inactive => 'true') %></p>
+				<% end %>
 				<p><%= link_to new_client_path, { :class => 'btn btn-success' } do %><i class="fa fa-plus left"></i>New Client<% end %></p>
 				<% if @clients.blank? %>
 				<p class="lead">No clients.</p>

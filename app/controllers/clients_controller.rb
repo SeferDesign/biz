@@ -2,7 +2,11 @@ class ClientsController < ApplicationController
   before_action :set_client, only: [:show, :edit, :update, :destroy]
 
   def index
-    @clients = Client.all
+    if params[:inactive] == 'true'
+      @clients = Client.inactive.all
+    else
+      @clients = Client.active.all
+    end
   end
 
   def show

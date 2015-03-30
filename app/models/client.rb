@@ -13,6 +13,9 @@ class Client < ActiveRecord::Base
 
 	default_scope { order('name ASC') }
 
+	scope :active, -> { where(active: true) }
+	scope :inactive, -> { where(active: false) }
+
 	def invoiceTotal
 		self.invoices.sum(:cost)
 	end
