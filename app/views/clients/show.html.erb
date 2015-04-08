@@ -22,7 +22,7 @@
 				<% if !@client.email_accounting.blank? %>
 				<p>
 					<strong>Accounting Email(s):</strong><br>
-					<%= @client.email_accounting %><% if !@client.email_accounting_2.blank? %>, <%= @client.email_accounting_2 %><% end %>
+					<%= @client.email_accounting %><% if @client.email_accounting_2.present? %>, <%= @client.email_accounting_2 %><% end %><% if @client.email_accounting_3.present? %>, <%= @client.email_accounting_3 %><% end %>
 				</p>
 				<% end %>
 				<% if !@client.site_url.blank? %>

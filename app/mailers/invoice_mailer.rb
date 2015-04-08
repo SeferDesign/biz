@@ -9,7 +9,9 @@ class InvoiceMailer < ActionMailer::Base
 
     @ourCCEmail = 'Robert Sefer <rsefer@gmail.com>'
 
-    if !@client.email_accounting_2.blank?
+    if @client.email_accounting_2.present? and @client.email_accounting_3.present?
+      @emailCC = @client.email_accounting_2 + ', ' + @client.email_accounting_3 + ', ' + @ourCCEmail
+    elsif @client.email_accounting_2.present?
       @emailCC = @client.email_accounting_2 + ', ' + @ourCCEmail
     else
       @emailCC = @ourCCEmail
