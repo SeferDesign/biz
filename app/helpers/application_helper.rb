@@ -40,7 +40,7 @@ module ApplicationHelper
 		'info@seferdesign.com'
 	end
 	def company_street
-		'1 E. Scott #2006'
+		'1 E. Scott #1402'
 	end
 	def company_city
 		'Chicago'
