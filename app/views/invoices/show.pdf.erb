@@ -4,7 +4,7 @@
 			<div class="col-sm-12">
 				<%= wicked_pdf_image_tag company_logo_url %>
 				<% if @invoice.client.logo.present? %>
-				<div class="pull-right"><div id="clientlogo-wrap"><%= image_tag(@invoice.client.logo.url(:medium)) %></div></div>
+				<div class="pull-right"><div id="clientlogo-wrap" class="client-logo"><%= image_tag(@invoice.client.logo.url()) %></div></div>
 				<% end %>
 			</div>
 		</div>
