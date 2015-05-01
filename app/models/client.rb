@@ -9,7 +9,7 @@ class Client < ActiveRecord::Base
 		:storage => :s3,
 		:s3_credentials => "#{Rails.root}/config/aws.yml",
     :path => '/images/:id/:style.:extension'
-	validates_attachment_content_type :logo, :content_type => %w(image/jpeg image/jpg image/png)
+	validates_attachment_content_type :logo, :content_type => %w(image/jpeg image/jpg image/png image/svg)
 
 	default_scope { order('name ASC') }
 
