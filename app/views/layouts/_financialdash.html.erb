@@ -18,10 +18,10 @@
 		<h3 class="text-center">Active Goals</h3>
 		<% Goal.where('startdate <= ? AND enddate >=  ?', today, today).order('enddate DESC, amount DESC').each_with_index do |goal, index| %>
 			<% if index == 0 %>
-			<span class="lead"><%= goal.timeperiod %> (<%= goal.goaltype %>): <span class="pull-right currency"><%= number_to_currency(goal.amount, { :negative_format => '(%n)' }) %></span></span>
+			<span class="lead"><%= link_to goal do %><%= goal.timeperiod %> (<%= goal.goaltype %>):<% end %><span class="pull-right currency"><%= number_to_currency(goal.amount, { :negative_format => '(%n)' }) %></span></span>
 			<hr class="halfbottom">
 			<% else %>
-			<span class="lead"><%= goal.timeperiod %> (<%= goal.goaltype %>): <span class="pull-right currency"><%= number_to_currency(goal.amount, { :negative_format => '(%n)' }) %></span></span><br>
+			<span class="lead"><%= link_to goal do %><%= goal.timeperiod %> (<%= goal.goaltype %>):<% end %><span class="pull-right currency"><%= number_to_currency(goal.amount, { :negative_format => '(%n)' }) %></span></span><br>
 			<% end %>
 		<% end %>
 	</div>
