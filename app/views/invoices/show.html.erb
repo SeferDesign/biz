@@ -21,6 +21,10 @@
 					<strong>Project:</strong>
 					<%= link_to @invoice.project do %><%= @invoice.project.name %><% end %>
 				</p>
+				<p>
+					<strong>ID Display:</strong>
+					<%= @invoice.display_id %>
+				</p>
 				<p><strong>Description:</strong></p>
 				<p><%= @invoice.description %></p>
 				<p>

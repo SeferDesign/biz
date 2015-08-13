@@ -21,4 +21,9 @@ class Invoice < ActiveRecord::Base
 	scope :paidByQ3, -> (year) { paid.where("paiddate >= ? AND paiddate <= ?", Date.new(year, 7, 1), Date.new(year, 9, 30)) }
 	scope :paidByQ4, -> (year) { paid.where("paiddate >= ? AND paiddate <= ?", Date.new(year, 10, 1), Date.new(year, 12, 31)) }
 
+	def display_id
+		id_offset = 100000 + self.id
+		self.client.name.downcase.tr(' ', '') + '-' + id_offset.to_s
+	end
+
 end
