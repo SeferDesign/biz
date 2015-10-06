@@ -115,3 +115,14 @@ footer {
 .doicons i {
 	vertical-align: middle;
 }
+
+.button-wrap-nopad {
+
+	padding-left: 0px;
+
+	.btn-block {
+		padding-left: 0px;
+		padding-right: 0px;
+	}
+	
+}
