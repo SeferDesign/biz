@@ -13,13 +13,13 @@
 		<div class="col-lg-4 col-sm-6">
 			<div class="form-group">
 				<%= f.label :client_id, 'Client' %>
-				<%= collection_select(:invoice, 'client_id', Client.all, :id, :name, {}, { :class => 'form-control' }) %>
+				<%= collection_select(:invoice, 'client_id', Client.all, :id, :name, { :include_blank => true }, { :class => 'form-control' }) %>
 			</div>
 		</div>
 		<div class="col-lg-4 col-sm-6">
 			<div class="form-group">
 				<%= f.label :project_id, 'Project' %>
-				<%= collection_select(:invoice, 'project_id', Project.all, :id, :project_client_and_name, {}, { :class => 'form-control' }) %>
+				<%= collection_select(:invoice, 'project_id', Project.all, :id, :project_client_and_name, { :include_blank => true }, { :class => 'form-control' }) %>
 			</div>
 		</div>
 		<div class="col-lg-2 col-sm-6">
@@ -27,7 +27,7 @@
 				<%= f.label :date, 'Invoice Date' %>
 				<div class="input-group">
 					<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-					<%= f.text_field :date, :required => true, :placeholder => 'YYYY-MM-DD', class: 'form-control datepicker' %>
+					<%= f.text_field :date, :required => true, :placeholder => 'YYYY-MM-DD', :class => 'form-control datepicker', :value => @invoice.date ? @invoice.date : Time.now.strftime("%Y-%m-%d") %>
 				</div>
 			</div>
 		</div>
