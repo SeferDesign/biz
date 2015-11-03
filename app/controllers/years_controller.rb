@@ -16,6 +16,8 @@ class YearsController < ApplicationController
       @paidClients.add(invoice.client)
     end
 
+    @paidClients = @paidClients.sort { |a,b| b.yearPaidInvoices(@year.year).sum(:cost) <=> a.yearPaidInvoices(@year.year).sum(:cost) }
+
     @invoicesUnpaid = Invoice.unpaid.where("date >= ? AND date <= ?", Date.new(@year.year, 1, 1), Date.new(@year.year, 12, 31))
 
     @incomeQ1 = Invoice.paidByQ1(@year.year).sum('cost')
