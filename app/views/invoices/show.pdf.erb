@@ -2,7 +2,7 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-sm-12">
-				<%= wicked_pdf_image_tag company_logo_url %>
+				<%= wicked_pdf_image_tag '/images/sdc_acronym.svg' %>
 				<% if @invoice.client.logo.present? %>
 				<div class="pull-right"><div id="clientlogo-wrap" class="client-logo"><%= image_tag(@invoice.client.logo.url()) %></div></div>
 				<% end %>

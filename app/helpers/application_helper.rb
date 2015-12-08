@@ -1,7 +1,7 @@
 module ApplicationHelper
 
 	def company_full_name
-		'Sefer Design Company'
+		'Sefer Design Company LLC'
 	end
 	def company_abbrv_name
 		'Sefer Design Co.'
@@ -13,19 +13,19 @@ module ApplicationHelper
 		'http://seferdesign.com'
 	end
 	def company_logo_url
-		'/images/sdc_block_dark.svg'
+		image_url('sdc.svg')
 	end
 	def company_logo_alt_url
-		'/images/sdc_block_white.svg'
+		image_url('sdc_white.svg')
 	end
-	def company_text_logo_url
-		'/images/sdc_text_dark.svg'
+	def company_acronym_logo_url
+		image_url('sdc_acronym.svg')
 	end
-	def company_text_logo_alt_url
-		'/images/sdc_text_white.svg'
+	def company_acronym_logo_alt_url
+		image_url('sdc_acronym_white.svg')
 	end
 	def company_favicon_url
-		'/images/sdc_favicon_144.png'
+		image_url('sdc_favicon_144.png')
 	end
 	def company_pay_to
 		'Robert Sefer'
