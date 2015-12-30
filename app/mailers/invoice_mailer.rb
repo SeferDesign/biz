@@ -54,6 +54,7 @@ class InvoiceMailer < ActionMailer::Base
       from_name: "Sefer Design Company",
       from_email: 'info@seferdesign.com',
       to: @emailAddressList,
+      preserve_recipients: true, # Preserves traditional CC but each email address counts seperately towards quota
       subject: "Invoice from Sefer Design Company",
       html: render_to_string(:action => 'invoice_email.html', :locals => { :invoice => @invoice }, :layout => false),
       attachments: [{
