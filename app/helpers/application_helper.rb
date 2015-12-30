@@ -10,7 +10,7 @@ module ApplicationHelper
 		'SDC'
 	end
 	def company_site_url
-		'http://seferdesign.com'
+		'https://seferdesign.com'
 	end
 	def company_logo_url
 		image_url('sdc.svg')
@@ -28,7 +28,7 @@ module ApplicationHelper
 		image_url('sdc_favicon_144.png')
 	end
 	def company_pay_to
-		'Robert Sefer'
+		'Sefer Design Company LLC'
 	end
 	def company_phone
 		'(630) 204-0013'
