@@ -45,7 +45,7 @@
 				<div class="clearfix"></div>
 				<hr>
 				<p><%= @invoice.description %><% if @invoice.paid != true %>  <%= invoice_description_suffix_pleasepay %><% end %></p>
-				<p class="indent">Thank you,<br><%= company_pay_to %><br><%= company_full_name %><br><%= company_email %><br><%= company_phone %></p>
+				<p class="indent">Thank you,<br><%= company_operator_name %><br><%= company_full_name %><br><%= company_email %><br><%= company_phone %></p>
 				<hr>
 				<% if @invoice.lines.present? %>
 				<table class="table table-condensed">

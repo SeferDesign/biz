@@ -30,6 +30,9 @@ module ApplicationHelper
 	def company_pay_to
 		'Sefer Design Company LLC'
 	end
+	def company_operator_name
+		'Robert Sefer'
+	end
 	def company_phone
 		'(630) 204-0013'
 	end
