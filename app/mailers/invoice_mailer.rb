@@ -47,7 +47,8 @@ class InvoiceMailer < ActionMailer::Base
 
     @tempPDF = WickedPdf.new.pdf_from_string(
       pdf,
-      :encoding => 'UTF-8'
+      :encoding => 'UTF-8',
+      :page_size => 'Letter'
     )
 
     message = {
