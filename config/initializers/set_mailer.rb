@@ -1,11 +1,10 @@
 ActionMailer::Base.delivery_method = :smtp
+ActionMailer::Base.default charset: "utf-8"
 ActionMailer::Base.smtp_settings = {
-  :address              => 'mail.seferdesign.com',
+  :address              => 'smtp.mandrillapp.com',
   :port                 => 587,
-  :domain               => 'seferdesign.com',
+  :enable_starttls_auto => true,
   :user_name            => 'info@seferdesign.com',
-  :password             => Figaro.env.email_password,
-  :authentication       => 'plain',
-  :enable_starttls_auto => false,
-  :openssl_verify_mode  => 'none'
+  :password             => Figaro.env.mandrill_api_key,
+  :authentication       => 'login'
 }

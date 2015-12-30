@@ -34,7 +34,7 @@ module ApplicationHelper
 		'(630) 204-0013'
 	end
 	def company_email
-		'rsefer@gmail.com'
+		'info@seferdesign.com'
 	end
 	def company_email_invoice
 		'info@seferdesign.com'
