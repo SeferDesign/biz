@@ -28,7 +28,7 @@ module ApplicationHelper
 		image_url('sdc_favicon_144.png')
 	end
 	def company_pay_to
-		'Sefer Design Company LLC'
+		self.company_full_name
 	end
 	def company_operator_name
 		'Robert Sefer'
@@ -40,7 +40,7 @@ module ApplicationHelper
 		'info@seferdesign.com'
 	end
 	def company_email_invoice
-		'info@seferdesign.com'
+		self.company_email
 	end
 	def company_street
 		'1 E. Scott #1402'

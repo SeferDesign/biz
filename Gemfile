@@ -22,6 +22,7 @@ gem 'bootstrap-sass'
 gem 'autoprefixer-rails'
 gem 'faraday'
 gem 'lazy_high_charts'
+gem 'mandrill-api', '~> 1.0', '>= 1.0.53'
 
 group :development do
   gem 'spring'
