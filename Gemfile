@@ -23,6 +23,7 @@ gem 'autoprefixer-rails'
 gem 'faraday'
 gem 'lazy_high_charts'
 gem 'mandrill-api', '~> 1.0', '>= 1.0.53'
+gem 'roadie', '~> 3.1.1'
 
 group :development do
   gem 'spring'
