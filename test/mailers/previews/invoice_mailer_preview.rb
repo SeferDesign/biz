@@ -2,7 +2,7 @@
 class InvoiceMailerPreview < ActionMailer::Preview
 
   def invoice_email
-    InvoiceMailer.invoice_email(Invoice.first)
+    #InvoiceMailer.invoice_email(Invoice.first)
   end
 
 end
