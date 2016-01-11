@@ -9,8 +9,8 @@ class SummaryMailer < ActionMailer::Base
   end
 
   def weekly_activity_summary
-    @date_start = Date.today - 7.days
-    @date_end = Date.today - 1.days
+    @date_start = Date.today - 6.days
+    @date_end = Date.today
     @invoicesSent = Invoice.where(:date => @date_start..@date_end).order(date: :asc)
     @invoicesPaid = Invoice.paid.where(:paiddate => @date_start..@date_end).order(paiddate: :asc)
 
