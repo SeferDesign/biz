@@ -2,7 +2,11 @@ class GoalsController < ApplicationController
   before_action :set_goal, only: [:show, :edit, :update, :destroy]
 
   def index
-    @goals = Goal.all.sort { |a,b| b.enddate <=> a.enddate }
+    if params[:showall] == 'true'
+      @goals = Goal.all.sort { |a,b| b.enddate <=> a.enddate }
+    else
+      @goals = Goal.recent.sort { |a,b| b.enddate <=> a.enddate }
+    end
   end
 
   def show

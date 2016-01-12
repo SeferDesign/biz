@@ -1,5 +1,7 @@
 class Goal < ActiveRecord::Base
 
+  scope :recent, -> { where('enddate >= ?', Date.today - 6.months) }
+
   def actualamount
     if self.timeperiod == 'Year'
       if self.goaltype == 'Total'
