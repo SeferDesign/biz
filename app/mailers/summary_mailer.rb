@@ -20,7 +20,7 @@ class SummaryMailer < ActionMailer::Base
       name: 'Robert Sefer'
     }]
 
-    email_html_raw = render_to_string(:action => 'weekly_activity_summary.html', :locals => { :invoicesSent => @invoicesSent, :invoicesPaid => @invoicesPaid, :date_start => @date_start, :date_end => @date_end }, :layout => false)
+    email_html_raw = render_to_string(:layout => 'layouts/mail.html', :action => 'weekly_activity_summary.html', :locals => { :invoicesSent => @invoicesSent, :invoicesPaid => @invoicesPaid, :date_start => @date_start, :date_end => @date_end })
 
     html_roadie = Roadie::Document.new email_html_raw
     html_inlined = html_roadie.transform

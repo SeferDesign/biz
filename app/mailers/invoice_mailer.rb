@@ -51,13 +51,18 @@ class InvoiceMailer < ActionMailer::Base
       :page_size => 'Letter'
     )
 
+    email_html_raw = render_to_string(:layout => 'layouts/mail.html', :action => 'invoice_email.html', :locals => { :invoice => @invoice })
+
+    html_roadie = Roadie::Document.new email_html_raw
+    html_inlined = html_roadie.transform
+
     message = {
       from_name: "Sefer Design Company",
       from_email: 'info@seferdesign.com',
       to: @emailAddressList,
       preserve_recipients: true, # Preserves traditional CC but each email address counts seperately towards quota
       subject: "Invoice from Sefer Design Company",
-      html: render_to_string(:action => 'invoice_email.html', :locals => { :invoice => @invoice }, :layout => false),
+      html: html_inlined,
       attachments: [{
         type: 'application/pdf',
         name: "#{@pdfFileName}.pdf",
