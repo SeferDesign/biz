@@ -26,4 +26,14 @@ class Invoice < ActiveRecord::Base
 		self.client.name.downcase.tr(' ', '') + '-' + id_offset.to_s
 	end
 
+	def hasDiscount
+		hasTruth = false
+		self.lines.each do |line|
+			if line.discount?
+				hasTruth = true
+			end
+		end
+		hasTruth
+	end
+
 end

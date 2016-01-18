@@ -10,7 +10,8 @@
 				<p class="lead">Total Income: <span class="pull-right currency green"><%= number_to_currency(@incomeYear, { :negative_format => '(%n)' }) %></span></p>
 				<p class="lead">Tax Rate*: <span class="pull-right currency"><%= number_to_percentage(@year.taxrate * 100, :precision => 2) %></span></p>
 				<p class="lead">Tax Estimate*: <span class="pull-right currency red"><%= number_to_currency(@incomeYear * @year.taxrate, { :negative_format => '(%n)' }) %></span></p>
-				<p><small>*Tax rate and estimates are conservative and independent of expenses.</small></p>
+				<p class="lead">Discounts Given: <span class="pull-right currency">$<%= number_to_currency(@year.discounts, { :negative_format => '(%n)' }) %></span></p>
+				<p><small>*Tax rate and estimates are conservative and independent of expenses and discounts.</small></p>
 			</div>
 		</div>
 		<div class="row">
@@ -121,7 +122,7 @@
 							<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
 							<td><%= invoice.paiddate %></td>
 							<td class="text-center hidden-xs"><%= invoice.worktype %></td>
-							<td class="text-right"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
+							<td class="text-right"><% if invoice.hasDiscount %>*<% end %><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
 							<td class="text-center"><% if invoice.paid == true %><i class="fa fa-check green"></i><% else %><span class="spread red">Not Paid</span><% end %></td>
 						</tr>
 						<% end %>

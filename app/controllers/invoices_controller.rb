@@ -2,7 +2,7 @@ class InvoicesController < ApplicationController
   before_action :set_invoice, only: [:show, :edit, :email, :update, :destroy]
 
   def index
-    
+
     @notableInvoices = Invoice.all.unpaid + Invoice.all.recent
 
     @months = []
@@ -31,8 +31,7 @@ class InvoicesController < ApplicationController
 
   def show
     if @invoice.client.currentrate
-      currentrate = sprintf("%.2f", @invoice.client.currentrate)
-      @ratePlaceholder = "Rate ($#{currentrate})"
+      @ratePlaceholder = "Rate ($#{@invoice.client.currentrate})"
     else
       @ratePlaceholder = 'Rate'
     end
