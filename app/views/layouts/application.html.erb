@@ -2,20 +2,14 @@
 <html>
 <head>
   <title><%= yield(:title) %><%= company_abbrv_name %> Biz Admin</title>
-
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=3.0" />
-
-  <!-- Fav and touch icons -->
+  <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0" />
   <link rel="apple-touch-icon-precomposed" href="<%= company_favicon_url %>">
   <link rel="shortcut icon" href="<%= company_favicon_url %>">
-
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
   <%= stylesheet_link_tag    "application", media: "all", "data-turbolinks-track" => true %>
   <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
   <%= csrf_meta_tags %>
-
-  <!-- Typekit -->
   <script type="text/javascript" src="//use.typekit.net/rwh3txf.js"></script>
   <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
 </head>
