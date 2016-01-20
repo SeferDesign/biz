@@ -38,7 +38,7 @@
 					<p><strong>Payment Method:</strong> <%= @invoice.paymenttype %></p>
 					<% else %>
 					<p><strong>Status:</strong> <span class="spread red">Not Paid</span></p>
-					<p>This payment can be made out to:</p>
+					<p>This payment can be made out to '<%= company_pay_to %>' and mailed to:</p>
 					<p><%= company_pay_to %><br><%= company_street %><br><%= company_city %>, <%= company_state_abbrv %> <%= company_zipcode %></p>
 					<% end %>
 				</div>
