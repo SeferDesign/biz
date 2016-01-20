@@ -19,7 +19,7 @@ module ApplicationHelper
 		image_url('sdc_white.svg')
 	end
 	def company_logo_alt_png_url
-		image_url('sdc_white.png')
+		'/images/sdc_white.png'
 	end
 	def company_acronym_logo_url
 		image_url('sdc_acronym.svg')
