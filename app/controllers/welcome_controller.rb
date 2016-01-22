@@ -12,7 +12,10 @@ class WelcomeController < ApplicationController
       f.series(
         :name => 'Revenue',
         :data => @months.map{ |x,y| [y] },
-        :animation => false
+        :animation => false,
+        :tooltip => {
+          :pointFormat => '<strong>${point.y}</strong><br/>'
+        }
       )
       f.xAxis(
         :categories => @months.map{ |x,y| [x] }

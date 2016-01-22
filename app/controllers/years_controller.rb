@@ -35,7 +35,10 @@ class YearsController < ApplicationController
       f.series(
         :name => 'Revenue',
         :data => @months,
-        :animation => false
+        :animation => false,
+        :tooltip => {
+          :pointFormat => '<strong>${point.y}</strong><br/>'
+        }
       )
       f.xAxis(
         :categories => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec']
