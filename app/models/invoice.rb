@@ -23,7 +23,7 @@ class Invoice < ActiveRecord::Base
 
 	def display_id
 		id_offset = 100000 + self.id
-		self.client.name.downcase.tr(' ', '') + '-' + id_offset.to_s
+		self.client.name.downcase.gsub(/[^0-9A-Za-z]/, '')[0..20] + '-' + id_offset.to_s
 	end
 
 	def hasDiscount
