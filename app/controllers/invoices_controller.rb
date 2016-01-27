@@ -2,31 +2,7 @@ class InvoicesController < ApplicationController
   before_action :set_invoice, only: [:show, :edit, :email, :update, :destroy]
 
   def index
-
     @notableInvoices = Invoice.all.unpaid + Invoice.all.recent
-
-    @months = []
-
-    4.downto(0).each do |m|
-      @months.push([m.month.ago.strftime("%B"), Invoice.paidByMonth(m.month.ago).sum('cost').to_f])
-    end
-
-    @incomeChart = LazyHighCharts::HighChart.new('graph') do |f|
-      f.series(
-        :name => 'Revenue',
-        :data => @months.map{ |x,y| [y] },
-        :animation => false
-      )
-      f.xAxis(
-        :categories => @months.map{ |x,y| [x] }
-      )
-      f.chart(
-        {
-          :defaultSeriesType => 'column'
-        }
-      )
-    end
-
   end
 
   def show

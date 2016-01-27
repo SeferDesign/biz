@@ -25,31 +25,6 @@ class YearsController < ApplicationController
     @incomeQ3 = Invoice.paidByQ3(@year.year).sum('cost')
     @incomeQ4 = Invoice.paidByQ4(@year.year).sum('cost')
 
-    @months = []
-
-    (1..12).each do |m|
-      @months.push(Invoice.paidByMonth(Date.new(@year.year, m, 1)).sum('cost').to_f)
-    end
-
-    @incomeChart = LazyHighCharts::HighChart.new('graph') do |f|
-      f.series(
-        :name => 'Revenue',
-        :data => @months,
-        :animation => false,
-        :tooltip => {
-          :pointFormat => '<strong>${point.y}</strong><br/>'
-        }
-      )
-      f.xAxis(
-        :categories => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec']
-      )
-      f.chart(
-        {
-          :defaultSeriesType => 'column'
-        }
-      )
-    end
-
     respond_to do |format|
       format.html
       format.csv do
