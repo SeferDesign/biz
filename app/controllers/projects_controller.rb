@@ -6,7 +6,6 @@ class ProjectsController < ApplicationController
   end
 
   def show
-  	@invoices = @project.invoices
   end
 
   def new

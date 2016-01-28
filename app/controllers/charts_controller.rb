@@ -5,7 +5,7 @@ class ChartsController < ApplicationController
   def trailing_x_months
     months = []
     @number_of_months.downto(0).each do |m|
-      months.push([m.month.ago.strftime("%B"), Invoice.paidByMonth(m.month.ago).sum('cost').to_f])
+      months.push([m.month.ago.strftime("%B"), Invoice.paidByMonth(m.month.ago.year, m.month.ago.month).sum('cost').to_f])
     end
     render json: months
   end
@@ -13,7 +13,7 @@ class ChartsController < ApplicationController
   def year_by_month
     months = []
     (1..12).each do |m|
-      months.push([Date::ABBR_MONTHNAMES[m], Invoice.paidByMonth(Date.new(@year.year, m, 1)).sum('cost').to_f])
+      months.push([Date::ABBR_MONTHNAMES[m], Invoice.paidByMonth(@year.year, m).sum('cost').to_f])
     end
     render json: months
   end

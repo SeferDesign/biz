@@ -15,7 +15,7 @@ class Invoice < ActiveRecord::Base
 
 	scope :unpaidByYear, -> (year) { unpaid.where("date >= ? AND date <= ?", Date.new(year, 1, 1), Date.new(year, 12, 31)) }
 	scope :paidByYear, -> (year) { paid.where("SELECT extract(YEAR FROM paiddate) = ?", year) }
-	scope :paidByMonth, -> (date) { paid.where("SELECT extract(YEAR FROM paiddate) = ? AND extract(MONTH FROM paiddate) = ?", date.year, date.month) }
+	scope :paidByMonth, -> (year, monthNumber) { paid.where("SELECT extract(YEAR FROM paiddate) = ? AND extract(MONTH FROM paiddate) = ?", year, monthNumber) }
 	scope :paidByQuarter, -> (year, quarterNumber) { paid.where("paiddate >= ? AND paiddate <= ?", Date.new(year, 3 * quarterNumber - 2, 1), Date.new(year, 3 * quarterNumber, 1).end_of_month) }
 
 	def display_id
