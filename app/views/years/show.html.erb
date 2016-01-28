@@ -15,10 +15,7 @@
 			</div>
 		</div>
 		<div class="row">
-			<%= render partial: 'quarter', locals: { quarterNumber: 1 } %>
-			<%= render partial: 'quarter', locals: { quarterNumber: 2 } %>
-			<%= render partial: 'quarter', locals: { quarterNumber: 3 } %>
-			<%= render partial: 'quarter', locals: { quarterNumber: 4 } %>
+			<%= render partial: 'quarter', collection: [1, 2, 3, 4], as: :quarterNumber %>
 		</div>
 		<div class="row">
 			<div class="col-sm-8 col-sm-offset-2">

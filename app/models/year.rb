@@ -27,18 +27,7 @@ class Year < ActiveRecord::Base
 	end
 
 	def incomeByQuarter(quarterNumber)
-		case quarterNumber
-			when 1
-				Invoice.paidByQ1(self.year).sum('cost')
-			when 2
-				Invoice.paidByQ2(self.year).sum('cost')
-			when 3
-				Invoice.paidByQ3(self.year).sum('cost')
-			when 4
-				Invoice.paidByQ4(self.year).sum('cost')
-			else
-				0
-		end
+		self.invoices.paidByQuarter(self.year, quarterNumber).sum('cost')
 	end
 
 	def taxOwedByQuarter(quarterNumber)
