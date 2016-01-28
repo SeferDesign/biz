@@ -8,7 +8,7 @@ class Year < ActiveRecord::Base
 
 	def invoiceDiscountsTotal
 		discountLinesTotal = 0
-		self.invoices.paid.each do |invoice|
+		self.invoices.paidByYear(self.year).each do |invoice|
 			invoice.lines.each do |line|
 				if line.discount?
 					discountLinesTotal += line.total
@@ -19,7 +19,7 @@ class Year < ActiveRecord::Base
 	end
 
 	def incomeTotal
-		self.invoices.paid.sum('cost')
+		self.invoices.paidByYear(self.year).sum('cost')
 	end
 
 	def taxOwedTotal
@@ -46,7 +46,7 @@ class Year < ActiveRecord::Base
 	end
 
 	def paidClients
-    self.invoices.paid.map { |i| i.client }.uniq.sort { |a,b| b.yearPaidInvoices(self.year).sum(:cost) <=> a.yearPaidInvoices(self.year).sum(:cost) }
+    self.invoices.paidByYear(self.year).map { |i| i.client }.uniq.sort { |a,b| b.yearPaidInvoices(self.year).sum(:cost) <=> a.yearPaidInvoices(self.year).sum(:cost) }
 	end
 
 end

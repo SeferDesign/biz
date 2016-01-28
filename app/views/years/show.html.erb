@@ -54,12 +54,8 @@
 					</tbody>
 				</table>
 				<% end %>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-sm-12">
-				<% if @year.invoices.paid.blank? %>
-				<p class="lead">No invoices.</p>
+				<% if @year.invoices.paidByYear(@year.year).blank? %>
+				<p class="lead">No invoices were paid in <%= @year.year %>.</p>
 				<% else %>
 				<h3>Paid Invoices By Client</h3>
 				<table class="table table-condensed">
@@ -93,7 +89,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<% @year.invoices.paid.each do |invoice| %>
+						<% @year.invoices.paidByYear(@year.year).each do |invoice| %>
 						<tr id="invoicerow<%= invoice.id %>">
 							<td><%= link_to Client.find(invoice.client_id) do %><%= Client.find(invoice.client_id).name %><% end %></td>
 							<td><%= link_to invoice do %><%= invoice.date %><% end %></td>

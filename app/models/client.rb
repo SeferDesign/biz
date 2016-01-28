@@ -26,7 +26,7 @@ class Client < ActiveRecord::Base
 	end
 
 	def yearPaidInvoices(year)
-		self.invoices.paid.where("paiddate >= ? AND paiddate <= ?", Date.new(year, 1, 1), Date.new(year, 12, 31))
+		self.invoices.paidByYear(year)
 	end
 
 end
