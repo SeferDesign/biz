@@ -2,30 +2,60 @@ class Goal < ActiveRecord::Base
 
   scope :recent, -> { where('enddate >= ?', Date.today - 6.months) }
 
-  def actualamount
+  def invoicesPaidInTimeScope
     if self.timeperiod == 'Year'
-      if self.goaltype == 'Total'
-        Invoice.paidByYear(self.enddate.year).sum('cost')
-      elsif self.goaltype == 'Contract'
-        Invoice.paidByYear(self.enddate.year).contract.sum('cost')
-      elsif self.goaltype == 'Hourly'
-        Invoice.paidByYear(self.enddate.year).hourly.sum('cost')
-      elsif self.goaltype == 'Retainer'
-        Invoice.paidByYear(self.enddate.year).retainer.sum('cost')
-      end
+      Invoice.paidByYear(self.enddate.year)
     elsif self.timeperiod == 'Month'
-      if self.goaltype == 'Total'
-        Invoice.paidByMonth(self.enddate.year, self.enddate.month).sum('cost')
-      elsif self.goaltype == 'Contract'
-        Invoice.paidByMonth(self.enddate.year, self.enddate.month).contract.sum('cost')
-      elsif self.goaltype == 'Hourly'
-        Invoice.paidByMonth(self.enddate.year, self.enddate.month).hourly.sum('cost')
-      elsif self.goaltype == 'Retainer'
-        Invoice.paidByMonth(self.enddate.year, self.enddate.month).retainer.sum('cost')
-      end
+      Invoice.paidByMonth(self.enddate.year, self.enddate.month)
     else
-      0
+      nil
     end
+  end
+
+  def actualamount
+    if self.goaltype == 'Total'
+      self.invoicesPaidInTimeScope.sum('cost')
+    elsif self.goaltype == 'Contract'
+      self.invoicesPaidInTimeScope.contract.sum('cost')
+    elsif self.goaltype == 'Hourly'
+      self.invoicesPaidInTimeScope.hourly.sum('cost')
+    elsif self.goaltype == 'Retainer'
+      self.invoicesPaidInTimeScope.retainer.sum('cost')
+    end
+  end
+
+  def status
+    if Date.today > self.enddate
+      'Past'
+    elsif Date.today < self.startdate
+      'Future'
+    else
+      'Current'
+    end
+  end
+
+  def met
+    if self.actualamount >= self.amount
+      true
+    else
+      false
+    end
+  end
+
+  def actualProgressAsFraction
+    self.actualamount / self.amount
+  end
+
+  def fullPeriodDays
+    (self.enddate - self.startdate + 1).to_f
+  end
+
+  def paceDays
+    (Date.today - self.startdate + 1).to_f
+  end
+
+  def paceAsFraction
+    self.paceDays / self.fullPeriodDays
   end
 
 end

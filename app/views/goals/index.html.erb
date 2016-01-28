@@ -41,10 +41,8 @@
 											<span class="red"><strong>&times;</strong></span>
 											<% end %>
 										<% elsif goal.status == 'Current' %>
-											<% if goal.timeperiod == 'Year' %>
-											<%= number_to_percentage(goal.actualamount / goal.amount * 100, :strip_insignificant_zeros => true, :precision => 2) %>
-											<% elsif goal.timeperiod == 'Month' %>
-											<%= number_to_percentage(goal.actualamount / goal.amount * 100, :strip_insignificant_zeros => true, :precision => 2) %>
+											<% if goal.timeperiod == 'Year' or goal.timeperiod == 'Month' %>
+											<%= percentageDisplay(goal.actualProgressAsFraction) %>
 											<% end %>
 										<% elsif goal.status == 'Future' %>
 										&mdash;

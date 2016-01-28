@@ -31,25 +31,20 @@
 							<% end %>
 						</p>
 						<% elsif @goal.status == 'Current' %>
-						<p><strong>Goal Pace:</strong> <%= number_to_percentage(@pace, :strip_insignificant_zeros => true, :precision => 2) %></p>
-						<p><strong>Actual Progress:</strong> <%= number_to_percentage(@progress, :strip_insignificant_zeros => true, :precision => 2) %></p>
+						<p><strong>Goal Pace:</strong> <%= percentageDisplay(@goal.paceAsFraction) %></p>
+						<p><strong>Actual Progress:</strong> <%= percentageDisplay(@goal.actualProgressAsFraction) %></p>
 						<% elsif @goal.status == 'Future' %>
-						<p>
-							<strong>Actual Progress:</strong> &mdash;
-						</p>
+						<p><strong>Actual Progress:</strong> &mdash;</p>
 						<% end %>
 						<% if @goal.status == 'Current' %>
-							<div class="progress progress-striped">
-								<div class="progress-bar progress-bar-primary" role="progressbar" style="width: <%= number_to_percentage(@firstLength, :strip_insignificant_zeros => true, :precision => 2) %>"></div>
-								<div class="progress-bar progress-bar-<% if @progressRaw > @paceRaw %>success<% else %>danger<% end %>" role="progressbar"style="width: <%= number_to_percentage(@secondLength, :strip_insignificant_zeros => true, :precision => 2) %>"></div>
-							</div>
+							<%= progressbarDisplay %>
 						<% end %>
 					</div>
 				</div>
 			</div>
 			<div class="col-sm-12">
 				<h3>Paid Invoices</h3>
-				<% if @invoicesPaid.blank? %>
+				<% if @goal.invoicesPaidInTimeScope.blank? %>
 				<p class="lead">No paid invoices.</p>
 				<% else %>
 				<table class="table table-condensed">
@@ -64,7 +59,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<% @invoicesPaid.each do |invoice| %>
+						<% @goal.invoicesPaidInTimeScope.each do |invoice| %>
 						<tr id="invoicerow<%= invoice.id %>">
 							<td><%= link_to invoice.client do %><%= invoice.client.name %><% end %></td>
 							<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
