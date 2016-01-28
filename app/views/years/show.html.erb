@@ -7,41 +7,18 @@
 				<p><%= link_to "Download CSV", year_path(@year, format: "csv") %></p>
 			</div>
 			<div class="col-sm-8 col-sm-offset-2">
-				<p class="lead">Total Income: <span class="pull-right currency green"><%= number_to_currency(@incomeYear, { :negative_format => '(%n)' }) %></span></p>
+				<p class="lead">Total Income: <span class="pull-right currency green"><%= number_to_currency(@year.incomeTotal, { :negative_format => '(%n)' }) %></span></p>
 				<p class="lead">Tax Rate*: <span class="pull-right currency"><%= number_to_percentage(@year.taxrate * 100, :precision => 2) %></span></p>
-				<p class="lead">Tax Estimate*: <span class="pull-right currency red"><%= number_to_currency(@incomeYear * @year.taxrate, { :negative_format => '(%n)' }) %></span></p>
-				<p class="lead">Discounts Given: <span class="pull-right currency">$<%= number_to_currency(@year.discounts, { :negative_format => '(%n)' }) %></span></p>
+				<p class="lead">Tax Estimate*: <span class="pull-right currency red"><%= number_to_currency(@year.taxOwedTotal, { :negative_format => '(%n)' }) %></span></p>
+				<p class="lead">Discounts Given^: <span class="pull-right currency">$<%= number_to_currency(@year.invoiceDiscountsTotal, { :negative_format => '(%n)' }) %></span></p>
 				<p><small>*Tax rate and estimates are conservative and independent of expenses and discounts.</small></p>
 			</div>
 		</div>
 		<div class="row">
-			<div class="col-lg-3 col-md-6">
-				<h3 class="text-center">Quarter 1</h3>
-				<h4 class="text-center">January - March</h4>
-				<p class="lead">Income: <span class="pull-right currency green"><%= number_to_currency(@incomeQ1, { :negative_format => '(%n)' }) %></span></p>
-				<p class="lead">Tax Estimate: <span class="pull-right currency red"><%= number_to_currency(@incomeQ1 * @year.taxrate, { :negative_format => '(%n)' }) %></span></p>
-				<hr class="hidden-lg hidden-md">
-			</div>
-			<div class="col-lg-3 col-md-6">
-				<h3 class="text-center">Quarter 2</h3>
-				<h4 class="text-center">April - June</h4>
-				<p class="lead">Income: <span class="pull-right currency green"><%= number_to_currency(@incomeQ2, { :negative_format => '(%n)' }) %></span></p>
-				<p class="lead">Tax Estimate: <span class="pull-right currency red"><%= number_to_currency(@incomeQ2 * @year.taxrate, { :negative_format => '(%n)' }) %></span></p>
-				<hr class="hidden-lg hidden-md">
-			</div>
-			<div class="col-lg-3 col-md-6">
-				<h3 class="text-center">Quarter 3</h3>
-				<h4 class="text-center">July - September</h4>
-				<p class="lead">Income: <span class="pull-right currency green"><%= number_to_currency(@incomeQ3, { :negative_format => '(%n)' }) %></span></p>
-				<p class="lead">Tax Estimate: <span class="pull-right currency red"><%= number_to_currency(@incomeQ3 * @year.taxrate, { :negative_format => '(%n)' }) %></span></p>
-				<hr class="hidden-lg hidden-md">
-			</div>
-			<div class="col-lg-3 col-md-6">
-				<h3 class="text-center">Quarter 4</h3>
-				<h4 class="text-center">October - December</h4>
-				<p class="lead">Income: <span class="pull-right currency green"><%= number_to_currency(@incomeQ4, { :negative_format => '(%n)' }) %></span></p>
-				<p class="lead">Tax Estimate: <span class="pull-right currency red"><%= number_to_currency(@incomeQ4 * @year.taxrate, { :negative_format => '(%n)' }) %></span></p>
-			</div>
+			<%= render partial: 'quarter', locals: { quarterNumber: 1 } %>
+			<%= render partial: 'quarter', locals: { quarterNumber: 2 } %>
+			<%= render partial: 'quarter', locals: { quarterNumber: 3 } %>
+			<%= render partial: 'quarter', locals: { quarterNumber: 4 } %>
 		</div>
 		<div class="row">
 			<div class="col-sm-8 col-sm-offset-2">
@@ -51,7 +28,7 @@
 		<div class="row">
 			<div class="col-sm-12">
 				<h3>Unpaid Invoices</h3>
-				<% if @invoicesUnpaid.blank? %>
+				<% if @year.invoices.unpaid.blank? %>
 				<p class="lead">No unpaid invoices issued in <%= @year.year %>.</p>
 				<% else %>
 				<table class="table table-condensed">
@@ -65,7 +42,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<% @invoicesUnpaid.each do |invoice| %>
+						<% @year.invoices.unpaid.each do |invoice| %>
 						<tr id="invoicerow<%= invoice.id %>">
 							<td><%= link_to Client.find(invoice.client_id) do %><%= Client.find(invoice.client_id).name %><% end %></td>
 							<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
@@ -81,7 +58,7 @@
 		</div>
 		<div class="row">
 			<div class="col-sm-12">
-				<% if @invoicesPaid.blank? %>
+				<% if @year.invoices.paid.blank? %>
 				<p class="lead">No invoices.</p>
 				<% else %>
 				<h3>Paid Invoices By Client</h3>
@@ -94,7 +71,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<% @paidClients.each do |client| %>
+						<% @year.paidClients.each do |client| %>
 						<tr>
 							<td><%= link_to client.name, client %></td>
 							<td class="text-center"><%= client.yearPaidInvoices(@year.year).count %></td>
@@ -116,13 +93,13 @@
 						</tr>
 					</thead>
 					<tbody>
-						<% @invoicesPaid.each do |invoice| %>
+						<% @year.invoices.paid.each do |invoice| %>
 						<tr id="invoicerow<%= invoice.id %>">
 							<td><%= link_to Client.find(invoice.client_id) do %><%= Client.find(invoice.client_id).name %><% end %></td>
 							<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
 							<td><%= invoice.paiddate %></td>
 							<td class="text-center hidden-xs"><%= invoice.worktype %></td>
-							<td class="text-right"><% if invoice.hasDiscount %>*<% end %><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
+							<td class="text-right"><% if invoice.hasDiscount %>^<% end %><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
 							<td class="text-center"><% if invoice.paid == true %><i class="fa fa-check green"></i><% else %><span class="spread red">Not Paid</span><% end %></td>
 						</tr>
 						<% end %>

@@ -6,25 +6,6 @@ class YearsController < ApplicationController
   end
 
   def show
-    @year = Year.friendly.find(params[:id])
-
-    @invoicesPaid = Invoice.paidByYear(@year.year)
-    @incomeYear = @invoicesPaid.sum('cost')
-
-    @paidClients = SortedSet.new
-    @invoicesPaid.each do |invoice|
-      @paidClients.add(invoice.client)
-    end
-
-    @paidClients = @paidClients.sort { |a,b| b.yearPaidInvoices(@year.year).sum(:cost) <=> a.yearPaidInvoices(@year.year).sum(:cost) }
-
-    @invoicesUnpaid = Invoice.unpaid.where("date >= ? AND date <= ?", Date.new(@year.year, 1, 1), Date.new(@year.year, 12, 31))
-
-    @incomeQ1 = Invoice.paidByQ1(@year.year).sum('cost')
-    @incomeQ2 = Invoice.paidByQ2(@year.year).sum('cost')
-    @incomeQ3 = Invoice.paidByQ3(@year.year).sum('cost')
-    @incomeQ4 = Invoice.paidByQ4(@year.year).sum('cost')
-
     respond_to do |format|
       format.html
       format.csv do
@@ -32,7 +13,6 @@ class YearsController < ApplicationController
         headers['Content-Type'] ||= 'text/csv'
       end
     end
-
   end
 
   def new
