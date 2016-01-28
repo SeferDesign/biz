@@ -28,13 +28,7 @@ class Invoice < ActiveRecord::Base
 	end
 
 	def hasDiscount
-		hasTruth = false
-		self.lines.each do |line|
-			if line.discount?
-				hasTruth = true
-			end
-		end
-		hasTruth
+		self.lines.any? { |l| l.discount? }
 	end
 
 end
