@@ -7,7 +7,7 @@ class Client < ActiveRecord::Base
 		:styles => { :medium => "300x300>", :thumb => "100x100>" },
 		:default_url => "/images/clients/:style/missing.png",
 		:storage => :s3,
-		#:s3_protocol => :https, #breaks pdf embedding as of 1/29/2015
+		:s3_protocol => :https,
 		:s3_credentials => "#{Rails.root}/config/aws.yml",
     :path => '/images/:id/:style.:extension'
 

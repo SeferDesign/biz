@@ -4,7 +4,7 @@
 			<div class="col-sm-12">
 				<%= wicked_pdf_image_tag '/images/sdc_acronym.svg' %>
 				<% if @invoice.client.logo.present? %>
-				<div class="pull-right"><div id="clientlogo-wrap" class="client-logo"><%= image_tag(@invoice.client.logo.url()) %></div></div>
+				<div class="pull-right"><div id="clientlogo-wrap" class="client-logo"><%= image_tag embed_remote_image(@invoice.client.logo.url(), @invoice.client.logo_content_type) %></div></div>
 				<% end %>
 			</div>
 		</div>
