@@ -23,5 +23,11 @@ module Biz
 
     config.action_mailer.default_url_options = { host: 'seferdesign.com' }
 
+    config.paperclip_defaults = {
+      storage: :s3,
+      s3_region: ENV['AWS_REGION'],
+      s3_credentials: "#{Rails.root}/config/aws.yml"
+    }
+
   end
 end

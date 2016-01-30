@@ -12,7 +12,7 @@ gem 'jquery-rails'
 gem 'turbolinks'
 gem 'jbuilder', '~> 1.2'
 
-gem 'aws-sdk'
+gem 'aws-sdk', '< 2'
 gem 'figaro'
 gem 'devise'
 gem 'paperclip'

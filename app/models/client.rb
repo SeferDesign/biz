@@ -4,11 +4,11 @@ class Client < ActiveRecord::Base
 	has_many :invoices, through: :projects
 
 	has_attached_file :logo,
-		:styles => { :medium => "300x300>", :thumb => "100x100>" },
-		:default_url => "/images/clients/:style/missing.png",
-		:storage => :s3,
 		:s3_protocol => :https,
-		:s3_credentials => "#{Rails.root}/config/aws.yml",
+		:styles => {
+			:medium => '300x300>',
+			:thumb => '100x100>'
+		},
     :path => '/images/:id/:style.:extension'
 
 	validates_attachment_content_type :logo, :content_type => %w(image/jpeg image/jpg image/png image/svg+xml)
