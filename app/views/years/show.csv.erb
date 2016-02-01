@@ -6,7 +6,7 @@
   'Description'
 ] %>
 <%= CSV.generate_line headers %>
-<% @invoicesPaid.sort { |a,b| a.paiddate <=> b.paiddate }.each do |invoice| %><%= CSV.generate_line([
+<% @year.invoices.paid.sort { |a,b| a.paiddate <=> b.paiddate }.each do |invoice| %><%= CSV.generate_line([
     invoice.paiddate,
     invoice.client.name,
     invoice.cost,
