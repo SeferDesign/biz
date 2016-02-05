@@ -3,8 +3,13 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-sm-12">
-				<h1>Projects</h1>
+				<h1><% if params[:all] == 'true' %>All<% else %>Recent<% end %> Projects</h1>
 				<p><%= link_to 'Home', root_path %></p>
+				<% if params[:all] == 'true' %>
+				<p><%= link_to 'Recent Projects', projects_path %></p>
+				<% else %>
+				<p><%= link_to 'All Projects', projects_path(:all => 'true') %></p>
+				<% end %>
 				<p><%= link_to new_project_path, { :class => 'btn btn-success' } do %><i class="fa fa-plus left"></i>New Project<% end %></p>
 				<% if @projects.blank? %>
 				<p class="lead">No projects.</p>
@@ -42,7 +47,7 @@
 								</tr>
 							</thead>
 							<tbody>
-								<% @projects.complete.sort { |b,a| a.startdate <=> b.startdate }.each do |project| %>
+								<% @projects_archive.sort { |b,a| a.startdate <=> b.startdate }.each do |project| %>
 								<tr id="projectrow<%= project.id %>">
 									<td><%= link_to Client.find(project.client_id) do %><%= Client.find(project.client_id).name %><% end %></td>
 									<td><%= link_to project do %><%= project.name %><% end %></td>

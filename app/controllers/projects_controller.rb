@@ -2,7 +2,12 @@ class ProjectsController < ApplicationController
   before_action :set_project, only: [:show, :edit, :update, :destroy]
 
   def index
-    @projects = Project.all
+    if params[:all] == 'true'
+      @projects_archive = Project.complete
+    else
+      @projects_archive = Project.complete.recent
+    end
+    @projects = Project.incomplete.all
   end
 
   def show
