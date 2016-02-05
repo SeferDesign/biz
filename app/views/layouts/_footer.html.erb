@@ -4,7 +4,7 @@
 			<div class="col-sm-12 text-center">
 				<% if user_signed_in? %><nav class="footer-nav">
 					<ul>
-						<li><%= link_to 'Clients', clients_path %></li><li><%= link_to 'Projects', projects_path %></li><li><%= link_to 'Invoices', invoices_path %></li><li><%= link_to 'Goals', goals_path %></li><li><%= link_to '2015', year_path(Year.where(year: 2015).first.year) %></li><li><%= link_to '2016', year_path(Year.where(year: 2016).first.year) %></li><li><%= link_to destroy_user_session_path, :method => :delete do %>Sign Out<i class="fa fa-sign-out right"></i><% end %></li>
+						<li><%= link_to 'Clients', clients_path %></li><li><%= link_to 'Projects', projects_path %></li><li><%= link_to 'Invoices', invoices_path %></li><% if Date.today.month < 3 and Date.today.day < 6 %><li><%= link_to 'Goals', goals_path %></li><li><%= link_to 1.year.ago.year, year_path(Year.where(year: 1.year.ago.year).first.year) %></li><% end %><li><%= link_to Date.today.year, year_path(Year.where(year: Date.today.year).first.year) %></li><li><%= link_to destroy_user_session_path, :method => :delete do %>Sign Out<i class="fa fa-sign-out right"></i><% end %></li>
 					</ul>
 				</nav><% end %>
 				<p>&copy; <%= company_full_name %></p>
