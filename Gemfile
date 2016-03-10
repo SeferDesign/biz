@@ -23,7 +23,6 @@ gem 'bootstrap-sass'
 gem 'autoprefixer-rails'
 gem 'faraday'
 gem 'chartkick'
-gem 'mandrill-api', '~> 1.0', '>= 1.0.53'
 gem 'roadie', '~> 3.1.1'
 
 group :development do

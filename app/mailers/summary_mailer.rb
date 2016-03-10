@@ -1,5 +1,3 @@
-require 'mandrill'
-
 class SummaryMailer < ActionMailer::Base
   default from: "Sefer Design Co. <info@seferdesign.com>"
   helper :application
