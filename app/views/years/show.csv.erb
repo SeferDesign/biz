@@ -8,8 +8,8 @@
 <%= CSV.generate_line headers %>
 <% @year.invoices.paid.sort { |a,b| a.paiddate <=> b.paiddate }.each do |invoice| %><%= CSV.generate_line([
     invoice.paiddate,
-    invoice.client.name,
+    invoice.client.name.sub(',', ''),
     invoice.cost,
     invoice.paymenttype,
-    invoice.description
+    invoice.description.sub(',', '')
   ]) %><% end %>
