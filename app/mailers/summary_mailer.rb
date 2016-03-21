@@ -13,23 +13,11 @@ class SummaryMailer < ActionMailer::Base
     html_roadie = Roadie::Document.new email_html_raw
     html_inlined = html_roadie.transform
 
-    ses = Aws::SES::Client.new(region: ENV['aws_region'], credentials: Aws::Credentials.new(ENV['aws_s3_key_id'], ENV['aws_s3_secret']))
-    ses.send_email({
-      source: "Sefer Design Co. <info@seferdesign.com>",
-      destination: {
-        to_addresses: ["Robert Sefer <rsefer@gmail.com>"]
-      },
-      message: {
-        subject: {
-          data: "Weekly Invoice Summary - #{@date_start.strftime("%b %e")} through #{@date_end.strftime("%b %e")}"
-        },
-        body: {
-          html: {
-            data: html_inlined
-          }
-        }
-      }
-    })
+    mail(to: "Robert Sefer <rsefer@gmail.com>", subject: "Weekly Invoice Summary - #{@date_start.strftime("%b %e")} through #{@date_end.strftime("%b %e")}") do |format|
+      format.html do
+        html_inlined
+      end
+    end
 
   end
 
