@@ -2,14 +2,14 @@ development:
   access_key_id: <%= ENV["aws_s3_key_id"] %>
   secret_access_key: <%= ENV["aws_s3_secret"] %>
   region: <%= ENV["aws_region"] %>
-  bucket: SeferBiz
+  bucket: <%= ENV["aws_s3_bucket"] %>
 test:
   access_key_id: <%= ENV["aws_s3_key_id"] %>
   secret_access_key: <%= ENV["aws_s3_secret"] %>
   region: <%= ENV["aws_region"] %>
-  bucket: SeferBiz
+  bucket: <%= ENV["aws_s3_bucket"] %>
 production:
   access_key_id: <%= ENV["aws_s3_key_id"] %>
   secret_access_key: <%= ENV["aws_s3_secret"] %>
   region: <%= ENV["aws_region"] %>
-  bucket: SeferBiz
+  bucket: <%= ENV["aws_s3_bucket"] %>

@@ -24,9 +24,13 @@ module Biz
     config.action_mailer.default_url_options = { host: 'seferdesign.com' }
 
     config.paperclip_defaults = {
-      storage: :s3,
-      s3_region: ENV['AWS_REGION'],
-      s3_credentials: "#{Rails.root}/config/aws.yml"
+      :storage => :s3,
+      :s3_credentials => {
+        :bucket => Figaro.env.aws_s3_bucket,
+        :access_key_id => Figaro.env.aws_s3_key_id,
+        :secret_access_key => Figaro.env.aws_s3_secret,
+        :s3_region => Figaro.env.aws_region
+      }
     }
 
   end
