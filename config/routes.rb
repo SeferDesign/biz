@@ -1,5 +1,13 @@
 Biz::Application.routes.draw do
 
+  if Rails.env.production?
+    constraints(:host => /^(?!biz\.seferdesign\.com)/i) do
+      match "/(*path)" => redirect {
+        |params, req| "https://biz.seferdesign.com/#{params[:path]}"
+      },  via: [:get, :post]
+    end
+  end
+
   devise_for :users, :skip => [:registrations]
   resources :years
   resources :goals
