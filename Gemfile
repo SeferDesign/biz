@@ -1,8 +1,6 @@
 source 'https://rubygems.org'
 
-ruby '2.2.3'
-
-gem 'unicorn'
+gem 'puma'
 gem 'rails', '~> 4.2.5'
 gem 'pg'
 gem 'sass-rails', '~> 4.0.2'
@@ -31,6 +29,15 @@ group :development do
   gem 'better_errors'
   gem 'binding_of_caller'
   gem 'hirb'
+  gem 'capistrano', require: false
+  gem 'capistrano-rvm', require: false
+  gem 'capistrano-rails', require: false
+  gem 'capistrano-bundler', require: false
+  gem 'capistrano3-puma', require: false
+  gem 'capistrano-postgresql', require: false
+  gem 'capistrano-secrets-yml', require: false
+  gem 'capistrano-figaro-yml', require: false
+  gem 'capistrano-rails-console', require: false
 end
 
 group :production do
