@@ -2,9 +2,19 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-sm-12">
-				<%= wicked_pdf_image_tag '/images/sdc_acronym.svg' %>
+				<div class="sdc-logo"><%= wicked_pdf_image_tag '/images/sdc_acronym.svg' %></div>
 				<% if @invoice.client.logo.present? %>
-				<div class="pull-right"><div id="clientlogo-wrap" class="client-logo"><%= image_tag embed_remote_image(@invoice.client.logo.url(), @invoice.client.logo_content_type) %></div></div>
+        <%
+					image = MiniMagick::Image.open(@invoice.client.logo.url())
+          if (image.width.to_f / image.height.to_f) < 2.5
+            logoWD = (150 / image.height.to_f).to_f
+          else
+            logoWD = (200 / image.width.to_f).to_f
+          end
+					logoW = (logoWD * image.width.to_f).ceil
+					logoH = (logoWD * image.height.to_f).ceil
+        %>
+				<div class="pull-right"><div id="clientlogo-wrap" class="client-logo"><%= image_tag embed_remote_image(@invoice.client.logo.url(), @invoice.client.logo_content_type), width: logoW, height: logoH %></div></div>
 				<% end %>
 			</div>
 		</div>

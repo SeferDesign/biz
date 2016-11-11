@@ -132,12 +132,20 @@ section {
 	padding: 1em 0px;
 }
 
-.client-logo {
+#client-show,
+#invoice-show {
 
-	&,
-	img {
+	.client-logo {
 		max-width: 300px;
 	}
+}
+
+.client-logo {
+
+  img {
+		float: right;
+    max-width: none;
+  }
 
 }
 

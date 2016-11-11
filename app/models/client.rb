@@ -5,7 +5,7 @@ class Client < ActiveRecord::Base
 
 	has_attached_file :logo,
 		:s3_protocol => :https,
-		:styles => {
+		style: {
 			:medium => '300x300>',
 			:thumb => '100x100>'
 		},

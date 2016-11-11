@@ -7,7 +7,6 @@
   <%= wicked_pdf_stylesheet_link_tag "font-awesome.min" %>
   <%= wicked_pdf_stylesheet_link_tag "bootstrap.min" %>
   <%= wicked_pdf_stylesheet_link_tag "style" %>
-  <%= wicked_pdf_stylesheet_link_tag "pdf-style" %>
   <style>
   	body {
   		color: #000000;
@@ -22,13 +21,13 @@
 	  	letter-spacing: 0px;
   	}
 
-  	header img {
+    .sdc-logo {
+      float: left;
+    }
+
+    .sdc-logo img {
 	  	max-width: 100px;
 	  	max-height: 80px;
-  	}
-
-  	#clientlogo-wrap img {
-	  	max-width: 200px;
   	}
 
   	p.indent {

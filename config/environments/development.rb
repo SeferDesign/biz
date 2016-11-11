@@ -29,6 +29,6 @@ Biz::Application.configure do
 
   config.action_mailer.default_url_options = { host: 'biz.dev' }
 
-  Paperclip.options[:command_path] = "/usr/local/bin/"
+  Paperclip.options[:command_path] = "/usr/local/bin/identify"
 
 end
