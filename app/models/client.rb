@@ -5,7 +5,12 @@ class Client < ActiveRecord::Base
 
 	has_attached_file :logo,
 		:s3_protocol => :https,
-		:bucket => Figaro.env.aws_s3_bucket,
+    :s3_credentials => {
+      :bucket => Figaro.env.aws_s3_bucket,
+      :access_key_id => Figaro.env.aws_s3_key_id,
+      :secret_access_key => Figaro.env.aws_s3_secret,
+      :s3_region => Figaro.env.aws_region
+    },
 		style: {
 			:medium => '300x300>',
 			:thumb => '100x100>'
