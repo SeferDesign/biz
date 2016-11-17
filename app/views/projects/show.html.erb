@@ -4,7 +4,7 @@
 		<div class="row">
 			<div class="col-sm-12">
 				<% if !@project.client.logo.blank? %>
-				<%= image_tag(@project.client.logo.url(), class: 'pull-right hidden-xs') %>
+				<%= image_tag(@project.client.logo.url(), class: 'client-logo pull-right hidden-xs') %>
 				<% end %>
 				<h1><%= @project.name %></h1>
 				<p class="doicons">
