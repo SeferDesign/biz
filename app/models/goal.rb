@@ -19,8 +19,6 @@ class Goal < ActiveRecord::Base
       self.invoicesPaidInTimeScope.contract.sum('cost')
     elsif self.goaltype == 'Hourly'
       self.invoicesPaidInTimeScope.hourly.sum('cost')
-    elsif self.goaltype == 'Retainer'
-      self.invoicesPaidInTimeScope.retainer.sum('cost')
     end
   end
 
