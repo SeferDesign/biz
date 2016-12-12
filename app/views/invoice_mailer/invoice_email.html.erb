@@ -5,6 +5,23 @@
       <table>
         <tr>
           <td>
+            <script type="application/ld+json">
+            {
+              "@context": "http://schema.org",
+              "@type": "EmailMessage",
+              "description": "View Invoice",
+              "potentialAction": {
+                "@type": "ViewAction",
+                "target": "<%= invoice_url(@invoice) %>",
+                "name": "View Invoice"
+              },
+              "publisher": {
+                "@type": "Organization",
+                "name": "Sefer Design Co.",
+                "url": "https://seferdesign.com"
+              }
+            }
+            </script>
             <h1>Invoice for <%= invoice.client.name %></h1>
             <h3>Invoice ID: <%= invoice.display_id %></h3>
             <h3>Amount: <%= number_to_currency(invoice.lines.sum('total'), { :unit => '$', :negative_format => '(%n)' }) %></h3>

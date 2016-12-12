@@ -5,6 +5,23 @@
       <table>
         <tr>
           <td>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "EmailMessage",
+  "description": "Review Invoices",
+  "potentialAction": {
+    "@type": "ViewAction",
+    "target": "<%= invoices_url %>",
+    "name": "Review Invoices"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Sefer Design Co.",
+    "url": "https://seferdesign.com"
+  }
+}
+</script>
             <h3>Weekly Invoice Summary<br>
             <small><%= @date_start.strftime("%A, %B %e") %> through
             <%= @date_end.strftime("%A, %B %e") %></small></h3>
