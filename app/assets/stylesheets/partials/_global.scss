@@ -139,7 +139,7 @@ section {
 	.client-logo {
 		max-width: 300px;
 	}
-	
+
 }
 
 .client-logo {
@@ -191,6 +191,21 @@ footer {
 		padding-right: 0px;
 	}
 
+}
+
+.payment-options {
+
+  margin-top: 4rem;
+  margin-bottom: 2rem;
+	text-align: center;
+
+  img {
+		display: block;
+		margin: 1rem auto;
+    max-width: 200px;
+		max-height: 35px;
+  }
+  
 }
 
 @media all and (min-width: 768px) {

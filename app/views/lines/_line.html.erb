@@ -1,5 +1,7 @@
 <tr>
+	<% if user_signed_in? %>
 	<td><%= link_to [line.invoice, line], method: :delete, data: { confirm: 'Are you sure?' } do %><i class="fa fa-trash-o red"></i><% end %></td>
+	<% end %>
   <td><%= line.description %></td>
   <% if line.hours.present? %>
   <td class="text-center"><%= line.hours %></td>

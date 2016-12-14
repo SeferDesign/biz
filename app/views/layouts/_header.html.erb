@@ -2,7 +2,7 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-sm-6 col-sm-offset-3 text-center">
-				<a href="/"><img src="<%= company_logo_alt_url %>" alt="<%= company_full_name %>"></a>
+				<a href="<% if user_signed_in? %>/<% else %>https://seferdesign.com<% end %>"><img src="<%= company_logo_alt_url %>" alt="<%= company_full_name %>"></a>
 			</div>
 		</div>
 	</div>

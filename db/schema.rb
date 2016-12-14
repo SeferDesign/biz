@@ -1,4 +1,3 @@
-# encoding: UTF-8
 # This file is auto-generated from the current state of the database. Instead
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
@@ -11,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160128184457) do
+ActiveRecord::Schema.define(version: 20161214152108) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -56,14 +55,16 @@ ActiveRecord::Schema.define(version: 20160128184457) do
     t.integer  "client_id"
     t.integer  "project_id"
     t.date     "date"
-    t.string   "worktype",    limit: 255
-    t.decimal  "cost",                    precision: 8, scale: 2
+    t.string   "worktype",     limit: 255
+    t.decimal  "cost",                     precision: 8, scale: 2
     t.boolean  "paid"
     t.date     "paiddate"
-    t.string   "paymenttype", limit: 255
+    t.string   "paymenttype",  limit: 255
     t.text     "description"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "access_token"
+    t.index ["access_token"], name: "index_invoices_on_access_token", unique: true, using: :btree
   end
 
   create_table "lines", force: :cascade do |t|
@@ -76,9 +77,8 @@ ActiveRecord::Schema.define(version: 20160128184457) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.boolean  "discount",                                        default: false
+    t.index ["invoice_id"], name: "index_lines_on_invoice_id", using: :btree
   end
-
-  add_index "lines", ["invoice_id"], name: "index_lines_on_invoice_id", using: :btree
 
   create_table "projects", force: :cascade do |t|
     t.string   "name",       limit: 255
@@ -103,10 +103,9 @@ ActiveRecord::Schema.define(version: 20160128184457) do
     t.string   "last_sign_in_ip",        limit: 255
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.index ["email"], name: "index_users_on_email", unique: true, using: :btree
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
   end
-
-  add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
-  add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
 
   create_table "years", force: :cascade do |t|
     t.integer  "year"

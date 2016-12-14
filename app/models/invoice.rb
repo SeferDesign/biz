@@ -1,4 +1,5 @@
 class Invoice < ActiveRecord::Base
+	has_secure_token :access_token
 	has_many :lines, :dependent => :destroy
 	belongs_to :client
 	belongs_to :project

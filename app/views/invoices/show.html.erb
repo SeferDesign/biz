@@ -1,4 +1,8 @@
+<% if user_signed_in? %>
 <% provide(:title, "Invoice ##{@invoice.id} | ") %>
+<% else %>
+<% provide(:title, "Invoice | ") %>
+<% end %>
 <section id="invoice-show">
 	<div class="container">
 		<div class="row">
@@ -6,6 +10,7 @@
 				<% if @invoice.client.logo.present? %>
 				<%= image_tag(@invoice.client.logo.url(), class: 'client-logo pull-right hidden-xs') %>
 				<% end %>
+				<% if user_signed_in? %>
 				<h1>Invoice #<%= @invoice.id %></h1>
 				<p class="doicons">
 					<%= link_to invoice_path(:format=>'pdf'), title: 'PDF' do %><i class="fa fa-fw fa-2x fa-file text-success"></i><% end %>
@@ -13,16 +18,19 @@
 					<%= link_to invoice_path(@invoice), title: 'Delete', method: :delete, data: { confirm: "Are you sure you would like to delete Invoice ##{@invoice.id}?" } do %><i class="fa fa-fw fa-2x fa-trash-o text-danger"></i><% end %>
 					<%= link_to email_invoice_path(@invoice), title: 'Send' do %><i class="fa fa-fw fa-2x fa-envelope text-success"></i><% end %>
 				</p>
+				<% end %>
 				<p>
 					<strong>Client:</strong>
-					<%= link_to @invoice.client do %><%= @invoice.client.name %><% end %>
+					<% if user_signed_in? %><%= link_to @invoice.client do %><%= @invoice.client.name %><% end %><% else %><%= @invoice.client.name %><% end %>
 				</p>
+				<% if user_signed_in? %>
 				<p>
 					<strong>Project:</strong>
 					<%= link_to @invoice.project do %><%= @invoice.project.name %><% end %>
 				</p>
+				<% end %>
 				<p>
-					<strong>ID Display:</strong>
+					<strong>ID<% if user_signed_in? %> Display<% end %>:</strong>
 					<%= @invoice.display_id %>
 				</p>
 				<p><strong>Description:</strong></p>
@@ -48,10 +56,12 @@
 					<strong>Paid Date:</strong>
 					<%= @invoice.paiddate.to_formatted_s(:long) %>
 				</p>
+				<% if !@invoice.paymenttype.blank? %>
 				<p>
 					<strong>Payment Method:</strong>
 					<%= @invoice.paymenttype %>
 				</p>
+				<% end %>
 				<% end %>
 			</div>
 		</div>
@@ -59,7 +69,9 @@
 		<table class="table table-condensed">
 			<thead>
 				<tr>
+          <% if user_signed_in? %>
 					<th>&nbsp;</th>
+          <% end %>
 					<th>Description</th>
 					<th class="text-center">Hours</th>
 					<th class="text-center">Rate ($) per Hour</th>
@@ -69,13 +81,37 @@
 			<tbody>
 				<%= render @invoice.lines %>
 				<tr>
+          <% if user_signed_in? %>
 					<td>&nbsp;</td>
+          <% end %>
 					<td class="text-right" colspan="3"><strong>Total</strong>&nbsp;&nbsp;</td>
 					<td><strong><div class="pull-right"><%= number_to_currency(@invoice.lines.sum('total'), { :unit => '', :negative_format => '(%n)' }) %></div>$</strong></td>
 				</tr>
 			</tbody>
 		</table>
 		<% end %>
+    <% if !user_signed_in? and !@invoice.paid %>
+		<div class="payment-options">
+			<div class="row">
+				<div class="col-sm-8 col-sm-offset-2 payment-option payment-option-check">
+					<h3>This payment can be made out to '<%= company_pay_to %>' and mailed to:</h3>
+					<p><%= company_pay_to %><br><%= company_street %><br><%= company_city %>, <%= company_state_abbrv %> <%= company_zipcode %></p>
+				</div>
+			</div>
+			<h3>We also accept electronic payments at the following providers:</h3>
+			<div class="row">
+				<div class="col-sm-4 col-sm-offset-1 payment-option payment-option-chase">
+					<%= image_tag('chase.svg') %>
+					Make a Chase QuickPay payment to 'info@seferdesign.com'
+				</div>
+				<div class="col-sm-4 col-sm-offset-2 payment-option payment-option-paypal">
+					<%= image_tag('paypal.svg') %>
+					Make a PayPal payment to 'info@seferdesign.com' and mark as a 'friends and family' transaction to avoid fees
+				</div>
+			</div>
+    </div>
+    <% end %>
+		<% if user_signed_in? %>
 		<h2>Add a line:</h2>
 		<%= render 'lines/form' %>
 		<div class="row hidden-print">
@@ -83,5 +119,6 @@
 				<p><%= link_to 'Back', invoices_path %></p>
 			</div>
 		</div>
+		<% end %>
 	</div>
 </section>
