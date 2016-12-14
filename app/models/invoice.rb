@@ -27,4 +27,12 @@ class Invoice < ActiveRecord::Base
 		self.lines.any? { |l| l.discount? }
 	end
 
+	def stripeChargeCost
+		((self.cost + 0.30) / (1 - 0.029)).round(2)
+	end
+
+  def stripeChargeDifference
+		stripeChargeCost - self.cost
+	end
+
 end

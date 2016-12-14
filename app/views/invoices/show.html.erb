@@ -91,6 +91,18 @@
 		</table>
 		<% end %>
     <% if !user_signed_in? and !@invoice.paid %>
+		<form action="/your-server-side-code" method="POST">
+      <div>For an additional fee of <%= number_to_currency(@invoice.stripeChargeDifference) %> (Stripe fees), you can charge a CC, for a total of <%= number_to_currency(@invoice.stripeChargeCost) %></div>
+  <script
+    src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+    data-key="<%= Figaro.env.stripe %>"
+    data-amount="<%= @invoice.stripeChargeCost * 100 %>"
+    data-name="Sefer Design Company LLC"
+    data-description="<%= @invoice.display_id %>"
+    data-image="https://s3.amazonaws.com/SeferBiz/internal/sdc-square.png"
+    data-locale="auto">
+  </script>
+</form>
 		<div class="payment-options">
 			<div class="row">
 				<div class="col-sm-8 col-sm-offset-2 payment-option payment-option-check">
