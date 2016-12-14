@@ -61,10 +61,6 @@ module ApplicationHelper
 		'60610'
 	end
 
-	def payment_button_png_url
-		'/images/payment_button.png'
-	end
-
 	def total_invoiced_unpaid
 		Invoice.unpaid.sum('cost')
 	end
