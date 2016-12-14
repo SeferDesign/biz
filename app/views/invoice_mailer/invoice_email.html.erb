@@ -5,20 +5,19 @@
       <table>
         <tr>
           <td>
-            <script type="application/ld+json">
+            <script type='application/ld+json'>
             {
               "@context": "http://schema.org",
-              "@type": "EmailMessage",
-              "description": "View Invoice",
-              "potentialAction": {
-                "@type": "ViewAction",
-                "target": "<%= invoice_url(@invoice) %>",
-                "name": "View Invoice"
-              },
-              "publisher": {
+              "@type": "Invoice",
+              "paymentStatus": "<% if invoice.paid == true %>Paid<% else %>Unpaid<% end %>",
+              "provider": {
                 "@type": "Organization",
                 "name": "Sefer Design Co.",
                 "url": "https://seferdesign.com"
+              },
+              "totalPaymentDue": {
+                "@type": "PriceSpecification",
+                "price": "<%= number_to_currency(invoice.lines.sum('total'), { :unit => '$', :negative_format => '(%n)' }) %>"
               }
             }
             </script>
