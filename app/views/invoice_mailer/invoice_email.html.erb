@@ -26,7 +26,7 @@
             <h3>Amount: <%= number_to_currency(invoice.lines.sum('total'), { :unit => '$', :negative_format => '(%n)' }) %></h3>
             <h3>Status: <% if invoice.paid == true %><span style="color: green;">PAID</span><% else %><span style="color: red;">NOT PAID</span><% end %></h3>
             <% if invoice.paid == true %><h3>Payment Method: <%= invoice.paymenttype %></h3><% end %>
-            <p><%= invoice.description %> Attached is an invoice PDF with cost breakdowns and payment information for your records.</p>
+            <p><%= invoice.description %> Attached is an invoice PDF with cost breakdowns and payment information for your records. This payment can be made out to '<%= company_pay_to %>'.</p>
             <table>
               <tr>
                 <td align="center">
