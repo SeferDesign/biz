@@ -23,6 +23,7 @@ gem 'autoprefixer-rails'
 gem 'faraday'
 gem 'chartkick'
 gem 'roadie', '~> 3.1.1'
+gem 'stripe', :git => 'https://github.com/stripe/stripe-ruby'
 
 group :development do
   gem 'spring'

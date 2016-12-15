@@ -1,5 +1,5 @@
 class InvoicesController < ApplicationController
-  before_action :set_invoice, only: [:show, :edit, :email, :update, :destroy]
+  before_action :set_invoice, only: [:show, :edit, :email, :stripe, :update, :destroy]
 
   def index
     @notableInvoices = Invoice.all.unpaid + Invoice.all.recent
@@ -71,6 +71,27 @@ class InvoicesController < ApplicationController
         ]
       }]
     }'}
+  end
+
+  def stripe
+    Stripe.api_key = Figaro.env.stripe_api_secret_key
+    token = params[:stripeToken]
+
+    @stripeError = false
+    begin
+      charge = Stripe::Charge.create(
+        :amount => (@invoice.stripeChargeCost * 100).to_i,
+        :currency => 'usd',
+        :source => token,
+        :description => "#{@invoice.display_id}",
+        :receipt_email => params[:stripeEmail],
+        :metadata => { "invoice_id" => @invoice.id }
+      )
+      @charge = charge
+      @invoice.update(:paid => true, :paymenttype => 'Stripe', :paiddate => Date.today)
+    rescue Stripe::CardError => e
+      @stripeError = true
+    end
   end
 
   def populate
