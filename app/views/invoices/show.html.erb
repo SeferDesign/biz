@@ -28,6 +28,11 @@
 					<strong>Project:</strong>
 					<%= link_to @invoice.project do %><%= @invoice.project.name %><% end %>
 				</p>
+				<% if @invoice.access_token.present? %>
+				<p>
+					<strong>Access Token:</strong> <%= @invoice.access_token %> (<a href="<%= invoice_path(@invoice) %>?access_token=<%= @invoice.access_token %>">Client Link</a>)
+				</p>
+				<% end %>
 				<% end %>
 				<p>
 					<strong>ID<% if user_signed_in? %> Display<% end %>:</strong>
@@ -90,7 +95,7 @@
 			</tbody>
 		</table>
 		<% end %>
-    <% if !user_signed_in? and !@invoice.paid %>
+    <% if !user_signed_in? and !@invoice.paid and @invoice.access_token.present? %>
 		<div class="payment-options">
 			<div class="row">
 				<div class="col-sm-8 col-sm-offset-2 payment-option payment-option-check">
