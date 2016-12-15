@@ -115,7 +115,7 @@
 				<div class="col-sm-8 col-sm-offset-2 payment-option payment-option-stripe">
 					<h3>We also accept credit cards via the Stripe payment service:</h3>
 					<%= form_tag "#{stripe_invoice_path(@invoice)}?access_token=#{@invoice.access_token}" do %>
-		  	    <div>Stripe adds a fee of <strong><%= number_to_currency(@invoice.stripeChargeDifference) %></strong> for this transaction, which increases your payment total to <strong><%= number_to_currency(@invoice.stripeChargeCost) %></strong>.</div>
+		  	    <div>Stripe <a href="https://stripe.com/us/pricing" target="_blank">adds a fee</a> of <strong><%= number_to_currency(@invoice.stripeChargeDifference) %></strong> for this transaction, which increases your payment total to <strong><%= number_to_currency(@invoice.stripeChargeCost) %></strong>.</div>
 		  			<script
 		  			  src="https://checkout.stripe.com/checkout.js" class="stripe-button"
 		  			  data-key="<%= Figaro.env.stripe_api_publishable_key %>"
@@ -128,7 +128,6 @@
 		      <% end %>
 				</div>
 			</div>
-
     </div>
     <% end %>
 		<% if user_signed_in? %>
