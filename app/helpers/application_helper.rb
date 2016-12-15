@@ -80,6 +80,7 @@ module ApplicationHelper
 			'Credit Card',
 			'Chase Quick Pay',
 			'PayPal',
+			'Stripe',
 			'ACH',
 			'Venmo',
 			'Other'

@@ -15,6 +15,7 @@ Biz::Application.routes.draw do
   	resources :lines
     member do
       get :email
+      post :stripe
     end
   end
   resources :projects
