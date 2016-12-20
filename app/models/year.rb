@@ -35,7 +35,7 @@ class Year < ActiveRecord::Base
 	end
 
 	def paidClients
-    self.invoices.paidByYear(self.year).map { |i| i.client }.uniq.sort { |a,b| b.yearPaidInvoices(self.year).sum(:cost) <=> a.yearPaidInvoices(self.year).sum(:cost) }
+    Invoice.paidByYear(self.year).map { |i| i.client }.uniq.sort { |a,b| b.yearPaidInvoices(self.year).sum(:cost) <=> a.yearPaidInvoices(self.year).sum(:cost) }
 	end
 
 end
