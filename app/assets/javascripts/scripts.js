@@ -1,6 +1,6 @@
-jQuery(document).ready(function($) {
+jQuery(document).on('turbolinks:load', function() {
 
-	$('#paid-date-icon').click(function() {
+	$('#paid-date-icon-wrap').click(function() {
 		var dateToday = new Date();
 		var dateYear = dateToday.getFullYear().toString();
 		var dateMonth = (dateToday.getMonth() + 1).toString();
