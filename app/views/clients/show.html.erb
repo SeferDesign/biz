@@ -85,6 +85,33 @@
 				<% if @client.invoices.blank? %>
 				<p class="lead">No invoices.</p>
 				<% else %>
+				<h4>Paid By Year</h4>
+				<table class="table table-condensed">
+					<thead>
+						<tr>
+							<th>Year</th>
+							<th>&nbsp;</th>
+							<th class="text-right">Total Paid</th>
+						</tr>
+					</thead>
+					<tbody>
+						<% Year.order('year DESC').each do |year|
+							if Invoice.paidByYear(year.year).where(:client_id => @client.id).length > 0
+						%>
+						<tr>
+							<td><%= link_to year do %><%= year.year %><% end %></td>
+							<td>&nbsp;</td>
+							<td class="text-right"><%= number_to_currency(Invoice.paidByYear(year.year).where(:client_id => @client.id).sum(:cost), { :negative_format => '(%n)' }) %></td>
+						</tr>
+						<% end end %>
+						<tr>
+							<td>&nbsp;</td>
+							<td class="text-right"><strong>Total</strong></td>
+							<td class="text-right"><strong><%= number_to_currency(@client.invoiceTotal, { :negative_format => '(%n)' }) %></strong></td>
+						</tr>
+					</tbody>
+				</table>
+				<h4>All</h4>
 				<table class="table table-condensed">
 					<thead>
 						<tr>
