@@ -19,7 +19,7 @@ class Year < ActiveRecord::Base
 	end
 
 	def incomeTotal
-		self.invoices.paidByYear(self.year).sum('cost')
+		Invoice.paidByYear(self.year).sum('cost')
 	end
 
 	def taxOwedTotal
