@@ -116,6 +116,7 @@
 					<thead>
 						<tr>
 							<th>Date</th>
+							<th>ID</th>
 							<th class="text-center hidden-xs">Type</th>
 							<th class="text-right">Cost</th>
 							<th class="text-center">Paid?</th>
@@ -125,13 +126,14 @@
 						<% @client.invoices.each do |invoice| %>
 						<tr id="invoicerow<%= invoice.id %>">
 							<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
+							<td><%= invoice.display_id %></td>
 							<td class="text-center hidden-xs"><%= invoice.worktype %></td>
 							<td class="text-right"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
 							<td class="text-center"><% if invoice.paid == true %><i class="fa fa-check green"></i><% else %><span class="spread red">Not Paid</span><% end %></td>
 						</tr>
 						<% end %>
 						<tr>
-							<td>&nbsp;</td>
+							<td colspan="2">&nbsp;</td>
 							<td class="text-center"><strong>Total</strong></td>
 							<td class="text-right"><strong><%= number_to_currency(@client.invoiceTotal, { :negative_format => '(%n)' }) %></strong></td>
 							<td>&nbsp;</td>
