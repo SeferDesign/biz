@@ -27,7 +27,7 @@ class Year < ActiveRecord::Base
 	end
 
 	def incomeByQuarter(quarterNumber)
-		self.invoices.paidByQuarter(self.year, quarterNumber).sum('cost')
+		Invoices.paidByQuarter(self.year, quarterNumber).sum('cost')
 	end
 
 	def taxOwedByQuarter(quarterNumber)
