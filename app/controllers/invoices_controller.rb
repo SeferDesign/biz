@@ -1,5 +1,5 @@
 class InvoicesController < ApplicationController
-  before_action :set_invoice, only: [:show, :edit, :email, :stripe, :update, :destroy]
+  before_action :set_invoice, only: [:show, :edit, :email, :stripe, :mark_paid, :update, :destroy]
 
   def index
     @notableInvoices = Invoice.all.unpaid + Invoice.all.recent
@@ -99,6 +99,12 @@ class InvoicesController < ApplicationController
     respond_to do |format|
       format.js
     end
+  end
+
+  def mark_paid
+    @invoice.paiddate = Date.today
+    @invoice.paid = true
+    @invoice.save
   end
 
   def create
