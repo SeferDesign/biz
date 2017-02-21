@@ -18,7 +18,7 @@ class InvoiceMailer < ActionMailer::Base
     html_roadie = Roadie::Document.new email_html_raw
     html_inlined = html_roadie.transform
 
-    pdfFileName = invoice.client.name.gsub(/[^0-9A-Za-z]/, '') + invoice.date.to_s
+    pdfFileName = invoice.pdfFileName
 
     if invoice.paid == true
       pdfFileName = pdfFileName + '_paid'
@@ -30,6 +30,18 @@ class InvoiceMailer < ActionMailer::Base
     ).force_encoding('UTF-8').encode('UTF-8', { :invalid => :replace, :undef => :replace, :replace => '?' })
     tempPDF = WickedPdf.new.pdf_from_string(pdf, :encoding => 'UTF-8', :page_size => 'Letter')
     encodedPDF = Base64.encode64(tempPDF)
+
+    require 'tempfile'
+
+    Tempfile.open('prefix', Rails.root.join('tmp')) do |f|
+      f.binmode
+      f.write tempPDF
+      session = GoogleDrive::Session.from_config('config/google.json')
+      file = session.upload_from_file(f, "#{pdfFileName}.pdf", convert: false)
+      session.collection_by_url(Figaro.env.google_drive_invoices_unpaid_folder_url).add(file)
+      session.root_collection.remove(file)
+      f.unlink
+    end
 
     mail(to: "#{invoice.client.contact} <#{invoice.client.email_accounting}>", subject: "Invoice from Sefer Design Company", cc: cc_list) do |format|
       format.html do

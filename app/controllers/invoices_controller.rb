@@ -105,6 +105,7 @@ class InvoicesController < ApplicationController
     @invoice.paiddate = Date.today
     @invoice.paid = true
     @invoice.save
+    move_drive_doc_to_paid
   end
 
   def create
@@ -120,6 +121,9 @@ class InvoicesController < ApplicationController
   end
 
   def update
+    if @invoice.paid != invoice_params[:paid] and invoice_params[:paid] == 'true'
+      move_drive_doc_to_paid
+    end
     respond_to do |format|
       if @invoice.update(invoice_params)
         format.html { redirect_to @invoice, notice: 'Invoice was successfully updated.' }
@@ -143,5 +147,11 @@ class InvoicesController < ApplicationController
 
     def invoice_params
       params.require(:invoice).permit(:client_id, :project_id, :date, :worktype, :cost, :paid, :paiddate, :paymenttype, :description, :access_token)
+    end
+
+    def move_drive_doc_to_paid
+      #session = GoogleDrive::Session.from_config('config/google.json')
+      #file = session.file_by_title(@invoice.pdfFileName)
+      #logger.debug file
     end
 end

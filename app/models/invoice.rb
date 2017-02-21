@@ -18,9 +18,12 @@ class Invoice < ActiveRecord::Base
 	scope :paidByMonth, -> (year, monthNumber) { paid.where("SELECT extract(YEAR FROM paiddate) = ? AND extract(MONTH FROM paiddate) = ?", year, monthNumber) }
 	scope :paidByQuarter, -> (year, quarterNumber) { paid.where("paiddate >= ? AND paiddate <= ?", Date.new(year, 3 * quarterNumber - 2, 1), Date.new(year, 3 * quarterNumber, 1).end_of_month) }
 
+	def display_id_number
+		(100000 + self.id).to_s
+	end
+
 	def display_id
-		id_offset = 100000 + self.id
-		self.client.name.downcase.gsub(/[^0-9A-Za-z]/, '')[0..20] + '-' + id_offset.to_s
+		self.client.name.downcase.gsub(/[^0-9A-Za-z]/, '')[0..20] + '-' + self.display_id_number
 	end
 
 	def hasDiscount
@@ -33,6 +36,10 @@ class Invoice < ActiveRecord::Base
 
   def stripeChargeDifference
 		stripeChargeCost - self.cost
+	end
+
+	def pdfFileName
+		self.client.name.gsub(/[^0-9A-Za-z]/, '') + '-' + self.display_id_number + '-' + self.date.to_s
 	end
 
 end

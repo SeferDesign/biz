@@ -21,4 +21,5 @@ config/secrets.yml
 /public/system/clients/logos/
 
 # Ignore application configuration
+/config/google.json
 /config/application.yml
