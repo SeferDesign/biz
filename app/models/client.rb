@@ -15,7 +15,8 @@ class Client < ActiveRecord::Base
 			:medium => '300x300>',
 			:thumb => '100x100>'
 		},
-    :path => '/images/:id/:style.:extension'
+    :path => '/images/:id/:style.:extension',
+		:validate_media_type => false
 
 	validates_attachment_content_type :logo, :content_type => %w(image/jpeg image/jpg image/png image/svg+xml)
 
