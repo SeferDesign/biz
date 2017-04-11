@@ -27,8 +27,8 @@ module Biz
       :storage => :s3,
       :s3_credentials => {
         :bucket => Figaro.env.aws_s3_bucket,
-        :access_key_id => Figaro.env.aws_s3_key_id,
-        :secret_access_key => Figaro.env.aws_s3_secret,
+        :access_key_id => Figaro.env.aws_access_key_id,
+        :secret_access_key => Figaro.env.aws_secret_access_key,
         :s3_region => Figaro.env.aws_region
       }
     }
