@@ -154,7 +154,12 @@ module ApplicationHelper
 	def vendor_categories
 		[
 			'Software',
-			'Transporation'
+			'Transporation',
+			'Web Service',
+			'Supplies',
+			'Travel',
+			'Meals and Entertainment',
+			'Other'
 		]
 	end
 
