@@ -1,5 +1,5 @@
 class YearsController < ApplicationController
-  before_action :set_year, only: [:show, :edit, :update, :destroy]
+  before_action :set_year, only: [:show, :income, :expenses, :edit, :update, :destroy]
 
   def index
     @years = Year.all.sort { |a,b| a.year <=> b.year }
@@ -10,6 +10,24 @@ class YearsController < ApplicationController
       format.html
       format.csv do
         headers['Content-Disposition'] = "attachment; filename=\"#{@year.year}paidinvoices\.csv\""
+        headers['Content-Type'] ||= 'text/csv'
+      end
+    end
+  end
+
+  def income
+    respond_to do |format|
+      format.csv do
+        headers['Content-Disposition'] = "attachment; filename=\"#{@year.year}paidinvoices\.csv\""
+        headers['Content-Type'] ||= 'text/csv'
+      end
+    end
+  end
+
+  def expenses
+    respond_to do |format|
+      format.csv do
+        headers['Content-Disposition'] = "attachment; filename=\"#{@year.year}expenses\.csv\""
         headers['Content-Type'] ||= 'text/csv'
       end
     end

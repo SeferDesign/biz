@@ -4,7 +4,6 @@
 		<div class="row">
 			<div class="col-sm-12">
 				<h1>Year <%= @year.year %> Summary</h1>
-				<p><%= link_to "Download CSV", year_path(@year, format: "csv") %></p>
 			</div>
 			<div class="col-sm-8 col-sm-offset-2">
 				<p class="lead">Total Income: <span class="pull-right currency green"><%= number_to_currency(@year.incomeTotal, { :negative_format => '(%n)' }) %></span></p>
@@ -21,6 +20,7 @@
 		</ul>
 		<div class="tab-content">
 			<div role="tabpanel" class="tab-pane active" id="income">
+				<p><%= link_to 'Download Income CSV', income_year_path(@year, format: 'csv') %></p>
 				<div class="row">
 					<%= render partial: 'quarter', collection: [1, 2, 3, 4], as: :quarterNumber %>
 				</div>
@@ -110,6 +110,7 @@
 				</div>
 			</div>
 			<div role="tabpanel" class="tab-pane" id="expenses">
+				<p><%= link_to 'Download Expenses CSV', expenses_year_path(@year, format: 'csv') %></p>
 				<h3>Expenses (to-date)</h3>
 				<% if @year.expenses.blank? %>
 				<p class="lead">No to-date expenses in <%= @year.year %>.</p>

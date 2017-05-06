@@ -9,7 +9,12 @@ Biz::Application.routes.draw do
   end
 
   devise_for :users, :skip => [:registrations]
-  resources :years
+  resources :years do
+    member do
+      get :income
+      get :expenses
+    end
+  end
   resources :goals
   resources :invoices do
   	resources :lines
