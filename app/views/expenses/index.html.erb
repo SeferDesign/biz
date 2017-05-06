@@ -3,8 +3,13 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-sm-12">
-				<h1>Expenses</h1>
+				<h1><% if params[:future] == 'true' %>Future<% elsif params[:inactive] == 'true' %>All Past<% else %>Recent<% end %> Expenses</h1>
 				<p><%= link_to 'Home', root_path %></p>
+				<% if params[:future] == 'true' or params[:inactive] == 'true' %>
+				<p><%= link_to 'Recent Expenses', expenses_path %></p>
+				<% else %>
+				<p><%= link_to 'All Past Expenses', expenses_path(:inactive => 'true') %> &bull; <%= link_to 'Future Expenses', expenses_path(:future => 'true') %></p>
+				<% end %>
 				<p><%= link_to new_expense_path, { :class => 'btn btn-success' } do %><i class="fa fa-plus left"></i>New Expense<% end %></p>
 				<% if @expenses.blank? %>
 				<p class="lead">No expenses.</p>

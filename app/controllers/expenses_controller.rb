@@ -2,7 +2,13 @@ class ExpensesController < ApplicationController
   before_action :set_expense, only: [:show, :edit, :update, :destroy]
 
   def index
-    @expenses = Expense.all
+    if params[:future] == 'true'
+      @expenses = Expense.future.all
+    elsif params[:inactive] == 'true'
+      @expenses = Expense.past.all
+    else
+      @expenses = Expense.recent.all
+    end
   end
 
   def show
