@@ -20,6 +20,8 @@ Biz::Application.routes.draw do
   end
   resources :projects
   resources :clients
+  resources :expenses
+  resources :vendors
 
   root 'welcome#index'
 

@@ -1,0 +1,36 @@
+<% provide(:title, 'Vendors | ') %>
+<section id="vendors-list">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12">
+				<h1>Vendors</h1>
+				<p><%= link_to 'Home', root_path %></p>
+				<p><%= link_to new_vendor_path, { :class => 'btn btn-success' } do %><i class="fa fa-plus left"></i>New Vendor<% end %></p>
+				<% if @vendors.blank? %>
+				<p class="lead">No vendors.</p>
+				<% else %>
+				<div class="row">
+					<div class="col-sm-12">
+						<table class="table table-condensed">
+							<thead>
+								<tr>
+									<th>Vendor</th>
+									<th>Category</th>
+								</tr>
+							</thead>
+							<tbody>
+								<% @vendors.sort { |a,b| a.name <=> b.name }.each do |vendor| %>
+								<tr id="vendorrow<%= vendor.id %>">
+									<td><%= link_to vendor do %><%= vendor.name %><% end %></td>
+									<td><%= vendor.category %></td>
+								</tr>
+								<% end %>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<% end %>
+			</div>
+		</div>
+	</div>
+</section>

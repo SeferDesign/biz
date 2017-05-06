@@ -10,90 +10,151 @@
 				<p class="lead">Total Income: <span class="pull-right currency green"><%= number_to_currency(@year.incomeTotal, { :negative_format => '(%n)' }) %></span></p>
 				<p class="lead">Tax Rate*: <span class="pull-right currency"><%= number_to_percentage(@year.taxrate * 100, :precision => 2) %></span></p>
 				<p class="lead">Tax Estimate*: <span class="pull-right currency red"><%= number_to_currency(@year.taxOwedTotal, { :negative_format => '(%n)' }) %></span></p>
-				<p class="lead">Discounts Given^: <span class="pull-right currency">$<%= number_to_currency(@year.invoiceDiscountsTotal, { :negative_format => '(%n)' }) %></span></p>
+				<p class="lead">Discounts Given^: <span class="pull-right currency"><%= number_to_currency(@year.invoiceDiscountsTotal, { :negative_format => '(%n)' }) %></span></p>
+				<p class="lead">Expenses (to-date): <span class="pull-right currency red"><%= number_to_currency(@year.expenses.sum(:cost), { :negative_format => '(%n)' }) %></span></p>
 				<p><small>*Tax rate and estimates are conservative and independent of expenses and discounts.</small></p>
 			</div>
 		</div>
-		<div class="row">
-			<%= render partial: 'quarter', collection: [1, 2, 3, 4], as: :quarterNumber %>
-		</div>
-		<div class="row">
-			<div class="col-sm-8 col-sm-offset-2">
-				<div class="chart-wrap"><%= column_chart chart_year_by_month_path(@year.id) %></div>
+		<ul class="nav nav-tabs" role="tablist">
+			<li role="presentation" class="active"><a href="#income" role="tab" data-toggle="tab">Income</a></li>
+			<li role="presentation"><a href="#expenses" role="tab" data-toggle="tab">Expenses</a></li>
+		</ul>
+		<div class="tab-content">
+			<div role="tabpanel" class="tab-pane active" id="income">
+				<div class="row">
+					<%= render partial: 'quarter', collection: [1, 2, 3, 4], as: :quarterNumber %>
+				</div>
+				<div class="row">
+					<div class="col-sm-8 col-sm-offset-2">
+						<div class="chart-wrap"><%= column_chart chart_year_by_month_path(@year.id) %></div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-12">
+						<h3>Unpaid Invoices</h3>
+						<% if @year.invoices.unpaid.blank? %>
+						<p class="lead">No unpaid invoices issued in <%= @year.year %>.</p>
+						<% else %>
+						<table class="table table-condensed">
+							<thead>
+								<tr>
+									<th>Client</th>
+									<th>Issue Date</th>
+									<th class="text-center">Days Since Issued</th>
+									<th class="text-center hidden-xs">Type</th>
+									<th class="text-right">Cost</th>
+								</tr>
+							</thead>
+							<tbody>
+								<% @year.invoices.unpaid.each do |invoice| %>
+								<tr id="invoicerow<%= invoice.id %>">
+									<td><%= link_to Client.find(invoice.client_id) do %><%= Client.find(invoice.client_id).name %><% end %></td>
+									<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
+									<td class="text-center"><%= (Date.today - invoice.date).to_i %></td>
+									<td class="text-center hidden-xs"><%= invoice.worktype %></td>
+									<td class="text-right"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
+								</tr>
+								<% end %>
+							</tbody>
+						</table>
+						<% end %>
+						<% if Invoice.paidByYear(@year.year).blank? %>
+						<p class="lead">No invoices were paid in <%= @year.year %>.</p>
+						<% else %>
+						<h3>Paid Invoices By Client</h3>
+						<table class="table table-condensed">
+							<thead>
+								<tr>
+									<th>Client</th>
+									<th class="text-center"># of Invoices</th>
+									<th class="text-right">Cost</th>
+								</tr>
+							</thead>
+							<tbody>
+								<% @year.paidClients.each do |client| %>
+								<tr>
+									<td><%= link_to client.name, client %></td>
+									<td class="text-center"><%= client.yearPaidInvoices(@year.year).count %></td>
+									<td class="text-right"><%= number_to_currency(client.yearPaidInvoices(@year.year).sum(:cost)) %></td>
+								</tr>
+								<% end %>
+							</tbody>
+						</table>
+						<h3>All Paid Invoices</h3>
+						<table class="table table-condensed">
+							<thead>
+								<tr>
+									<th>Client</th>
+									<th>Issue Date</th>
+									<th>Paid Date</th>
+									<th class="text-center hidden-xs">Type</th>
+									<th class="text-right">Cost</th>
+									<th class="text-center">Paid?</th>
+								</tr>
+							</thead>
+							<tbody>
+								<% Invoice.paidByYear(@year.year).each do |invoice| %>
+								<tr id="invoicerow<%= invoice.id %>">
+									<td><%= link_to Client.find(invoice.client_id) do %><%= Client.find(invoice.client_id).name %><% end %></td>
+									<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
+									<td><%= invoice.paiddate %></td>
+									<td class="text-center hidden-xs"><%= invoice.worktype %></td>
+									<td class="text-right"><% if invoice.hasDiscount %>^<% end %><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
+									<td class="text-center"><% if invoice.paid == true %><i class="fa fa-check green"></i><% else %><span class="spread red">Not Paid</span><% end %></td>
+								</tr>
+								<% end %>
+							</tbody>
+						</table>
+						<% end %>
+					</div>
+				</div>
 			</div>
-		</div>
-		<div class="row">
-			<div class="col-sm-12">
-				<h3>Unpaid Invoices</h3>
-				<% if @year.invoices.unpaid.blank? %>
-				<p class="lead">No unpaid invoices issued in <%= @year.year %>.</p>
+			<div role="tabpanel" class="tab-pane" id="expenses">
+				<h3>Expenses (to-date)</h3>
+				<% if @year.expenses.blank? %>
+				<p class="lead">No to-date expenses in <%= @year.year %>.</p>
 				<% else %>
 				<table class="table table-condensed">
 					<thead>
 						<tr>
-							<th>Client</th>
-							<th>Issue Date</th>
-							<th class="text-center">Days Since Issued</th>
-							<th class="text-center hidden-xs">Type</th>
+							<th>Date</th>
+							<th>Vendor</th>
+							<th>Name</th>
 							<th class="text-right">Cost</th>
 						</tr>
 					</thead>
 					<tbody>
-						<% @year.invoices.unpaid.each do |invoice| %>
-						<tr id="invoicerow<%= invoice.id %>">
-							<td><%= link_to Client.find(invoice.client_id) do %><%= Client.find(invoice.client_id).name %><% end %></td>
-							<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
-							<td class="text-center"><%= (Date.today - invoice.date).to_i %></td>
-							<td class="text-center hidden-xs"><%= invoice.worktype %></td>
-							<td class="text-right"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
+						<% @year.expenses.each do |expense| %>
+						<tr id="expenserow<%= expense.id %>">
+							<td><%= link_to expense do %><%= expense.date %><% end %></td>
+							<td><%= link_to expense.vendor do %><%= expense.vendor.name %><% end %></td>
+							<td><%= expense.name %></td>
+							<td class="text-right"><%= number_to_currency(expense.cost, { :negative_format => '(%n)' }) %></td>
 						</tr>
 						<% end %>
 					</tbody>
 				</table>
 				<% end %>
-				<% if Invoice.paidByYear(@year.year).blank? %>
-				<p class="lead">No invoices were paid in <%= @year.year %>.</p>
+				<h3>Expenses (future)</h3>
+				<% if @year.expensesFuture.blank? %>
+				<p class="lead">No future expenses in <%= @year.year %>.</p>
 				<% else %>
-				<h3>Paid Invoices By Client</h3>
 				<table class="table table-condensed">
 					<thead>
 						<tr>
-							<th>Client</th>
-							<th class="text-center"># of Invoices</th>
+							<th>Date</th>
+							<th>Vendor</th>
+							<th>Name</th>
 							<th class="text-right">Cost</th>
 						</tr>
 					</thead>
 					<tbody>
-						<% @year.paidClients.each do |client| %>
-						<tr>
-							<td><%= link_to client.name, client %></td>
-							<td class="text-center"><%= client.yearPaidInvoices(@year.year).count %></td>
-							<td class="text-right"><%= number_to_currency(client.yearPaidInvoices(@year.year).sum(:cost)) %></td>
-						</tr>
-						<% end %>
-					</tbody>
-				</table>
-				<h3>All Paid Invoices</h3>
-				<table class="table table-condensed">
-					<thead>
-						<tr>
-							<th>Client</th>
-							<th>Issue Date</th>
-							<th>Paid Date</th>
-							<th class="text-center hidden-xs">Type</th>
-							<th class="text-right">Cost</th>
-							<th class="text-center">Paid?</th>
-						</tr>
-					</thead>
-					<tbody>
-						<% Invoice.paidByYear(@year.year).each do |invoice| %>
-						<tr id="invoicerow<%= invoice.id %>">
-							<td><%= link_to Client.find(invoice.client_id) do %><%= Client.find(invoice.client_id).name %><% end %></td>
-							<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
-							<td><%= invoice.paiddate %></td>
-							<td class="text-center hidden-xs"><%= invoice.worktype %></td>
-							<td class="text-right"><% if invoice.hasDiscount %>^<% end %><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
-							<td class="text-center"><% if invoice.paid == true %><i class="fa fa-check green"></i><% else %><span class="spread red">Not Paid</span><% end %></td>
+						<% @year.expensesFuture.each do |expense| %>
+						<tr id="expenserow<%= expense.id %>">
+							<td><%= link_to expense do %><%= expense.date %><% end %></td>
+							<td><%= link_to expense.vendor do %><%= expense.vendor.name %><% end %></td>
+							<td><%= expense.name %></td>
+							<td class="text-right"><%= number_to_currency(expense.cost, { :negative_format => '(%n)' }) %></td>
 						</tr>
 						<% end %>
 					</tbody>

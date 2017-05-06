@@ -38,4 +38,12 @@ class Year < ActiveRecord::Base
     Invoice.paidByYear(self.year).map { |i| i.client }.uniq.sort { |a,b| b.yearPaidInvoices(self.year).sum(:cost) <=> a.yearPaidInvoices(self.year).sum(:cost) }
 	end
 
+	def expenses
+		Expense.where("SELECT extract(YEAR FROM date) = ?", self.year).where(['date <= ?', Time.now])
+	end
+
+	def expensesFuture
+		Expense.where("SELECT extract(YEAR FROM date) = ?", self.year).where(['date > ?', Time.now])
+	end
+
 end

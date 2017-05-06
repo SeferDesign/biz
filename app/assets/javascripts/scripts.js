@@ -30,4 +30,12 @@ jQuery(document).on('turbolinks:load', function() {
 		window.print();
 	});
 
+	$('input[name="expense_type"]').change(function() {
+		if ($('#expense_type_monthly').is(':checked')) {
+			$('.expense-monthly-form-element').show();
+		} else {
+			$('.expense-monthly-form-element').hide();
+		}
+	});
+
 });

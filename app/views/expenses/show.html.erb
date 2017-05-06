@@ -1,0 +1,23 @@
+<% provide(:title, "Expense ##{@expense.id} | ") %>
+<section id="expense-show">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12">
+				<% if !notice.nil? %>
+        <p><%= notice %></p>
+        <% end %>
+				<h1>Expense #<%= @expense.id %></h1>
+				<p class="doicons">
+					<%= link_to edit_expense_path, title: 'Edit' do %><i class="fa fa-fw fa-2x fa-pencil-square-o text-warning"></i><% end %>
+					<%= link_to expense_path, title: 'Delete', method: :delete, data: { confirm: "Are you sure you would like to delete Expense ##{@expense.id}?" } do %><i class="fa fa-fw fa-2x fa-trash-o text-danger"></i><% end %>
+				</p>
+				<p><strong>Name:</strong> <%= @expense.name %></p>
+				<p><strong>Vendor:</strong> <%= link_to @expense.vendor do %><%= @expense.vendor.name %><% end %></p>
+				<p><strong>Date:</strong> <%= @expense.date %></p>
+				<p><strong>Cost:</strong> <%= number_to_currency(@expense.cost, { :negative_format => '(%n)' }) %></p>
+				<p><strong>Account:</strong> <%= @expense.account %></p>
+				<% if !@expense.notes.empty? %><p><strong>Notes:</strong> <%= @expense.notes %></p><% end %>
+      </div>
+    </div>
+  </div>
+</section>

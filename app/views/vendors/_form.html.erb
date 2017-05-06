@@ -1,0 +1,30 @@
+<%= form_for(@vendor) do |f| %>
+  <% if @vendor.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@vendor.errors.count, "error") %> prohibited this vendor from being saved:</h2>
+
+      <ul>
+      <% @vendor.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <div class="row">
+		<div class="col-sm-4">
+			<div class="form-group">
+				<%= f.label :name %>
+				<%= f.text_field :name, class: 'form-control' %>
+			</div>
+		</div>
+    <div class="col-sm-4">
+			<div class="form-group">
+				<%= f.label :category, 'Category' %>
+        <%= select(:vendor, 'category', vendor_categories, {}, { :class => 'form-control' }) %>
+			</div>
+		</div>
+  </div>
+  <div class="form-group">
+    <button type="submit" class="btn btn-success"><i class="fa fa-save left"></i>Save</button>
+  </div>
+<% end %>

@@ -87,6 +87,13 @@ module ApplicationHelper
 		]
 	end
 
+	def expense_account_types
+		[
+			'Business',
+			'Personal'
+		]
+	end
+
 	def us_states
     [
       ['Alabama', 'AL'],
@@ -142,6 +149,13 @@ module ApplicationHelper
       ['Wisconsin', 'WI'],
       ['Wyoming', 'WY']
     ]
+	end
+
+	def vendor_categories
+		[
+			'Software',
+			'Transporation'
+		]
 	end
 
 	def today

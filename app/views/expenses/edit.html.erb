@@ -1,0 +1,12 @@
+<% provide(:title, "Edit Expense ##{@expense.id} | ") %>
+<section id="expense-edit">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12">
+				<h1>Edit Expense #<%= @expense.id %></h1>
+				<%= render 'form' %>
+				<p><%= link_to 'Back', expenses_path %></p>
+			</div>
+		</div>
+	</div>
+</section>

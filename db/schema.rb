@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161214152108) do
+ActiveRecord::Schema.define(version: 20170506202317) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -39,6 +39,18 @@ ActiveRecord::Schema.define(version: 20161214152108) do
     t.integer  "currentrate"
     t.boolean  "active",                            default: true
     t.string   "email_accounting_3",    limit: 255
+  end
+
+  create_table "expenses", force: :cascade do |t|
+    t.string   "name"
+    t.integer  "vendor_id"
+    t.date     "date"
+    t.float    "cost"
+    t.text     "notes"
+    t.string   "account"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["vendor_id"], name: "index_expenses_on_vendor_id", using: :btree
   end
 
   create_table "goals", force: :cascade do |t|
@@ -107,6 +119,13 @@ ActiveRecord::Schema.define(version: 20161214152108) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
   end
 
+  create_table "vendors", force: :cascade do |t|
+    t.string   "name"
+    t.string   "category"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "years", force: :cascade do |t|
     t.integer  "year"
     t.float    "taxrate"
@@ -114,4 +133,5 @@ ActiveRecord::Schema.define(version: 20161214152108) do
     t.datetime "updated_at"
   end
 
+  add_foreign_key "expenses", "vendors"
 end

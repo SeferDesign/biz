@@ -17,6 +17,22 @@ body {
 		border-radius-bottom-left: 0px;
 	}
 
+	&-danger-alt {
+
+		color: $white;
+		background-color: $brand-danger-alt;
+
+		&:hover {
+			color: $white;
+			background-color: darken($brand-danger-alt, 5%);
+		}
+
+		&:active {
+			background-color: darken($brand-danger-alt, 10%);
+		}
+
+	}
+
 }
 
 .fa {
@@ -210,6 +226,14 @@ footer {
 		margin-top: 2rem;
 	}
 
+}
+
+.expense-monthly-form-element {
+	display: none;
+}
+
+.tab-pane {
+	padding-top: 2rem;
 }
 
 @media all and (min-width: 768px) {

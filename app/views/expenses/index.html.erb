@@ -1,0 +1,40 @@
+<% provide(:title, 'Expenses | ') %>
+<section id="expenses-list">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12">
+				<h1>Expenses</h1>
+				<p><%= link_to 'Home', root_path %></p>
+				<p><%= link_to new_expense_path, { :class => 'btn btn-success' } do %><i class="fa fa-plus left"></i>New Expense<% end %></p>
+				<% if @expenses.blank? %>
+				<p class="lead">No expenses.</p>
+				<% else %>
+				<div class="row">
+					<div class="col-sm-12">
+						<table class="table table-condensed">
+							<thead>
+								<tr>
+									<th>Date</th>
+									<th>Vendor</th>
+									<th class="hidden-xs">Name</th>
+									<th class="text-right">Cost</th>
+								</tr>
+							</thead>
+							<tbody>
+								<% @expenses.sort { |a,b| b.date <=> a.date }.each do |expense| %>
+								<tr id="expenserow<%= expense.id %>">
+									<td><%= link_to expense do %><%= expense.date %><% end %></td>
+									<td><%= link_to expense.vendor do %><%= expense.vendor.name %><% end %></td>
+									<td class="hidden-xs"><%= expense.name %></td>
+									<td class="text-right"><%= number_to_currency(expense.cost, { :negative_format => '(%n)' }) %></td>
+								</tr>
+								<% end %>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<% end %>
+			</div>
+		</div>
+	</div>
+</section>

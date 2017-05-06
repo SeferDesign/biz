@@ -4,17 +4,17 @@
 		<div class="row">
 			<div class="col-sm-12">
 				<div class="row">
-					<div class="col-md-3 col-sm-6">
+					<div class="col-md-4 col-sm-6">
             <div class="row">
               <div class="col-xs-10">
-                <%= link_to clients_path, { :class => 'btn btn-block btn-lg btn-warning' } do %><i class="fa fa-users left"></i>Clients<% end %>
+                <%= link_to clients_path, { :class => 'btn btn-block btn-lg btn-warning' } do %><i class="fa fa-address-book-o left"></i>Clients<% end %>
               </div>
               <div class="col-xs-2 button-wrap-nopad">
                 <%= link_to new_client_path, { :class => 'btn btn-block btn-lg btn-warning' } do %><i class="fa fa-fw fa-plus"></i><% end %>
               </div>
             </div>
 					</div>
-					<div class="col-md-3 col-sm-6">
+					<div class="col-md-4 col-sm-6">
 						<div class="row">
               <div class="col-xs-10">
 								<%= link_to projects_path, { :class => 'btn btn-block btn-lg btn-info' } do %><i class="fa fa-folder-open-o left"></i>Projects<% end %>
@@ -24,7 +24,7 @@
               </div>
 						</div>
 					</div>
-					<div class="col-md-3 col-sm-6">
+					<div class="col-md-4 col-sm-6">
 						<div class="row">
               <div class="col-xs-10">
 								<%= link_to invoices_path, { :class => 'btn btn-block btn-lg btn-success' } do %><i class="fa fa-usd left"></i>Invoices<% end %>
@@ -34,13 +34,34 @@
               </div>
 						</div>
 					</div>
-					<div class="col-md-3 col-sm-6">
+					<div class="col-sm-12"><hr></div>
+					<div class="col-md-4 col-sm-6">
 						<div class="row">
               <div class="col-xs-10">
-								<%= link_to goals_path, { :class => 'btn btn-block btn-lg btn-danger' } do %><i class="fa fa-tasks left"></i>Goals<% end %>
+								<%= link_to goals_path, { :class => 'btn btn-block btn-lg btn-danger-alt' } do %><i class="fa fa-tasks left"></i>Goals<% end %>
 							</div>
 							<div class="col-xs-2 button-wrap-nopad">
-                <%= link_to new_goal_path, { :class => 'btn btn-block btn-lg btn-danger' } do %><i class="fa fa-fw fa-plus"></i><% end %>
+                <%= link_to new_goal_path, { :class => 'btn btn-block btn-lg btn-danger-alt' } do %><i class="fa fa-fw fa-plus"></i><% end %>
+              </div>
+						</div>
+					</div>
+					<div class="col-md-4 col-sm-6">
+						<div class="row">
+              <div class="col-xs-10">
+								<%= link_to vendors_path, { :class => 'btn btn-block btn-lg btn-danger' } do %><i class="fa fa-users left"></i>Vendors<% end %>
+							</div>
+							<div class="col-xs-2 button-wrap-nopad">
+                <%= link_to new_vendor_path, { :class => 'btn btn-block btn-lg btn-danger' } do %><i class="fa fa-fw fa-plus"></i><% end %>
+              </div>
+						</div>
+					</div>
+					<div class="col-md-4 col-sm-6">
+						<div class="row">
+              <div class="col-xs-10">
+								<%= link_to expenses_path, { :class => 'btn btn-block btn-lg btn-primary' } do %><i class="fa fa-credit-card left"></i>Expenses<% end %>
+							</div>
+							<div class="col-xs-2 button-wrap-nopad">
+                <%= link_to new_expense_path, { :class => 'btn btn-block btn-lg btn-primary' } do %><i class="fa fa-fw fa-plus"></i><% end %>
               </div>
 						</div>
 					</div>
