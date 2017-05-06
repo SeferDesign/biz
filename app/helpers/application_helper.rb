@@ -157,8 +157,10 @@ module ApplicationHelper
 			'Transporation',
 			'Web Service',
 			'Supplies',
+			'Business Service',
 			'Travel',
 			'Meals and Entertainment',
+			'Charity',
 			'Other'
 		]
 	end
