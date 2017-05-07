@@ -1,0 +1,58 @@
+<% provide(:title, 'New Bulk Expenses | ') %>
+<section id="expenses-new">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12">
+				<% if !notice.nil? %>
+        <p><%= notice %></p>
+        <% end %>
+				<h1>New Bulk Expenses</h1>
+				<p>Assumes all use the '<%= expense_account_types[0] %>' account type and have no notes.</p>
+				<div class="row">
+					<div class="col-sm-3">
+						<strong>Date</strong>
+					</div>
+					<div class="col-sm-4">
+						<strong>Vendor</strong>
+					</div>
+					<div class="col-sm-3">
+						<strong>Name</strong>
+					</div>
+					<div class="col-sm-2">
+						<strong>Cost</strong>
+					</div>
+				</div>
+        <%= form_tag do |f| %>
+					<div class="row new-expense-row">
+						<div class="col-sm-3">
+							<div class="form-group">
+								<div class="input-group">
+									<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+									<%= text_field_tag('date[]', Time.now.strftime("%Y-%m-%d"), { :required => true, :placeholder => 'YYYY-MM-DD', :class => 'form-control datepicker'}) %>
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-4">
+							<%= select_tag('vendor_id[]', options_from_collection_for_select(Vendor.all, 'id', 'name'), { :required => true, :class => 'form-control' }) %>
+						</div>
+						<div class="col-sm-3">
+							<%= text_field_tag('name[]', nil, { :required => true, :class => 'form-control' }) %>
+						</div>
+						<div class="col-sm-2">
+							<%= number_field_tag('cost[]', nil, { :required => true, :placeholder => '0.00', :class => 'form-control', :step => '0.01' }) %>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-sm-12">
+							<button id="duplicate-expense-row" class="duplicate-expense-row btn btn-primary pull-right">Duplicate</button>
+						</div>
+					</div>
+					<div class="form-group">
+				    <button type="submit" class="btn btn-success"><i class="fa fa-save left"></i>Save</button>
+				  </div>
+        <% end %>
+				<p><%= link_to 'Back', expenses_path %></p>
+			</div>
+		</div>
+	</div>
+</section>

@@ -4,9 +4,11 @@ Biz::Application.routes.draw do
     constraints(:host => /^(?!biz\.seferdesign\.com)/i) do
       match "/(*path)" => redirect {
         |params, req| "https://biz.seferdesign.com/#{params[:path]}"
-      },  via: [:get, :post]
+      }, via: [:get, :post]
     end
   end
+
+  match 'expenses/bulk/new', to: 'expenses#bulk_new', as: 'new_bulk_expenses', via: [:get, :post]
 
   devise_for :users, :skip => [:registrations]
   resources :years do

@@ -47,7 +47,17 @@ jQuery(document).on('turbolinks:load', function() {
 				Chartkick.charts['chart-2'].redraw();
 			}
 		}, 0);
+	});
 
+	$('#duplicate-expense-row').click(function(e) {
+		e.preventDefault();
+		var lastRow = $(this).parents().find('form').find('.new-expense-row').last();
+		var clone = lastRow.clone();
+		lastRow.after(clone).promise().done(function() {
+			$('.datepicker').datepicker({
+				format: 'yyyy-mm-dd'
+			});
+		});
 	});
 
 });
