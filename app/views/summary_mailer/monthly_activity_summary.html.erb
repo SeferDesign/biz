@@ -22,10 +22,10 @@
   }
 }
 </script>
-            <h3>Weekly Activity Summary<br>
+            <h3>Monthly Activity Summary<br>
             <small><%= @date_start.strftime("%A, %B %e") %> through
             <%= @date_end.strftime("%A, %B %e") %></small></h3>
-						<p><a href="<%= root_url + 'years/' + @date_start.year.to_s + '/income.csv' %>">Income CSV</a> &bull; <a href="<%= root_url + 'years/' + @date_start.year.to_s + '/expenses.csv' %>">Expenses CSV</a></p>
+            <p><a href="<%= root_url + 'years/' + @date_start.year.to_s + '/income.csv' %>">Income CSV</a> &bull; <a href="<%= root_url + 'years/' + @date_start.year.to_s + '/expenses.csv' %>">Expenses CSV</a></p>
 						<p><strong>Invoices Paid</strong> - <%= pluralize(@invoicesPaid.count, 'invoice') %>
             totalling $<%= @invoicesPaid.sum('cost').to_f %></p>
 						<% if @invoicesPaid.count > 0 %>
