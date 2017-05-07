@@ -5,12 +5,23 @@
 			<div class="col-sm-12">
 				<h1>Vendors</h1>
 				<p><%= link_to 'Home', root_path %></p>
+				<p><% if params[:category] == 'true' %><%= link_to 'View Alphabetically', vendors_path %><% else %><%= link_to 'View by Category', vendors_path(:category => 'true') %><% end %>
 				<p><%= link_to new_vendor_path, { :class => 'btn btn-success' } do %><i class="fa fa-plus left"></i>New Vendor<% end %></p>
 				<% if @vendors.blank? %>
 				<p class="lead">No vendors.</p>
 				<% else %>
 				<div class="row">
 					<div class="col-sm-12">
+						<% if params[:category] == 'true' %>
+						<div class="vendors-category-view">
+							<% @vendors.group_by(&:category).sort_by { |k, v| -v.join.length }.each do |category, vend| %>
+							<p><strong><%= category %></strong></h3>
+							<ul>
+								<% vend.each do |v| %><li><%= link_to v do %><%= v.name %><% end %></li><% end %>
+							</ul>
+							<% end %>
+						</div>
+						<% else %>
 						<table class="table table-condensed">
 							<thead>
 								<tr>
@@ -19,7 +30,7 @@
 								</tr>
 							</thead>
 							<tbody>
-								<% @vendors.sort { |a,b| a.name <=> b.name }.each do |vendor| %>
+								<% @vendors.each do |vendor| %>
 								<tr id="vendorrow<%= vendor.id %>">
 									<td><%= link_to vendor do %><%= vendor.name %><% end %></td>
 									<td><%= vendor.category %></td>
@@ -27,6 +38,7 @@
 								<% end %>
 							</tbody>
 						</table>
+						<% end %>
 					</div>
 				</div>
 				<% end %>

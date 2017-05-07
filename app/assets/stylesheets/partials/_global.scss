@@ -236,7 +236,27 @@ footer {
 	padding-top: 2rem;
 }
 
+.vendors-category-view {
+
+	ul {
+		margin-bottom: 1rem;
+	}
+
+}
+
 @media all and (min-width: 768px) {
+
+	.vendors-category-view {
+
+		column-count: 2;
+
+
+
+		p:nth-of-type(4) {
+			break-before: column;
+		}
+
+	}
 
 	footer {
 
