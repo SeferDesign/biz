@@ -159,7 +159,9 @@ module ApplicationHelper
 			'Supplies',
 			'Business Service',
 			'Travel',
+			'Contractor',
 			'Meals and Entertainment',
+			'Education',
 			'Charity',
 			'Other'
 		]
