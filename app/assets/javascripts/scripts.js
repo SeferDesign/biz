@@ -54,9 +54,10 @@ jQuery(document).on('turbolinks:load', function() {
 		var lastRow = $(this).parents().find('form').find('.new-expense-row').last();
 		var clone = lastRow.clone();
 		lastRow.after(clone).promise().done(function() {
-			$('.datepicker').datepicker({
+			clone.find('.datepicker').datepicker({
 				format: 'yyyy-mm-dd'
 			});
+			clone.find('select').val(lastRow.find('select').val());
 		});
 	});
 
