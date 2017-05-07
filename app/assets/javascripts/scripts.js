@@ -38,4 +38,16 @@ jQuery(document).on('turbolinks:load', function() {
 		}
 	});
 
+	$('.yearsummary a[role="tab"]').click(function() {
+		setTimeout(function() {
+			if (Chartkick.charts['chart-1']) {
+				Chartkick.charts['chart-1'].redraw();
+			}
+			if (Chartkick.charts['chart-2']) {
+				Chartkick.charts['chart-2'].redraw();
+			}
+		}, 0);
+
+	});
+
 });

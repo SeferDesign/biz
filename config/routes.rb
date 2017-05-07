@@ -36,5 +36,6 @@ Biz::Application.routes.draw do
   get 'invoices_controller/mark_paid/:id', to: 'invoices#mark_paid', as: 'mark_paid_invoice'
   get 'charts_controller/trailing_x_months/:number_of_months', to: 'charts#trailing_x_months', as: 'chart_trailing_x_months'
   get 'charts_controller/year_by_month/:id', to: 'charts#year_by_month', as: 'chart_year_by_month'
+  get 'charts_controller/year_expense_category/:id', to: 'charts#year_expense_category', as: 'chart_year_by_expense_category'
 
 end

@@ -16,7 +16,8 @@
 		</div>
 		<ul class="nav nav-tabs" role="tablist">
 			<li role="presentation" class="active"><a href="#income" role="tab" data-toggle="tab">Income</a></li>
-			<li role="presentation"><a href="#expenses" role="tab" data-toggle="tab">Expenses</a></li>
+			<li role="presentation"><a href="#expenses-summary" role="tab" data-toggle="tab">Expenses (Summary)</a></li>
+			<li role="presentation"><a href="#expenses-detailed" role="tab" data-toggle="tab">Expenses (Detailed)</a></li>
 		</ul>
 		<div class="tab-content">
 			<div role="tabpanel" class="tab-pane active" id="income">
@@ -109,7 +110,35 @@
 					</div>
 				</div>
 			</div>
-			<div role="tabpanel" class="tab-pane" id="expenses">
+			<div role="tabpanel" class="tab-pane" id="expenses-summary">
+				<p><%= link_to 'Download Expenses CSV', expenses_year_path(@year, format: 'csv') %></p>
+				<h3>By Category (to-date)</h3>
+				<% if @year.expenses.blank? %>
+				<p class="lead">No to-date expenses in <%= @year.year %>.</p>
+				<% else %>
+				<div class="chart-wrap"><%= pie_chart chart_year_by_expense_category_path(@year.id), legend: true, donut: true %></div>
+				<h3>By Vendor (to-date)</h3>
+				<table class="table table-condensed">
+					<thead>
+						<tr>
+							<th>Vendor</th>
+							<th>Count</th>
+							<th class="text-right">Cost</th>
+						</tr>
+					</thead>
+					<tbody>
+						<% @year.expensesVendors.each do |vendor| %>
+						<tr id="vendorrow<%= vendor.id %>">
+							<td><%= link_to vendor do %><%= vendor.name %><% end %></td>
+							<td><%= vendor.yearExpenses(@year.year).length %></td>
+							<td class="text-right"><%= number_to_currency(vendor.yearExpenses(@year.year).sum(:cost), { :negative_format => '(%n)' }) %></td>
+						</tr>
+						<% end %>
+					</tbody>
+				</table>
+				<% end %>
+			</div>
+			<div role="tabpanel" class="tab-pane" id="expenses-detailed">
 				<p><%= link_to 'Download Expenses CSV', expenses_year_path(@year, format: 'csv') %></p>
 				<h3>Expenses (to-date)</h3>
 				<% if @year.expenses.blank? %>

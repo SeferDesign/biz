@@ -4,6 +4,8 @@ class Expense < ApplicationRecord
 
   default_scope { order('date ASC, name ASC') }
 
+  scope :expenseByYear, -> (year) { past.where("SELECT extract(YEAR FROM date) = ?", year) }
+
   scope :recent, -> { where("date >= ? AND date <= ?", 1.year.ago, Time.now) }
   scope :future, -> { where(['date > ?', Time.now]) }
 	scope :past, -> { where(['date <= ?', Time.now]) }

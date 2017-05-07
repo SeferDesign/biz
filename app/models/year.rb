@@ -46,4 +46,8 @@ class Year < ActiveRecord::Base
 		Expense.where("SELECT extract(YEAR FROM date) = ?", self.year).where(['date > ?', Time.now])
 	end
 
+	def expensesVendors
+    self.expenses.map { |i| i.vendor }.uniq.sort { |a,b| b.expenses.sum(:cost) <=> a.expenses.sum(:cost) }
+	end
+
 end
