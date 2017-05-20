@@ -3,9 +3,6 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-sm-12">
-				<% if !notice.nil? %>
-        <p><%= notice %></p>
-        <% end %>
 				<h1>Expense #<%= @expense.id %></h1>
 				<p class="doicons">
 					<%= link_to edit_expense_path, title: 'Edit' do %><i class="fa fa-fw fa-2x fa-pencil-square-o text-warning"></i><% end %>

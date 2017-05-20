@@ -18,6 +18,23 @@
 
 <%= render 'layouts/header' %>
 
+<% if user_signed_in? and (!notice.nil? or !alert.nil?) %>
+<section class="notice-alert">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-12">
+        <% if !notice.nil? %>
+        <p><%= notice %></p>
+        <% end %>
+        <% if !alert.nil? %>
+        <p><%= alert %></p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</section>
+<% end %>
+
 <%= yield %>
 
 <%= render 'layouts/footer' %>

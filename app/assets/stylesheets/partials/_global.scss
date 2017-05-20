@@ -167,6 +167,17 @@ section {
 
 }
 
+.notice-alert {
+
+	text-align: center;
+	font-weight: bold;
+
+	p:last-child {
+		margin-bottom: 0px;
+	}
+	
+}
+
 footer {
 
 	.footer-logo {

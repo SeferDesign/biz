@@ -2,12 +2,6 @@
   <div class="container">
     <div class="row">
       <div class="col-sm-4 col-sm-offset-4">
-        <% if !notice.nil? %>
-        <p><%= notice %></p>
-        <% end %>
-        <% if !alert.nil? %>
-        <p><%= alert %></p>
-        <% end %>
         <h2 class="text-center">Sign Up</h2>
         <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
           <%= devise_error_messages! %>
