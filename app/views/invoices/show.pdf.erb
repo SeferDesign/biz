@@ -2,14 +2,14 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-sm-12">
-				<div class="sdc-logo"><%= wicked_pdf_image_tag '/images/sdc_acronym.svg' %></div>
+				<div class="sdc-logo"><%= wicked_pdf_image_tag '/images/sdc.svg' %></div>
 				<% if @invoice.client.logo.present? %>
         <%
 					image = MiniMagick::Image.open(@invoice.client.logo.url())
           if (image.width.to_f / image.height.to_f) < 2.5
-            logoWD = (150 / image.height.to_f).to_f
+            logoWD = (100 / image.height.to_f).to_f
           else
-            logoWD = (200 / image.width.to_f).to_f
+            logoWD = (135 / image.width.to_f).to_f
           end
 					logoW = (logoWD * image.width.to_f).ceil
 					logoH = (logoWD * image.height.to_f).ceil
@@ -48,7 +48,7 @@
 					<p><strong>Payment Method:</strong> <%= @invoice.paymenttype %></p>
 					<% else %>
 					<p><strong>Status:</strong> <span class="spread red">Not Paid</span></p>
-					<p>This payment can be made out to '<%= company_pay_to %>' and sent to <%= mail_to company_email %> or mailed to:</p>
+					<p>This payment can be made out to '<%= company_pay_to %>' and sent to &nbsp;<%= mail_to company_email %> or mailed to:</p>
 					<p><%= company_pay_to %><br><%= company_street %><br><%= company_city %>, <%= company_state_abbrv %> <%= company_zipcode %></p>
 					<% end %>
 				</div>
@@ -58,7 +58,7 @@
 				<p class="indent">Thank you,<br><%= company_operator_name %><br><%= company_full_name %><br><%= company_email %><br><%= company_phone %></p>
 				<hr>
 				<% if @invoice.lines.present? %>
-				<table class="table table-hover table-striped table-condensed">
+				<table class="table table-condensed">
 		      <thead>
 		        <tr>
 		          <th>Description</th>
@@ -81,11 +81,14 @@
 						  <td><div class="pull-right"><%= number_to_currency(line.total, { :unit => '', :negative_format => '(%n)' }) %></div>$</td>
 						</tr>
 						<% end %>
-			      <tr>
+
+			    </tbody>
+					<tfoot>
+						<tr>
 			        <td class="text-right" colspan="3"><strong>Total</strong>&nbsp;&nbsp;</td>
 			        <td><strong><div class="pull-right"><%= number_to_currency(@invoice.lines.sum('total'), { :unit => '', :negative_format => '(%n)' }) %></div>$</strong></td>
 			      </tr>
-			    </tbody>
+					</tfoot>
 			  </table>
 			  <% end %>
 			</div>

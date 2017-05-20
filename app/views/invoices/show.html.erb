@@ -74,7 +74,7 @@
 				<p><strong>Description:</strong></p>
 				<p><%= @invoice.description %></p>
 				<% if !@invoice.lines.blank? %>
-				<table class="table table-hover table-striped table-condensed">
+				<table class="table table-hover table-condensed">
 					<thead>
 						<tr>
 		          <% if user_signed_in? %>
@@ -88,6 +88,8 @@
 					</thead>
 					<tbody>
 						<%= render @invoice.lines %>
+					</tbody>
+					<tfoot>
 						<tr>
 		          <% if user_signed_in? %>
 							<td>&nbsp;</td>
@@ -95,7 +97,7 @@
 							<td class="text-right" colspan="3"><strong>Total</strong>&nbsp;&nbsp;</td>
 							<td><strong><div class="pull-right"><%= number_to_currency(@invoice.lines.sum('total'), { :unit => '', :negative_format => '(%n)' }) %></div>$</strong></td>
 						</tr>
-					</tbody>
+					</tfoot>
 				</table>
 				<% end %>
 		    <% if !user_signed_in? and !@invoice.paid and @invoice.access_token.present? %>
