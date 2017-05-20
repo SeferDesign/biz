@@ -113,7 +113,7 @@ class InvoicesController < ApplicationController
 
     respond_to do |format|
       if @invoice.save
-        format.html { redirect_to @invoice, notice: 'Invoice was successfully created.' }
+        format.html { redirect_to @invoice }
       else
         format.html { render action: 'new' }
       end
@@ -126,7 +126,7 @@ class InvoicesController < ApplicationController
     end
     respond_to do |format|
       if @invoice.update(invoice_params)
-        format.html { redirect_to @invoice, notice: 'Invoice was successfully updated.' }
+        format.html { redirect_to @invoice }
       else
         format.html { render action: 'edit' }
       end
