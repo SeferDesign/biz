@@ -140,6 +140,17 @@
 				      <% end %>
 						</div>
 					</div>
+					<hr>
+					<h3>Pay with cryptocurrencies:</h3>
+					<p>If you'd like to pay with a cryptocurrency listed below, please contact us <%= mail_to company_email, 'via email' %>.</p>
+					<div class="row">
+						<div class="col-sm-6 payment-option payment-option-bitcoin">
+							<img src="https://s3.amazonaws.com/SeferBiz/internal/bitcoin.svg">
+						</div>
+						<div class="col-sm-6 payment-option payment-option-ethereum">
+							<img src="https://s3.amazonaws.com/SeferBiz/internal/ethereum.svg">
+						</div>
+					</div>
 		    </div>
 		    <% end %>
 				<% if user_signed_in? %>

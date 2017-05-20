@@ -76,12 +76,13 @@ module ApplicationHelper
 	def payment_types
 		[
 			'Check',
-			'Cash',
 			'Credit Card',
 			'Chase Quick Pay',
 			'PayPal',
 			'Stripe',
 			'ACH',
+			'Cryptocurrency',
+			'Cash',
 			'Venmo',
 			'Other'
 		]
