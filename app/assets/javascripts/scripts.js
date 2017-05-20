@@ -23,7 +23,8 @@ jQuery(document).on('turbolinks:load', function() {
 	});
 
 	$('.datepicker').datepicker({
-		format: 'yyyy-mm-dd'
+		format: 'yyyy-mm-dd',
+		autoclose: true
 	});
 
 	$('[data-print="true"]').click(function() {
