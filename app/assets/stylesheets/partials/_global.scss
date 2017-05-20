@@ -1,6 +1,7 @@
 body {
 	color: $white;
 	background: $grey;
+	font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 .btn {
@@ -55,7 +56,7 @@ h5,
 h6 {
 
 	margin: 0px 0px 20px;
-	font-family: $font-headers;
+	font-weight: 400;
 
 	&.title {
 		text-align: center;
@@ -175,7 +176,11 @@ section {
 	p:last-child {
 		margin-bottom: 0px;
 	}
-	
+
+}
+
+.table > tfoot > tr > td {
+	border-top-width: 2px;
 }
 
 footer {

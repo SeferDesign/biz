@@ -60,7 +60,7 @@
 				<% if @client.projects.blank? %>
 				<p class="lead">No projects.</p>
 				<% else %>
-				<table class="table table-condensed">
+				<table class="table table-hover table-striped table-condensed">
 					<thead>
 						<tr>
 							<th>Name</th>
@@ -86,7 +86,7 @@
 				<p class="lead">No invoices.</p>
 				<% else %>
 				<h4>Paid By Year</h4>
-				<table class="table table-condensed">
+				<table class="table table-hover table-striped table-condensed">
 					<thead>
 						<tr>
 							<th>Year</th>
@@ -104,15 +104,17 @@
 							<td class="text-right"><%= number_to_currency(Invoice.paidByYear(year.year).where(:client_id => @client.id).sum(:cost), { :negative_format => '(%n)' }) %></td>
 						</tr>
 						<% end end %>
+					</tbody>
+					<tfoot>
 						<tr>
 							<td>&nbsp;</td>
 							<td class="text-right"><strong>Total</strong></td>
 							<td class="text-right"><strong><%= number_to_currency(@client.invoiceTotal, { :negative_format => '(%n)' }) %></strong></td>
 						</tr>
-					</tbody>
+					</tfoot>
 				</table>
 				<h4>All</h4>
-				<table class="table table-condensed">
+				<table class="table table-hover table-striped table-condensed">
 					<thead>
 						<tr>
 							<th>Date Sent</th>
@@ -132,13 +134,15 @@
 							<td class="text-center"><% if invoice.paid == true %><span class="green"><%= invoice.paiddate %></span><% else %><span class="spread red">Not Paid</span><% end %></td>
 						</tr>
 						<% end %>
+					</tbody>
+					<tfoot>
 						<tr>
 							<td colspan="2">&nbsp;</td>
 							<td class="text-center"><strong>Total</strong></td>
 							<td class="text-right"><strong><%= number_to_currency(@client.invoiceTotal, { :negative_format => '(%n)' }) %></strong></td>
 							<td>&nbsp;</td>
 						</tr>
-					</tbody>
+					</tfoot>
 				</table>
 				<% end %>
 			</div>
