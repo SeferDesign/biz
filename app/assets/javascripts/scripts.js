@@ -60,6 +60,13 @@ jQuery(document).on('turbolinks:load', function() {
 		});
 	});
 
+	Highcharts.setOptions({
+		lang: {
+			thousandsSep: ',',
+			numericSymbols: null
+		}
+	});
+
 });
 
 function setDatepickers() {

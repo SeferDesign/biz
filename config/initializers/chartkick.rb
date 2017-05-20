@@ -12,8 +12,24 @@ Chartkick.options = {
     '#fff73d'
   ],
   library: {
-    vAxis: {
-      format: 'currency'
+    plotOptions: {
+      series: {
+        animation: false
+      }
+    },
+    legend: {
+      enabled: false
+    },
+    tooltip: {
+      valuePrefix: '$',
+      valueDecimals: 0,
+      pointFormat: '<b>{point.y}</b>'
+    },
+    yAxis: {
+      format: 'currency',
+      labels: {
+        format: '${value:,.0f}'
+    }
     }
   }
 }
