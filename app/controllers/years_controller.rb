@@ -6,13 +6,6 @@ class YearsController < ApplicationController
   end
 
   def show
-    respond_to do |format|
-      format.html
-      format.csv do
-        headers['Content-Disposition'] = "attachment; filename=\"#{@year.year}paidinvoices\.csv\""
-        headers['Content-Type'] ||= 'text/csv'
-      end
-    end
   end
 
   def income

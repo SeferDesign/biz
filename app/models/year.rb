@@ -47,7 +47,7 @@ class Year < ActiveRecord::Base
 	end
 
 	def expensesVendors
-    self.expenses.map { |i| i.vendor }.uniq.sort { |a,b| b.expenses.sum(:cost) <=> a.expenses.sum(:cost) }
+    self.expenses.map { |i| i.vendor }.uniq.sort { |a,b| b.yearExpenses(self.year).sum(:cost) <=> a.yearExpenses(self.year).sum(:cost) }
 	end
 
 end
