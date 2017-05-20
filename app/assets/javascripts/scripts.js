@@ -22,10 +22,7 @@ jQuery(document).on('turbolinks:load', function() {
 		}, 200);
 	});
 
-	$('.datepicker').datepicker({
-		format: 'yyyy-mm-dd',
-		autoclose: true
-	});
+	setDatepickers();
 
 	$('[data-print="true"]').click(function() {
 		window.print();
@@ -59,7 +56,16 @@ jQuery(document).on('turbolinks:load', function() {
 				format: 'yyyy-mm-dd'
 			});
 			clone.find('select').val(lastRow.find('select').val());
+			setDatepickers();
 		});
 	});
 
 });
+
+function setDatepickers() {
+	$('.datepicker').datepicker('destroy');
+	$('.datepicker').datepicker({
+		format: 'yyyy-mm-dd',
+		autoclose: true
+	});
+}
