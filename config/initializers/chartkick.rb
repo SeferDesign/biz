@@ -29,7 +29,7 @@ Chartkick.options = {
       format: 'currency',
       labels: {
         format: '${value:,.0f}'
-    }
+      }
     }
   }
 }
