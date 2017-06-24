@@ -1,1 +1,1 @@
-An internal tool that allows for tracking of clients, projects, goals, vendors, expenses, and goals.
+An internal tool that allows tracking of clients, projects, goals, vendors, expenses, and goals, on a monthly and yearly basis..
