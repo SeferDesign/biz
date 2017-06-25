@@ -136,6 +136,8 @@
 						<% end %>
 					</tbody>
 				</table>
+				<h3>By Month (to-date)</h3>
+				<div class="chart-wrap"><%= column_chart chart_year_by_expense_month_path(@year.id) %></div>
 				<% end %>
 			</div>
 			<div role="tabpanel" class="tab-pane" id="expenses-detailed">

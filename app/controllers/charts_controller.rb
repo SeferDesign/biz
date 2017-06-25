@@ -1,7 +1,7 @@
 class ChartsController < ApplicationController
   include ApplicationHelper
   before_action :set_number_of_months, only: [:trailing_x_months]
-  before_action :set_year, only: [:year_by_month, :year_expense_category]
+  before_action :set_year, only: [:year_by_month, :year_expense_category, :year_expense_month]
 
   def trailing_x_months
     months = []
@@ -31,6 +31,14 @@ class ChartsController < ApplicationController
       categories.push([cat, this_cat_expenses])
     end
     render json: categories
+  end
+
+  def year_expense_month
+    months = []
+    (1..12).each do |m|
+      months.push([Date::ABBR_MONTHNAMES[m], Expense.expenseByMonth(@year.year, m).sum('cost').to_f])
+    end
+    render json: months
   end
 
   private
