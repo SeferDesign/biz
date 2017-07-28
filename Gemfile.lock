@@ -192,6 +192,8 @@ GEM
     http-cookie (1.0.3)
       domain_name (~> 0.5)
     http_parser.rb (0.6.0)
+    httparty (0.15.5)
+      multi_xml (>= 0.5.2)
     httpclient (2.8.3)
     hurley (0.2)
     i18n (0.8.0)
@@ -228,6 +230,7 @@ GEM
     mini_portile2 (2.1.0)
     minitest (5.10.1)
     multi_json (1.12.1)
+    multi_xml (0.6.0)
     multipart-post (2.0.0)
     nenv (0.3.0)
     net-scp (1.2.1)
@@ -380,6 +383,7 @@ DEPENDENCIES
   google_drive (~> 2.1.2)
   guard-livereload
   hirb
+  httparty
   jbuilder (~> 1.2)
   jquery-rails
   mini_magick
@@ -399,4 +403,4 @@ DEPENDENCIES
   wkhtmltopdf-binary
 
 BUNDLED WITH
-   1.14.3
+   1.14.6

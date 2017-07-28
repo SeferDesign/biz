@@ -25,6 +25,7 @@ gem 'chartkick'
 gem 'roadie', '~> 3.1.1'
 gem 'stripe', :git => 'https://github.com/stripe/stripe-ruby'
 gem 'google_drive', '~> 2.1.2'
+gem 'httparty'
 
 group :development do
   gem 'spring'

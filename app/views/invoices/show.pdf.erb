@@ -14,7 +14,19 @@
 					logoW = (logoWD * image.width.to_f).ceil
 					logoH = (logoWD * image.height.to_f).ceil
         %>
-				<div class="pull-right"><div id="clientlogo-wrap" class="client-logo"><%= image_tag embed_remote_image(@invoice.client.logo.url(), @invoice.client.logo_content_type), width: logoW, height: logoH %></div></div>
+				<div id="clientlogo-wrap" class="client-logo">
+					<% if image.type == 'SVG' %>
+					<style>
+					.client-logo svg {
+						width: <%= logoW %>px;
+						height: <%= logoH %>px;
+					}
+					</style>
+					<%= remote_svg_raw(@invoice.client.logo.url()).html_safe %>
+					<% else %>
+					<%= image_tag embed_remote_image(@invoice.client.logo.url(), @invoice.client.logo_content_type), width: logoW, height: logoH %>
+					<% end %>
+				</div>
 				<% end %>
 			</div>
 		</div>

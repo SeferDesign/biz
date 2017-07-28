@@ -172,6 +172,13 @@ module ApplicationHelper
 		Date.today
 	end
 
+	def remote_svg_raw(url)
+		require 'httparty'
+		svg = Nokogiri::HTML(open(url)).at_css 'svg'
+		svg['style'] = nil
+		raw svg
+	end
+
 	require 'open-uri'
 	def embed_remote_image(url, content_type)
 	  asset = open(url, "r:UTF-8") { |f| f.read }
