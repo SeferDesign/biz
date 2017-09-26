@@ -16,7 +16,7 @@
 
 <%= render 'layouts/header' %>
 
-<% if user_signed_in? and (!notice.nil? or !alert.nil?) %>
+<% if (!notice.nil? or !alert.nil?) and (user_signed_in? or controller_name == 'sessions') %>
 <section class="notice-alert">
   <div class="container">
     <div class="row">
