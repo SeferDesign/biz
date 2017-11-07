@@ -116,7 +116,11 @@
 				<% if @year.expenses.blank? %>
 				<p class="lead">No to-date expenses in <%= @year.year %>.</p>
 				<% else %>
-				<div class="chart-wrap"><%= pie_chart chart_year_by_expense_category_path(@year.id), legend: true, donut: true %></div>
+				<div class="chart-wrap"><%= pie_chart chart_year_by_expense_category_path(@year.id), id: 'expenses-category-pie', legend: true, donut: true, library: {
+					tooltip: {
+			      pointFormat: 'Expenses: <b>{point.y}</b>'
+			    }
+				} %></div>
 				<h3>By Month (to-date)</h3>
 				<div class="chart-wrap"><%= column_chart chart_year_by_expense_month_path(@year.id) %></div>
 				<h3>By Vendor (to-date)</h3>

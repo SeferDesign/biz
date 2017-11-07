@@ -23,7 +23,7 @@ Chartkick.options = {
     tooltip: {
       valuePrefix: '$',
       valueDecimals: 0,
-      pointFormat: '<b>{point.y}</b>'
+      pointFormat: '{series.name}: <b>{point.y}</b>'
     },
     yAxis: {
       format: 'currency',
