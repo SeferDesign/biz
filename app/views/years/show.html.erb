@@ -112,17 +112,23 @@
 			</div>
 			<div role="tabpanel" class="tab-pane" id="expenses-summary">
 				<p><%= link_to 'Download Expenses CSV', expenses_year_path(@year, format: 'csv') %></p>
-				<h3>By Category (to-date)</h3>
 				<% if @year.expenses.blank? %>
 				<p class="lead">No to-date expenses in <%= @year.year %>.</p>
 				<% else %>
-				<div class="chart-wrap"><%= pie_chart chart_year_by_expense_category_path(@year.id), id: 'expenses-category-pie', legend: true, donut: true, library: {
-					tooltip: {
-			      pointFormat: 'Expenses: <b>{point.y}</b>'
-			    }
-				} %></div>
-				<h3>By Month (to-date)</h3>
-				<div class="chart-wrap"><%= column_chart chart_year_by_expense_month_path(@year.id) %></div>
+				<div class="row">
+					<div class="col-md-6">
+						<h3>By Category (to-date)</h3>
+						<div class="chart-wrap"><%= pie_chart chart_year_by_expense_category_path(@year.id), id: 'expenses-category-pie', legend: true, donut: true, library: {
+							tooltip: {
+					      pointFormat: 'Expenses: <b>{point.y}</b>'
+					    }
+						} %></div>
+					</div>
+					<div class="col-md-6">
+						<h3>By Month (to-date)</h3>
+						<div class="chart-wrap"><%= column_chart chart_year_by_expense_month_path(@year.id) %></div>
+					</div>
+				</div>
 				<h3>By Vendor (to-date)</h3>
 				<table class="table table-hover table-striped table-condensed">
 					<thead>
