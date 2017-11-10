@@ -30,7 +30,7 @@
 									<td class="hidden-xs"><%= link_to Project.find(invoice.project_id) do %><%= Project.find(invoice.project_id).name %><% end %></td>
 									<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
 									<td class="text-center hidden-xs"><% if invoice.worktype == 'Contract' %>C<% elsif invoice.worktype == 'Hourly' %>H<% end %></td>
-									<td class="text-right hidden-xs"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
+									<td class="currency text-right hidden-xs"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
 									<td class="text-center"><% if invoice.paid == true %><i class="fa fa-check green"></i><% else %><span class="spread red">Not Paid</span><% end %></td>
 								</tr>
 								<% end %>

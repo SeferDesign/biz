@@ -31,8 +31,8 @@
 								<tr>
 									<td><%= link_to goal do %><% if goal.timeperiod == 'Year' %>Year <%= goal.enddate.year %><% elsif goal.timeperiod == 'Month' %><%= goal.enddate.strftime('%B') %>&nbsp;<%= goal.enddate.year %><% end %><% end %></td>
 									<td><%= goal.goaltype %></td>
-									<td class="text-right"><%= number_to_currency(goal.amount, { :negative_format => '(%n)' }) %></td>
-									<td class="text-right hidden-xs"><%= number_to_currency(goal.actualamount, { :negative_format => '(%n)' }) %></td>
+									<td class="currency text-right"><%= number_to_currency(goal.amount, { :negative_format => '(%n)' }) %></td>
+									<td class="currency text-right hidden-xs"><%= number_to_currency(goal.actualamount, { :negative_format => '(%n)' }) %></td>
 									<td class="text-center">
 										<% if goal.status == 'Past' %>
 											<% if goal.met %>

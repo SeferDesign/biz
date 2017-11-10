@@ -17,8 +17,8 @@
 					</div>
 					<div class="col-sm-4">
 						<p><strong>Type:</strong> <%= @goal.goaltype %></p>
-						<p><strong>Amount:</strong> <%= number_to_currency(@goal.amount, { :negative_format => '(%n)' }) %></p>
-						<% if @goal.status == 'Current' or @goal.status == 'Past' %><p><strong>Actual:</strong> <%= number_to_currency(@goal.actualamount, { :negative_format => '(%n)' }) %></p><% end %>
+						<p><strong>Amount:</strong> <span class="currency"><%= number_to_currency(@goal.amount, { :negative_format => '(%n)' }) %></span></p>
+						<% if @goal.status == 'Current' or @goal.status == 'Past' %><p><strong>Actual:</strong> <span class="currency"><%= number_to_currency(@goal.actualamount, { :negative_format => '(%n)' }) %></span></p><% end %>
 					</div>
 					<div class="col-sm-4">
 						<% if @goal.status == 'Past' %>
@@ -65,7 +65,7 @@
 							<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
 							<td><%= invoice.paiddate %></td>
 							<td class="text-center hidden-xs"><%= invoice.worktype %></td>
-							<td class="text-right"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
+							<td class="currency text-right"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
 							<td class="text-center"><% if invoice.paid == true %><i class="fa fa-check green"></i><% else %><span class="spread red">Not Paid</span><% end %></td>
 						</tr>
 						<% end %>

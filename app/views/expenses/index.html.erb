@@ -31,7 +31,7 @@
 									<td><%= link_to expense do %><%= expense.date %><% end %></td>
 									<td><%= link_to expense.vendor do %><%= expense.vendor.name %><% end %></td>
 									<td class="hidden-xs"><%= expense.name %></td>
-									<td class="text-right"><%= number_to_currency(expense.cost, { :negative_format => '(%n)' }) %></td>
+									<td class="currency text-right"><%= number_to_currency(expense.cost, { :negative_format => '(%n)' }) %></td>
 								</tr>
 								<% end %>
 							</tbody>

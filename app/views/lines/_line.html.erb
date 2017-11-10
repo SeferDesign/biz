@@ -5,10 +5,10 @@
   <td><%= line.description %></td>
   <% if line.hours.present? %>
   <td class="text-center"><%= line.hours %></td>
-  <td class="text-center"><%= number_to_currency(line.rate, { :unit => ''}) %></td>
+  <td class="currency text-center"><%= number_to_currency(line.rate, { :unit => ''}) %></td>
   <% else %>
   <td class="text-center">&mdash;</td>
   <td class="text-center">&mdash;</td>
   <% end %>
-  <td><div class="pull-right"><%= number_to_currency(line.total, { :unit => '', :negative_format => '(%n)' }) %></div>$</td>
+  <td class="currency"><div class="pull-right"><%= number_to_currency(line.total, { :unit => '', :negative_format => '(%n)' }) %></div>$</td>
 </tr>

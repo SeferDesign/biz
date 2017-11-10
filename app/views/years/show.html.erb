@@ -53,7 +53,7 @@
 									<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
 									<td class="text-center"><%= (Date.today - invoice.date).to_i %></td>
 									<td class="text-center hidden-xs"><%= invoice.worktype %></td>
-									<td class="text-right"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
+									<td class="currency text-right"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
 								</tr>
 								<% end %>
 							</tbody>
@@ -76,7 +76,7 @@
 								<tr>
 									<td><%= link_to client.name, client %></td>
 									<td class="text-center"><%= client.yearPaidInvoices(@year.year).count %></td>
-									<td class="text-right"><%= number_to_currency(client.yearPaidInvoices(@year.year).sum(:cost)) %></td>
+									<td class="currency text-right"><%= number_to_currency(client.yearPaidInvoices(@year.year).sum(:cost)) %></td>
 								</tr>
 								<% end %>
 							</tbody>
@@ -100,7 +100,7 @@
 									<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
 									<td><%= invoice.paiddate %></td>
 									<td class="text-center hidden-xs"><%= invoice.worktype %></td>
-									<td class="text-right"><% if invoice.hasDiscount %>^<% end %><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
+									<td class="currency text-right"><% if invoice.hasDiscount %>^<% end %><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
 									<td class="text-center"><% if invoice.paid == true %><i class="fa fa-check green"></i><% else %><span class="spread red">Not Paid</span><% end %></td>
 								</tr>
 								<% end %>
@@ -143,7 +143,7 @@
 						<tr id="vendorrow<%= vendor.id %>">
 							<td><%= link_to vendor do %><%= vendor.name %><% end %></td>
 							<td><%= vendor.yearExpenses(@year.year).length %></td>
-							<td class="text-right"><%= number_to_currency(vendor.yearExpenses(@year.year).sum(:cost), { :negative_format => '(%n)' }) %></td>
+							<td class="currency text-right"><%= number_to_currency(vendor.yearExpenses(@year.year).sum(:cost), { :negative_format => '(%n)' }) %></td>
 						</tr>
 						<% end %>
 					</tbody>
@@ -171,7 +171,7 @@
 							<td><%= link_to expense do %><%= expense.date %><% end %></td>
 							<td><%= link_to expense.vendor do %><%= expense.vendor.name %><% end %></td>
 							<td><%= expense.name %></td>
-							<td class="text-right"><%= number_to_currency(expense.cost, { :negative_format => '(%n)' }) %></td>
+							<td class="currency text-right"><%= number_to_currency(expense.cost, { :negative_format => '(%n)' }) %></td>
 						</tr>
 						<% end %>
 					</tbody>
@@ -196,7 +196,7 @@
 							<td><%= link_to expense do %><%= expense.date %><% end %></td>
 							<td><%= link_to expense.vendor do %><%= expense.vendor.name %><% end %></td>
 							<td><%= expense.name %></td>
-							<td class="text-right"><%= number_to_currency(expense.cost, { :negative_format => '(%n)' }) %></td>
+							<td class="currency text-right"><%= number_to_currency(expense.cost, { :negative_format => '(%n)' }) %></td>
 						</tr>
 						<% end %>
 					</tbody>

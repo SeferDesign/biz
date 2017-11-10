@@ -54,13 +54,13 @@
 						<% @project.invoices.each do |invoice| %>
 						<tr id="invoicerow<%= invoice.id %>">
 							<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
-							<td class="text-right"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
+							<td class="currency text-right"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
 							<td class="text-center"><% if invoice.paid == true %><i class="fa fa-check green"></i><% else %><span class="spread red">Not Paid</span><% end %></td>
 						</tr>
 						<% end %>
 						<tr>
 							<td class="text-right"><strong>Total</strong></td>
-							<td class="text-right"><strong><%= number_to_currency(@project.invoiceTotal, { :negative_format => '(%n)' }) %></strong></td>
+							<td class="currency text-right"><strong><%= number_to_currency(@project.invoiceTotal, { :negative_format => '(%n)' }) %></strong></td>
 							<td>&nbsp;</td>
 						</tr>
 					</tbody>

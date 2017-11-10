@@ -52,7 +52,7 @@
 				</p>
 				<p>
 					<strong>Cost:</strong>
-					<%= number_to_currency(@invoice.cost, { :negative_format => '(%n)' }) %>
+					<span class="currency"><%= number_to_currency(@invoice.cost, { :negative_format => '(%n)' }) %></span>
 				</p>
 				<% if @invoice.paid == false %>
 				<p>
@@ -95,7 +95,7 @@
 							<td>&nbsp;</td>
 		          <% end %>
 							<td class="text-right" colspan="3"><strong>Total</strong>&nbsp;&nbsp;</td>
-							<td><strong><div class="pull-right"><%= number_to_currency(@invoice.lines.sum('total'), { :unit => '', :negative_format => '(%n)' }) %></div>$</strong></td>
+							<td class="currency"><strong><div class="pull-right"><%= number_to_currency(@invoice.lines.sum('total'), { :unit => '', :negative_format => '(%n)' }) %></div>$</strong></td>
 						</tr>
 					</tfoot>
 				</table>

@@ -32,8 +32,8 @@
 									<td><%= link_to client do %><%= client.name %><% end %></td>
 									<td class="hidden-xs"><%= client.contact %></td>
 									<td><% if client.currentrate %><%= number_to_currency(client.currentrate) %><% else %>&mdash;<% end %></td>
-									<td class="text-right hidden-xs"><% if client.unpaidTotal > 0 %><span class="spread red"><%= number_to_currency(client.unpaidTotal, { :negative_format => '(%n)' }) %></span><% else %>&mdash;<% end %></td>
-									<td class="text-right"><%= number_to_currency(client.invoiceTotal, { :negative_format => '(%n)' }) %></td>
+									<td class="currency text-right hidden-xs"><% if client.unpaidTotal > 0 %><span class="spread red"><%= number_to_currency(client.unpaidTotal, { :negative_format => '(%n)' }) %></span><% else %>&mdash;<% end %></td>
+									<td class="currency text-right"><%= number_to_currency(client.invoiceTotal, { :negative_format => '(%n)' }) %></td>
 								</tr>
 								<% end %>
 							</tbody>

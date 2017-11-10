@@ -101,7 +101,7 @@
 						<tr>
 							<td><%= link_to year do %><%= year.year %><% end %></td>
 							<td>&nbsp;</td>
-							<td class="text-right"><%= number_to_currency(Invoice.paidByYear(year.year).where(:client_id => @client.id).sum(:cost), { :negative_format => '(%n)' }) %></td>
+							<td class="currency text-right"><%= number_to_currency(Invoice.paidByYear(year.year).where(:client_id => @client.id).sum(:cost), { :negative_format => '(%n)' }) %></td>
 						</tr>
 						<% end end %>
 					</tbody>
@@ -109,7 +109,7 @@
 						<tr>
 							<td>&nbsp;</td>
 							<td class="text-right"><strong>Total</strong></td>
-							<td class="text-right"><strong><%= number_to_currency(@client.invoiceTotal, { :negative_format => '(%n)' }) %></strong></td>
+							<td class="currency text-right"><strong><%= number_to_currency(@client.invoiceTotal, { :negative_format => '(%n)' }) %></strong></td>
 						</tr>
 					</tfoot>
 				</table>
@@ -130,7 +130,7 @@
 							<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
 							<td><%= invoice.display_id %></td>
 							<td class="text-center hidden-xs"><%= invoice.worktype %></td>
-							<td class="text-right"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
+							<td class="currency text-right"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
 							<td class="text-center"><% if invoice.paid == true %><span class="green"><%= invoice.paiddate %></span><% else %><span class="spread red">Not Paid</span><% end %></td>
 						</tr>
 						<% end %>
@@ -139,7 +139,7 @@
 						<tr>
 							<td colspan="2">&nbsp;</td>
 							<td class="text-center"><strong>Total</strong></td>
-							<td class="text-right"><strong><%= number_to_currency(@client.invoiceTotal, { :negative_format => '(%n)' }) %></strong></td>
+							<td class="currency text-right"><strong><%= number_to_currency(@client.invoiceTotal, { :negative_format => '(%n)' }) %></strong></td>
 							<td>&nbsp;</td>
 						</tr>
 					</tfoot>
