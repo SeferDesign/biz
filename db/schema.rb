@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170506202317) do
+ActiveRecord::Schema.define(version: 20171204200418) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -39,6 +39,7 @@ ActiveRecord::Schema.define(version: 20170506202317) do
     t.integer  "currentrate"
     t.boolean  "active",                            default: true
     t.string   "email_accounting_3",    limit: 255
+    t.string   "federalein"
   end
 
   create_table "expenses", force: :cascade do |t|

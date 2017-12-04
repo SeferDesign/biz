@@ -67,6 +67,7 @@
 							<thead>
 								<tr>
 									<th>Client</th>
+									<th class="text-center">Federal EIN</th>
 									<th class="text-center"># of Invoices</th>
 									<th class="text-right">Cost</th>
 								</tr>
@@ -75,6 +76,7 @@
 								<% @year.paidClients.each do |client| %>
 								<tr>
 									<td><%= link_to client.name, client %></td>
+									<td class="text-center"><% if client.federalein %><%= client.federalein %><% else %>&mdash;<% end %></td>
 									<td class="text-center"><%= client.yearPaidInvoices(@year.year).count %></td>
 									<td class="currency text-right"><%= number_to_currency(client.yearPaidInvoices(@year.year).sum(:cost)) %></td>
 								</tr>

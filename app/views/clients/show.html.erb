@@ -46,6 +46,9 @@
 				<% if @client.international %>
 				<p><strong><i class="fa fa-globe left"></i>International Client</strong></p>
 				<% end %>
+				<% if !@client.federalein.blank? %>
+				<p><strong>Federal EIN:</strong> <%= @client.federalein %></p>
+				<% end %>
 				<% if !@client.currentrate.blank? %>
 				<p>
 					<strong>Current Hourly Rate:</strong><br>

@@ -39,7 +39,8 @@ client = Client.create!(
   :email_accounting => 'rsefer@gmail.com',
   :preferred_paymenttype => 'Chase Quick Pay',
   :currentrate => 85,
-  :active => true
+  :active => true,
+  :federalein => '81-0123456'
 )
 
 project = Project.create!(
