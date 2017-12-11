@@ -23,10 +23,12 @@
 			<div role="tabpanel" class="tab-pane active" id="income">
 				<p><%= link_to 'Download Income CSV', income_year_path(@year, format: 'csv') %></p>
 				<div class="row">
-					<%= render partial: 'quarter', collection: [1, 2, 3, 4], as: :quarterNumber %>
-				</div>
-				<div class="row">
-					<div class="col-sm-8 col-sm-offset-2">
+					<div class="col-md-6">
+						<div class="row">
+							<%= render partial: 'quarter', collection: [1, 2, 3, 4], as: :quarterNumber %>
+						</div>
+					</div>
+					<div class="col-md-6">
 						<div class="chart-wrap"><%= column_chart chart_year_by_invoice_month_path(@year.id) %></div>
 					</div>
 				</div>
