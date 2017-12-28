@@ -14,11 +14,16 @@ class Goal < ActiveRecord::Base
 
   def actualamount
     if self.goaltype == 'Total'
-      self.invoicesPaidInTimeScope.sum('cost')
+      working = self.invoicesPaidInTimeScope
     elsif self.goaltype == 'Contract'
-      self.invoicesPaidInTimeScope.contract.sum('cost')
+      working = self.invoicesPaidInTimeScope.contract
     elsif self.goaltype == 'Hourly'
-      self.invoicesPaidInTimeScope.hourly.sum('cost')
+      working = self.invoicesPaidInTimeScope.hourly
+    end
+    if working and working.length > 0
+      working.sum('cost')
+    else
+      0
     end
   end
 
