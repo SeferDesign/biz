@@ -13,13 +13,13 @@
 		<div class="col-lg-4 col-sm-6">
 			<div class="form-group">
 				<%= f.label :client_id, 'Client' %>
-				<%= collection_select(:invoice, 'client_id', Client.all, :id, :name, { :include_blank => true, :selected => @copied_invoice ? @copied_invoice.client_id : '' }, { :class => 'form-control' }) %>
+				<%= collection_select(:invoice, 'client_id', Client.all, :id, :name, { :include_blank => true, :selected => params[:action] == 'edit' ? @invoice.client.id : (@copied_invoice ? @copied_invoice.client.id : '') }, { :class => 'form-control' }) %>
 			</div>
 		</div>
 		<div class="col-lg-4 col-sm-6">
 			<div class="form-group">
 				<%= f.label :project_id, 'Project' %>
-				<%= collection_select(:invoice, 'project_id', Project.all, :id, :project_client_and_name, { :include_blank => true, :selected => @copied_invoice ? @copied_invoice.project_id : '' }, { :class => 'form-control' }) %>
+				<%= collection_select(:invoice, 'project_id', Project.all, :id, :project_client_and_name, { :include_blank => true, :selected => params[:action] == 'edit' ? @invoice.project.id : (@copied_invoice ? @copied_invoice.project.id : '') }, { :class => 'form-control' }) %>
 			</div>
 		</div>
 		<div class="col-lg-2 col-sm-6">
@@ -43,9 +43,9 @@
 		<div class="col-sm-4">
 			<div class="form-group">
 				<%= f.label :worktype, 'Work Type' %><br>
-				<%= radio_button('invoice', 'worktype', 'Contract', { checked: (@copied_invoice and @copied_invoice.worktype == 'Contract') ? true : false }) %>
+				<%= radio_button('invoice', 'worktype', 'Contract', { checked: (params[:action] == 'edit' and @invoice.worktype == 'Contract') ? true : ((@copied_invoice and @copied_invoice.worktype == 'Contract') ? true : false) }) %>
 				<%= label_tag(:invoice_worktype_contract, 'Contract') %>
-				<%= radio_button('invoice', 'worktype', 'Hourly', { checked: (@copied_invoice and @copied_invoice.worktype == 'Hourly') ? true : false }) %>
+				<%= radio_button('invoice', 'worktype', 'Hourly', { checked: (params[:action] == 'edit' and @invoice.worktype == 'Hourly') ? true : ((@copied_invoice and @copied_invoice.worktype == 'Hourly') ? true : false) }) %>
 				<%= label_tag(:invoice_worktype_hourly, 'Hourly') %>
 			</div>
 		</div>

@@ -61,10 +61,6 @@ module ApplicationHelper
 		'60610'
 	end
 
-	def total_invoiced_unpaid
-		Invoice.unpaid.sum('cost')
-	end
-
 	def invoice_description_suffix
 		'Find below a cost-breakdown for the recent work completed.'
 	end
