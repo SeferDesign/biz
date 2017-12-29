@@ -13,13 +13,13 @@
 		<div class="col-lg-4 col-sm-6">
 			<div class="form-group">
 				<%= f.label :client_id, 'Client' %>
-				<%= collection_select(:invoice, 'client_id', Client.all, :id, :name, { :include_blank => true }, { :class => 'form-control' }) %>
+				<%= collection_select(:invoice, 'client_id', Client.all, :id, :name, { :include_blank => true, :selected => @copied_invoice ? @copied_invoice.client_id : '' }, { :class => 'form-control' }) %>
 			</div>
 		</div>
 		<div class="col-lg-4 col-sm-6">
 			<div class="form-group">
 				<%= f.label :project_id, 'Project' %>
-				<%= collection_select(:invoice, 'project_id', Project.all, :id, :project_client_and_name, { :include_blank => true }, { :class => 'form-control' }) %>
+				<%= collection_select(:invoice, 'project_id', Project.all, :id, :project_client_and_name, { :include_blank => true, :selected => @copied_invoice ? @copied_invoice.project_id : '' }, { :class => 'form-control' }) %>
 			</div>
 		</div>
 		<div class="col-lg-2 col-sm-6">
@@ -43,16 +43,18 @@
 		<div class="col-sm-4">
 			<div class="form-group">
 				<%= f.label :worktype, 'Work Type' %><br>
-				<%= radio_button('invoice', 'worktype', 'Contract') %>
+				<%= radio_button('invoice', 'worktype', 'Contract', { checked: @copied_invoice.worktype == 'Contract' ? true : false }) %>
 				<%= label_tag(:invoice_worktype_contract, 'Contract') %>
-				<%= radio_button('invoice', 'worktype', 'Hourly') %>
+				<%= radio_button('invoice', 'worktype', 'Hourly', { checked: @copied_invoice.worktype == 'Hourly' ? true : false }) %>
 				<%= label_tag(:invoice_worktype_hourly, 'Hourly') %>
 			</div>
 		</div>
 		<div class="col-sm-8">
 			<div class="form-group">
 				<%= f.label :description %>
-				<% if @invoice.description.blank? %>
+				<% if @copied_invoice %>
+				<%= f.text_area :description, class: 'form-control', value: @copied_invoice.description %>
+				<% elsif @invoice.description.blank? %>
 				<%= f.text_area :description, class: 'form-control', value: 'This invoice represents work on ' %>
 				<% else %>
 				<%= f.text_area :description, class: 'form-control' %>
