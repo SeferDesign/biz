@@ -31,8 +31,8 @@ class InvoicesController < ApplicationController
 
   def new
     @invoice = Invoice.new
-		@copied_invoice = nil
-		if params[:copied_id].present?
+		@copied_invoice = false
+		if params[:copied_id].present? and !Invoice.where(id: params[:copied_id]).empty?
 			@copied_invoice = Invoice.find(params[:copied_id])
 		end
   end

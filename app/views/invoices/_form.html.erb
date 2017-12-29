@@ -43,9 +43,9 @@
 		<div class="col-sm-4">
 			<div class="form-group">
 				<%= f.label :worktype, 'Work Type' %><br>
-				<%= radio_button('invoice', 'worktype', 'Contract', { checked: @copied_invoice.worktype == 'Contract' ? true : false }) %>
+				<%= radio_button('invoice', 'worktype', 'Contract', { checked: (@copied_invoice and @copied_invoice.worktype == 'Contract') ? true : false }) %>
 				<%= label_tag(:invoice_worktype_contract, 'Contract') %>
-				<%= radio_button('invoice', 'worktype', 'Hourly', { checked: @copied_invoice.worktype == 'Hourly' ? true : false }) %>
+				<%= radio_button('invoice', 'worktype', 'Hourly', { checked: (@copied_invoice and @copied_invoice.worktype == 'Hourly') ? true : false }) %>
 				<%= label_tag(:invoice_worktype_hourly, 'Hourly') %>
 			</div>
 		</div>
