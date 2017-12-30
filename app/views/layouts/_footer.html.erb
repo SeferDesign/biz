@@ -7,8 +7,8 @@
 						<li><%= link_to 'Clients', clients_path %></li><li><%= link_to 'Projects', projects_path %></li><li><%= link_to 'Invoices', invoices_path %></li><li><%= link_to 'Goals', goals_path %></li><% if Date.today.month < 3 %><li><%= link_to 1.year.ago.year, year_path(Year.where(year: 1.year.ago.year).first.year) %></li><% end %><li><%= link_to Date.today.year, year_path(Year.where(year: Date.today.year).first.year) %></li><li><%= link_to 'Vendors', vendors_path %></li><li><%= link_to 'Expenses', expenses_path %></li><li><%= link_to destroy_user_session_path, :method => :delete do %>Sign Out<i class="fa fa-sign-out right"></i><% end %></li>
 					</ul>
 				</nav><% end %>
-				<p>&copy; <%= company_full_name %></p>
-				<a href="<%= company_site_url %>" title="<%= company_full_name %>" class="hidden-print"><img class="footer-logo" src="<%= company_acronym_logo_alt_url %>" alt="<%= company_full_name %>"></a>
+				<p>&copy; <%= company[:full_name] %></p>
+				<a href="<%= company[:site_url] %>" title="<%= company[:full_name] %>" class="hidden-print"><img class="footer-logo" src="<%= company[:logo][:acronym][:alt] %>" alt="<%= company[:full_name] %>"></a>
 			</div>
 		</div>
 	</div>

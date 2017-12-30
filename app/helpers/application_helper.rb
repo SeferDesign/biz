@@ -1,64 +1,32 @@
 module ApplicationHelper
 
-	def company_full_name
-		'Sefer Design Company LLC'
-	end
-	def company_abbrv_name
-		'Sefer Design Co.'
-	end
-	def company_initialed_name
-		'SDC'
-	end
-	def company_site_url
-		'https://seferdesign.com'
-	end
-	def company_logo_url
-		image_url('sdc.svg')
-	end
-	def company_logo_alt_url
-		image_url('sdc_white.svg')
-	end
-	def company_logo_alt_png_url
-		'/images/sdc_white.png'
-	end
-	def company_acronym_logo_url
-		image_url('sdc_acronym.svg')
-	end
-	def company_acronym_logo_alt_url
-		image_url('sdc_acronym_white.svg')
-	end
-	def company_favicon_url
-		image_url('sdc_favicon_144.png')
-	end
-	def company_pay_to
-		self.company_full_name
-	end
-	def company_operator_name
-		'Robert Sefer'
-	end
-	def company_phone
-		'(630) 204-0013'
-	end
-	def company_email
-		'info@seferdesign.com'
-	end
-	def company_email_invoice
-		self.company_email
-	end
-	def company_street
-		'1 E. Scott #1402'
-	end
-	def company_city
-		'Chicago'
-	end
-	def company_state
-		'Illinois'
-	end
-	def company_state_abbrv
-		'IL'
-	end
-	def company_zipcode
-		'60610'
+	def company
+		{
+			:full_name => 'Sefer Design Company LLC',
+			:abbrv_name => 'Sefer Design Co.',
+			:pay_to => 'Sefer Design Company LLC',
+			:operator_name => 'Robert Sefer',
+			:site_url => 'https://seferdesign.com',
+			:email => 'info@seferdesign.com',
+			:phone => '(630) 204-0013',
+			:address => {
+				:street => '1 E. Scott #1402',
+				:city => 'Chicago',
+				:state => 'Illinois',
+				:state_abbrv => 'IL',
+				:zipcode => '60610'
+			},
+			:logo => {
+				:default => image_url('sdc.svg'),
+				:alt => image_url('sdc_white.svg'),
+				:alt_png => '/images/sdc_white.png',
+				:acronym => {
+					:default => image_url('sdc_acronym.svg'),
+					:alt => image_url('sdc_acronym_white.svg')
+				},
+				:favicon => image_url('sdc_favicon_144.png')
+			}
+		}
 	end
 
 	def invoice_description_suffix

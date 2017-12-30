@@ -60,14 +60,14 @@
 					<p><strong>Payment Method:</strong> <%= @invoice.paymenttype %></p>
 					<% else %>
 					<p><strong>Status:</strong> <span class="spread red">Not Paid</span></p>
-					<p>This payment can be made out to '<%= company_pay_to %>' and sent to <%= mail_to company_email %> or mailed to:</p>
-					<p><%= company_pay_to %><br><%= company_street %><br><%= company_city %>, <%= company_state_abbrv %> <%= company_zipcode %></p>
+					<p>This payment can be made out to '<%= company[:pay_to] %>' and sent to &nbsp;<%= mail_to company[:email] %> or mailed to:</p>
+					<p><%= company[:pay_to] %><br><%= company[:address][:street] %><br><%= company[:address][:city] %>, <%= company[:address][:state_abbrv] %> <%= company[:address][:zipcode] %></p>
 					<% end %>
 				</div>
 				<div class="clearfix"></div>
 				<hr>
 				<p><%= @invoice.description %><% if @invoice.paid != true %>  <%= invoice_description_suffix_pleasepay %><% end %></p>
-				<p class="indent">Thank you,<br><%= company_operator_name %><br><%= company_full_name %><br><%= company_email %><br><%= company_phone %></p>
+				<p class="indent">Thank you,<br><%= company[:operator_name] %><br><%= company[:full_name] %><br><%= company[:email] %><br><%= company[:phone] %></p>
 				<hr>
 				<% if @invoice.lines.present? %>
 				<table class="table table-condensed">

@@ -105,8 +105,8 @@
 					<div class="row">
 						<div class="col-sm-12payment-option payment-option-check">
 							<h3>Pay via paper check:</h3>
-							<p>Please make the check out to '<strong><%= company_pay_to %></strong>' and mail to:</p>
-							<p><%= company_pay_to %><br><%= company_street %><br><%= company_city %>, <%= company_state_abbrv %> <%= company_zipcode %></p>
+							<p>Please make the check out to '<strong><%= company[:pay_to] %></strong>' and mail to:</p>
+							<p><%= company[:pay_to] %><br><%= company[:address][:street] %><br><%= company[:address][:city] %>, <%= company[:address][:state_abbrv] %> <%= company[:address][:zipcode] %></p>
 						</div>
 					</div>
 		      <hr>
@@ -142,7 +142,7 @@
 					</div>
 					<hr>
 					<h3>Pay with cryptocurrencies:</h3>
-					<p>If you'd like to pay with a cryptocurrency listed below, please contact us <%= mail_to company_email, 'via email' %>.</p>
+					<p>If you'd like to pay with a cryptocurrency listed below, please contact us <%= mail_to company[:email], 'via email' %>.</p>
 					<div class="row">
 						<div class="col-sm-6 payment-option payment-option-bitcoin">
 							<img src="https://s3.amazonaws.com/SeferBiz/internal/bitcoin.svg">
