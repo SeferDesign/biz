@@ -6,6 +6,19 @@ user = User.create!(
   :password_confirmation => 'admin123'
 )
 
+# last year
+Year.create!(
+  :year => Time.new.year - 1,
+  :taxrate => 0.4
+)
+
+# next year
+Year.create!(
+  :year => Time.new.year + 1,
+  :taxrate => 0.4
+)
+
+# this year
 year = Year.create!(
   :year => Time.new.year,
   :taxrate => 0.4
