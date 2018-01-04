@@ -60,6 +60,22 @@ jQuery(document).on('turbolinks:load', function() {
 		});
 	});
 
+	$('.description-prefills a').click(function(e) {
+		e.preventDefault();
+		var newDescription = '';
+		var variousPre = 'This invoice represents work through ';
+		switch ($(this).attr('data-slug')) {
+			case 'yesterday':
+				newDescription = variousPre + getDateInFormat(-1);
+			break;
+			case 'today':
+				newDescription = variousPre + getDateInFormat(0);
+			break;
+		}
+		newDescription += '.';
+		$('#invoice_description').html(newDescription);
+	});
+
 	Highcharts.setOptions({
 		lang: {
 			thousandsSep: ',',
@@ -75,4 +91,10 @@ function setDatepickers() {
 		format: 'yyyy-mm-dd',
 		autoclose: true
 	});
+}
+
+function getDateInFormat(days) {
+	var date = new Date();
+	date.setDate(date.getDate() + days);
+	return date.getFullYear() + '-'+ (date.getMonth() < 10 ? '0' : '') + (date.getMonth() + 1) + '-' + (date.getDay() < 10 ? '0' : '') + date.getDay();
 }

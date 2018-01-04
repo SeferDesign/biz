@@ -52,10 +52,11 @@
 		<div class="col-sm-8">
 			<div class="form-group">
 				<%= f.label :description %>
+				<div class="description-prefills"><a href="#" data-slug="yesterday">Yesterday</a> | <a href="#" data-slug="today">Today</a></div>
 				<% if @copied_invoice %>
 				<%= f.text_area :description, class: 'form-control', value: @copied_invoice.description %>
 				<% elsif @invoice.description.blank? %>
-				<%= f.text_area :description, class: 'form-control', value: 'This invoice represents work on ' %>
+				<%= f.text_area :description, class: 'form-control', value: 'This invoice represents work through ' + 1.day.ago.strftime("%Y-%m-%d") + '.' %>
 				<% else %>
 				<%= f.text_area :description, class: 'form-control' %>
 				<% end %>
