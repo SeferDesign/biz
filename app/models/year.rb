@@ -30,7 +30,25 @@ class Year < ActiveRecord::Base
 		Invoice.paidByQuarter(self.year, quarterNumber).sum('cost')
 	end
 
-	def taxOwedByQuarter(quarterNumber)
+	def taxOwedByQuarterTaxCalendar(quarterNumber)
+		quarterMonthsBounds = [1, 12]
+		if quarterNumber == 1
+			quarterMonthsBounds = [1, 3]
+		elsif quarterNumber == 2
+			quarterMonthsBounds = [4, 5]
+		elsif quarterNumber == 3
+			quarterMonthsBounds = [6, 8]
+		elsif quarterNumber == 4
+			quarterMonthsBounds = [9, 12]
+		end
+		income = 0
+		(quarterMonthsBounds[0]..quarterMonthsBounds[1]).each do |m|
+			income += Invoice.paidByMonth(self.year, m).sum(:cost)
+		end
+		income * self.taxrate
+	end
+
+	def taxOwedByQuarterActualCalendar(quarterNumber)
 		self.incomeByQuarter(quarterNumber) * self.taxrate
 	end
 
