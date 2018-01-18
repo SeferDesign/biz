@@ -16,7 +16,7 @@ jQuery(document).on('turbolinks:load', function() {
 		$('#invoice_paid_true').prop('checked', true);
 	});
 
-	$('#paid-today-btn').click(function() {
+	$('.paid-today-btn').click(function() {
 		setTimeout(function() {
 			window.location = window.location.href;
 		}, 200);
