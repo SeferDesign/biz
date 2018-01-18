@@ -27,7 +27,7 @@
 				<%= f.label :completed, 'Project Status' %><br>
 				<%= radio_button('project', 'completed', true) %>
 				<%= label_tag(:project_completed_true, 'Completed') %>
-				<%= radio_button('project', 'completed', false, { :checked => params[:action] == 'new' ? 'checked' : '' }) %>
+				<%= radio_button('project', 'completed', false, { :checked => (params[:action] == 'new' or !@project.completed) ? 'checked' : '' }) %>
 				<%= label_tag(:project_completed_false, 'Not') %>
 			</div>
 		</div>
