@@ -65,6 +65,7 @@
 		<div class="row">
 			<div class="col-sm-6">
 				<h3>Projects</h3>
+				<p><%= link_to new_project_path(:client_id => @client.id), :class => 'btn btn-success btn-sm' do %><i class="fa fa-plus left"></i>New Project<% end %></p>
 				<% if @client.projects.blank? %>
 				<p class="lead">No projects.</p>
 				<% else %>
@@ -90,6 +91,7 @@
 		<div class="row">
 			<div class="col-sm-12">
 				<h3>Invoices</h3>
+				<p><%= link_to new_invoice_path(:client_id => @client.id), :class => 'btn btn-success btn-sm' do %><i class="fa fa-plus left"></i>New Invoice<% end %></p>
 				<% if @client.invoices.blank? %>
 				<p class="lead">No invoices.</p>
 				<% else %>

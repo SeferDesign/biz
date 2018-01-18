@@ -19,7 +19,7 @@
 		<div class="col-sm-4">
 			<div class="form-group">
 				<%= f.label :client_id, 'Client' %>
-				<%= collection_select(:project, 'client_id', Client.all, :id, :name, {}, { :class => 'form-control' }) %>
+				<%= collection_select(:project, 'client_id', Client.all, :id, :name, { :selected => params[:client_id].present? ? params[:client_id] : (@project.client.present? ? @project.client.id : '') }, { :class => 'form-control' }) %>
 			</div>
 		</div>
 		<div class="col-sm-4">
@@ -27,7 +27,7 @@
 				<%= f.label :completed, 'Project Status' %><br>
 				<%= radio_button('project', 'completed', true) %>
 				<%= label_tag(:project_completed_true, 'Completed') %>
-				<%= radio_button('project', 'completed', false) %>
+				<%= radio_button('project', 'completed', false, { :checked => params[:action] == 'new' ? 'checked' : '' }) %>
 				<%= label_tag(:project_completed_false, 'Not') %>
 			</div>
 		</div>
@@ -38,7 +38,7 @@
 				<%= f.label :startdate, 'Start Date' %>
 				<div class="input-group">
 					<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-					<%= f.text_field :startdate, :placeholder => 'YYYY-MM-DD', class: 'form-control datepicker' %>
+					<%= f.text_field :startdate, :placeholder => 'YYYY-MM-DD', class: 'form-control datepicker', :value => params[:action] == 'new' ? DateTime.now.strftime('%Y-%m-%d') : @project.startdate %>
 				</div>
 			</div>
 		</div>

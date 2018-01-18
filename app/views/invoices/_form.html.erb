@@ -13,13 +13,16 @@
 		<div class="col-lg-4 col-sm-6">
 			<div class="form-group">
 				<%= f.label :client_id, 'Client' %>
-				<%= collection_select(:invoice, 'client_id', Client.all, :id, :name, { :include_blank => true, :selected => params[:action] == 'edit' ? @invoice.client.id : (@copied_invoice ? @copied_invoice.client.id : '') }, { :class => 'form-control' }) %>
+				<%= collection_select(:invoice, 'client_id', Client.all, :id, :name, { :include_blank => true, :selected => params[:action] == 'edit' ? @invoice.client.id : (params[:client_id].present? ? params[:client_id] : (@copied_invoice ? @copied_invoice.client.id : '')) }, { :class => 'form-control' }) %>
+				<script>
+				$('invoice_client_id').change();
+				</script>
 			</div>
 		</div>
 		<div class="col-lg-4 col-sm-6">
 			<div class="form-group">
 				<%= f.label :project_id, 'Project' %>
-				<%= collection_select(:invoice, 'project_id', Project.all, :id, :project_client_and_name, { :include_blank => true, :selected => params[:action] == 'edit' ? @invoice.project.id : (@copied_invoice ? @copied_invoice.project.id : '') }, { :class => 'form-control' }) %>
+				<%= collection_select(:invoice, 'project_id', Project.all, :id, :project_client_and_name, { :include_blank => true, :selected => params[:project_id].present? ? params[:project_id] : (params[:action] == 'edit' ? @invoice.project.id : (@copied_invoice ? @copied_invoice.project.id : '')) }, { :class => 'form-control' }) %>
 			</div>
 		</div>
 		<div class="col-lg-2 col-sm-6">
