@@ -54,6 +54,6 @@ class ClientsController < ApplicationController
     end
 
     def client_params
-      params.require(:client).permit(:name, :contact, :email_accounting, :email_accounting_2, :email_accounting_3, :site_url, :logo, :address1, :address2, :city, :state, :zipcode, :international, :intinfo, :preferred_paymenttype, :currentrate, :active, :federalein)
+      params.require(:client).permit(:name, :contact, :email_accounting, :email_accounting_2, :email_accounting_3, :site_url, :logo, :address1, :address2, :city, :state, :zipcode, :international, :intinfo, :preferred_paymenttype, :currentrate, :active, :federalein, :gsheet_id)
     end
 end

@@ -18,79 +18,134 @@
 				<%= f.label :international, 'International?' %>
 			</div>
 		</div>
-		<div class="col-sm-4">
-			<div class="form-group">
-				<%= f.label :name %>
-				<%= f.text_field :name, class: 'form-control' %>
-			</div>
-			<div class="form-group">
-				<%= f.label :contact %>
-				<%= f.text_field :contact, class: 'form-control' %>
-			</div>
-			<div class="form-group">
-				<%= f.label :email_accounting, 'Accounting Email' %>
-				<%= f.text_field :email_accounting, class: 'form-control' %>
-			</div>
-			<div class="form-group">
-				<%= f.label :email_accounting_2, 'Accounting Email 2' %>
-				<%= f.text_field :email_accounting_2, class: 'form-control' %>
-			</div>
-			<div class="form-group">
-				<%= f.label :email_accounting_3, 'Accounting Email 3' %>
-				<%= f.text_field :email_accounting_3, class: 'form-control' %>
-			</div>
-			<div class="form-group">
-				<%= f.label :preferred_paymenttype, 'Preferred Payment Type' %>
-				<%= select(:client, 'preferred_paymenttype', payment_types, { :include_blank => 'None' }, { :class => 'form-control' }) %>
-			</div>
-			<div class="form-group">
-				<%= f.label :currentrate, 'Current Hourly Rate' %>
-				<%= f.number_field :currentrate, class: 'form-control' %>
-			</div>
-		</div>
-		<div class="col-sm-4">
-			<div class="form-group">
-				<%= f.label :address1, 'Address' %>
-				<%= f.text_field :address1, class: 'form-control' %>
-			</div>
-			<div class="form-group">
-				<%= f.label :address2, 'Address 2' %>
-				<%= f.text_field :address2, class: 'form-control' %>
-			</div>
-			<div class="form-group">
-				<%= f.label :city, 'City' %>
-				<%= f.text_field :city, class: 'form-control' %>
-			</div>
-			<div class="form-group">
-				<%= f.label :state, 'State' %>
-				<%= select(:client, 'state', us_states, { :include_blank => 'None' }, { :class => 'form-control' } ) %>
-			</div>
-			<div class="form-group">
-				<%= f.label :zipcode, 'Zipcode' %>
-				<%= f.text_field :zipcode, class: 'form-control' %>
-			</div>
-			<% if @client.international %>
-			<div class="form-group">
-				<%= f.label :intinfo, 'International Info' %>
-				<%= f.text_field :intinfo, class: 'form-control' %>
-			</div>
-			<% end %>
-			<div class="form-group">
-				<%= f.label :federalein, 'Federal EIN' %>
-				<%= f.text_field :federalein, class: 'form-control' %>
-			</div>
-		</div>
-		<div class="col-sm-4">
-			<div class="form-group">
-				<%= f.label :site_url, 'Site' %>
-				<%= f.text_field :site_url, class: 'form-control' %>
-			</div>
-			<div class="form-group">
-				<%= f.label :logo, 'Logo' %>
-				<%= f.file_field :logo %>
-				<% if !@client.logo.blank? %>
-				<div class="clientimage"><%= image_tag(@client.logo.url) %></div>
+		<div class="col-sm-12">
+			<div class="row">
+				<div class="col-sm-4">
+					<div class="form-group">
+						<%= f.label :name %>
+						<%= f.text_field :name, class: 'form-control' %>
+					</div>
+				</div>
+				<div class="col-sm-4">
+					<div class="form-group">
+						<%= f.label :contact %>
+						<%= f.text_field :contact, class: 'form-control' %>
+					</div>
+				</div>
+				<div class="col-sm-4">
+					<div class="form-group">
+						<%= f.label :site_url, 'Site' %>
+						<%= f.text_field :site_url, class: 'form-control' %>
+					</div>
+				</div>
+				<div class="col-sm-12">
+					<hr>
+				</div>
+				<div class="col-sm-2">
+					<div class="form-group">
+						<%= f.label :address1, 'Address' %>
+						<%= f.text_field :address1, class: 'form-control' %>
+					</div>
+				</div>
+				<div class="col-sm-2">
+					<div class="form-group">
+						<%= f.label :address2, 'Address 2' %>
+						<%= f.text_field :address2, class: 'form-control' %>
+					</div>
+				</div>
+				<div class="col-sm-4">
+					<div class="form-group">
+						<%= f.label :city, 'City' %>
+						<%= f.text_field :city, class: 'form-control' %>
+					</div>
+				</div>
+				<div class="col-sm-2">
+					<div class="form-group">
+						<%= f.label :state, 'State' %>
+						<%= select(:client, 'state', us_states, { :include_blank => 'None' }, { :class => 'form-control' } ) %>
+					</div>
+				</div>
+				<div class="col-sm-2">
+					<div class="form-group">
+						<%= f.label :zipcode, 'Zipcode' %>
+						<%= f.text_field :zipcode, class: 'form-control' %>
+					</div>
+				</div>
+				<% if @client.international %>
+				<div class="col-sm-12">
+					<div class="form-group">
+						<%= f.label :intinfo, 'International Info' %>
+						<%= f.text_field :intinfo, class: 'form-control' %>
+					</div>
+				</div>
 				<% end %>
+				<div class="col-sm-12">
+					<hr>
+				</div>
+				<div class="col-md-6">
+					<div class="row">
+						<div class="col-sm-12">
+							<div class="form-group">
+								<%= f.label :email_accounting, 'Accounting Email' %>
+								<%= f.text_field :email_accounting, class: 'form-control' %>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<%= f.label :email_accounting_2, 'Accounting 2' %>
+								<%= f.text_field :email_accounting_2, class: 'form-control' %>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<%= f.label :email_accounting_3, 'Accounting 3' %>
+								<%= f.text_field :email_accounting_3, class: 'form-control' %>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<%= f.label :preferred_paymenttype, 'Preferred Payment' %>
+								<%= select(:client, 'preferred_paymenttype', payment_types, { :include_blank => 'None' }, { :class => 'form-control' }) %>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<%= f.label :currentrate, 'Hourly Rate' %>
+								<%= f.number_field :currentrate, class: 'form-control' %>
+							</div>
+						</div>
+						<div class="col-sm-12">
+							<div class="form-group">
+								<%= f.label :federalein, 'Federal EIN' %>
+								<%= f.text_field :federalein, class: 'form-control' %>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-12 visible-xs visible-sm">
+					<hr>
+				</div>
+				<div class="col-md-6">
+					<div class="row">
+						<div class="col-sm-12">
+							<div class="form-group">
+								<%= f.label :gsheet_id, 'Google Sheet ID' %>
+								<%= f.text_field :gsheet_id, class: 'form-control' %>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<%= f.label :logo, 'Logo' %>
+								<%= f.file_field :logo %>
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<% if !@client.logo.blank? %>
+							<div class="clientimage"><%= image_tag(@client.logo.url) %></div>
+							<% end %>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>

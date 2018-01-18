@@ -101,6 +101,14 @@ h1 {
 	color: $black;
 }
 
+.ghseet-embed {
+	display: block;
+	margin: 1rem 0px;
+	width: 100%;
+	min-height: 550px;
+	border: 0px;
+}
+
 .bulk-expenses-row-header {
 	margin-bottom: 5px;
 }

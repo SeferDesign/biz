@@ -56,6 +56,11 @@
 				</p>
 				<% end %>
 			</div>
+			<% if @client.gsheet_id.present? %>
+			<div class="col-sm-12">
+				<iframe class="ghseet-embed" src="https://docs.google.com/spreadsheets/d/<%= @client.gsheet_id %>/edit"></iframe>
+			</div>
+			<% end %>
 		</div>
 		<div class="row">
 			<div class="col-sm-6">
