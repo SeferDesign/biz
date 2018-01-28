@@ -5,17 +5,6 @@ GIT
     stripe (3.8.0)
       faraday (~> 0.10)
 
-GIT
-  remote: https://github.com/thoughtbot/paperclip
-  revision: c794f6df0a10b94f377b9efea08dcfa4e73cfc43
-  specs:
-    paperclip (5.1.0)
-      activemodel (>= 4.2.0)
-      activesupport (>= 4.2.0)
-      cocaine (~> 0.5.5)
-      mime-types
-      mimemagic (~> 0.3.0)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -241,6 +230,12 @@ GEM
       shellany (~> 0.0)
     orm_adapter (0.5.0)
     os (0.9.6)
+    paperclip (5.2.1)
+      activemodel (>= 4.2.0)
+      activesupport (>= 4.2.0)
+      cocaine (~> 0.5.5)
+      mime-types
+      mimemagic (~> 0.3.0)
     pg (0.21.0)
     pry (0.11.2)
       coderay (~> 1.1.0)
@@ -379,7 +374,7 @@ DEPENDENCIES
   jbuilder (~> 1.2)
   jquery-rails
   mini_magick
-  paperclip!
+  paperclip (~> 5.2.0)
   pg
   puma (~> 3.6.2)
   rails (~> 5.0.1)
@@ -395,4 +390,4 @@ DEPENDENCIES
   wkhtmltopdf-binary
 
 BUNDLED WITH
-   1.14.6
+   1.16.1
