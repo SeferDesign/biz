@@ -1,14 +1,14 @@
 source 'https://rubygems.org'
 
 gem 'puma', '~> 3.6.2'
-gem 'rails', '~> 5.0.1'
+gem 'rails', '~> 5.1.4'
 gem 'pg'
 gem 'sass-rails'
-gem 'uglifier', '>= 1.3.0'
+gem 'uglifier'
 gem 'coffee-rails'
 gem 'jquery-rails'
 gem 'turbolinks'
-gem 'jbuilder', '~> 1.2'
+gem 'jbuilder'
 
 gem 'aws-sdk', '~> 2.3.2'
 gem 'figaro'
