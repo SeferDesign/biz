@@ -10,7 +10,7 @@
 				<% else %>
 				<p><%= link_to 'All Past Expenses', expenses_path(:inactive => 'true') %> &bull; <%= link_to 'Future Expenses', expenses_path(:future => 'true') %></p>
 				<% end %>
-				<p><%= link_to new_expense_path, { :class => 'btn btn-success' } do %><i class="fa fa-plus left"></i>New Expense<% end %> <%= link_to new_bulk_expenses_path, { :class => 'btn btn-danger' } do %><i class="fa fa-plus left"></i>Add Bulk Expenses<% end %></p>
+				<p><%= link_to new_expense_path, { :class => 'btn btn-success' } do %><%= icon('fas', 'plus', class: 'left') %>New Expense<% end %> <%= link_to new_bulk_expenses_path, { :class => 'btn btn-danger' } do %><%= icon('fas', 'plus', class: 'left') %>Add Bulk Expenses<% end %></p>
 				<% if @expenses.blank? %>
 				<p class="lead">No expenses.</p>
 				<% else %>

@@ -136,6 +136,14 @@ module ApplicationHelper
 		Date.today
 	end
 
+	def icon_action_edit
+		icon('fas', 'edit', class: 'fa-fw fa-2x text-warning')
+	end
+
+	def icon_action_delete
+		icon('fas', 'trash-alt', class: 'fa-fw fa-2x text-danger')
+	end
+
 	def remote_svg_raw(url)
 		require 'httparty'
 		svg = Nokogiri::HTML(open(url)).at_css 'svg'

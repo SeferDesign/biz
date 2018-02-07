@@ -23,7 +23,7 @@
 			<div class="form-group">
 				<%= f.label :date, 'Date' %>
 				<div class="input-group">
-					<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					<span class="input-group-addon"><%= icon('fas', 'calendar-alt') %></span>
 					<%= f.text_field :date, :required => true, :placeholder => 'YYYY-MM-DD', :class => 'form-control datepicker', :value => @expense.date ? @expense.date : Time.now.strftime("%Y-%m-%d") %>
 				</div>
 			</div>
@@ -32,7 +32,7 @@
 			<div class="form-group">
 				<%= f.label :cost %>
         <div class="input-group">
-          <span class="input-group-addon"><i class="fa fa-usd"></i></span>
+          <span class="input-group-addon"><%= icon('fas', 'dollar-sign') %></span>
           <%= f.number_field :cost, class: 'form-control', :step => '0.01' %>
         </div>
       </div>
@@ -69,6 +69,6 @@
   <% end %>
 	<hr>
   <div class="form-group">
-    <button type="submit" class="btn btn-success"><i class="fa fa-save left"></i>Save</button>
+    <button type="submit" class="btn btn-success"><%= icon('far', 'save', class: 'left') %>Save</button>
   </div>
 <% end %>

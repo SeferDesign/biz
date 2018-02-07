@@ -10,7 +10,7 @@
 				<% else %>
 				<p><%= link_to 'All Goals', goals_path(:showall => 'true') %></p>
 				<% end %>
-				<p><%= link_to new_goal_path, { :class => 'btn btn-success' } do %><i class="fa fa-plus left"></i>New Goal<% end %></p>
+				<p><%= link_to new_goal_path, { :class => 'btn btn-success' } do %><%= icon('fas', 'plus', class: 'left') %>New Goal<% end %></p>
 				<% if @goals.blank? %>
 				<p class="lead">No goals.</p>
 				<% else %>
@@ -36,9 +36,9 @@
 									<td class="text-center">
 										<% if goal.status == 'Past' %>
 											<% if goal.met %>
-											<i class="fa fa-check green"></i>
+											<%= icon('fas', 'check', class: 'green') %>
 											<% else %>
-											<span class="red"><strong>&times;</strong></span>
+											<%= icon('fas', 'times', class: 'red') %>
 											<% end %>
 										<% elsif goal.status == 'Current' %>
 											<% if goal.timeperiod == 'Year' or goal.timeperiod == 'Month' %>

@@ -29,7 +29,7 @@
 			<div class="form-group">
 				<%= f.label :date, 'Invoice Date' %>
 				<div class="input-group">
-					<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					<span class="input-group-addon"><%= icon('fas', 'calendar-alt') %></span>
 					<%= f.text_field :date, :required => true, :placeholder => 'YYYY-MM-DD', :class => 'form-control datepicker', :value => @invoice.date ? @invoice.date : Time.now.strftime("%Y-%m-%d") %>
 				</div>
 			</div>
@@ -38,7 +38,7 @@
 			<div class="form-group">
 				<%= f.label :cost %>
 				<div class="input-group">
-					<span class="input-group-addon"><i class="fa fa-usd"></i></span>
+					<span class="input-group-addon"><%= icon('fas', 'dollar-sign') %></span>
 					<%= f.text_field :cost, :placeholder => '0.00', class: 'form-control text-right' %>
 				</div>
 			</div>
@@ -85,7 +85,7 @@
 			<div class="form-group">
 				<%= f.label :paiddate, 'Paid Date' %>
 				<div class="input-group">
-					<span id="paid-date-icon-wrap" class="input-group-addon"><i id="paid-date-icon" class="fa fa-calendar"></i></span>
+					<span id="paid-date-icon-wrap" class="input-group-addon"><%= icon('fas', 'calendar-alt', id: 'paid-date-icon') %></span>
 					<%= f.text_field :paiddate, :placeholder => 'YYYY-MM-DD', class: 'form-control datepicker' %>
 				</div>
 			</div>
@@ -100,7 +100,7 @@
 	<div class="row">
 		<div class="col-sm-12">
 			<div class="form-group">
-				<button type="submit" class="btn btn-success"><i class="fa fa-save left"></i>Save</button>
+				<button type="submit" class="btn btn-success"><%= icon('far', 'save', class: 'left') %>Save</button>
 			</div>
 		</div>
 	</div>

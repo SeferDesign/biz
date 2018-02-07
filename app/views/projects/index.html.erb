@@ -10,13 +10,13 @@
 				<% else %>
 				<p><%= link_to 'All Projects', projects_path(:all => 'true') %></p>
 				<% end %>
-				<p><%= link_to new_project_path, { :class => 'btn btn-success' } do %><i class="fa fa-plus left"></i>New Project<% end %></p>
+				<p><%= link_to new_project_path, { :class => 'btn btn-success' } do %><%= icon('fas', 'plus', class: 'left') %>New Project<% end %></p>
 				<% if @projects.blank? %>
 				<p class="lead">No projects.</p>
 				<% else %>
 				<div class="row">
 					<div class="col-sm-12">
-						<h3 class="text-center red"><i class="fa fa-refresh left"></i>In-Progress</h3>
+						<h3 class="text-center red"><%= icon('fas', 'sync', class: 'left') %>In-Progress</h3>
 						<table class="table table-hover table-striped table-condensed">
 							<thead>
 								<tr>
@@ -37,7 +37,7 @@
 						</table>
 					</div>
 					<div class="col-sm-12">
-						<h3 class="text-center green"><i class="fa fa-check left"></i>Completed</h3>
+						<h3 class="text-center green"><%= icon('fas', 'check', class: 'left') %>Completed</h3>
 						<table class="table table-hover table-striped table-condensed">
 							<thead>
 								<tr>

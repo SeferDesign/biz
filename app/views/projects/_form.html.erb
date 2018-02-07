@@ -37,7 +37,7 @@
 			<div class="form-group">
 				<%= f.label :startdate, 'Start Date' %>
 				<div class="input-group">
-					<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					<span class="input-group-addon"><%= icon('fas', 'calendar-alt') %></span>
 					<%= f.text_field :startdate, :placeholder => 'YYYY-MM-DD', class: 'form-control datepicker', :value => params[:action] == 'new' ? DateTime.now.strftime('%Y-%m-%d') : @project.startdate %>
 				</div>
 			</div>
@@ -46,7 +46,7 @@
 			<div class="form-group">
 				<%= f.label :enddate, 'End Date' %>
 				<div class="input-group">
-					<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					<span class="input-group-addon"><%= icon('fas', 'calendar-alt') %></span>
 					<%= f.text_field :enddate, :placeholder => 'YYYY-MM-DD', class: 'form-control datepicker' %>
 				</div>
 			</div>
@@ -54,6 +54,6 @@
 	</div>
 	<hr>
 	<div class="form-group">
-		<button type="submit" class="btn btn-success"><i class="fa fa-save left"></i>Save</button>
+		<button type="submit" class="btn btn-success"><%= icon('far', 'save', class: 'left') %>Save</button>
 	</div>
 <% end %>

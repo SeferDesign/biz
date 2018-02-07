@@ -5,8 +5,8 @@
 			<div class="col-sm-12">
 				<h1>Goal #<%= @goal.id %></h1>
 				<p class="doicons">
-					<%= link_to edit_goal_path, title: 'Edit' do %><i class="fa fa-fw fa-2x fa-pencil-square-o text-warning"></i><% end %>
-					<%= link_to goal_path, title: 'Delete', method: :delete, data: { confirm: "Are you sure you would like to delete Goal ##{@goal.id}?" } do %><i class="fa fa-fw fa-2x fa-trash-o text-danger"></i><% end %>
+					<%= link_to edit_goal_path, title: 'Edit' do %><%= icon_action_edit %><% end %>
+					<%= link_to goal_path, title: 'Delete', method: :delete, data: { confirm: "Are you sure you would like to delete Goal ##{@goal.id}?" } do %><%= icon_action_delete %><% end %>
 				</p>
 				<div class="row">
 					<div class="col-sm-4">
@@ -25,7 +25,7 @@
 						<p>
 							<strong>Met?</strong>
 							<% if @goal.met %>
-							<i class="fa fa-check green"></i>
+							<%= icon('fas', 'check', class: 'green') %>
 							<% else %>
 							<span class="red"><strong>&times;</strong></span>
 							<% end %>
@@ -66,7 +66,7 @@
 							<td><%= invoice.paiddate %></td>
 							<td class="text-center hidden-xs"><%= invoice.worktype %></td>
 							<td class="currency text-right"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
-							<td class="text-center"><% if invoice.paid == true %><i class="fa fa-check green"></i><% else %><span class="spread red">Not Paid</span><% end %></td>
+							<td class="text-center"><% if invoice.paid == true %><%= icon('fas', 'check', class: 'green') %><% else %><span class="spread red">Not Paid</span><% end %></td>
 						</tr>
 						<% end %>
 					</tbody>

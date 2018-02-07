@@ -5,8 +5,8 @@
 			<div class="col-sm-12">
 				<h1><%= @vendor.name %></h1>
 				<p class="doicons">
-					<%= link_to edit_vendor_path(@vendor), title: 'Edit' do %><i class="fa fa-fw fa-2x fa-pencil-square-o text-warning"></i><% end %>
-					<%= link_to vendor_path(@vendor), title: 'Delete', method: :delete, data: { confirm: "Are you sure you would like to delete Client ##{@vendor.id}?" } do %><i class="fa fa-fw fa-2x fa-trash-o text-danger"></i><% end %>
+					<%= link_to edit_vendor_path(@vendor), title: 'Edit' do %><%= icon_action_edit %><% end %>
+					<%= link_to vendor_path(@vendor), title: 'Delete', method: :delete, data: { confirm: "Are you sure you would like to delete Client ##{@vendor.id}?" } do %><%= icon_action_delete %><% end %>
 				</p>
 				<p><strong>Category:</strong> <%= @vendor.category %></p>
 				<h3>Expenses</h3>

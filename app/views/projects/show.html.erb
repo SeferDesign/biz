@@ -8,8 +8,8 @@
 				<% end %>
 				<h1><%= @project.name %></h1>
 				<p class="doicons">
-					<%= link_to edit_project_path(@project), title: 'Edit' do %><i class="fa fa-fw fa-2x fa-pencil-square-o text-warning"></i><% end %>
-					<%= link_to project_path(@project), title: 'Delete', method: :delete, data: { confirm: "Are you sure you would like to delete Project ##{@project.id}?" } do %><i class="fa fa-fw fa-2x fa-trash-o text-danger"></i><% end %>
+					<%= link_to edit_project_path(@project), title: 'Edit' do %><%= icon_action_edit %><% end %>
+					<%= link_to project_path(@project), title: 'Delete', method: :delete, data: { confirm: "Are you sure you would like to delete Project ##{@project.id}?" } do %><%= icon_action_delete %><% end %>
 				</p>
 					<strong>Project ID:</strong>
 					<%= @project.id %>
@@ -20,7 +20,7 @@
 				</p>
 				<p>
 					<strong>Completed?:</strong>
-					<% if @project.completed == true %><i class="fa fa-check green"></i><% else %><span class="spread red">Not Completed</span><% end %>
+					<% if @project.completed == true %><%= icon('fas', 'check', class: 'green') %><% else %><span class="spread red">Not Completed</span><% end %>
 				</p>
 				<% if !@project.startdate.blank? %>
 				<p>
@@ -39,7 +39,7 @@
 		<div class="row">
 			<div class="col-sm-8">
 				<h3>Invoices</h3>
-				<p><%= link_to new_invoice_path(:client_id => @project.client.id, :project_id => @project.id), :class => 'btn btn-success btn-sm' do %><i class="fa fa-plus left"></i>New Invoice<% end %></p>
+				<p><%= link_to new_invoice_path(:client_id => @project.client.id, :project_id => @project.id), :class => 'btn btn-success btn-sm' do %><%= icon('fas', 'plus', class: 'left') %>New Invoice<% end %></p>
 				<% if @project.invoices.blank? %>
 				<p class="lead">No invoices.</p>
 				<% else %>
@@ -56,7 +56,7 @@
 						<tr id="invoicerow<%= invoice.id %>">
 							<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
 							<td class="currency text-right"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
-							<td class="text-center"><% if invoice.paid == true %><i class="fa fa-check green"></i><% else %><span class="spread red">Not Paid</span><% end %></td>
+							<td class="text-center"><% if invoice.paid == true %><%= icon('fas', 'check', class: 'green') %><% else %><span class="spread red">Not Paid</span><% end %></td>
 						</tr>
 						<% end %>
 						<tr>
