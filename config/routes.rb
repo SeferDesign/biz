@@ -41,4 +41,18 @@ Biz::Application.routes.draw do
   get 'charts_controller/year_expense_category/:id', to: 'charts#year_expense_category', as: 'chart_year_by_expense_category'
   get 'charts_controller/year_expense_month/:id', to: 'charts#year_expense_month', as: 'chart_year_by_expense_month'
 
+  namespace :api, defaults: { format: 'json' } do
+
+    namespace :v1 do
+      resources :invoices, only: [:index, :show, :create] do
+        resources :lines, only: [:index, :show, :create]
+        member do
+          get :email
+        end
+      end
+      resources :projects, only: [:index, :show]
+      resources :clients, only: [:index, :show]
+    end
+  end
+
 end
