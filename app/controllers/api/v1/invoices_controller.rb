@@ -14,7 +14,7 @@ class Api::V1::InvoicesController < Api::ApiController
     @invoice = Invoice.new(invoice_params)
 
     if @invoice.save
-      render json: { message: 'Invoice created.', invoice_id: @invoice.id }
+      render json: { message: 'Invoice created.', invoice_id: @invoice.id, url: url_for(@invoice) }
     else
       render json: { error: 'Unauthorized' }, status: 500
     end
