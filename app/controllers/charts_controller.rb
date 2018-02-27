@@ -32,7 +32,9 @@ class ChartsController < ApplicationController
           this_cat_expenses += expense.cost
         end
       end
-      @expenses_data.push([cat, this_cat_expenses])
+      if this_cat_expenses > 0
+        @expenses_data.push([cat, this_cat_expenses])
+      end
     end
     render json: @expenses_data
   end
