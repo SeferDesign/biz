@@ -35,6 +35,7 @@ Biz::Application.routes.draw do
   get ':action' => 'welcome#:action'
 
   get 'invoices_controller/populate', to: 'invoices#populate'
+  get 'invoices_controller/generate_crypto_link', to: 'invoices#generate_crypto_link'
   get 'invoices_controller/mark_paid/:id', to: 'invoices#mark_paid', as: 'mark_paid_invoice'
   get 'charts_controller/trailing_x_months/:number_of_months', to: 'charts#trailing_x_months', as: 'chart_trailing_x_months'
   get 'charts_controller/year_invoice_month/:id', to: 'charts#year_invoice_month', as: 'chart_year_by_invoice_month'

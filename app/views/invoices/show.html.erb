@@ -140,16 +140,10 @@
 						</div>
 					</div>
 					<hr>
-					<h3>Pay with cryptocurrencies:</h3>
-					<p>If you'd like to pay with a cryptocurrency listed below, please contact us <%= mail_to company[:email], 'via email' %>.</p>
-					<div class="row">
-						<div class="col-sm-6 payment-option payment-option-bitcoin">
-							<img src="https://s3.amazonaws.com/SeferBiz/internal/bitcoin.svg">
-						</div>
-						<div class="col-sm-6 payment-option payment-option-ethereum">
-							<img src="https://s3.amazonaws.com/SeferBiz/internal/ethereum.svg">
-						</div>
-					</div>
+					<h3>Pay with cryptocurrency:</h3>
+					<div>Cryptocurrency payments are facilitated through <a href="https://commerce.coinbase.com/" target="_blank">Coinbase Commerce</a>.</div>
+					<button id="generate-crypto-link" data-invoice-id="<%= @invoice.id %>" data-access-token="<%= @invoice.access_token %>" class="stripe-button-el"><span>Pay through Coinbase</span></button>
+					<a id="crypto-link" href="#"></a>
 		    </div>
 		    <% end %>
 				<% if user_signed_in? %>

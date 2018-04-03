@@ -83,6 +83,22 @@ jQuery(document).on('turbolinks:load', function() {
 		}
 	});
 
+	$('#generate-crypto-link').click(function() {
+		$.ajax({
+	    url: '/invoices_controller/generate_crypto_link',
+	    data: {
+	      id: $(this).attr('data-invoice-id'),
+	      access_token: $(this).attr('data-access-token')
+	    },
+	    success: function(result) {
+				if (result.body.data.hosted_url) {
+					$('#crypto-link').attr('href', result.body.data.hosted_url);
+					$('#crypto-link')[0].click();
+				}
+	    }
+	  });
+	});
+
 });
 
 function setDatepickers() {

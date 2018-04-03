@@ -1,5 +1,5 @@
 class InvoicesController < ApplicationController
-  before_action :set_invoice, only: [:show, :edit, :email, :stripe, :mark_paid, :update, :destroy]
+  before_action :set_invoice, only: [:show, :edit, :email, :stripe, :generate_crypto_link, :mark_paid, :update, :destroy]
 
   def index
     @notableInvoices = Invoice.all.unpaid + Invoice.all.recent
@@ -75,6 +75,35 @@ class InvoicesController < ApplicationController
         ]
       }]
     }'}
+  end
+
+  def generate_crypto_link
+    response = HTTParty.post('https://api.commerce.coinbase.com/charges', {
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CC-Api-Key': Figaro.env.coinbase_commerce_key,
+        'X-CC-Version': '2018-03-22'
+      },
+      body: {
+        name: 'SDC Invoice',
+        description: @invoice.description,
+        local_price: {
+          amount: @invoice.cost,
+          currency: 'USD'
+        },
+        pricing_type: 'fixed_price',
+        metadata: {
+          invoice_id: @invoice.id,
+          invoice_url: invoice_url(@invoice),
+          client_id: @invoice.client.id,
+          client_name: @invoice.client.name
+        }
+      }.to_json
+    })
+    render json: {
+      code: response.code,
+      body: JSON.parse(response.body)
+    }
   end
 
   def stripe
