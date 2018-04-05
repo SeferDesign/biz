@@ -3,6 +3,9 @@ class WelcomeController < ApplicationController
   def index
   end
 
+  def payment
+  end
+
   def drive
     require "google_drive"
     session = GoogleDrive::Session.from_config("config/google.json")

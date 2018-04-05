@@ -1,0 +1,60 @@
+<div class="payment-options">
+  <div class="row">
+    <div class="col-sm-12 payment-option payment-option-check">
+      <h3>Pay via paper check:</h3>
+      <p>Please make the check out to '<strong><%= company[:pay_to] %></strong>' and mail to:</p>
+      <p><%= company[:pay_to] %><br><%= company[:address][:street] %><br><%= company[:address][:city] %>, <%= company[:address][:state_abbrv] %> <%= company[:address][:zipcode] %></p>
+    </div>
+  </div>
+  <hr>
+  <h3>Pay electronically via Zelle or Chase QuickPay:</h3>
+  <div class="row">
+    <div class="col-sm-10 col-sm-offset-1">
+      <p>Make a <a href="https://www.zellepay.com/" target="_blank">Zelle</a> or Chase QuickPay payment to 'info@seferdesign.com'. For a complete list of supported banks, see <a href="https://www.zellepay.com/get-started" target="_blank">here</a>.</p>
+    </div>
+    <div class="col-sm-12">
+      <div class="payment-images">
+        <%= image_tag('payment/chase.svg') %><%= image_tag('payment/bankofamerica.svg') %><%= image_tag('payment/wellsfargo.svg') %><%= image_tag('payment/capitalone.svg') %><%= image_tag('payment/citi.svg') %><%= image_tag('payment/pnc.svg') %><%= image_tag('payment/tdbank.svg') %><%= image_tag('payment/usbank.svg') %>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <h3>Pay electronically via PayPal:</h3>
+  <div class="row">
+    <div class="col-sm-10 col-sm-offset-1 payment-option payment-option-paypal">
+      <p>Make a PayPal payment to 'info@seferdesign.com' and mark as a 'friends and family' transaction to avoid fees</p>
+      <div class="payment-images">
+        <%= image_tag('payment/paypal.svg') %>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col-sm-12 payment-option payment-option-stripe">
+      <h3>Pay with a credit or debit card via the Stripe payment service:</h3>
+      <% if controller_name == 'invoices' %>
+        <%= form_tag "#{stripe_invoice_path(@invoice)}?access_token=#{@invoice.access_token}" do %>
+          <p>Stripe <a href="https://stripe.com/us/pricing" target="_blank">adds a fee</a> of <strong><%= number_to_currency(@invoice.stripeChargeDifference) %></strong> for this transaction, which increases your payment total to <strong><%= number_to_currency(@invoice.stripeChargeCost) %></strong>.</p>
+          <script
+            src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+            data-key="<%= Figaro.env.stripe_api_publishable_key %>"
+            data-amount="<%= @invoice.stripeChargeCost * 100 %>"
+            data-name="Sefer Design Company LLC"
+            data-description="<%= @invoice.display_id %>"
+            data-image="https://s3.amazonaws.com/SeferBiz/internal/sdc-square.png"
+            data-locale="auto">
+          </script>
+        <% end %>
+      <% elsif controller_name == 'welcome' and action_name == 'payment' %>
+      <p>Stripe <a href="https://stripe.com/us/pricing" target="_blank">adds a fee</a> of <strong>approximately 3%</strong> to each transaction.</p>
+      <% end %>
+    </div>
+  </div>
+  <hr>
+  <h3>Pay with cryptocurrency:</h3>
+  <p>Cryptocurrency payments are facilitated through <a href="https://commerce.coinbase.com/" target="_blank">Coinbase Commerce</a>.</p>
+  <% if controller_name == 'invoices' %>
+  <button id="generate-crypto-link" data-invoice-id="<%= @invoice.id %>" data-access-token="<%= @invoice.access_token %>" class="stripe-button-el"><span>Pay with Cryptocurrency</span></button>
+  <a id="crypto-link" href="#"></a>
+  <% end %>
+</div>
