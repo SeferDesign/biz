@@ -12,6 +12,10 @@
             <%= f.label :password %><br />
             <%= f.password_field :password, autocomplete: "off", class: 'form-control' %>
           </div>
+					<div class="form-group">
+            <%= f.label :otp_attempt, '2FA' %><br />
+            <%= f.text_field :otp_attempt, autocomplete: "off", class: 'form-control' %>
+          </div>
           <div class="row">
             <div class="col-sm-6 col-sm-push-6">
               <div class="form-group">
