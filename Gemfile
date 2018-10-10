@@ -27,6 +27,7 @@ gem 'roadie', '~> 3.1.1'
 gem 'stripe', '~> 3.9.1'
 gem 'google_drive', '~> 2.1.2'
 gem 'httparty'
+gem 'mini_racer'
 
 group :development do
   gem 'spring'
