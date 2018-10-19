@@ -1,6 +1,6 @@
 body {
 	color: $white;
-	background: $grey;
+	background: $black;
 	font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
@@ -128,6 +128,10 @@ h1 {
 header,
 footer {
 	@extend .pad;
+}
+
+header {
+	padding: 2em 0px 1.5em;
 }
 
 img {
