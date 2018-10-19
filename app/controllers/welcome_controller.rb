@@ -8,8 +8,8 @@ class WelcomeController < ApplicationController
 
 	def stripe
 		Stripe.api_key = Figaro.env.stripe_api_secret_key
-		@payouts = Stripe::Payout.list(limit: 9999)
-		@charges = Stripe::Charge.list(limit: 9999)
+		@payouts = Stripe::Payout.list(limit: nil)
+		@charges = Stripe::Charge.list(limit: nil)
 	end
 
   def drive
