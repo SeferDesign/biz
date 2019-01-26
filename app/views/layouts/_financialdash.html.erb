@@ -4,34 +4,43 @@
 	</div>
 </div>
 <div class="row">
-	<div class="col-lg-3 col-lg-offset-0 col-md-8 col-md-offset-2">
-		<h3 class="text-center"><%= today.strftime('%B') %></h3>
-		<span class="lead">Paid: <span class="pull-right currency green"><%= number_to_currency(Invoice.paidByMonth(today.year, today.month).sum('cost'), { :negative_format => '(%n)' }) %></span></span>
-		<hr class="halfbottom">
-		<span class="lead">
-			Contract: <span class="pull-right currency text-info"><%= number_to_currency(Invoice.paidByMonth(today.year, today.month).contract.sum('cost'), { :negative_format => '(%n)' }) %></span><br>
-			Hourly: <span class="pull-right currency text-warning"><%= number_to_currency(Invoice.paidByMonth(today.year, today.month).hourly.sum('cost'), { :negative_format => '(%n)' }) %></span>
-		</span>
+	<div class="col-md-8 col-md-offset-2">
+		<table class="table table-goals">
+			<thead>
+				<tr>
+					<th>&nbsp;</th>
+					<th class="text-right">Revenue</th>
+					<th class="text-right">Goal</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td><%= today.year %></td>
+					<td class="text-right"><span class="pull-right currency green"><%= number_to_currency(Invoice.paidByYear(today.year).sum('cost'), { :negative_format => '(%n)' }) %></span></td>
+					<td class="text-right">&mdash;</td>
+				</tr>
+				<tr>
+					<td><%= today.strftime('%B') %></td>
+					<td class="text-right"><span class="pull-right currency green"><span class="pull-right currency green"><%= number_to_currency(Invoice.paidByMonth(today.year, today.month).sum('cost'), { :negative_format => '(%n)' }) %></span></span></td>
+					<td class="text-right">&mdash;</td>
+				</tr>
+			</tbody>
+		</table>
 	</div>
-	<div class="col-lg-4 col-lg-offset-1 col-md-8 col-md-offset-2">
-		<h3 class="text-center">Active Goals</h3>
+	<div class="col-lg-4 col-lg-offset-2 col-md-6">
+		<h3 class="text-center">Paid</h3>
+		<span class="lead"><%= today.year %> YTD: <span class="pull-right currency green"><%= number_to_currency(Invoice.paidByYear(today.year).sum('cost'), { :negative_format => '(%n)' }) %></span></span>
+		<hr class="halfbottom">
+		<span class="lead"><%= today.strftime('%B') %>: <span class="pull-right currency green"><%= number_to_currency(Invoice.paidByMonth(today.year, today.month).sum('cost'), { :negative_format => '(%n)' }) %></span></span>
+	</div>
+	<div class="col-lg-4 col-md-6">
+		<h3 class="text-center">Goals</h3>
 		<% Goal.where('startdate <= ? AND enddate >=  ?', today, today).order('enddate DESC, amount DESC').each_with_index do |goal, index| %>
+			<span class="lead"><%= link_to goal do %><%= goal.timeperiod %>:<% end %><span class="pull-right currency"><%= number_to_currency(goal.amount, { :negative_format => '(%n)' }) %></span></span>
 			<% if index == 0 %>
-			<span class="lead"><%= link_to goal do %><%= goal.timeperiod %> (<%= goal.goaltype %>):<% end %><span class="pull-right currency"><%= number_to_currency(goal.amount, { :negative_format => '(%n)' }) %></span></span>
 			<hr class="halfbottom">
-			<% else %>
-			<span class="lead"><%= link_to goal do %><%= goal.timeperiod %> (<%= goal.goaltype %>):<% end %><span class="pull-right currency"><%= number_to_currency(goal.amount, { :negative_format => '(%n)' }) %></span></span><br>
 			<% end %>
 		<% end %>
-	</div>
-	<div class="col-lg-3 col-lg-offset-1 col-md-8 col-md-offset-2">
-		<h3 class="text-center"><%= today.year %> YTD</h3>
-		<span class="lead">Paid: <span class="pull-right currency green"><%= number_to_currency(Invoice.paidByYear(today.year).sum('cost'), { :negative_format => '(%n)' }) %></span></span>
-		<hr class="halfbottom">
-		<span class="lead">
-			Contract: <span class="pull-right currency text-info"><%= number_to_currency(Invoice.paidByYear(today.year).contract.sum('cost'), { :negative_format => '(%n)' }) %></span><br>
-			Hourly: <span class="pull-right currency text-warning"><%= number_to_currency(Invoice.paidByYear(today.year).hourly.sum('cost'), { :negative_format => '(%n)' }) %></span>
-		</span>
 	</div>
 </div>
 <div class="row">
