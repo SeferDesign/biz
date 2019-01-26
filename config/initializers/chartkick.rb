@@ -11,6 +11,9 @@ Chartkick.options = {
     '#000000',
     '#fff73d'
   ],
+	prefix: '$',
+	thousands: ',',
+	decimal: '.',
   library: {
     plotOptions: {
       series: {
@@ -24,15 +27,7 @@ Chartkick.options = {
       enabled: false
     },
     tooltip: {
-      valuePrefix: '$',
-      valueDecimals: 0,
-      pointFormat: '{series.name}: <b>{point.y}</b>'
-    },
-    yAxis: {
-      format: 'currency',
-      labels: {
-        format: '${value:,.0f}'
-      }
+			shared: true
     }
   }
 }
