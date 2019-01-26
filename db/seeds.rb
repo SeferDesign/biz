@@ -24,22 +24,6 @@ year = Year.create!(
   :taxrate => 0.4
 )
 
-goalYear = Goal.create!(
-  :startdate => Date.today.beginning_of_year,
-  :enddate => Date.today.end_of_year,
-  :timeperiod => 'Year',
-  :goaltype => 'Total',
-  :amount => 999999.99
-)
-
-goalMonth = Goal.create!(
-  :startdate => Date.today.beginning_of_month,
-  :enddate => Date.today.end_of_month,
-  :timeperiod => 'Month',
-  :goaltype => 'Total',
-  :amount => 99999.99
-)
-
 client = Client.create!(
   :name => 'Sefer Design Company LLC',
   :contact => 'Robert Sefer',

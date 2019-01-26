@@ -17,7 +17,6 @@ Biz::Application.routes.draw do
       get :expenses
     end
   end
-  resources :goals
   resources :invoices do
   	resources :lines
     member do
