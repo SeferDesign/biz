@@ -17,12 +17,12 @@
 				<tr>
 					<td><%= today.year %></td>
 					<td class="text-right"><span class="pull-right currency green"><%= number_to_currency(Invoice.paidByYear(today.year).sum('cost'), { :negative_format => '(%n)' }) %></span></td>
-					<td class="text-right">&mdash;</td>
+					<td class="text-right"><%= number_to_currency(Year.where(year: today.year).first.goal_year.to_i) %></td>
 				</tr>
 				<tr>
 					<td><%= today.strftime('%B') %></td>
 					<td class="text-right"><span class="pull-right currency green"><span class="pull-right currency green"><%= number_to_currency(Invoice.paidByMonth(today.year, today.month).sum('cost'), { :negative_format => '(%n)' }) %></span></span></td>
-					<td class="text-right">&mdash;</td>
+					<td class="text-right"><%= number_to_currency(Year.where(year: today.year).first.goals_months[today.month - 1].to_i) %></td>
 				</tr>
 			</tbody>
 		</table>

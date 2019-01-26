@@ -35,6 +35,7 @@ class YearsController < ApplicationController
 
   def create
     @year = Year.new(year_params)
+		@year.goals_months = params[:goals_months].map(&:to_i)
 
     respond_to do |format|
       if @year.save
@@ -46,6 +47,8 @@ class YearsController < ApplicationController
   end
 
   def update
+		@year.goals_months = params[:goals_months].map(&:to_i)
+		@year.save
     respond_to do |format|
       if @year.update(year_params)
         format.html { redirect_to @year, notice: 'Year was successfully updated.' }
@@ -68,6 +71,6 @@ class YearsController < ApplicationController
     end
 
     def year_params
-      params.require(:year).permit(:year, :taxrate)
+      params.require(:year).permit(:year, :taxrate, :goal_year, :goals_months)
     end
 end

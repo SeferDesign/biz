@@ -5,6 +5,9 @@
 			<div class="col-sm-12">
 				<h1>Year <%= @year.year %> Summary</h1>
 			</div>
+			<p class="doicons">
+				<%= link_to edit_year_path(@year), title: 'Edit' do %><%= icon_action_edit %><% end %>
+			</p>
 			<div class="col-sm-8 col-sm-offset-2">
 				<p class="lead">Total Income: <span class="pull-right currency green"><%= number_to_currency(@year.incomeTotal, { :negative_format => '(%n)' }) %></span></p>
 				<p class="lead">Tax Rate*: <span class="pull-right currency"><%= number_to_percentage(@year.taxrate * 100, :precision => 2) %></span></p>
@@ -18,6 +21,7 @@
 			<li role="presentation" class="active"><a href="#income" role="tab" data-toggle="tab">Income</a></li>
 			<li role="presentation"><a href="#expenses-summary" role="tab" data-toggle="tab">Expenses (Summary)</a></li>
 			<li role="presentation"><a href="#expenses-detailed" role="tab" data-toggle="tab">Expenses (Detailed)</a></li>
+			<li role="presentation"><a href="#goals" role="tab" data-toggle="tab">Goals</a></li>
 		</ul>
 		<div class="tab-content">
 			<div role="tabpanel" class="tab-pane active" id="income">
@@ -205,6 +209,26 @@
 						<% end %>
 					</tbody>
 				</table>
+				<% end %>
+			</div>
+			<div role="tabpanel" class="tab-pane" id="goals">
+				<div class="row">
+					<div class="col-sm-4">
+						<p><strong>Year</strong></p>
+					</div>
+					<div class="col-sm-8">
+						<p><%= number_to_currency(@year.goal_year, { :precision => 0 }) %></p>
+					</div>
+				</div>
+				<% @year.goals_months.each_with_index do |month, index| %>
+				<div class="row">
+					<div class="col-sm-4">
+						<p><strong><%= Date::MONTHNAMES[index + 1] %></strong></p>
+					</div>
+					<div class="col-sm-8">
+						<p><%= number_to_currency(month.to_i, { :precision => 0 }) %></p>
+					</div>
+				</div>
 				<% end %>
 			</div>
 		</div>
