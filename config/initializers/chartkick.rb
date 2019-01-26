@@ -15,7 +15,10 @@ Chartkick.options = {
     plotOptions: {
       series: {
         animation: false
-      }
+      },
+			column: {
+				grouping: false
+			}
     },
     legend: {
       enabled: false

@@ -255,7 +255,27 @@ footer {
 }
 
 .chart-wrap {
+
 	margin-top: 60px;
+
+	.highcharts-column-series {
+
+		&.highcharts-series {
+
+			&-2 {
+
+				rect {
+					stroke: #639ec9;
+					stroke-width: 0.5%;
+					opacity: 0.25;
+				}
+
+			}
+
+		}
+
+	}
+
 }
 
 .doicons i {

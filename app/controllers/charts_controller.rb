@@ -2,16 +2,18 @@ class ChartsController < ApplicationController
   include ApplicationHelper
   before_action :set_number_of_months, only: [:trailing_x_months]
   before_action :set_data_holders
-  before_action :set_year, only: [:year_invoice_month, :year_expense_category, :year_expense_month]
+  before_action :set_year, only: [:year_invoice_month, :year_invoice_month_with_goal, :year_expense_category, :year_expense_month]
 
   def trailing_x_months
     @number_of_months.downto(0).each do |m|
       @invoices_data[:data].store(m.month.ago.strftime("%B"), Invoice.paidByMonth(m.month.ago.year, m.month.ago.month).sum('cost').to_f)
       @expenses_data[:data].store(m.month.ago.strftime("%B"), Expense.expenseByMonth(m.month.ago.year, m.month.ago.month).sum('cost').to_f)
+			@goals_data[:data].store(m.month.ago.strftime("%B"), Year.where(year: m.month.ago.year).first.goals_months[Date::MONTHNAMES.index(m.month.ago.strftime("%B")) - 1].to_f)
     end
     render json: [
       @invoices_data,
-      @expenses_data
+      @expenses_data,
+			@goals_data
     ]
   end
 
@@ -21,6 +23,19 @@ class ChartsController < ApplicationController
       @invoices_data[:data].store(Date::ABBR_MONTHNAMES[m], Invoice.paidByMonth(@year.year, m).sum('cost').to_f)
     end
     render json: [@invoices_data]
+  end
+
+	def year_invoice_month_with_goal
+		months = []
+    (1..12).each do |m|
+      @invoices_data[:data].store(Date::ABBR_MONTHNAMES[m], Invoice.paidByMonth(@year.year, m).sum('cost').to_f)
+			@goals_data[:data].store(Date::ABBR_MONTHNAMES[m], @year.goals_months[m - 1].to_f)
+    end
+    render json: [
+			@invoices_data,
+			[],
+			@goals_data
+		]
   end
 
   def year_expense_category
@@ -54,6 +69,7 @@ class ChartsController < ApplicationController
     def set_data_holders
       @invoices_data = { name: 'Invoices', data: {} }
       @expenses_data = { name: 'Expenses', data: {} }
+			@goals_data = { name: 'Goal', data: {} }
     end
 
     def set_year
