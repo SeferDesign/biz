@@ -265,9 +265,11 @@ footer {
 			&-2 {
 
 				rect {
+					fill: transparent;
 					stroke: #639ec9;
-					stroke-width: 0.5%;
-					opacity: 0.25;
+					stroke-width: 0.25%;
+					stroke-dasharray: 5;
+					opacity: 0.5;
 				}
 
 			}
