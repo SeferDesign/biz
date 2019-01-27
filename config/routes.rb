@@ -3,7 +3,7 @@ Biz::Application.routes.draw do
   if Rails.env.production?
     constraints(:host => /^(?!biz\.seferdesign\.com)/i) do
       match "/(*path)" => redirect {
-        |params, req| "http://biz.seferdesign.com/#{params[:path]}"
+        |params, req| "https://biz.seferdesign.com/#{params[:path]}"
       }, via: [:get, :post]
     end
   end
