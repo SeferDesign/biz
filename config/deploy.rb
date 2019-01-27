@@ -24,11 +24,11 @@ namespace :logs do
 end
 
 # Change these
-server '104.131.172.33', port: 22, roles: [:web, :app, :db], primary: true
+server '54.157.35.88', port: 22, roles: [:web, :app, :db], primary: true
 
 set :branch, ENV['BRANCH'] if ENV['BRANCH']
 
-set :repo_url,        'git@github.com:SeferDesign/biz.git'
+set :repo_url,        'https://github.com/SeferDesign/biz.git'
 set :user,            'deploy'
 set :puma_threads,    [1, 8]
 set :puma_workers,    0
@@ -53,7 +53,7 @@ set :log_level,     :debug
 # set :keep_releases, 5
 
 ## Linked Files & Directories (Default None):
-set :linked_files, %w{config/google.json}
+# set :linked_files, %w{config/google.json}
 # set :linked_dirs,  %w{bin log tmp/pids tmp/cache tmp/sockets vendor/bundle public/system}
 
 namespace :puma do
