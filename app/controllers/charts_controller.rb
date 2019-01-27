@@ -47,6 +47,7 @@ class ChartsController < ApplicationController
           this_cat_expenses += expense.cost
         end
       end
+			this_cat_expenses = this_cat_expenses.to_i
       if this_cat_expenses > 0
         @expenses_data.push([cat, this_cat_expenses])
       end
