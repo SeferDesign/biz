@@ -24,7 +24,7 @@ namespace :logs do
 end
 
 # Change these
-server '54.157.35.88', port: 22, roles: [:web, :app, :db], primary: true
+server '54.242.162.172', port: 22, roles: [:web, :app, :db], primary: true
 
 set :branch, ENV['BRANCH'] if ENV['BRANCH']
 
