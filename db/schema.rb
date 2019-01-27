@@ -55,6 +55,16 @@ ActiveRecord::Schema.define(version: 20190126174019) do
     t.index ["vendor_id"], name: "index_expenses_on_vendor_id"
   end
 
+	create_table "goals", force: :cascade do |t|
+    t.date "startdate"
+    t.date "enddate"
+    t.string "timeperiod"
+    t.string "goaltype"
+    t.decimal "amount", precision: 8, scale: 2
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "invoices", id: :serial, force: :cascade do |t|
     t.integer "client_id"
     t.integer "project_id"
