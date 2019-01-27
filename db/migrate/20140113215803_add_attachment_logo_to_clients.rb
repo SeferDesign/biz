@@ -1,4 +1,4 @@
-class AddAttachmentLogoToClients < ActiveRecord::Migration
+class AddAttachmentLogoToClients < ActiveRecord::Migration[5.1]
   def self.up
     change_table :clients do |t|
       t.attachment :logo

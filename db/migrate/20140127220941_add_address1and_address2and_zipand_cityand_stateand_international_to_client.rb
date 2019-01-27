@@ -1,4 +1,4 @@
-class AddAddress1andAddress2andZipandCityandStateandInternationalToClient < ActiveRecord::Migration
+class AddAddress1andAddress2andZipandCityandStateandInternationalToClient < ActiveRecord::Migration[5.1]
   def change
     add_column :clients, :address1, :string
     add_column :clients, :address2, :string

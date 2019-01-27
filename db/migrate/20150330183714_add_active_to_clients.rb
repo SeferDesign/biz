@@ -1,4 +1,4 @@
-class AddActiveToClients < ActiveRecord::Migration
+class AddActiveToClients < ActiveRecord::Migration[5.1]
   def change
     add_column :clients, :active, :boolean, :default => true
   end

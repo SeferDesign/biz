@@ -1,4 +1,4 @@
-class Changefloatstodecimals < ActiveRecord::Migration
+class Changefloatstodecimals < ActiveRecord::Migration[5.1]
   def self.up
     change_table :goals do |t|
       t.change :amount, :decimal, :precision => 8, :scale => 2

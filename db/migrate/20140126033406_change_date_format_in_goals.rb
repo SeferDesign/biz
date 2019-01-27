@@ -1,4 +1,4 @@
-class ChangeDateFormatInGoals < ActiveRecord::Migration
+class ChangeDateFormatInGoals < ActiveRecord::Migration[5.1]
   def self.up
    change_column :goals, :startdate, :date
    change_column :goals, :enddate, :date
