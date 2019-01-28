@@ -1,5 +1,15 @@
 jQuery(document).on('turbolinks:load', function() {
 
+	var hash = document.location.hash;
+	if (hash && $('.tab-content .tab-pane').length > 0) {
+		$('.nav-tabs a[href="' + hash + '"]').tab('show');
+	}
+
+	$('.nav-tabs a').on('shown.bs.tab', function (e) {
+		e.preventDefault();
+		history.pushState({}, document.title, location.href.replace(location.hash, '') + e.target.hash);
+	});
+
 	$('#paid-date-icon-wrap').click(function() {
 		var dateToday = new Date();
 		var dateYear = dateToday.getFullYear().toString();

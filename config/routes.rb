@@ -39,6 +39,7 @@ Biz::Application.routes.draw do
   get 'charts_controller/trailing_x_months/:number_of_months', to: 'charts#trailing_x_months', as: 'chart_trailing_x_months'
   get 'charts_controller/year_invoice_month/:id', to: 'charts#year_invoice_month', as: 'chart_year_by_invoice_month'
 	get 'charts_controller/year_invoice_month_with_goal/:id', to: 'charts#year_invoice_month_with_goal', as: 'chart_year_by_invoice_month_with_goals'
+	get 'charts_controller/year_all_data/:id', to: 'charts#year_all_data', as: 'chart_year_all_data'
   get 'charts_controller/year_expense_category/:id', to: 'charts#year_expense_category', as: 'chart_year_by_expense_category'
   get 'charts_controller/year_expense_month/:id', to: 'charts#year_expense_month', as: 'chart_year_by_expense_month'
 

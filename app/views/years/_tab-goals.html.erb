@@ -1,0 +1,18 @@
+<div class="row">
+	<div class="col-sm-4">
+		<p><strong>Year</strong></p>
+	</div>
+	<div class="col-sm-8">
+		<p><span class="currency"><%= number_to_currency(@year.goal_year, { :precision => 0 }) %></span></p>
+	</div>
+</div>
+<% @year.goals_months.each_with_index do |month, index| %>
+<div class="row">
+	<div class="col-sm-4">
+		<p><strong><%= Date::MONTHNAMES[index + 1] %></strong></p>
+	</div>
+	<div class="col-sm-8">
+		<p><span class="currency"><%= number_to_currency(month.to_i, { :precision => 0 }) %></span></p>
+	</div>
+</div>
+<% end %>
