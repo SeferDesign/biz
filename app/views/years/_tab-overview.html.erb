@@ -1,4 +1,4 @@
-<div class="col-sm-8 col-sm-offset-2">
+<div class="col-md-4">
 	<p class="lead">Total Income: <span class="pull-right currency green"><%= number_to_currency(@year.incomeTotal, { :negative_format => '(%n)' }) %></span></p>
 	<p class="lead">Tax Rate*: <span class="pull-right currency"><%= number_to_percentage(@year.taxrate * 100, :precision => 2) %></span></p>
 	<p class="lead">Tax Estimate*: <span class="pull-right currency red"><%= number_to_currency(@year.taxOwedTotal, { :negative_format => '(%n)' }) %></span></p>
@@ -6,6 +6,6 @@
 	<p class="lead">Expenses (to-date): <span class="pull-right currency red"><%= number_to_currency(@year.expenses.sum(:cost), { :negative_format => '(%n)' }) %></span></p>
 	<p><small>*Tax rate and estimates are conservative and independent of expenses and discounts.</small></p>
 </div>
-<div class="col-sm-8 col-sm-offset-2">
-	<div class="chart-wrap"><%= column_chart chart_year_all_data_path(@year.id) %></div>
+<div class="col-md-7 col-md-offset-1">
+	<div class="chart-wrap overview-chart-wrap"><%= column_chart chart_year_all_data_path(@year.id) %></div>
 </div>

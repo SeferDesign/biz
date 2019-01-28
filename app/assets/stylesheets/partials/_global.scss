@@ -228,7 +228,13 @@ section {
 }
 
 .table-goals {
-	font-size: 2rem;
+
+	font-size: 1.5rem;
+
+	@media screen and (min-width: $width-sm) {
+		font-size: 2rem;
+	}
+
 }
 
 footer {
@@ -257,6 +263,14 @@ footer {
 .chart-wrap {
 
 	margin-top: 60px;
+
+	&.overview-chart-wrap {
+
+		@media screen and (min-width: $screen-md) {
+			margin-top: 0px;
+		}
+
+	}
 
 	.highcharts-column-series {
 
