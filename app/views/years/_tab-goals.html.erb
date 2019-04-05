@@ -16,12 +16,7 @@
 		<tr>
 			<td><strong><%= Date::MONTHNAMES[index + 1] %></strong></td>
 			<td><span class="currency"><%= number_to_currency(month.to_i, { :precision => 0 }) %></span></td>
-			<td><span class="currency"><%
-				monthSum = Invoice.paidByMonth(@year.year, month).sum('cost').to_i
-				if monthSum == 0
-			%>&mdash;<% else %>
-			<%= number_to_currency(Invoice.paidByMonth(@year.year, month).sum('cost').to_i, { :negative_format => '(%n)' }) %>
-			<% end %></span></td>
+			<td><span class="currency"><%= number_to_currency(Invoice.paidByMonth(@year.year, month).sum('cost').to_i, { :negative_format => '(%n)' }) %></span></td>
 		</tr>
 		<% end %>
 	</tbody>
