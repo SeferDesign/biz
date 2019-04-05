@@ -9,6 +9,9 @@
 					<%= link_to vendor_path(@vendor), title: 'Delete', method: :delete, data: { confirm: "Are you sure you would like to delete Client ##{@vendor.id}?" } do %><%= icon_action_delete %><% end %>
 				</p>
 				<p><strong>Category:</strong> <%= @vendor.category %></p>
+				<% if @vendor.notes %>
+				<p><%= @vendor.notes %></p>
+				<% end %>
 				<h3>Expenses</h3>
 				<% if @vendor.expenses.blank? %>
 				<p class="lead">No to-date expenses.</p>
