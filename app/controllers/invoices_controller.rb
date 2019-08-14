@@ -179,7 +179,7 @@ class InvoicesController < ApplicationController
     end
 
     def invoice_params
-      params.require(:invoice).permit(:client_id, :project_id, :date, :worktype, :cost, :paid, :paiddate, :paymenttype, :description, :access_token)
+      params.require(:invoice).permit(:client_id, :date, :worktype, :cost, :paid, :paiddate, :paymenttype, :description, :access_token)
     end
 
     def move_drive_doc_to_paid

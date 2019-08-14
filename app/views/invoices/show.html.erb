@@ -28,10 +28,6 @@
 					<% if user_signed_in? %><%= link_to @invoice.client do %><%= @invoice.client.name %><% end %><% else %><%= @invoice.client.name %><% end %>
 				</p>
 				<% if user_signed_in? %>
-				<p>
-					<strong>Project:</strong>
-					<%= link_to @invoice.project do %><%= @invoice.project.name %><% end %>
-				</p>
 				<% if @invoice.access_token.present? %>
 				<p>
 					<strong>Access Token:</strong> <%= @invoice.access_token %> (<a href="<%= invoice_path(@invoice) %>?access_token=<%= @invoice.access_token %>">Client Link</a>)

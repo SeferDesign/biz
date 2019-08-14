@@ -40,13 +40,6 @@ client = Client.create!(
   :federalein => '81-0123456'
 )
 
-project = Project.create!(
-  :name => 'Web Site Revamp',
-  :client_id => client.id,
-  :startdate => 1.month.ago,
-  :completed => false
-)
-
 vendor = Vendor.create!(
   :name => 'Amazon Web Services',
   :category => 'Web Service'
@@ -56,14 +49,13 @@ vendor = Vendor.create!(
   x = 6 - i
   invoicePaid = Invoice.create!(
     :client_id => client.id,
-    :project_id => project.id,
     :date => x.month.ago,
     :worktype => 'Contract',
     :cost => (i + 1) * 10000.00,
     :paid => true,
     :paiddate => (x - 1).month.ago,
     :paymenttype => 'Chase Quick Pay',
-    :description => 'This invoice represents work on various projects.'
+    :description => 'This invoice represents various work.'
   )
 
   invoicePaidLine = Line.create!(
@@ -84,12 +76,11 @@ end
 
 invoiceUnpaid = Invoice.create!(
   :client_id => client.id,
-  :project_id => project.id,
   :date => 1.day.ago,
   :worktype => 'Hourly',
   :cost => 10000.00,
   :paid => false,
-  :description => 'This invoice represents work on various projects.'
+  :description => 'This invoice represents various work.'
 )
 
 invoiceUnpaidLine = Line.create!(

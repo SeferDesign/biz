@@ -24,7 +24,6 @@ Biz::Application.routes.draw do
       post :stripe
     end
   end
-  resources :projects
   resources :clients
   resources :expenses
   resources :vendors
@@ -52,7 +51,6 @@ Biz::Application.routes.draw do
           get :email
         end
       end
-      resources :projects, only: [:index, :show]
       resources :clients, only: [:index, :show]
     end
   end

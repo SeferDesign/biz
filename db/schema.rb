@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190405154335) do
+ActiveRecord::Schema.define(version: 20190814231714) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -57,7 +57,6 @@ ActiveRecord::Schema.define(version: 20190405154335) do
 
   create_table "invoices", id: :serial, force: :cascade do |t|
     t.integer "client_id"
-    t.integer "project_id"
     t.date "date"
     t.string "worktype", limit: 255
     t.decimal "cost", precision: 8, scale: 2
@@ -82,16 +81,6 @@ ActiveRecord::Schema.define(version: 20190405154335) do
     t.datetime "updated_at"
     t.boolean "discount", default: false
     t.index ["invoice_id"], name: "index_lines_on_invoice_id"
-  end
-
-  create_table "projects", id: :serial, force: :cascade do |t|
-    t.string "name", limit: 255
-    t.integer "client_id"
-    t.date "startdate"
-    t.date "enddate"
-    t.boolean "completed"
-    t.datetime "created_at"
-    t.datetime "updated_at"
   end
 
   create_table "users", id: :serial, force: :cascade do |t|

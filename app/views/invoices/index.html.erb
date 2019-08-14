@@ -16,7 +16,6 @@
 							<thead>
 								<tr>
 									<th>Client</th>
-									<th class="hidden-xs">Project</th>
 									<th>Date</th>
 									<th>&nbsp;</th>
 									<th class="text-center hidden-xs">Type</th>
@@ -28,7 +27,6 @@
 								<% @notableInvoices.each do |invoice| %>
 								<tr id="invoicerow<%= invoice.id %>">
 									<td><%= link_to Client.find(invoice.client_id) do %><%= Client.find(invoice.client_id).name %><% end %></td>
-									<td class="hidden-xs"><%= link_to Project.find(invoice.project_id) do %><%= Project.find(invoice.project_id).name %><% end %></td>
 									<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
 									<td><%= link_to new_invoice_path(:copied_id => invoice.id), :class => 'copy-invoice-link' do %><%= icon('far', 'copy') %><% end %><% if !invoice.paid? %><%= link_to mark_paid_invoice_path(invoice), title: 'Paid Today?', class: 'paid-today-btn paid-today-link', remote: true do %><%= icon('fas', 'check-square', class: 'right') %><% end %><% end %></td>
 									<td class="text-center hidden-xs"><% if invoice.worktype == 'Contract' %>C<% elsif invoice.worktype == 'Hourly' %>H<% end %></td>

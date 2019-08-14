@@ -4,7 +4,7 @@
 			<div class="col-sm-12 text-center">
 				<% if user_signed_in? and !(controller_name == 'welcome' and action_name == 'payment') %><nav class="footer-nav">
 					<ul>
-						<li><%= link_to 'Clients', clients_path %></li><li><%= link_to 'Projects', projects_path %></li><li><%= link_to 'Invoices', invoices_path %></li><% if Date.today.month < 3 %><li><%= link_to 1.year.ago.year, year_path(Year.where(year: 1.year.ago.year).first.year) %></li><% end %><li><%= link_to Date.today.year, year_path(Year.where(year: Date.today.year).first.year) %></li><li><%= link_to 'Vendors', vendors_path %></li><li><%= link_to 'Expenses', expenses_path %></li><li><%= link_to destroy_user_session_path, :method => :delete do %>Sign Out<%= icon('fas', 'sign-out-alt', class: 'right') %><% end %></li>
+						<li><%= link_to 'Clients', clients_path %></li><li><%= link_to 'Invoices', invoices_path %></li><% if Date.today.month < 3 %><li><%= link_to 1.year.ago.year, year_path(Year.where(year: 1.year.ago.year).first.year) %></li><% end %><li><%= link_to Date.today.year, year_path(Year.where(year: Date.today.year).first.year) %></li><li><%= link_to 'Vendors', vendors_path %></li><li><%= link_to 'Expenses', expenses_path %></li><li><%= link_to destroy_user_session_path, :method => :delete do %>Sign Out<%= icon('fas', 'sign-out-alt', class: 'right') %><% end %></li>
 					</ul>
 				</nav><% end %>
 				<p>&copy; <%= company[:full_name] %></p>

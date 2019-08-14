@@ -31,7 +31,7 @@
 								<% @clients.sort { |a,b| a.name <=> b.name }.each do |client| %>
 								<tr id="clientrow<%= client.id %>">
 									<td><%= link_to client do %><%= client.name %><% end %></td>
-									<td><%= link_to new_invoice_path(:client_id => client.id), :class => 'new-invoice-link' do %><%= icon('fas', 'dollar-sign') %><% end %><%= link_to new_project_path(:client_id => client.id), :class => 'new-project-link' do %><%= icon('far', 'folder-open', class: 'right') %><% end %></td>
+									<td><%= link_to new_invoice_path(:client_id => client.id), :class => 'new-invoice-link' do %><%= icon('fas', 'dollar-sign') %><% end %></td>
 									<td class="hidden-xs"><%= client.contact %></td>
 									<td><% if client.currentrate %><%= number_to_currency(client.currentrate) %><% else %>&mdash;<% end %></td>
 									<td class="currency text-right hidden-xs"><% if client.unpaidTotal > 0 %><span class="spread red"><%= number_to_currency(client.unpaidTotal, { :negative_format => '(%n)' }) %></span><% else %>&mdash;<% end %></td>

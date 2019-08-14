@@ -63,32 +63,6 @@
 			<% end %>
 		</div>
 		<div class="row">
-			<div class="col-sm-6">
-				<h3>Projects</h3>
-				<p><%= link_to new_project_path(:client_id => @client.id), :class => 'btn btn-success btn-sm' do %><%= icon('fas', 'plus', class: 'left') %>New Project<% end %></p>
-				<% if @client.projects.blank? %>
-				<p class="lead">No projects.</p>
-				<% else %>
-				<table class="table table-hover table-striped table-condensed">
-					<thead>
-						<tr>
-							<th>Name</th>
-							<th class="text-center">Completed?</th>
-						</tr>
-					</thead>
-					<tbody>
-						<% @client.projects.each do |project| %>
-						<tr id="projectrow<%= project.id %>">
-							<td><%= link_to project do %><%= project.name %><% end %></td>
-							<td class="text-center"><% if project.completed == true %><%= icon('fas', 'check', class: 'green') %><% else %><span class="spread red">No</span><% end %></td>
-						</tr>
-						<% end %>
-					</tbody>
-				</table>
-				<% end %>
-			</div>
-		</div>
-		<div class="row">
 			<div class="col-sm-12">
 				<h3>Invoices</h3>
 				<p><%= link_to new_invoice_path(:client_id => @client.id), :class => 'btn btn-success btn-sm' do %><%= icon('fas', 'plus', class: 'left') %>New Invoice<% end %></p>

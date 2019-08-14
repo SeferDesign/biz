@@ -10,40 +10,38 @@
 	</div>
 	<% end %>
 	<div class="row">
-		<div class="col-lg-4 col-sm-6">
-			<div class="form-group">
-				<%= f.label :client_id, 'Client' %>
-				<%= collection_select(:invoice, 'client_id', Client.all, :id, :name, { :include_blank => true, :selected => params[:action] == 'edit' ? @invoice.client.id : (params[:client_id].present? ? params[:client_id] : (@copied_invoice ? @copied_invoice.client.id : '')) }, { :class => 'form-control' }) %>
-				<script>
-				$('invoice_client_id').change();
-				</script>
-			</div>
-		</div>
-		<div class="col-lg-4 col-sm-6">
-			<div class="form-group">
-				<%= f.label :project_id, 'Project' %>
-				<%= collection_select(:invoice, 'project_id', Project.all, :id, :project_client_and_name, { :include_blank => true, :selected => params[:project_id].present? ? params[:project_id] : (params[:action] == 'edit' ? @invoice.project.id : (@copied_invoice ? @copied_invoice.project.id : '')) }, { :class => 'form-control' }) %>
-			</div>
-		</div>
-		<div class="col-lg-2 col-sm-6">
-			<div class="form-group">
-				<%= f.label :date, 'Invoice Date' %>
-				<div class="input-group">
-					<span class="input-group-addon"><%= icon('fas', 'calendar-alt') %></span>
-					<%= f.text_field :date, :required => true, :placeholder => 'YYYY-MM-DD', :class => 'form-control datepicker', :value => @invoice.date ? @invoice.date : Time.now.strftime("%Y-%m-%d") %>
+		<div class="col-sm-6">
+			<div class="row">
+				<div class="col-sm-12">
+					<div class="form-group">
+						<%= f.label :client_id, 'Client' %>
+						<%= collection_select(:invoice, 'client_id', Client.all, :id, :name, { :include_blank => true, :selected => params[:action] == 'edit' ? @invoice.client.id : (params[:client_id].present? ? params[:client_id] : (@copied_invoice ? @copied_invoice.client.id : '')) }, { :class => 'form-control' }) %>
+						<script>
+						$('invoice_client_id').change();
+						</script>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<%= f.label :date, 'Invoice Date' %>
+						<div class="input-group">
+							<span class="input-group-addon"><%= icon('fas', 'calendar-alt') %></span>
+							<%= f.text_field :date, :required => true, :placeholder => 'YYYY-MM-DD', :class => 'form-control datepicker', :value => @invoice.date ? @invoice.date : Time.now.strftime("%Y-%m-%d") %>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<%= f.label :cost %>
+						<div class="input-group">
+							<span class="input-group-addon"><%= icon('fas', 'dollar-sign') %></span>
+							<%= f.text_field :cost, :placeholder => '0.00', class: 'form-control text-right' %>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
-		<div class="col-lg-2 col-sm-6">
-			<div class="form-group">
-				<%= f.label :cost %>
-				<div class="input-group">
-					<span class="input-group-addon"><%= icon('fas', 'dollar-sign') %></span>
-					<%= f.text_field :cost, :placeholder => '0.00', class: 'form-control text-right' %>
-				</div>
-			</div>
-		</div>
-		<div class="col-sm-4">
+		<div class="col-sm-6">
 			<div class="form-group">
 				<%= f.label :worktype, 'Work Type' %><br>
 				<%= radio_button('invoice', 'worktype', 'Contract', { checked: (params[:action] == 'edit' and @invoice.worktype == 'Contract') ? true : ((@copied_invoice and @copied_invoice.worktype == 'Contract') ? true : false) }) %>
@@ -51,8 +49,6 @@
 				<%= radio_button('invoice', 'worktype', 'Hourly', { checked: (params[:action] == 'edit' and @invoice.worktype == 'Hourly') ? true : ((@copied_invoice and @copied_invoice.worktype == 'Hourly') ? true : false) }) %>
 				<%= label_tag(:invoice_worktype_hourly, 'Hourly') %>
 			</div>
-		</div>
-		<div class="col-sm-8">
 			<div class="form-group">
 				<%= f.label :description %>
 				<div class="description-prefills"><a href="#" data-slug="yesterday">Yesterday</a> | <a href="#" data-slug="today">Today</a></div>

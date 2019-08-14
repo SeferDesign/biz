@@ -1,7 +1,6 @@
 class Client < ActiveRecord::Base
 
-	has_many :projects, :dependent => :destroy
-	has_many :invoices, through: :projects
+	has_many :invoices
 
 	has_attached_file :logo,
 		:s3_protocol => :https,
