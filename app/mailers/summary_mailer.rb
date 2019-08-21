@@ -1,6 +1,6 @@
 class SummaryMailer < ActionMailer::Base
+	helper :application
   default from: "Sefer Design Co. <info@seferdesign.com>"
-  helper :application
 
   def weekly_activity_summary
     @date_start = Date.today - 6.days
@@ -13,7 +13,7 @@ class SummaryMailer < ActionMailer::Base
     html_roadie = Roadie::Document.new email_html_raw
     html_inlined = html_roadie.transform
 
-    mail(to: "Robert Sefer <rsefer@gmail.com>", subject: "Weekly Activity Summary - #{@date_start.strftime("%b %e")} through #{@date_end.strftime("%b %e")}") do |format|
+    mail(to: "Robert Sefer <rob@seferdesign.com>", subject: "Weekly Activity Summary - #{@date_start.strftime("%b %e")} through #{@date_end.strftime("%b %e")}") do |format|
       format.html do
         html_inlined
       end
@@ -34,7 +34,7 @@ class SummaryMailer < ActionMailer::Base
     html_roadie = Roadie::Document.new email_html_raw
     html_inlined = html_roadie.transform
 
-    mail(to: "Robert Sefer <rsefer@gmail.com>", subject: "Monthly Activity Summary - #{@date_start.strftime("%b %e")} through #{@date_end.strftime("%b %e")}") do |format|
+    mail(to: "Robert Sefer <rob@seferdesign.com>", subject: "Monthly Activity Summary - #{@date_start.strftime("%b %e")} through #{@date_end.strftime("%b %e")}") do |format|
       format.html do
         html_inlined
       end

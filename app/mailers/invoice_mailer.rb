@@ -1,12 +1,11 @@
 class InvoiceMailer < ActionMailer::Base
-
-  default from: "Sefer Design Co. <info@seferdesign.com>"
-  helper :application
+	helper :application
+  default from: "Sefer Design Co. <info@seferdesign.com>", reply_to: "Robert Sefer <rob@seferdesign.com>"
 
   def invoice_email(invoice)
     @invoice = invoice
 
-    cc_list = ["Robert Sefer <rsefer@gmail.com>"]
+    cc_list = ["Robert Sefer <rob@seferdesign.com>"]
     if invoice.client.email_accounting_2.present?
       cc_list.push(invoice.client.email_accounting_2)
     end
