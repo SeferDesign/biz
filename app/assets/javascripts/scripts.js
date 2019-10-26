@@ -122,5 +122,5 @@ function setDatepickers() {
 function getDateInFormat(days) {
 	var date = new Date();
 	date.setDate(date.getDate() + days);
-	return date.getFullYear() + '-'+ (date.getMonth() < 10 ? '0' : '') + (date.getMonth() + 1) + '-' + (date.getDate() < 10 ? '0' : '') + date.getDate();
+	return date.getFullYear() + '-'+ (date.getMonth() < 9 ? '0' : '') + (date.getMonth() + 1) + '-' + (date.getDate() < 9 ? '0' : '') + date.getDate();
 }
