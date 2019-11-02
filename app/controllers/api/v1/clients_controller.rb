@@ -3,10 +3,10 @@ class Api::V1::ClientsController < Api::ApiController
 
   def index
     @clients = Client.all
-    respond_with @clients
+    respond_with @clients, methods: :mostRecentInvoiceDate
   end
 
-  def show
+	def show
     render json: @client
   end
 

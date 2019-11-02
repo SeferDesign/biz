@@ -24,6 +24,14 @@ class Client < ActiveRecord::Base
 	scope :active, -> { where(active: true) }
 	scope :inactive, -> { where(active: false) }
 
+	def mostRecentInvoiceDate
+		if self.invoices.length > 0
+			self.invoices.first.date.strftime('%F')
+		else
+			nil
+		end
+	end
+
 	def invoiceTotal
 		self.invoices.sum(:cost)
 	end
