@@ -3,10 +3,10 @@ class Api::V1::ClientsController < Api::ApiController
 
   def index
 		@clients = Client.all
-		if params[:sortBy] == 'date'
-			@clients = @clients.sort { |a,b| a.mostRecentInvoiceDate <=> b.mostRecentInvoiceDate }
+		if params[:sortBy] == 'recentActivityDate'
+			@clients = @clients.sort { |a,b| a.mostRecentActivityDate <=> b.mostRecentActivityDate }.reverse
 		end
-    respond_with @clients, methods: :mostRecentInvoiceDate
+		respond_with @clients, methods: :mostRecentActivityDate
   end
 
 	def show

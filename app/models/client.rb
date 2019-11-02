@@ -24,11 +24,11 @@ class Client < ActiveRecord::Base
 	scope :active, -> { where(active: true) }
 	scope :inactive, -> { where(active: false) }
 
-	def mostRecentInvoiceDate
+	def mostRecentActivityDate
 		if self.invoices.length > 0
-			self.invoices.first.date.strftime('%F')
+			self.invoices.first.created_at
 		else
-			nil
+			self.created_at
 		end
 	end
 
