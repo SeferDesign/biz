@@ -1,4 +1,26 @@
 <div class="payment-options">
+	<div class="row">
+    <div class="col-sm-12 payment-option payment-option-stripe">
+      <h3>Pay with a credit or debit card:<br><small>via the Stripe payment service</small></h3>
+      <% if controller_name == 'invoices' %>
+        <%= form_tag "#{stripe_invoice_path(@invoice)}?access_token=#{@invoice.access_token}" do %>
+          <p>Stripe <a href="https://stripe.com/us/pricing" target="_blank">adds a fee</a> of <strong><%= number_to_currency(@invoice.stripeChargeDifference) %></strong> for this transaction, which increases your payment total to <strong><%= number_to_currency(@invoice.stripeChargeCost) %></strong>.</p>
+          <script
+            src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+            data-key="<%= Figaro.env.stripe_api_publishable_key %>"
+            data-amount="<%= @invoice.stripeChargeCost * 100 %>"
+            data-name="Sefer Design Company LLC"
+            data-description="<%= @invoice.display_id %>"
+            data-image="https://s3.amazonaws.com/SeferBiz/internal/sdc-square.png"
+            data-locale="auto">
+          </script>
+        <% end %>
+      <% elsif controller_name == 'welcome' and action_name == 'payment' %>
+      <p>Stripe <a href="https://stripe.com/us/pricing" target="_blank">adds a fee</a> of <strong>approximately 3%</strong> to each transaction.</p>
+      <% end %>
+    </div>
+  </div>
+  <hr>
   <div class="row">
     <div class="col-sm-12 payment-option payment-option-check">
       <h3>Pay via paper check:</h3>
@@ -26,28 +48,6 @@
       <div class="payment-images">
         <%= image_tag('payment/paypal.svg') %>
       </div>
-    </div>
-  </div>
-  <hr>
-  <div class="row">
-    <div class="col-sm-12 payment-option payment-option-stripe">
-      <h3>Pay with a credit or debit card via the Stripe payment service:</h3>
-      <% if controller_name == 'invoices' %>
-        <%= form_tag "#{stripe_invoice_path(@invoice)}?access_token=#{@invoice.access_token}" do %>
-          <p>Stripe <a href="https://stripe.com/us/pricing" target="_blank">adds a fee</a> of <strong><%= number_to_currency(@invoice.stripeChargeDifference) %></strong> for this transaction, which increases your payment total to <strong><%= number_to_currency(@invoice.stripeChargeCost) %></strong>.</p>
-          <script
-            src="https://checkout.stripe.com/checkout.js" class="stripe-button"
-            data-key="<%= Figaro.env.stripe_api_publishable_key %>"
-            data-amount="<%= @invoice.stripeChargeCost * 100 %>"
-            data-name="Sefer Design Company LLC"
-            data-description="<%= @invoice.display_id %>"
-            data-image="https://s3.amazonaws.com/SeferBiz/internal/sdc-square.png"
-            data-locale="auto">
-          </script>
-        <% end %>
-      <% elsif controller_name == 'welcome' and action_name == 'payment' %>
-      <p>Stripe <a href="https://stripe.com/us/pricing" target="_blank">adds a fee</a> of <strong>approximately 3%</strong> to each transaction.</p>
-      <% end %>
     </div>
   </div>
   <hr>
