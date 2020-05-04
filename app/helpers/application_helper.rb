@@ -10,7 +10,7 @@ module ApplicationHelper
 			:email => 'info@seferdesign.com',
 			:phone => '(630) 204-0013',
 			:address => {
-				:street => '1 E. Scott #1402',
+				:street => '10 W. Elm #808',
 				:city => 'Chicago',
 				:state => 'Illinois',
 				:state_abbrv => 'IL',
