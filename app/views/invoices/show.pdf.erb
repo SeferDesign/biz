@@ -62,6 +62,7 @@
 					<p><strong>Status:</strong> <span class="spread red">Not Paid</span></p>
 					<p>This payment can be made out to '<%= company[:pay_to] %>' and sent to &nbsp;<%= mail_to company[:email] %> or mailed to:</p>
 					<p><%= company[:pay_to] %><br><%= company[:address][:street] %><br><%= company[:address][:city] %>, <%= company[:address][:state_abbrv] %> <%= company[:address][:zipcode] %></p>
+					<p><strong>PLEASE NOTE: Our mailing address has recently changed.</strong></p>
 					<% end %>
 				</div>
 				<div class="clearfix"></div>
