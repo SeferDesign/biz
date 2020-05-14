@@ -33,7 +33,7 @@ class InvoicesController < ApplicationController
 			credentials.fetch_access_token!
 			@session = GoogleDrive::Session.from_credentials(credentials)
 
-			puts refresh_token.inspect
+			puts credentials.inspect
 			User.find(current_user.id).update({ google_token: credentials.refresh_token })
 		end
 
