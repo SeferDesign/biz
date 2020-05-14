@@ -20,8 +20,12 @@ class InvoicesController < ApplicationController
 
 		if current_user.google_token.present?
 			credentials.refresh_token = current_user.google_token
-			credentials.fetch_access_token!
-			@session = GoogleDrive::Session.from_credentials(credentials)
+			begin
+				credentials.fetch_access_token!
+				@session = GoogleDrive::Session.from_credentials(credentials)
+			rescue
+				#
+			end
 		end
 
 		if !@session and params[:code].present?
