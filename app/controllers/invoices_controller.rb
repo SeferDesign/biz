@@ -18,15 +18,17 @@ class InvoicesController < ApplicationController
 			additional_parameters: { 'access_type' => 'offline' }
 		)
 
-		if params[:code].present?
+		if current_user.google_token.present?
+			credentials.refresh_token = current_user.google_token
+			credentials.fetch_access_token!
+			@session = GoogleDrive::Session.from_credentials(credentials)
+		end
+
+		if !@session and params[:code].present?
 			credentials.code = params[:code]
 			credentials.fetch_access_token!
 			@session = GoogleDrive::Session.from_credentials(credentials)
 			User.find(current_user.id).update({ google_token: credentials.refresh_token })
-		elsif current_user.google_token.present?
-			credentials.refresh_token = current_user.google_token
-			credentials.fetch_access_token!
-			@session = GoogleDrive::Session.from_credentials(credentials)
 		end
 
 		if @session
@@ -43,7 +45,7 @@ class InvoicesController < ApplicationController
 				@tClients[row['client id']].push({ minutes: row['minutes'], timestamp: row['timestamp'], date: row['date'] })
 			end
 		else
-			@auth_url = credentials.authorization_uri
+			redirect_to credentials.authorization_uri.to_s
 		end
 
 	end
