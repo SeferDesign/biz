@@ -8,7 +8,8 @@ Biz::Application.routes.draw do
     end
   end
 
-  match 'expenses/bulk/new', to: 'expenses#bulk_new', as: 'new_bulk_expenses', via: [:get, :post]
+	match 'expenses/bulk/new', to: 'expenses#bulk_new', as: 'new_bulk_expenses', via: [:get, :post]
+	match 'invoices/time', to: 'invoices#time', as: 'logged_time', via: [:get]
 
   devise_for :users, :skip => [:registrations]
   resources :years do

@@ -32,16 +32,6 @@ class InvoiceMailer < ActionMailer::Base
 
     require 'tempfile'
 
-    # Tempfile.open('prefix', Rails.root.join('tmp')) do |f|
-    #   f.binmode
-    #   f.write tempPDF
-    #   session = GoogleDrive::Session.from_config('config/google.json')
-    #   file = session.upload_from_file(f, "#{pdfFileName}.pdf", convert: false)
-    #   session.collection_by_url(Figaro.env.google_drive_invoices_unpaid_folder_url).add(file)
-    #   session.root_collection.remove(file)
-    #   f.unlink
-    # end
-
     mail(to: "#{invoice.client.contact} <#{invoice.client.email_accounting}>", subject: "Invoice from Sefer Design Company", cc: cc_list) do |format|
       format.html do
         html_inlined
