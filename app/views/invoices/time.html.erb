@@ -3,6 +3,9 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-sm-12">
+				<% if @auth_url %>
+				<a href="<%= @auth_url %>">Activate Google Drive</a>
+				<% elsif @session %>
 				<h1>Time</h1>
 				<h3>Client Summary</h3>
 				<table class="table table-hover table-striped">
@@ -44,6 +47,7 @@
 						<% end %>
 					</tbody>
 				</table>
+				<% end %>
 			</div>
 		</div>
 	</div>

@@ -6,19 +6,45 @@ class InvoicesController < ApplicationController
 	end
 
 	def time
-		require 'google_drive'
-		session = GoogleDrive::Session.from_config('config/google.json')
-		gFile = session.file_by_id(Figaro.env.google_drive_hours_file_id)
-		fileString = gFile.download_to_string()
-		fileString = fileString.gsub("\r\n", "\n")
-		@rows = []
-		@tClients = {}
-		CSV.parse(fileString, headers: true, skip_blanks: true, row_sep: "\n") do |row|
-			@rows.push(row)
-			if !@tClients.key?(row['client id'])
-				@tClients[row['client id']] = []
+
+		require 'googleauth'
+		credentials = Google::Auth::UserRefreshCredentials.new(
+			client_id: Figaro.env.google_client_id,
+			client_secret: Figaro.env.google_client_secret,
+			scope: [
+				'https://www.googleapis.com/auth/drive'
+			],
+			redirect_uri: logged_time_url,
+			additional_parameters: { 'access_type' => 'offline' }
+		)
+
+		if params[:code].present?
+			credentials.code = params[:code]
+			credentials.fetch_access_token!
+			@session = GoogleDrive::Session.from_credentials(credentials)
+			current_user.google_token = credentials.refresh_token
+			current_user.save!
+		elsif current_user.google_token.present?
+			credentials.refresh_token = current_user.google_token
+			credentials.fetch_access_token!
+			@session = GoogleDrive::Session.from_credentials(credentials)
+		end
+
+		if @session
+			gFile = @session.file_by_id(Figaro.env.google_drive_hours_file_id)
+			fileString = gFile.download_to_string()
+			fileString = fileString.gsub("\r\n", "\n")
+			@rows = []
+			@tClients = {}
+			CSV.parse(fileString, headers: true, skip_blanks: true, row_sep: "\n") do |row|
+				@rows.push(row)
+				if !@tClients.key?(row['client id'])
+					@tClients[row['client id']] = []
+				end
+				@tClients[row['client id']].push({ minutes: row['minutes'], timestamp: row['timestamp'], date: row['date'] })
 			end
-			@tClients[row['client id']].push({ minutes: row['minutes'], timestamp: row['timestamp'], date: row['date'] })
+		else
+			@auth_url = credentials.authorization_uri
 		end
 
 	end
