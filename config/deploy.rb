@@ -37,7 +37,7 @@ set :puma_workers,    0
 #set :console_env, :production
 set :console_user, nil
 
-set :bundle_flags, '--deployment'
+# set :bundle_flags, '--deployment' # enable for verbose logging
 
 # Don't change these unless you know what you're doing
 set :pty,             true
