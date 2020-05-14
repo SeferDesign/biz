@@ -8,33 +8,52 @@ class InvoicesController < ApplicationController
 	def time
 
 		require 'googleauth'
-		credentials = Google::Auth::UserRefreshCredentials.new(
-			client_id: Figaro.env.google_client_id,
-			client_secret: Figaro.env.google_client_secret,
-			scope: [
-				'https://www.googleapis.com/auth/drive'
-			],
-			redirect_uri: logged_time_url,
-			additional_parameters: { 'access_type' => 'offline' }
-		)
 
 		if current_user.google_token.present?
+			credentials = Google::Auth::UserRefreshCredentials.new(
+				client_id: Figaro.env.google_client_id,
+				client_secret: Figaro.env.google_client_secret,
+				scope: [
+					'https://www.googleapis.com/auth/drive'
+				],
+				redirect_uri: logged_time_url,
+				additional_parameters: { 'access_type' => 'offline' }
+			)
 			credentials.refresh_token = current_user.google_token
 			begin
 				credentials.fetch_access_token!
 				@session = GoogleDrive::Session.from_credentials(credentials)
 			rescue
-				#
+				redirect_to credentials.authorization_uri.to_s
 			end
-		end
-
-		if !@session and params[:code].present?
+		elsif params[:code].present?
+			credentials = Google::Auth::UserRefreshCredentials.new(
+				client_id: Figaro.env.google_client_id,
+				client_secret: Figaro.env.google_client_secret,
+				scope: [
+					'https://www.googleapis.com/auth/drive'
+				],
+				redirect_uri: logged_time_url
+			)
 			credentials.code = params[:code]
-			credentials.fetch_access_token!
-			@session = GoogleDrive::Session.from_credentials(credentials)
-
-			puts credentials.inspect
-			User.find(current_user.id).update({ google_token: credentials.refresh_token })
+			begin
+				credentials.fetch_access_token!
+				@session = GoogleDrive::Session.from_credentials(credentials)
+				puts credentials.inspect
+				User.find(current_user.id).update({ google_token: credentials.refresh_token })
+			rescue
+				redirect_to credentials.authorization_uri.to_s
+			end
+		else
+			credentials = Google::Auth::UserRefreshCredentials.new(
+				client_id: Figaro.env.google_client_id,
+				client_secret: Figaro.env.google_client_secret,
+				scope: [
+					'https://www.googleapis.com/auth/drive'
+				],
+				redirect_uri: logged_time_url
+			)
+			redirect_to credentials.authorization_uri.to_s
 		end
 
 		if @session
@@ -50,8 +69,6 @@ class InvoicesController < ApplicationController
 				end
 				@tClients[row['client id']].push({ minutes: row['minutes'], timestamp: row['timestamp'], date: row['date'] })
 			end
-		else
-			redirect_to credentials.authorization_uri.to_s
 		end
 
 	end
