@@ -24,6 +24,7 @@ class InvoicesController < ApplicationController
 				credentials.fetch_access_token!
 				@session = GoogleDrive::Session.from_credentials(credentials)
 			rescue
+				puts 'failed google_token'
 				redirect_to credentials.authorization_uri.to_s
 			end
 		elsif params[:code].present?
@@ -42,6 +43,7 @@ class InvoicesController < ApplicationController
 				puts credentials.inspect
 				User.find(current_user.id).update({ google_token: credentials.refresh_token })
 			rescue
+				puts 'failed code'
 				redirect_to credentials.authorization_uri.to_s
 			end
 		else
