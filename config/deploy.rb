@@ -25,7 +25,7 @@ namespace :logs do
 end
 
 # Change these
-server '54.242.162.172', port: 22, roles: [:web, :app, :db], primary: true
+server '54.87.41.223', port: 22, roles: [:web, :app, :db], primary: true
 
 set :branch, ENV['BRANCH'] if ENV['BRANCH']
 
@@ -36,6 +36,8 @@ set :puma_workers,    0
 
 #set :console_env, :production
 set :console_user, nil
+
+set :bundle_flags, '--deployment'
 
 # Don't change these unless you know what you're doing
 set :pty,             true
