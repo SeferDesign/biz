@@ -4,19 +4,30 @@ class TimeController < ApplicationController
 	require 'google/apis/drive_v3'
 
 	def index
-		retries ||= 0
-		@googleClient.update!(session[:authorization])
-		service = Google::Apis::DriveV3::DriveService.new
-		service.authorization = @googleClient
 
-		sio = StringIO.new
-		gFile = service.get_file(
-			Figaro.env.google_drive_hours_file_id,
-			download_dest: sio
-		)
-		fileString = sio.string
+		begin
+			retries ||= 0
+			@googleClient.update!(session[:authorization])
+			service = Google::Apis::DriveV3::DriveService.new
+			service.authorization = @googleClient
+			sio = StringIO.new
+			gFile = service.get_file(
+				Figaro.env.google_drive_hours_file_id,
+				download_dest: sio
+			)
+		rescue Signet::AuthorizationError => e
+			redirect_to time_redirect_url
+		rescue Google::Apis::AuthorizationError => e
+			response = @googleClient.refresh!
+			session[:authorization] = session[:authorization].merge(response)
+			if (retries += 1) < 3
+				retry
+			else
+				redirect_to time_redirect_url
+			end
+		end
 
-		fileString = fileString.gsub("\r\n", "\n")
+		fileString = sio.string.gsub("\r\n", "\n")
 		@rows = []
 		@tClients = {}
 		CSV.parse(fileString, headers: true, skip_blanks: true, row_sep: "\n") do |row|
@@ -27,16 +38,6 @@ class TimeController < ApplicationController
 			@tClients[row['client id']].push({ minutes: row['minutes'], timestamp: row['timestamp'], date: row['date'] })
 		end
 
-		rescue Signet::AuthorizationError
-			redirect_to time_redirect_url
-		rescue Google::Apis::AuthorizationError
-			response = @googleClient.refresh!
-			session[:authorization] = session[:authorization].merge(response)
-			if (retries += 1) < 3
-				retry
-			else
-				redirect_to time_redirect_url
-			end
 	end
 
 	def redirect
