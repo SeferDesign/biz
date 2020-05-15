@@ -1,12 +1,12 @@
 class TimeController < ApplicationController
+	before_action :set_google_client, only: [:index, :redirect, :callback]
 
-	require 'google/apis/drive_v2'
+	require 'google/apis/drive_v3'
 
 	def index
-		client = Signet::OAuth2::Client.new(client_options)
-		client.update!(session[:authorization])
+		@client.update!(session[:authorization])
 		service = Google::Apis::DriveV3::DriveService.new
-		service.authorization = client
+		service.authorization = @client
 
 		sio = StringIO.new
 		gFile = service.get_file(
@@ -29,25 +29,27 @@ class TimeController < ApplicationController
 		end
 
 		rescue Google::Apis::AuthorizationError
-			response = client.refresh!
+			response = @client.refresh!
 			session[:authorization] = session[:authorization].merge(response)
 			retry
 	end
 
 	def redirect
-		client = Signet::OAuth2::Client.new(client_options)
-		redirect_to client.authorization_uri.to_s
+		redirect_to @client.authorization_uri.to_s
 	end
 
 	def callback
-		client = Signet::OAuth2::Client.new(client_options)
-		client.code = params[:code]
-		response = client.fetch_access_token!
+		@client.code = params[:code]
+		response = @client.fetch_access_token!
 		session[:authorization] = response
 		redirect_to time_url
   end
 
-  private
+	private
+		def set_google_client
+			@client = Signet::OAuth2::Client.new(client_options)
+		end
+
 		def client_options
 			{
 				client_id: Figaro.env.google_client_id,

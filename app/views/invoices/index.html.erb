@@ -5,7 +5,7 @@
 			<div class="col-sm-12">
 				<h1>Invoices</h1>
 				<p><%= link_to 'Home', root_path %></p>
-				<p><%= link_to new_invoice_path, { :class => 'btn btn-success' } do %><%= icon('fas', 'plus', class: 'left') %>New Invoice<% end %> <%= link_to logged_time_url, { :class => 'btn btn-primary' } do %><%= icon('fas', 'clock', class: 'left') %>Raw Time<% end %></p>
+				<p><%= link_to new_invoice_path, { :class => 'btn btn-success' } do %><%= icon('fas', 'plus', class: 'left') %>New Invoice<% end %> <%= link_to time_url, { :class => 'btn btn-primary' } do %><%= icon('fas', 'clock', class: 'left') %>Raw Time<% end %></p>
 				<h2>Recent &amp; Unpaid Invoices</h2>
 				<div class="row">
 					<div class="col-sm-12">
