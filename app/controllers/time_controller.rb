@@ -18,7 +18,11 @@ class TimeController < ApplicationController
 		rescue Signet::AuthorizationError => e
 			redirect_to time_redirect_url
 		rescue Google::Apis::AuthorizationError => e
-			response = @googleClient.refresh!
+			begin
+				response = @googleClient.refresh!
+			rescue
+				redirect_to time_redirect_url
+			end
 			session[:authorization] = session[:authorization].merge(response)
 			if (retries += 1) < 3
 				retry
