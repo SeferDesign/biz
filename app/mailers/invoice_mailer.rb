@@ -15,29 +15,30 @@ class InvoiceMailer < ActionMailer::Base
 
     email_html_raw = render_to_string(:layout => 'layouts/mail.html', :action => 'invoice_email.html', :locals => { :invoice => @invoice })
     html_roadie = Roadie::Document.new email_html_raw
-    html_inlined = html_roadie.transform
+		html_inlined = html_roadie.transform
 
-    pdfFileName = invoice.pdfFileName
+		emailSubject = 'Invoice from Sefer Design Company'
 
-    if invoice.paid == true
-      pdfFileName = pdfFileName + '_paid'
-    end
+		if Rails.env.development?
+			emailSubject = 'TEST - ' + emailSubject
+		end
 
-    pdf = render_to_string(
-      :layout => 'pdf/invoice.html',
-      :template => 'invoices/show.pdf.erb'
-    ).force_encoding('UTF-8').encode('UTF-8', { :invalid => :replace, :undef => :replace, :replace => '?' })
-    tempPDF = WickedPdf.new.pdf_from_string(pdf, :encoding => 'UTF-8', :page_size => 'Letter')
-    encodedPDF = Base64.encode64(tempPDF)
+		attachments["#{invoice.pdfFileName}.pdf"] = WickedPdf.new.pdf_from_string(
+			render_to_string(
+				:layout => 'pdf/invoice.html',
+				:template => 'invoices/show.pdf.erb'
+			).force_encoding('UTF-8').encode('UTF-8', {
+				:invalid => :replace,
+				:undef => :replace,
+				:replace => '?'
+			}),
+			:encoding => 'UTF-8',
+			:page_size => 'Letter'
+		)
 
-    require 'tempfile'
-
-    mail(to: "#{invoice.client.contact} <#{invoice.client.email_accounting}>", subject: "Invoice from Sefer Design Company", cc: cc_list) do |format|
+    mail(to: "#{invoice.client.contact} <#{invoice.client.email_accounting}>", subject: emailSubject, cc: cc_list) do |format|
       format.html do
         html_inlined
-      end
-      format.pdf do
-        attachments["#{pdfFileName}.pdf"] = WickedPdf.new.pdf_from_string(pdf, :encoding => 'UTF-8', :page_size => 'Letter')
       end
     end
 
