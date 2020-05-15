@@ -20,7 +20,7 @@ class InvoiceMailer < ActionMailer::Base
 		emailSubject = 'Invoice from Sefer Design Company'
 
 		if Rails.env.development?
-			emailSubject = 'TEST - ' + emailSubject
+			emailSubject = 'DEV - ' + emailSubject
 		end
 
 		attachments["#{invoice.pdfFileName}.pdf"] = WickedPdf.new.pdf_from_string(
