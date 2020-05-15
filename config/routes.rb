@@ -9,7 +9,10 @@ Biz::Application.routes.draw do
   end
 
 	match 'expenses/bulk/new', to: 'expenses#bulk_new', as: 'new_bulk_expenses', via: [:get, :post]
-	match 'invoices/time', to: 'invoices#time', as: 'logged_time', via: [:get]
+
+	match 'time', to: 'time#index', as: 'time', via: [:get]
+	match 'time/redirect', to: 'time#redirect', as: 'time_redirect', via: [:get]
+	match 'time/callback', to: 'time#callback', as: 'time_callback', via: [:get]
 
   devise_for :users, :skip => [:registrations]
   resources :years do

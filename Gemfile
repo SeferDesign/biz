@@ -29,7 +29,7 @@ gem 'faraday'
 gem 'chartkick', '~> 3'
 gem 'roadie', '~> 3'
 gem 'stripe', '~> 4'
-gem 'google_drive', '~> 3.0.4'
+gem 'google-api-client', '~> 0.39'
 gem 'httparty'
 
 group :development do

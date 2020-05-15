@@ -1,78 +1,8 @@
 class InvoicesController < ApplicationController
-  before_action :set_invoice, only: [:show, :edit, :email, :stripe, :generate_crypto_link, :mark_paid, :update, :destroy]
+	before_action :set_invoice, only: [:show, :edit, :email, :stripe, :generate_crypto_link, :mark_paid, :update, :destroy]
 
   def index
     @notableInvoices = Invoice.all.unpaid + Invoice.all.recent
-	end
-
-	def time
-
-		require 'googleauth'
-
-		if current_user.google_token.present?
-			credentials = Google::Auth::UserRefreshCredentials.new(
-				client_id: Figaro.env.google_client_id,
-				client_secret: Figaro.env.google_client_secret,
-				scope: [
-					'https://www.googleapis.com/auth/drive'
-				],
-				redirect_uri: logged_time_url,
-				additional_parameters: { 'access_type' => 'offline' }
-			)
-			credentials.refresh_token = current_user.google_token
-			begin
-				credentials.fetch_access_token!
-				@session = GoogleDrive::Session.from_credentials(credentials)
-			rescue
-				puts 'failed google_token'
-				redirect_to credentials.authorization_uri.to_s
-			end
-		elsif params[:code].present?
-			credentials = Google::Auth::UserRefreshCredentials.new(
-				client_id: Figaro.env.google_client_id,
-				client_secret: Figaro.env.google_client_secret,
-				scope: [
-					'https://www.googleapis.com/auth/drive'
-				],
-				redirect_uri: logged_time_url
-			)
-			credentials.code = params[:code]
-			begin
-				credentials.fetch_access_token!
-				@session = GoogleDrive::Session.from_credentials(credentials)
-				puts credentials.inspect
-				User.find(current_user.id).update({ google_token: credentials.refresh_token })
-			rescue
-				puts 'failed code'
-				redirect_to credentials.authorization_uri.to_s
-			end
-		else
-			credentials = Google::Auth::UserRefreshCredentials.new(
-				client_id: Figaro.env.google_client_id,
-				client_secret: Figaro.env.google_client_secret,
-				scope: [
-					'https://www.googleapis.com/auth/drive'
-				],
-				redirect_uri: logged_time_url
-			)
-			redirect_to credentials.authorization_uri.to_s
-		end
-
-		if @session
-			gFile = @session.file_by_id(Figaro.env.google_drive_hours_file_id)
-			fileString = gFile.download_to_string()
-			fileString = fileString.gsub("\r\n", "\n")
-			@rows = []
-			@tClients = {}
-			CSV.parse(fileString, headers: true, skip_blanks: true, row_sep: "\n") do |row|
-				@rows.push(row)
-				if !@tClients.key?(row['client id'])
-					@tClients[row['client id']] = []
-				end
-				@tClients[row['client id']].push({ minutes: row['minutes'], timestamp: row['timestamp'], date: row['date'] })
-			end
-		end
-
 	end
 
   def show
@@ -250,5 +180,6 @@ class InvoicesController < ApplicationController
 
     def invoice_params
       params.require(:invoice).permit(:client_id, :date, :worktype, :cost, :paid, :paiddate, :paymenttype, :description, :access_token)
-    end
+		end
+
 end
