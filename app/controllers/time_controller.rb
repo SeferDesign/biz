@@ -20,10 +20,10 @@ class TimeController < ApplicationController
 		rescue Google::Apis::AuthorizationError => e
 			begin
 				response = @googleClient.refresh!
+				session[:authorization] = session[:authorization].merge(response)
 			rescue
 				redirect_to time_redirect_url
 			end
-			session[:authorization] = session[:authorization].merge(response)
 			if (retries += 1) < 3
 				retry
 			else
