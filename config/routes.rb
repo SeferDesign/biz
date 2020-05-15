@@ -6,7 +6,12 @@ Biz::Application.routes.draw do
         |params, req| "https://biz.seferdesign.com/#{params[:path]}"
       }, via: [:get, :post]
     end
-  end
+	end
+
+	root 'welcome#index'
+
+	match 'payment', to: 'welcome#payment', via: [:get]
+	match 'stripe', to: 'welcome#stripe', via: [:get]
 
 	match 'expenses/bulk/new', to: 'expenses#bulk_new', as: 'new_bulk_expenses', via: [:get, :post]
 
@@ -31,10 +36,6 @@ Biz::Application.routes.draw do
   resources :clients
   resources :expenses
   resources :vendors
-
-  root 'welcome#index'
-
-  get ':action' => 'welcome#:action'
 
   get 'invoices_controller/populate', to: 'invoices#populate'
   get 'invoices_controller/generate_crypto_link', to: 'invoices#generate_crypto_link'

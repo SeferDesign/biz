@@ -12,7 +12,4 @@ class WelcomeController < ApplicationController
 		@charges = Stripe::Charge.list(limit: 100)
 	end
 
-  def drive
-  end
-
 end
