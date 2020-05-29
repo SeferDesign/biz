@@ -45,13 +45,13 @@ vendor = Vendor.create!(
   :category => 'Web Service'
 )
 
-0.upto(5).each do |i|
-  x = 6 - i
+0.upto(12).each do |i|
+  x = 13 - i
   invoicePaid = Invoice.create!(
     :client_id => client.id,
     :date => x.month.ago,
     :worktype => 'Contract',
-    :cost => (i + 1) * 10000.00,
+    :cost => (i % 2 + i % 3 + i % 4 + 1) * 10000.00,
     :paid => true,
     :paiddate => (x - 1).month.ago,
     :paymenttype => 'Chase Quick Pay',

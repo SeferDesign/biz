@@ -1,0 +1,61 @@
+<% provide(:title, 'Best | ') %>
+<section id="best">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12">
+				<h1>Best</h1>
+				<h2>Months</h2>
+				<table class="table table-hover table-striped">
+					<thead>
+						<tr>
+							<th>Month</th>
+							<th class="text-right">Income</th>
+						</tr>
+					</thead>
+					<tbody>
+						<% @months.take(8).each do |month| %>
+						<tr>
+							<td><%= link_to month[:year] do %><%= month[:year].year %><% end %> - <%= Date::MONTHNAMES[month[:month]] %></td>
+							<td class="currency text-right"><%= number_to_currency(month[:income], { :negative_format => '(%n)' }) %></td>
+						</tr>
+						<% end %>
+					</tbody>
+				</table>
+				<h2>Quarters</h2>
+				<table class="table table-hover table-striped">
+					<thead>
+						<tr>
+							<th>Quarter</th>
+							<th class="text-right">Income</th>
+						</tr>
+					</thead>
+					<tbody>
+						<% @quarters.take(8).each do |quarter| %>
+						<tr>
+							<td><%= link_to quarter[:year] do %><%= quarter[:year].year %><% end %> - Q<%= quarter[:quarter] %></td>
+							<td class="currency text-right"><%= number_to_currency(quarter[:income], { :negative_format => '(%n)' }) %></td>
+						</tr>
+						<% end %>
+					</tbody>
+				</table>
+				<h2>Years</h2>
+				<table class="table table-hover table-striped">
+					<thead>
+						<tr>
+							<th>Year</th>
+							<th class="text-right">Income</th>
+						</tr>
+					</thead>
+					<tbody>
+						<% Year.all.sort_by(&:incomeTotal).reverse.take(4).each do |year| %>
+						<tr>
+							<td><%= link_to year do %><%= year.year %><% end %></td>
+							<td class="currency text-right"><%= number_to_currency(year.incomeTotal, { :negative_format => '(%n)' }) %></td>
+						</tr>
+						<% end %>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</section>
