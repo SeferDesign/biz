@@ -138,7 +138,6 @@ class InvoicesController < ApplicationController
     @invoice.paiddate = Date.today
     @invoice.paid = true
     @invoice.save
-    move_drive_doc_to_paid
   end
 
   def create
@@ -154,9 +153,6 @@ class InvoicesController < ApplicationController
   end
 
   def update
-    if @invoice.paid != invoice_params[:paid] and invoice_params[:paid] == 'true'
-      move_drive_doc_to_paid
-    end
     respond_to do |format|
       if @invoice.update(invoice_params)
         format.html { redirect_to @invoice }
