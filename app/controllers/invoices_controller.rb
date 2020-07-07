@@ -10,7 +10,29 @@ class InvoicesController < ApplicationController
       @ratePlaceholder = "Rate ($#{@invoice.client.currentrate})"
     else
       @ratePlaceholder = 'Rate'
-    end
+		end
+
+		if !@invoice.paid
+			Stripe.api_key = Figaro.env.stripe_api_secret_key
+			@session = Stripe::Checkout::Session.create({
+				payment_method_types: ['card'],
+				line_items: [
+					price_data: {
+						product_data: {
+							name: 'Invoice #' + @invoice.display_id
+						},
+						unit_amount: (@invoice.stripeChargeCost * 100).to_i,
+						currency: 'usd',
+					},
+					quantity: 1,
+				],
+				mode: 'payment',
+				success_url: invoice_url(@invoice) + '/stripe/?session_id={CHECKOUT_SESSION_ID}&access_token='+ @invoice.access_token,
+				cancel_url: invoice_url(@invoice) + '?access_token='+ @invoice.access_token,
+			})
+			@invoice.stripe_session_id = @session.id
+			@invoice.save
+		end
   	respond_to do |format|
       format.html
       format.pdf do
@@ -107,25 +129,12 @@ class InvoicesController < ApplicationController
   end
 
   def stripe
-    Stripe.api_key = Figaro.env.stripe_api_secret_key
-    token = params[:stripeToken]
-
-    @stripeError = false
-    begin
-      charge = Stripe::Charge.create(
-        amount: (@invoice.stripeChargeCost * 100).to_i,
-        currency: 'usd',
-        source: token,
-        description: "#{@invoice.display_id}",
-        receipt_email: params[:stripeEmail],
-        metadata: { "invoice_id" => @invoice.id }
-      )
-      @charge = charge
-      @invoice.update(:paid => true, :paymenttype => 'Stripe', :paiddate => Date.today)
-    rescue Stripe::CardError => e
-      @stripeError = true
-    end
-  end
+		if !params[:session_id].present? or params[:session_id].empty? or params[:session_id] != @invoice.stripe_session_id
+			raise 'error'
+		else
+			@invoice.update(:paid => true, :paymenttype => 'Stripe', :paiddate => Date.today)
+		end
+	end
 
   def populate
     @client = Client.find(params[:client_id])
@@ -175,7 +184,7 @@ class InvoicesController < ApplicationController
     end
 
     def invoice_params
-      params.require(:invoice).permit(:client_id, :date, :worktype, :cost, :paid, :paiddate, :paymenttype, :description, :access_token)
+      params.require(:invoice).permit(:client_id, :date, :worktype, :cost, :paid, :paiddate, :paymenttype, :description, :access_token, :stripe_session_id)
 		end
 
 end

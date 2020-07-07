@@ -31,7 +31,7 @@ Biz::Application.routes.draw do
   	resources :lines
     member do
       get :email
-      post :stripe
+			get :stripe
     end
   end
   resources :clients

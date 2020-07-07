@@ -8,7 +8,7 @@
         <p>Your card has NOT been charged. Please contact us for further instructions.</p>
         <% else %>
         <h2>Payment Succeeded</h2>
-        <p>Your <% if params[:stripeTokenType] == 'source_bitcoin' %>Bitcoin account<% else%>card<% end %> was charged <%= number_to_currency(@charge.amount.to_f / 100) %>. Thank you!</p>
+        <p>Your card was charged successfully. Thank you!</p>
         <% end %>
       </div>
     </div>

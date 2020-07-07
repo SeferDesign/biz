@@ -4,16 +4,19 @@
       <h3>Pay with a credit or debit card:<br><small>via the Stripe payment service</small></h3>
       <% if controller_name == 'invoices' %>
         <%= form_tag "#{stripe_invoice_path(@invoice)}?access_token=#{@invoice.access_token}" do %>
-          <p>Stripe <a href="https://stripe.com/us/pricing" target="_blank">adds a fee</a> of <strong><%= number_to_currency(@invoice.stripeChargeDifference) %></strong> for this transaction, which increases your payment total to <strong><%= number_to_currency(@invoice.stripeChargeCost) %></strong>.</p>
-          <script
-            src="https://checkout.stripe.com/checkout.js" class="stripe-button"
-            data-key="<%= Figaro.env.stripe_api_publishable_key %>"
-            data-amount="<%= @invoice.stripeChargeCost * 100 %>"
-            data-name="Sefer Design Company LLC"
-            data-description="<%= @invoice.display_id %>"
-            data-image="https://s3.amazonaws.com/SeferBiz/internal/sdc-square.png"
-            data-locale="auto">
-          </script>
+					<p>Stripe <a href="https://stripe.com/us/pricing" target="_blank">adds a fee</a> of <strong><%= number_to_currency(@invoice.stripeChargeDifference) %></strong> for this transaction, which increases your payment total to <strong><%= number_to_currency(@invoice.stripeChargeCost) %></strong>.</p>
+					<button id="checkout-button" class="stripe-button" data-secret="<%= @session['id'] %>">Checkout</button>
+					<script src="https://js.stripe.com/v3/"></script>
+					<script>
+						var stripe = Stripe('<%= Figaro.env.stripe_api_publishable_key %>');
+						var checkoutButton = document.getElementById('checkout-button');
+						checkoutButton.addEventListener('click', function() {
+							stripe.redirectToCheckout({
+								sessionId: '<%= @session['id'] %>'
+							}).then(function (result) {
+							});
+						});
+					</script>
         <% end %>
       <% elsif controller_name == 'welcome' and action_name == 'payment' %>
       <p>Stripe <a href="https://stripe.com/us/pricing" target="_blank">adds a fee</a> of <strong>approximately 3%</strong> to each transaction.</p>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20200514201242) do
+ActiveRecord::Schema.define(version: 20200707155515) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -67,6 +67,7 @@ ActiveRecord::Schema.define(version: 20200514201242) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string "access_token"
+    t.string "stripe_session_id"
     t.index ["access_token"], name: "index_invoices_on_access_token", unique: true
   end
 
