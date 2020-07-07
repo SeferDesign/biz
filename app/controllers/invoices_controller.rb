@@ -113,12 +113,12 @@ class InvoicesController < ApplicationController
     @stripeError = false
     begin
       charge = Stripe::Charge.create(
-        :amount => (@invoice.stripeChargeCost * 100).to_i,
-        :currency => 'usd',
-        :source => token,
-        :description => "#{@invoice.display_id}",
-        :receipt_email => params[:stripeEmail],
-        :metadata => { "invoice_id" => @invoice.id }
+        amount: (@invoice.stripeChargeCost * 100).to_i,
+        currency: 'usd',
+        source: token,
+        description: "#{@invoice.display_id}",
+        receipt_email: params[:stripeEmail],
+        metadata: { "invoice_id" => @invoice.id }
       )
       @charge = charge
       @invoice.update(:paid => true, :paymenttype => 'Stripe', :paiddate => Date.today)

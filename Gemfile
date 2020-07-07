@@ -28,7 +28,7 @@ gem 'autoprefixer-rails'
 gem 'faraday'
 gem 'chartkick', '~> 3'
 gem 'roadie', '~> 3'
-gem 'stripe', '~> 4'
+gem 'stripe', '~> 5'
 gem 'google-api-client', '~> 0.39'
 gem 'httparty'
 
