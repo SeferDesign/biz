@@ -1,5 +1,5 @@
 class ClientsController < ApplicationController
-  before_action :set_client, only: [:show, :edit, :update, :destroy]
+	before_action :set_client, only: [:show, :edit, :update, :destroy]
 
   def index
     if params[:inactive] == 'true'
@@ -33,7 +33,7 @@ class ClientsController < ApplicationController
 
   def update
     respond_to do |format|
-      if @client.update(client_params)
+			if @client.update(client_params)
         format.html { redirect_to @client, notice: 'Client was successfully updated.' }
       else
         format.html { render action: 'edit' }
@@ -51,9 +51,9 @@ class ClientsController < ApplicationController
   private
     def set_client
       @client = Client.find(params[:id])
-    end
+		end
 
     def client_params
-      params.require(:client).permit(:name, :contact, :email_accounting, :email_accounting_2, :email_accounting_3, :site_url, :logo, :address1, :address2, :city, :state, :zipcode, :international, :intinfo, :preferred_paymenttype, :currentrate, :active, :federalein, :gsheet_id)
+      params.require(:client).permit(:name, :contact, :email_accounting, :email_accounting_2, :email_accounting_3, :site_url, :logo, :address1, :address2, :city, :state, :zipcode, :international, :intinfo, :preferred_paymenttype, :currentrate, :active, :federalein, :gsheet_id, :stripe_customer_id)
     end
 end

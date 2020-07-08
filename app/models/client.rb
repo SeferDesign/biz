@@ -1,5 +1,7 @@
 class Client < ActiveRecord::Base
 
+	after_save :stripe_customer_create_update
+
 	has_many :invoices
 
 	has_attached_file :logo,
@@ -42,6 +44,37 @@ class Client < ActiveRecord::Base
 
 	def yearPaidInvoices(year)
 		self.invoices.paidByYear(year)
+	end
+
+	def stripe_customer_create_update
+		customerInfo = {
+			:name => self.name,
+			:email => self.email_accounting,
+			:metadata => {
+				'seferbiz_client_id' => self.id
+			}
+		}
+		if self.address1.present?
+			customerInfo[:address] = {
+				:line1 => self.address1,
+				:line2 => self.address2,
+				:city => self.city,
+				:state => self.state,
+				:postal_code => self.zipcode
+			}
+		end
+		if self.stripe_customer_id.blank?
+			Stripe.api_key = Figaro.env.stripe_api_secret_key
+			response = Stripe::Customer.create(customerInfo)
+			self.stripe_customer_id = response['id']
+			self.save
+		end
+		unless self.stripe_customer_id.blank?
+			Stripe::Customer.update(
+				self.stripe_customer_id,
+				customerInfo
+			)
+		end
 	end
 
 end
