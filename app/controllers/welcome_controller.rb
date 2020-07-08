@@ -30,8 +30,8 @@ class WelcomeController < ApplicationController
   end
 
 	def stripe
-		@payouts = Stripe::Payout.list(limit: 100)
-		@charges = Stripe::Charge.list(limit: 100)
+		@payouts = Stripe::Payout.list({ limit: 100 })
+		@charges = Stripe::Charge.list({ limit: 100 })
 	end
 
 end
