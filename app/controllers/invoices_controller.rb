@@ -13,7 +13,6 @@ class InvoicesController < ApplicationController
 		end
 
 		if !@invoice.paid
-			Stripe.api_key = Figaro.env.stripe_api_secret_key
 			@session = Stripe::Checkout::Session.create({
 				payment_method_types: ['card'],
 				customer: @invoice.client.stripe_customer_id,

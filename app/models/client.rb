@@ -63,7 +63,6 @@ class Client < ActiveRecord::Base
 				:postal_code => self.zipcode
 			}
 		end
-		Stripe.api_key = Figaro.env.stripe_api_secret_key
 		if self.stripe_customer_id.blank?
 			response = Stripe::Customer.create(customerInfo)
 			self.stripe_customer_id = response['id']
