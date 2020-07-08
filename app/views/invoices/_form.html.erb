@@ -89,7 +89,15 @@
 		<div class="col-lg-2 col-sm-6">
 			<div class="form-group">
 				<%= f.label :paymenttype, 'Payment Type' %>
-				<%= select(:invoice, 'paymenttype', payment_types, { :include_blank => 'None', :selected => @copied_invoice ? @copied_invoice.paymenttype : (params[:client_id].present? ? Client.find(params[:client_id]).preferred_paymenttype : '') }, { :class => 'form-control' }) %>
+				<%
+					selectedPaymentType = nil
+					if @invoice.paid and @invoice.paymenttype.present?
+						selectedPaymentType = @invoice.paymenttype
+					elsif params[:client_id].present?
+						selectedPaymentType = Client.find(params[:client_id]).preferred_paymenttype
+					end
+				%>
+				<%= select(:invoice, 'paymenttype', payment_types, { :include_blank => 'None', :selected => selectedPaymentType }, { :class => 'form-control' }) %>
 			</div>
 		</div>
 	</div>
