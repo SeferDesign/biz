@@ -30,8 +30,14 @@ class WelcomeController < ApplicationController
   end
 
 	def stripe
-		@payouts = Stripe::Payout.list({ limit: 100 })
-		@charges = Stripe::Charge.list({ limit: 100 })
+		@payouts = []
+		Stripe::Payout.list({ limit: 100 }).auto_paging_each do |payout|
+			@payouts.append(payout)
+		end
+		@charges = []
+		Stripe::Charge.list({ limit: 100 }).auto_paging_each do |charge|
+			@charges.append(charge)
+		end
 	end
 
 end
