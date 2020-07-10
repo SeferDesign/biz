@@ -12,7 +12,7 @@ class InvoicesController < ApplicationController
       @ratePlaceholder = 'Rate'
 		end
 
-		if !@invoice.paid
+		if !@invoice.paid and @invoice.cost.present? and @invoice.cost >= 0.50
 			@session = Stripe::Checkout::Session.create({
 				payment_method_types: ['card'],
 				customer: @invoice.client.stripe_customer_id,
@@ -150,7 +150,10 @@ class InvoicesController < ApplicationController
   end
 
   def create
-    @invoice = Invoice.new(invoice_params)
+		@invoice = Invoice.new(invoice_params)
+		if !@invoice.cost.present? or @invoice.cost.empty?
+			@invoice.cost = 0
+		end
 
     respond_to do |format|
       if @invoice.save

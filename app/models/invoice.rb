@@ -30,11 +30,11 @@ class Invoice < ActiveRecord::Base
 	end
 
 	def stripeChargeCost
-		((self.cost + 0.30) / (1 - 0.029)).round(2)
+		(((self.cost or 0) + 0.30) / (1 - 0.029)).round(2)
 	end
 
   def stripeChargeDifference
-		stripeChargeCost - self.cost
+		self.stripeChargeCost - self.cost
 	end
 
 	def pdfFileName
