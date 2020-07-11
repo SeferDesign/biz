@@ -2,32 +2,7 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-sm-12">
-				<div class="sdc-logo"><%= wicked_pdf_image_tag '/images/sdc.svg' %></div>
-				<% if @invoice.client.logo.present? %>
-        <%
-					image = MiniMagick::Image.open(@invoice.client.logo.url())
-          if (image.width.to_f / image.height.to_f) < 2.5
-            logoWD = (100 / image.height.to_f).to_f
-          else
-            logoWD = (135 / image.width.to_f).to_f
-          end
-					logoW = (logoWD * image.width.to_f).ceil
-					logoH = (logoWD * image.height.to_f).ceil
-        %>
-				<div id="clientlogo-wrap" class="client-logo">
-					<% if image.type == 'SVG' %>
-					<style>
-					.client-logo svg {
-						width: <%= logoW %>px;
-						height: <%= logoH %>px;
-					}
-					</style>
-					<%= remote_svg_raw(@invoice.client.logo.url()).html_safe %>
-					<% else %>
-					<%= image_tag embed_remote_image(@invoice.client.logo.url(), @invoice.client.logo_content_type), width: logoW, height: logoH %>
-					<% end %>
-				</div>
-				<% end %>
+				<div class="sdc-logo-text"><strong><%= company[:full_name] %></strong></div>
 			</div>
 		</div>
 	</div>

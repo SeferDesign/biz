@@ -1,0 +1,22 @@
+<% if !@invoice.lines.blank? %>
+<table class="table table-hover table-condensed">
+	<thead>
+		<tr>
+			<th>&nbsp;</th>
+			<th>Description</th>
+			<th class="text-center">Hours</th>
+			<th class="text-center">Rate ($) per Hour</th>
+			<th class="text-center">Cost</th>
+		</tr>
+	</thead>
+	<tbody>
+		<%= render @invoice.lines %>
+	</tbody>
+	<tfoot>
+		<tr>
+			<td class="text-right" colspan="4"><strong>Total</strong>&nbsp;&nbsp;</td>
+			<td class="currency"><strong><div class="pull-right"><%= number_to_currency(@invoice.lines.sum('total'), { :unit => '', :negative_format => '(%n)' }) %></div>$</strong></td>
+		</tr>
+	</tfoot>
+</table>
+<% end %>

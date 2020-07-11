@@ -5,14 +5,20 @@ class InvoicesController < ApplicationController
     @notableInvoices = Invoice.all.unpaid + Invoice.all.recent
 	end
 
-  def show
+	def show
+		@clientView = false
+
     if @invoice.client.currentrate
       @ratePlaceholder = "Rate ($#{@invoice.client.currentrate})"
     else
       @ratePlaceholder = 'Rate'
 		end
 
-		if !@invoice.paid and @invoice.cost.present? and @invoice.cost >= 0.50
+		if params[:access_token].present? and params[:access_token] == @invoice.access_token
+			@clientView = true
+		end
+
+		if @clientView and !@invoice.paid and @invoice.cost.present? and @invoice.cost >= 0.50
 			@session = Stripe::Checkout::Session.create({
 				payment_method_types: ['card'],
 				customer: @invoice.client.stripe_customer_id,
