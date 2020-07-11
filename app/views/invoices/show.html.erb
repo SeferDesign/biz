@@ -22,6 +22,14 @@
 					<strong>Access Token:</strong> <%= @invoice.access_token %> (<a href="<%= invoice_path(@invoice) %>?access_token=<%= @invoice.access_token %>">Client Link</a>)
 				</p>
 				<% end %>
+				<% if @invoice.mail_sends.present? %>
+				<p>
+					<strong>Email(s) sent:</strong>
+					<% @invoice.mail_sends.each do |mail_send| %>
+						<br><%= mail_send.strftime('%B %e, %Y @ %l:%M %P') %>
+					<% end %>
+				</p>
+				<% end %>
 				<% end %>
 				<% if @invoice.paid == true and !user_signed_in? %>
 				<p><%= link_to invoice_path(:format => 'pdf', :access_token => @invoice.access_token), { :target => '_blank' } do %>Download Invoice marked 'PAID'<% end %></p>

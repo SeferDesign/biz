@@ -69,40 +69,9 @@ class InvoicesController < ApplicationController
   end
 
   def email
-    InvoiceMailer.invoice_email(@invoice).deliver
-    conn = Faraday.new(:url => 'https://hooks.slack.com') do |faraday|
-      faraday.request  :url_encoded
-      faraday.response :logger
-      faraday.adapter  Faraday.default_adapter
-    end
-    response = conn.post '/services/' + Figaro.env.slack_accounting_webhook_id, { :payload => '{
-      "attachments":[{
-        "pretext":"Invoice sent.",
-        "fallback":"Invoice for $' + sprintf("%.2f", @invoice.cost) + ' sent to ' + @invoice.client.contact + ' at ' + @invoice.client.name + '.",
-        "fields":[
-          {
-            "title":"Company",
-            "value":"<http://' + request.host + '/clients/' + @invoice.client.id.to_s + '|' + @invoice.client.name + '>",
-            "short": true
-          },
-          {
-            "title":"Amount",
-            "value":"$' + sprintf("%.2f", @invoice.cost) + '",
-            "short": true
-          },
-          {
-            "title":"Recipient",
-            "value": "<mailto:' + @invoice.client.email_accounting + '|' + @invoice.client.contact + '>",
-            "short":true
-          },
-          {
-            "title":"URL",
-            "value":"<http://' + request.host + '/invoices/' + @invoice.id.to_s + '|/invoices/' + @invoice.id.to_s + '>",
-            "short":true
-          }
-        ]
-      }]
-    }'}
+		InvoiceMailer.invoice_email(@invoice).deliver
+		existingSends = @invoice.mail_sends || []
+		@invoice.update(:mail_sends => existingSends.concat([ DateTime.now ]))
   end
 
   def generate_crypto_link
@@ -193,7 +162,7 @@ class InvoicesController < ApplicationController
     end
 
     def invoice_params
-      params.require(:invoice).permit(:client_id, :date, :worktype, :cost, :paid, :paiddate, :paymenttype, :description, :access_token, :stripe_session_id)
+      params.require(:invoice).permit(:client_id, :date, :worktype, :cost, :paid, :paiddate, :paymenttype, :description, :access_token, :stripe_session_id, :mail_sends)
 		end
 
 end

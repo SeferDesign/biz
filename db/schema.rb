@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20200708020647) do
+ActiveRecord::Schema.define(version: 20200711185735) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -69,6 +69,7 @@ ActiveRecord::Schema.define(version: 20200708020647) do
     t.datetime "updated_at"
     t.string "access_token"
     t.string "stripe_session_id"
+    t.datetime "mail_sends", default: [], array: true
     t.index ["access_token"], name: "index_invoices_on_access_token", unique: true
   end
 
