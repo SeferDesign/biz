@@ -11,7 +11,11 @@ class Api::V1::InvoicesController < Api::ApiController
   end
 
   def create
-    @invoice = Invoice.new(invoice_params)
+		@invoice = Invoice.new(invoice_params)
+
+		if !@invoice.cost.present? or @invoice.cost.empty?
+			@invoice.cost = 0
+		end
 
     if @invoice.save
       render json: { message: 'Invoice created.', invoice_id: @invoice.id, url: url_for(@invoice) }
@@ -31,7 +35,7 @@ class Api::V1::InvoicesController < Api::ApiController
     end
 
     def invoice_params
-      params.require(:invoice).permit(:client_id, :date, :worktype, :cost, :paid, :paiddate, :paymenttype, :description, :access_token)
+      params.require(:invoice).permit(:client_id, :date, :worktype, :cost, :paid, :paiddate, :paymenttype, :description, :access_token, :stripe_session_id)
     end
 
 end
