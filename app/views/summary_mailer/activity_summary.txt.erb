@@ -1,0 +1,16 @@
+<%= @subjectShort %>
+<%= @date_start.strftime("%A, %B %e") %> through <%= @date_end.strftime("%A, %B %e") %>
+
+Income CSV: <%= root_url + 'years/' + @date_start.year.to_s + '/income.csv' %>
+Expenses CSV: <%= root_url + 'years/' + @date_start.year.to_s + '/expenses.csv' %>
+
+Invoices Paid - <%= pluralize(@invoicesPaid.count, 'invoice') %> totalling $<%= @invoicesPaid.sum('cost').to_f %>
+
+Invoices Sent - <%= pluralize(@invoicesSent.count, 'invoice') %> totalling $<%= @invoicesSent.sum('cost').to_f %>
+
+<% if @expenses.present? and @expenses.count > 0 %>
+Expenses - <%= pluralize(@expenses.count, 'expense') %>
+totalling $<%= @expenses.sum('cost').to_f %>
+<% else %>
+No expenses incurred in this period.
+<% end %>
