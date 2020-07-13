@@ -9,7 +9,7 @@
 				<h2>Recent &amp; Unpaid Invoices</h2>
 				<div class="row">
 					<div class="col-sm-12">
-						<% if @notableInvoices.blank? %>
+						<% if Invoice.notable.blank? %>
 						<p class="lead">No invoices.</p>
 						<% else %>
 						<table class="table table-hover table-striped table-condensed">
@@ -24,7 +24,7 @@
 								</tr>
 							</thead>
 							<tbody>
-								<% @notableInvoices.each do |invoice| %>
+								<% Invoice.notable.each do |invoice| %>
 								<tr id="invoicerow<%= invoice.id %>">
 									<td><%= link_to Client.find(invoice.client_id) do %><%= Client.find(invoice.client_id).name %><% end %></td>
 									<td><%= link_to invoice do %><%= invoice.date %><% end %></td>

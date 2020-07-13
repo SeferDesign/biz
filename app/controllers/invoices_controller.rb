@@ -2,7 +2,6 @@ class InvoicesController < ApplicationController
 	before_action :set_invoice, only: [:show, :edit, :email, :stripe, :generate_crypto_link, :mark_paid, :update, :destroy]
 
   def index
-    @notableInvoices = Invoice.all.unpaid + Invoice.all.recent
 	end
 
 	def show

@@ -69,12 +69,9 @@ class ExpensesController < ApplicationController
     if request.post?
       if params[:date].present?
         created_counter = 0
-        logger.debug "ABOUT TO LOOP"
-        logger.debug params[:date].length
         (0..(params[:date].length - 1)).each do |e|
           expense = Expense.new(name: params[:name][e], vendor_id: params[:vendor_id][e], date: params[:date][e], cost: params[:cost][e], account: expense_account_types[0], notes: '')
           expense.save
-          logger.debug expense.to_json
           created_counter += 1
         end
         redirect_to expenses_url, notice: created_counter.to_s + ' expenses were successfully created.'

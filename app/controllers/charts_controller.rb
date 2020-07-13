@@ -1,11 +1,10 @@
 class ChartsController < ApplicationController
   include ApplicationHelper
-  before_action :set_number_of_months, only: [:trailing_x_months]
   before_action :set_data_holders
   before_action :set_year, only: [:year_invoice_month, :year_invoice_month_with_goal, :year_all_data, :year_expense_category, :year_expense_month]
 
   def trailing_x_months
-    @number_of_months.downto(0).each do |m|
+    (params[:number_of_months].to_i - 1).downto(0).each do |m|
       @invoices_data[:data].store(m.month.ago.strftime("%B"), Invoice.paidByMonth(m.month.ago.year, m.month.ago.month).sum('cost').to_i)
       @expenses_data[:data].store(m.month.ago.strftime("%B"), Expense.expenseByMonth(m.month.ago.year, m.month.ago.month).sum('cost').to_i)
 			@goals_data[:data].store(m.month.ago.strftime("%B"), Year.where(year: m.month.ago.year).first.goals_months[Date::MONTHNAMES.index(m.month.ago.strftime("%B")) - 1].to_i)
@@ -76,10 +75,6 @@ class ChartsController < ApplicationController
   end
 
   private
-    def set_number_of_months
-      @number_of_months = params[:number_of_months].to_i - 1
-    end
-
     def set_data_holders
       @invoices_data = { name: 'Invoices', data: {} }
       @expenses_data = { name: 'Expenses', data: {} }

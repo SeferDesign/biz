@@ -8,6 +8,7 @@ class Invoice < ActiveRecord::Base
 	scope :paid, -> { where(paid: true) }
 	scope :unpaid, -> { where.not(paid: true) }
 	scope :recent, -> { where("SELECT extract(MONTH FROM paiddate) = ? AND extract(YEAR FROM paiddate) = ?", Date.today.month, Date.today.year) }
+	scope :notable, -> { self.unpaid.merge(self.recent) }
 
 	scope :contract, -> { where(worktype: 'Contract') }
 	scope :hourly, -> { where(worktype: 'Hourly') }
