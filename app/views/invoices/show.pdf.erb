@@ -30,7 +30,7 @@
 					<h1>Invoice</h1>
 					<p><%= @invoice.date.to_formatted_s(:long) %></p>
 					<p><strong>Invoice ID:</strong> <%= @invoice.display_id %></p>
-					<% if @invoice.paid == true %>
+					<% if @invoice.paid %>
 					<p><strong>Status:</strong> <span class="spread green">Paid</span> on <%= @invoice.paiddate.to_formatted_s(:long) %></p>
 					<p><strong>Payment Method:</strong> <%= @invoice.paymenttype %></p>
 					<% else %>

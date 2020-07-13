@@ -17,7 +17,7 @@ class InvoicesController < ApplicationController
 			@clientView = true
 		end
 
-		if @clientView and !@invoice.paid and @invoice.cost.present? and @invoice.cost >= 0.50
+		if @clientView and @invoice.unpaid and @invoice.cost.present? and @invoice.cost >= 0.50
 			@session = Stripe::Checkout::Session.create({
 				payment_method_types: ['card'],
 				customer: @invoice.client.stripe_customer_id,

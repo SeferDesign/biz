@@ -18,6 +18,10 @@ class Invoice < ActiveRecord::Base
 	scope :paidByMonth, -> (year, monthNumber) { paid.where("SELECT extract(YEAR FROM paiddate) = ? AND extract(MONTH FROM paiddate) = ?", year, monthNumber) }
 	scope :paidByQuarter, -> (year, quarterNumber) { paid.where("paiddate >= ? AND paiddate <= ?", Date.new(year, 3 * quarterNumber - 2, 1), Date.new(year, 3 * quarterNumber, 1).end_of_month) }
 
+	def unpaid
+		!self.paid
+	end
+
 	def display_id_number
 		(100000 + self.id).to_s
 	end
