@@ -1,0 +1,16 @@
+Invoice for <%= invoice.client.name %>
+ID: <%= invoice.display_id %>
+Amount: <%= number_to_currency(invoice.lines.sum('total'), { :unit => '$', :negative_format => '(%n)' }) %>
+Status: <% if invoice.paid == true %>PAID<% else %>NOT PAID<% end %>
+
+PLEASE NOTE: Our mailing address has recently changed.
+
+<%= company[:pay_to] %>
+<%= company[:address][:street] %>
+<%= company[:address][:city] %>, <%= company[:address][:state_abbrv] %> <%= company[:address][:zipcode] %>
+
+<%= invoice.description %> Attached is an invoice PDF with cost breakdowns and payment information for your records. This payment can be made out to '<%= company[:pay_to] %>'.
+
+View Payment Instructions:
+
+<%= invoice_url(@invoice) %>?access_token=<%= @invoice.access_token %>
