@@ -50,7 +50,6 @@ vendor = Vendor.create!(
   invoicePaid = Invoice.create!(
     :client_id => client.id,
     :date => x.month.ago,
-    :worktype => 'Contract',
     :cost => (i % 2 + i % 3 + i % 4 + 1) * 10000.00,
     :paid => true,
     :paiddate => (x - 1).month.ago,
@@ -77,7 +76,6 @@ end
 invoiceUnpaid = Invoice.create!(
   :client_id => client.id,
   :date => 1.day.ago,
-  :worktype => 'Hourly',
   :cost => 10000.00,
   :paid => false,
   :description => 'This invoice represents various work.'

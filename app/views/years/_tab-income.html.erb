@@ -21,7 +21,6 @@
 					<th>Client</th>
 					<th>Issue Date</th>
 					<th class="text-center">Days Since Issued</th>
-					<th class="text-center hidden-xs">Type</th>
 					<th class="text-right">Cost</th>
 				</tr>
 			</thead>
@@ -31,7 +30,6 @@
 					<td><%= link_to Client.find(invoice.client_id) do %><%= Client.find(invoice.client_id).name %><% end %></td>
 					<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
 					<td class="text-center"><%= (Date.today - invoice.date).to_i %></td>
-					<td class="text-center hidden-xs"><%= invoice.worktype %></td>
 					<td class="currency text-right"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
 				</tr>
 				<% end %>
@@ -69,7 +67,6 @@
 					<th>Client</th>
 					<th>Issue Date</th>
 					<th>Paid Date</th>
-					<th class="text-center hidden-xs">Type</th>
 					<th class="text-right">Cost</th>
 					<th class="text-center">Paid?</th>
 				</tr>
@@ -80,7 +77,6 @@
 					<td><%= link_to Client.find(invoice.client_id) do %><%= Client.find(invoice.client_id).name %><% end %></td>
 					<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
 					<td><%= invoice.paiddate %></td>
-					<td class="text-center hidden-xs"><%= invoice.worktype %></td>
 					<td class="currency text-right"><% if invoice.hasDiscount %>^<% end %><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
 					<td class="text-center"><% if invoice.paid == true %><%= icon('fas', 'check', class: 'green') %><% else %><span class="spread red">Not Paid</span><% end %></td>
 				</tr>

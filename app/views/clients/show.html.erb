@@ -110,7 +110,6 @@
 									<th>Date Sent</th>
 									<th>&nbsp;</th>
 									<th>ID</th>
-									<th class="text-center hidden-xs">Type</th>
 									<th class="text-right">Cost</th>
 									<th class="text-center">Date Paid</th>
 								</tr>
@@ -121,7 +120,6 @@
 									<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
 									<td><%= link_to new_invoice_path(:copied_id => invoice.id), :class => 'copy-invoice-link' do %><%= icon('far', 'copy') %><% end %><% if !invoice.paid? %><%= link_to mark_paid_invoice_path(invoice), title: 'Paid Today?', class: 'paid-today-btn paid-today-link', remote: true do %><%= icon('fas', 'check-square', class: 'right') %><% end %><% end %></td>
 									<td><%= invoice.display_id %></td>
-									<td class="text-center hidden-xs"><%= invoice.worktype %></td>
 									<td class="currency text-right"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
 									<td class="text-center"><% if invoice.paid == true %><span class="green"><%= invoice.paiddate %></span><% else %><span class="spread red">Not Paid</span><% end %></td>
 								</tr>

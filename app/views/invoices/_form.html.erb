@@ -43,13 +43,6 @@
 		</div>
 		<div class="col-sm-6">
 			<div class="form-group">
-				<%= f.label :worktype, 'Work Type' %><br>
-				<%= radio_button('invoice', 'worktype', 'Contract', { checked: (params[:action] == 'edit' and @invoice.worktype == 'Contract') ? true : ((@copied_invoice and @copied_invoice.worktype == 'Contract') ? true : false) }) %>
-				<%= label_tag(:invoice_worktype_contract, 'Contract') %>
-				<%= radio_button('invoice', 'worktype', 'Hourly', { checked: (params[:action] == 'edit' and @invoice.worktype == 'Hourly') ? true : ((@copied_invoice and @copied_invoice.worktype == 'Hourly') ? true : false) }) %>
-				<%= label_tag(:invoice_worktype_hourly, 'Hourly') %>
-			</div>
-			<div class="form-group">
 				<%= f.label :description %>
 				<div class="description-prefills"><a href="#" data-slug="yesterday">Yesterday</a> | <a href="#" data-slug="today">Today</a></div>
 				<% if @copied_invoice %>

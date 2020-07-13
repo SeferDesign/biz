@@ -3,7 +3,6 @@
 one:
   client_id: 1
   date: 2014-01-13
-  worktype: MyString
   cost: 1.5
   paid: false
   paiddate: 2014-01-13
@@ -13,7 +12,6 @@ one:
 two:
   client_id: 1
   date: 2014-01-13
-  worktype: MyString
   cost: 1.5
   paid: false
   paiddate: 2014-01-13

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20200711185735) do
+ActiveRecord::Schema.define(version: 20200713192508) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -59,7 +59,6 @@ ActiveRecord::Schema.define(version: 20200711185735) do
   create_table "invoices", id: :serial, force: :cascade do |t|
     t.integer "client_id"
     t.date "date"
-    t.string "worktype", limit: 255
     t.decimal "cost", precision: 8, scale: 2
     t.boolean "paid"
     t.date "paiddate"

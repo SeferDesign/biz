@@ -125,7 +125,7 @@ class InvoicesController < ApplicationController
 
   def create
 		@invoice = Invoice.new(invoice_params)
-		if !@invoice.cost.present? or @invoice.cost.empty?
+		if !@invoice.cost.present?
 			@invoice.cost = 0
 		end
 
@@ -161,7 +161,7 @@ class InvoicesController < ApplicationController
     end
 
     def invoice_params
-      params.require(:invoice).permit(:client_id, :date, :worktype, :cost, :paid, :paiddate, :paymenttype, :description, :access_token, :stripe_session_id, :mail_sends)
+      params.require(:invoice).permit(:client_id, :date, :cost, :paid, :paiddate, :paymenttype, :description, :access_token, :stripe_session_id, :mail_sends)
 		end
 
 end
