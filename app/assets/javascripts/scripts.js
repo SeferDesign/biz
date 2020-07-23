@@ -109,7 +109,43 @@ jQuery(document).on('turbolinks:load', function() {
 	  });
 	});
 
+	var averageCharts = [
+		{ id: 'year-all-chart' },
+		{ id: 'year-income-chart' },
+		{ id: 'year-expenses-chart' }
+	];
+	for (var c = 0; c < averageCharts.length; c++) {
+		addAverageToChart(averageCharts[c].id);
+	}
+
 });
+
+function addAverageToChart(chartID) {
+	var chart = Chartkick.charts[chartID];
+	if (!chart) { return; }
+	setTimeout(function() {
+		var data = chart.getData()[0].data;
+		var dataUsed = [];
+		for (var i = 0; i < data.length; i++) {
+			if (data[i][1] > 0) {
+				dataUsed.push(data[i][1]);
+			}
+		}
+		var dataSum = dataUsed.reduce(function(a, b) {
+			return a + b;
+		}, 0);
+		var options = chart.getOptions();
+		options.library.yAxis = {
+			plotLines: [{
+				color: '#639ec9',
+				value: dataSum / dataUsed.length,
+				width: '1',
+				zIndex: 2
+			}]
+		};
+		chart.setOptions(options);
+	}, 1000);
+}
 
 function setDatepickers() {
 	$('.datepicker').datepicker('destroy');

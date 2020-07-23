@@ -7,5 +7,8 @@
 	<p><small>*Tax rate and estimates are conservative and independent of expenses and discounts.</small></p>
 </div>
 <div class="col-md-7 col-md-offset-1">
-	<div class="chart-wrap overview-chart-wrap"><%= column_chart chart_year_all_data_path(@year.id) %></div>
+	<div class="chart-wrap overview-chart-wrap"><%= column_chart chart_year_all_data_path(@year.id), id: 'year-all-chart' %></div>
+	<script>
+
+	</script>
 </div>
