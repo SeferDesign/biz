@@ -32,7 +32,6 @@ class ChartsController < ApplicationController
     end
     render json: [
 			@invoices_data,
-			nil,
 			@goals_data
 		]
   end

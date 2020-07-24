@@ -137,7 +137,7 @@ function addAverageToChart(chartID) {
 		var options = chart.getOptions();
 		options.library.yAxis = {
 			plotLines: [{
-				color: '#639ec9',
+				color: '<%= Chartkick.options[:colors][2] %>',
 				value: dataSum / dataUsed.length,
 				width: '1',
 				zIndex: 2

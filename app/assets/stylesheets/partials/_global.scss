@@ -271,24 +271,17 @@ footer {
 
 	}
 
-	.highcharts-column-series {
+}
 
-		&.highcharts-series {
+.chart-wrap .highcharts-column-series.highcharts-series-2,
+.chart-wrap #year-income-chart .highcharts-column-series.highcharts-series-1 {
 
-			&-2 {
-
-				rect {
-					fill: transparent;
-					stroke: #639ec9;
-					stroke-width: 0.25%;
-					stroke-dasharray: 5;
-					opacity: 0.5;
-				}
-
-			}
-
-		}
-
+	rect {
+		fill: transparent;
+		stroke: #639ec9;
+		stroke-width: 0.25%;
+		stroke-dasharray: 5;
+		opacity: 0.5;
 	}
 
 }
