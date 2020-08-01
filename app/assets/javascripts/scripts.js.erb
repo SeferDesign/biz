@@ -130,10 +130,18 @@ function addAverageToChart(chartID) {
 			figureTotal += data[i][1]
 		}
 		var options = chart.getOptions();
+		var monthlyAverage = figureTotal / options.days_elapsed * 365 / 12;
 		options.library.yAxis = {
 			plotLines: [{
 				color: '<%= Chartkick.options[:colors][2] %>',
-				value: figureTotal / options.days_elapsed * 365 / 12,
+				label: {
+					text: 'Average $' + numberWithCommas(Math.round(monthlyAverage)),
+					align: 'right',
+					textAlign: 'right',
+					x: 0,
+					y: 8
+				},
+				value: monthlyAverage,
 				width: '1',
 				zIndex: 2
 			}]
@@ -154,4 +162,8 @@ function getDateInFormat(days) {
 	var date = new Date();
 	date.setDate(date.getDate() + days);
 	return date.getFullYear() + '-'+ (date.getMonth() < 9 ? '0' : '') + (date.getMonth() + 1) + '-' + (date.getDate() < 9 ? '0' : '') + date.getDate();
+}
+
+function numberWithCommas(x) {
+	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
