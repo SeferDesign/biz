@@ -68,4 +68,16 @@ class Year < ActiveRecord::Base
     self.expenses.map { |i| i.vendor }.uniq.sort { |a,b| b.yearExpenses(self.year).sum(:cost) <=> a.yearExpenses(self.year).sum(:cost) }
 	end
 
+	def days_elapsed
+		if Date.today.year > self.year
+			if Date.gregorian_leap?(self.year)
+				366
+			else
+				365
+			end
+		else
+			Date.today.yday()
+		end
+	end
+
 end

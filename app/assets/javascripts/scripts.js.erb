@@ -125,20 +125,15 @@ function addAverageToChart(chartID) {
 	if (!chart) { return; }
 	setTimeout(function() {
 		var data = chart.getData()[0].data;
-		var dataUsed = [];
+		var figureTotal = 0;
 		for (var i = 0; i < data.length; i++) {
-			if (data[i][1] > 0) {
-				dataUsed.push(data[i][1]);
-			}
+			figureTotal += data[i][1]
 		}
-		var dataSum = dataUsed.reduce(function(a, b) {
-			return a + b;
-		}, 0);
 		var options = chart.getOptions();
 		options.library.yAxis = {
 			plotLines: [{
 				color: '<%= Chartkick.options[:colors][2] %>',
-				value: dataSum / dataUsed.length,
+				value: figureTotal / options.days_elapsed * 365 / 12,
 				width: '1',
 				zIndex: 2
 			}]
