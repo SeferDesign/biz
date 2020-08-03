@@ -1,5 +1,5 @@
 <%= @subjectShort %>
-<%= @date_start.strftime("%A, %B %e") %> through <%= @date_end.strftime("%A, %B %e") %>
+<%= @date_start.strftime("%A, %B %-d") %> through <%= @date_end.strftime("%A, %B %-d") %>
 
 Income CSV: <%= root_url + 'years/' + @date_start.year.to_s + '/income.csv' %>
 Expenses CSV: <%= root_url + 'years/' + @date_start.year.to_s + '/expenses.csv' %>

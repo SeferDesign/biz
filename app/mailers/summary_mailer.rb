@@ -17,7 +17,7 @@ class SummaryMailer < ActionMailer::Base
 		@invoicesPaid = Invoice.paid.where(:paiddate => @date_start..@date_end).order(paiddate: :asc)
 		@expenses = Expense.where(:date => @date_start..@date_end).order(date: :asc)
 
-		mail(to: "Robert Sefer <rob@seferdesign.com>", subject: "#{@subjectShort} - #{@date_start.strftime("%b %e")} through #{@date_end.strftime("%b %e")}", body: render_to_string(
+		mail(to: "Robert Sefer <rob@seferdesign.com>", subject: "#{@subjectShort} - #{@date_start.strftime("%b %-d")} through #{@date_end.strftime("%b %-d")}", body: render_to_string(
 			:layout => 'layouts/mail.txt',
 			:action => 'activity_summary.txt',
 			:locals => {
