@@ -5,7 +5,7 @@ class InvoiceMailer < ActionMailer::Base
   def invoice_email(invoice)
     @invoice = invoice
 
-    cc_list = ["Robert Sefer <rob@seferdesign.com>"]
+    cc_list = []
     if invoice.client.email_accounting_2.present?
       cc_list.push(invoice.client.email_accounting_2)
     end
@@ -26,7 +26,7 @@ class InvoiceMailer < ActionMailer::Base
 			:page_size => 'Letter'
 		)
 
-    mail(to: "#{invoice.client.contact} <#{invoice.client.email_accounting}>", subject: (Rails.env.development? ? 'DEV - ' : '') + 'Invoice from Sefer Design Company', cc: cc_list, body: render_to_string(
+    mail(to: "#{invoice.client.contact} <#{invoice.client.email_accounting}>", subject: (Rails.env.development? ? 'DEV - ' : '') + 'Invoice from Sefer Design Company', cc: cc_list, bcc: ["Robert Sefer <rob@seferdesign.com>"], body: render_to_string(
 			:layout => 'layouts/mail.txt',
 			:action => 'invoice_email.txt',
 			:locals => { :invoice => @invoice }
