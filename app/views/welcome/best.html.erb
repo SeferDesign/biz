@@ -9,7 +9,7 @@
 					<thead>
 						<tr>
 							<th>Month</th>
-							<th class="text-right">Income</th>
+							<th class="text-right">Total Income</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -26,13 +26,15 @@
 					<thead>
 						<tr>
 							<th>Quarter</th>
-							<th class="text-right">Income</th>
+							<th class="text-right">Per Month</th>
+							<th class="text-right">Total Income</th>
 						</tr>
 					</thead>
 					<tbody>
 						<% @quarters.take(8).each do |quarter| %>
 						<tr>
 							<td><%= link_to quarter[:year] do %><%= quarter[:year].year %><% end %> - Q<%= quarter[:quarter] %></td>
+							<td class="currency text-right"><%= number_to_currency(quarter[:income] / 3, { :negative_format => '(%n)' }) %></td>
 							<td class="currency text-right"><%= number_to_currency(quarter[:income], { :negative_format => '(%n)' }) %></td>
 						</tr>
 						<% end %>
@@ -43,13 +45,15 @@
 					<thead>
 						<tr>
 							<th>Year</th>
-							<th class="text-right">Income</th>
+							<th class="text-right">Per Month</th>
+							<th class="text-right">Total Income</th>
 						</tr>
 					</thead>
 					<tbody>
 						<% Year.all.sort_by(&:incomeTotal).reverse.take(4).each do |year| %>
 						<tr>
 							<td><%= link_to year do %><%= year.year %><% end %></td>
+							<td class="currency text-right"><%= number_to_currency(year.incomeTotal / 12, { :negative_format => '(%n)' }) %></td>
 							<td class="currency text-right"><%= number_to_currency(year.incomeTotal, { :negative_format => '(%n)' }) %></td>
 						</tr>
 						<% end %>
