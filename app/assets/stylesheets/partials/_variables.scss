@@ -1,18 +1,37 @@
 $black: #000;
 $white: #fff;
-$white-off: #f6f6f6;
-$grey: #333;
-$green: #5cb85c;
-$red: #d9534f;
-$orange: #f0ad4e;
-$purple: #8a22ff;
-$blue: #639ec9;
+$grey-light: #efefef;
+$grey: #ccc;
+$grey-darkish: #a3a3a3;
+$grey-dark: #707070;
+$red: #f74f4f;
+$green: #29b165;
+$blue: #4492ff;
 
-$brand-danger-alt: #9c5553;
+$color-primary: $blue;
+$border-color: $grey;
 
-$width-lg: 1200px;
-$width-md: 992px;
-$width-sm: 768px;
+$font-size-base: 16px;
 
-$table-bg-accent: $white-off;
-$table-bg-hover: darken($white-off, 10%);
+$screen-sm: 37.5rem;
+$screen-sm-px: $font-size-base * $screen-sm / 1rem;
+$screen-md: 64rem;
+$screen-md-px: $font-size-base * $screen-md / 1rem;
+$screen-lg: 71.25rem;
+$screen-lg-px: $font-size-base * $screen-lg / 1rem;
+$screen-xl: 90rem;
+$screen-xl-px: $font-size-base * $screen-xl / 1rem;
+$screen-xxl: 110rem;
+$screen-xxl-px: $font-size-base * $screen-xxl / 1rem;
+
+$mobile-breakpoint: $screen-md;
+$mobile-breakpoint-px: $screen-md-px;
+
+$max-breakpoint: $screen-xxl;
+
+$nav-width: 300px;
+
+$transition-speed: 300ms;
+
+$font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+

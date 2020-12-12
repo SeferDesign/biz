@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title><%= yield(:title) %><%= company[:abbrv_name] %> Biz Admin</title>
+  <title><%= yield(:title) %><% if yield(:title).length > 0 %> | <% end %><%= company[:abbrv_name] %> Biz Admin</title>
   <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0" />
   <%= csrf_meta_tags %>
   <link rel="apple-touch-icon-precomposed" href="<%= company[:logo][:favicon] %>">
@@ -14,28 +14,39 @@
   <%= javascript_include_tag 'https://www.google.com/jsapi' %>
   <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
 </head>
-<body>
+<body class="controller-<%= controller_name %> action-<%= action_name %>">
 
 <%= render 'layouts/header' %>
 
+<main>
+
+<%= render 'layouts/nav' %>
+
+<section>
+
 <% if (!notice.nil? or !alert.nil?) and (user_signed_in? or controller_name == 'sessions') %>
 <section class="notice-alert">
-  <div class="container">
-    <div class="row">
-      <div class="col-sm-12">
-        <% if !notice.nil? %>
-        <p><%= notice %></p>
-        <% end %>
-        <% if !alert.nil? %>
-        <p><%= alert %></p>
-        <% end %>
-      </div>
-    </div>
-  </div>
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12">
+				<% if !notice.nil? %>
+				<p><%= notice %></p>
+				<% end %>
+				<% if !alert.nil? %>
+				<p><%= alert %></p>
+				<% end %>
+			</div>
+		</div>
+	</div>
 </section>
 <% end %>
 
 <%= yield %>
+</section>
+
+</main>
+
+
 
 <%= render 'layouts/footer' %>
 

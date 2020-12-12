@@ -1,399 +1,43 @@
+*,
+::after,
+::before {
+	box-sizing: border-box;
+}
+
+html,
 body {
-	color: $white;
-	background: $black;
-	font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
-
-.btn {
-
-	text-decoration: none;
-
-	&.btn-left {
-		border-radius-top-right: 0px;
-		border-radius-bottom-right: 0px;
-	}
-
-	&.btn-right {
-		border-radius-top-left: 0px;
-		border-radius-bottom-left: 0px;
-	}
-
-	&-danger-alt {
-
-		color: $white;
-		background-color: $brand-danger-alt;
-
-		&:hover {
-			color: $white;
-			background-color: darken($brand-danger-alt, 5%);
-		}
-
-		&:active {
-			background-color: darken($brand-danger-alt, 10%);
-		}
-
-	}
-
-}
-
-.svg-inline--fa,
-.fas,
-.far,
-.fab {
-
-	&.right {
-		margin-left: 0.5em;
-	}
-
-	&.left {
-		margin-right: 0.5em;
-	}
-
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-
-	margin: 0px 0px 20px;
-	font-weight: 400;
-
-	&.title {
-		text-align: center;
-	}
-
-}
-
-h1 {
-	margin-top: 0px;
-}
-
-.carousel-control {
-
-	&.left,
-	&.left:hover,
-	&.right,
-	&.right:hover {
-		background: none;
-	}
-
-}
-
-.navbar {
-
-	margin-bottom: 0px;
-	background-color: transparent;
-	border: 0px;
-	border-radius: 0px;
-
-	.navbar-toggle {
-		border: 0px;
-		border-radius: 0px;
-	}
-
-	.navbar-brand {
-		height: auto;
-	}
-
-}
-
-.datepicker {
 	color: $black;
 }
 
-.ghseet-embed {
-	display: block;
-	margin: 1rem 0px;
-	width: 100%;
-	min-height: 550px;
-	border: 0px;
+main {
+	z-index: 1;
+	position: relative;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-start;
+	align-items: stretch;
 }
 
-.bulk-expenses-row-header {
-	margin-bottom: 5px;
-}
+.wrapper {
 
-.pad {
-	padding: 2em 0px;
-}
+	margin: 0px 1.5rem;
 
-.nopad-side {
-	padding-left: 0px;
-	padding-right: 0px;
-}
+	@include mq($screen-sm) {
+		margin: 0px 3rem;
+	}
 
-header,
-footer {
-	@extend .pad;
-}
+	@include mq($screen-md) {
+		margin: 0px auto;
+		width: $screen-md - 4rem;
+	}
 
-header {
-	padding: 2em 0px 1.5em;
+	@include mq($screen-lg) {
+		width: $screen-lg - 4rem;
+	}
+
 }
 
 img {
 	max-width: 100%;
-}
-
-ul {
-	list-style-type: none;
-	margin: 0px;
-	padding: 0px;
-}
-
-.green { color: $green; }
-.red   { color: $red; }
-
-.spread {
-	font-size: 12px;
-	letter-spacing: 1px;
-	font-weight: bold;
-	text-transform: uppercase;
-}
-
-.currency {
-	letter-spacing: 1px;
-	font-family: 'PT Mono', monospace;
-}
-
-p.lead.halfbottom {
-	margin-bottom: 10px;
-}
-
-hr.halfbottom {
-	margin: 10px 0px;
-}
-
-section {
-	color: $black;
-	background: $white;
-	padding: 1em 0px;
-}
-
-.copy-invoice-link {
-	color: $orange;
-}
-
-.new-invoice-link,
-.paid-today-link {
-	color: $green;
-}
-
-.description-prefills {
-
-	margin-bottom: 10px;
-	font-size: 13px;
-
-}
-
-#client-show,
-#invoice-show {
-
-	.client-logo {
-		max-width: 300px;
-	}
-
-}
-
-.client-logo {
-
-  img {
-		float: right;
-    max-width: none;
-  }
-
-}
-
-#clientlogo-wrap {
-	float: right;
-}
-
-.notice-alert {
-
-	text-align: center;
-	font-weight: bold;
-
-	p:last-child {
-		margin-bottom: 0px;
-	}
-
-}
-
-.table > tfoot > tr > td {
-	border-top-width: 2px;
-}
-
-.table-goals {
-
-	font-size: 1.5rem;
-
-	@media screen and (min-width: $width-sm) {
-		font-size: 2rem;
-	}
-
-}
-
-footer {
-
-	.footer-logo {
-		max-width: 100px;
-	}
-
-	.footer-nav {
-
-		margin-bottom: 1em;
-
-		a {
-			color: $white;
-			font-size: 24px;
-		}
-
-	}
-
-}
-
-.clientimage {
-	margin-top: 15px;
-}
-
-.chart-wrap {
-
-	margin-top: 60px;
-
-	&.overview-chart-wrap {
-
-		@media screen and (min-width: $screen-md) {
-			margin-top: 0px;
-		}
-
-	}
-
-}
-
-.chart-wrap .highcharts-plot-line-label {
-	font-size: 6px;
-	text-transform: uppercase;
-}
-
-.chart-wrap .highcharts-column-series.highcharts-series-2,
-.chart-wrap #year-income-chart .highcharts-column-series.highcharts-series-1 {
-
-	rect {
-		fill: transparent;
-		stroke: #639ec9;
-		stroke-width: 0.25%;
-		stroke-dasharray: 5;
-		opacity: 0.5;
-	}
-
-}
-
-.doicons i {
-	vertical-align: middle;
-}
-
-.button-wrap-nopad {
-
-	padding-left: 0px;
-
-	.btn-block {
-		padding-left: 0px;
-		padding-right: 0px;
-	}
-
-}
-
-.payment-options {
-
-  margin-top: 4rem;
-  margin-bottom: 2rem;
-	text-align: center;
-
-	.payment-images {
-
-		margin-top: 1rem;
-
-		img {
-			display: inline-block;
-			margin: 2rem 2rem;
-			max-width: 200px;
-			max-height: 75px;
-		}
-
-	}
-
-	.stripe-button-el {
-		margin-top: 2rem;
-	}
-
-}
-
-.expense-monthly-form-element {
-	display: none;
-}
-
-.tab-pane {
-	padding-top: 2rem;
-}
-
-.vendors-category-view {
-
-	ul {
-		margin-bottom: 1rem;
-	}
-
-}
-
-.payment-summary-page {
-
-	padding: 4rem 0px;
-
-	.payment-summary-intro {
-		text-align: center;
-	}
-
-}
-
-@media all and (min-width: 768px) {
-
-	.vendors-category-view {
-
-		column-count: 2;
-
-
-
-		p:nth-of-type(4) {
-			break-before: column;
-		}
-
-	}
-
-	footer {
-
-		.footer-nav {
-
-			a {
-				font-size: 14px;
-			}
-
-			ul {
-
-				li {
-					display: inline;
-				}
-
-				li:not(:last-child):after {
-					content: '\2022';
-					margin: 0px 0.5em;
-				}
-
-			}
-
-		}
-
-	}
-
+	height: auto;
 }

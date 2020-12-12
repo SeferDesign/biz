@@ -1,0 +1,15 @@
+i[class^="fa"] {
+
+	&.left {
+		margin-right: 0.25em;
+	}
+
+	&.right {
+		margin-left: 0.25em;
+	}
+
+	.btn & {
+		transform: translate(0px, -5%);
+	}
+
+}

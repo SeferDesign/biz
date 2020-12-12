@@ -1,0 +1,91 @@
+%btn {
+
+	$btn-color: $color-primary;
+
+	display: inline-block;
+	padding: 0.5em 2em;
+	color: $white;
+	background-color: $btn-color;
+	-webkit-appearance: none;
+	border: 0.125rem solid $btn-color;
+	outline: 0px;
+	border-radius: 0.5em;
+	line-height: 1;
+	font-size: 1rem;
+	font-weight: bold;
+	letter-spacing: 0.0625em;
+	text-transform: uppercase;
+	text-decoration: none;
+	transition: background-color 150ms;
+	will-change: background-color;
+
+
+	&:hover {
+		cursor: pointer;
+		background-color: darken($btn-color, 5%);
+	}
+
+	&:active {
+		background-color: darken($btn-color, 10%);
+	}
+
+}
+
+%btn-primary {
+
+	$btn-color: $blue;
+	color: $white;
+	background-color: $btn-color;
+	border-color: $btn-color;
+
+	&:hover {
+		cursor: pointer;
+		background-color: darken($btn-color, 5%);
+	}
+
+	&:active {
+		background-color: darken($btn-color, 10%);
+	}
+
+}
+
+%btn-success {
+
+	$btn-color: $green;
+	color: $white;
+	background-color: $btn-color;
+	border-color: $btn-color;
+
+	&:hover {
+		cursor: pointer;
+		background-color: darken($btn-color, 5%);
+	}
+
+	&:active {
+		background-color: darken($btn-color, 10%);
+	}
+
+}
+
+button,
+.btn {
+
+	@extend %btn;
+
+	+ .btn {
+		margin-left: 1em;
+	}
+
+	&.btn-primary {
+		@extend %btn-primary;
+	}
+
+	&.btn-success {
+		@extend %btn-success;
+	}
+
+	&.btn-lg {
+		font-size: 1.125rem;
+	}
+
+}

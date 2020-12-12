@@ -1,0 +1,58 @@
+header {
+
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: center;
+	padding: 1.5rem 1.5rem 1.5rem 0px;
+	background: $blue;
+
+	.logo-wrap {
+		padding: 0px 1.5rem;
+		flex-basis: $nav-width;
+
+		a {
+			display: block;
+			max-width: 200px;
+		}
+
+		img,
+		svg {
+			display: block;
+		}
+
+	}
+
+	.search-bar {
+
+		position: relative;
+		flex-grow: 1;
+
+		i[class^="fa"] {
+			position: absolute;
+			top: 50%;
+			left: 0.5rem;
+			transform: translate(0px, -50%);
+		}
+
+		input {
+
+			display: block;
+			width: 100%;
+			padding: 0.5rem 0.5rem 0.5rem 2rem;
+			background: $grey-light;
+			border: 1px solid $grey-light;
+			border-radius: 0.25em;
+			box-shadow: none;
+			outline: 0px;
+
+			&:focus {
+				border-color: $grey-dark;
+				background: $white;
+			}
+
+		}
+
+	}
+
+}

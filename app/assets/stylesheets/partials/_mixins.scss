@@ -1,0 +1,23 @@
+@mixin mq($name: 'desktop') {
+	$mqueryString: "(min-width: #{$mobile-breakpoint})";
+	@if $name == 'desktop' {
+		$mqueryString: "(min-width: #{$mobile-breakpoint})";
+	} @else if $name == 'mobile' {
+		$mqueryString: "(max-width: #{$mobile-breakpoint-px - 1})";
+	} @else {
+		$mqueryString: "(min-width: #{$name})";
+	}
+	@media #{$mqueryString} {
+		@content;
+	}
+}
+
+@mixin clear($pseudo: 'before') {
+
+	&:#{$pseudo} {
+		content: ' ';
+		display: block;
+		clear: both;
+	}
+
+}
