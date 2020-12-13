@@ -99,9 +99,10 @@ form,
 	textarea,
 	select,
 	.input-text-standin {
+
 		display: block;
 		padding: 0.5em 0.75em;
-		min-height: 2.25em;
+		height: 2.25em;
 		line-height: 1em;
 		width: 100%;
 		background: $grey-light;
@@ -116,6 +117,11 @@ form,
 			background: $white;
 		}
 
+	}
+
+	textarea {
+		height: 6em;
+		resize: vertical;
 	}
 
 	.input-text-standin {
@@ -141,44 +147,8 @@ form,
 
 	}
 
-	.input-toggle {
-
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: space-between;
-		align-items: stretch;
-		background: $grey;
-		text-transform: uppercase;
-
-		&,
-		&-option {
-			border-radius: 0.375em;
-		}
-
-		&-option {
-
-			flex: 1;
-			padding: 0.5625em;
-			color: $white;
-			text-align: center;
-			user-select: none;
-
-			&:hover {
-				cursor: pointer;
-			}
-
-		}
-
-		&[data-value="good"] .input-toggle-option[data-value="good"] {
-			background: $green;
-			font-weight: bold;
-		}
-
-		&[data-value="bad"] .input-toggle-option[data-value="bad"] {
-			background: $red;
-			font-weight: bold;
-		}
-
+	button[type="submit"] {
+		margin-top: 1.5rem;
 	}
 
 }

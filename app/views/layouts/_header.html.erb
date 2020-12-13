@@ -3,7 +3,7 @@
 		<a class="logo" href="<% if user_signed_in? %>/<% else %>https://seferdesign.com<% end %>"><img src="<%= company[:logo][:alt] %>" alt="<%= company[:full_name] %>"></a>
 	</div>
 	<div class="search-bar">
-		<i class="fas fa-search"></i>
-		<input type="search" placeholder="Search for clients, vendors, goals, etc.">
+		<label for="search"><i class="fas fa-search"></i></label>
+		<input id="search" type="search" placeholder="Search for clients, vendors, goals, etc.">
 	</div>
 </header>

@@ -16,39 +16,19 @@
 </head>
 <body class="controller-<%= controller_name %> action-<%= action_name %>">
 
-<%= render 'layouts/header' %>
-
-<main>
-
-<%= render 'layouts/nav' %>
-
-<section>
-
-<% if (!notice.nil? or !alert.nil?) and (user_signed_in? or controller_name == 'sessions') %>
-<section class="notice-alert">
-	<div class="container">
-		<div class="row">
-			<div class="col-sm-12">
-				<% if !notice.nil? %>
-				<p><%= notice %></p>
-				<% end %>
-				<% if !alert.nil? %>
-				<p><%= alert %></p>
-				<% end %>
-			</div>
-		</div>
-	</div>
-</section>
-<% end %>
-
+<% if !user_signed_in? %>
 <%= yield %>
-</section>
-
+<% else %>
+<%= render 'layouts/header' %>
+<main>
+	<%= render 'layouts/nav' %>
+	<section>
+		<%= render 'layouts/alert' %>
+		<%= yield %>
+	</section>
 </main>
-
-
-
 <%= render 'layouts/footer' %>
+<% end %>
 
 </body>
 </html>

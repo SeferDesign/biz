@@ -1,6 +1,6 @@
 <% provide(:title, 'Invoices') %>
 <h1><%= icon('fas', 'dollar-sign', class: 'fa-fw left') %>Invoices</h1>
-<p><%= link_to new_invoice_path, { :class => 'btn btn-success' } do %><%= icon('fas', 'plus', class: 'left') %>New Invoice<% end %> <%= link_to time_url, { :class => 'btn btn-primary' } do %><%= icon('fas', 'clock', class: 'left') %>Raw Time<% end %></p>
+<p><%= link_to new_invoice_path, { :class => 'btn btn-success' } do %><%= icon('fas', 'plus', class: 'left') %>New Invoice<% end %></p>
 <div class="panel">
 	<h2>Recent &amp; Unpaid Invoices</h2>
 	<% if Invoice.notable.blank? %>

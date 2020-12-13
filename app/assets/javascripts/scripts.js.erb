@@ -1,5 +1,7 @@
 jQuery(document).on('turbolinks:load', function() {
 
+	setVH();
+
 	var hash = document.location.hash;
 	if (hash && $('.tab-content .tab-pane').length > 0) {
 		$('.nav-tabs a[href="' + hash + '"]').tab('show');
@@ -32,8 +34,6 @@ jQuery(document).on('turbolinks:load', function() {
 		}, 200);
 	});
 
-	setDatepickers();
-
 	$('[data-print="true"]').click(function() {
 		window.print();
 	});
@@ -62,11 +62,7 @@ jQuery(document).on('turbolinks:load', function() {
 		var lastRow = $(this).parents().find('form').find('.new-expense-row').last();
 		var clone = lastRow.clone();
 		lastRow.after(clone).promise().done(function() {
-			clone.find('.datepicker').datepicker({
-				format: 'yyyy-mm-dd'
-			});
 			clone.find('select').val(lastRow.find('select').val());
-			setDatepickers();
 		});
 	});
 
@@ -120,6 +116,15 @@ jQuery(document).on('turbolinks:load', function() {
 
 });
 
+window.addEventListener('resize', function() {
+	setVH();
+});
+
+function setVH() {
+	var vh = window.innerHeight * 0.01;
+	document.documentElement.style.setProperty('--vh', vh + 'px');
+}
+
 function addAverageToChart(chartID) {
 	var chart = Chartkick.charts[chartID];
 	if (!chart) { return; }
@@ -148,14 +153,6 @@ function addAverageToChart(chartID) {
 		};
 		chart.setOptions(options);
 	}, 1000);
-}
-
-function setDatepickers() {
-	$('.datepicker').datepicker('destroy');
-	$('.datepicker').datepicker({
-		format: 'yyyy-mm-dd',
-		autoclose: true
-	});
 }
 
 function getDateInFormat(days) {

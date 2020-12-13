@@ -9,56 +9,43 @@
 		</ul>
 	</div>
 	<% end %>
-	<div class="row">
-		<div class="col-sm-6">
-			<div class="row">
-				<div class="col-sm-12">
-					<div class="form-group">
-						<%= f.label :client_id, 'Client' %>
-						<%= collection_select(:invoice, 'client_id', Client.all, :id, :name, { :include_blank => true, :selected => params[:action] == 'edit' ? @invoice.client.id : (params[:client_id].present? ? params[:client_id] : (@copied_invoice ? @copied_invoice.client.id : '')) }, { :class => 'form-control' }) %>
-						<script>
-						$('invoice_client_id').change();
-						</script>
-					</div>
-				</div>
-				<div class="col-sm-6">
-					<div class="form-group">
-						<%= f.label :date, 'Invoice Date' %>
-						<div class="input-group">
-							<span class="input-group-addon"><%= icon('fas', 'calendar-alt') %></span>
-							<%= f.text_field :date, :required => true, :placeholder => 'YYYY-MM-DD', :class => 'form-control datepicker', :value => @invoice.date ? @invoice.date : Time.now.strftime("%Y-%m-%d") %>
-						</div>
-					</div>
-				</div>
-				<div class="col-sm-6">
-					<div class="form-group">
-						<%= f.label :cost %>
-						<div class="input-group">
-							<span class="input-group-addon"><%= icon('fas', 'dollar-sign') %></span>
-							<%= f.text_field :cost, :placeholder => '0.00', class: 'form-control text-right' %>
-						</div>
-					</div>
-				</div>
-			</div>
+	<div class="form-section panel">
+		<div class="form-description">
+			Basic Info
 		</div>
-		<div class="col-sm-6">
-			<div class="form-group">
+		<div class="form-elements">
+			<div class="form-element full">
+				<%= f.label :client_id, 'Client' %>
+				<%= collection_select(:invoice, 'client_id', Client.all, :id, :name, { :include_blank => true, :selected => params[:action] == 'edit' ? @invoice.client.id : (params[:client_id].present? ? params[:client_id] : (@copied_invoice ? @copied_invoice.client.id : '')) }) %>
+				<script>$('invoice_client_id').change();</script>
+			</div>
+			<div class="form-element">
+				<%= f.label :date, 'Invoice Date' %>
+				<%= f.date_field :date, :required => true, :placeholder => 'YYYY-MM-DD', :pattern => '\d{4}-\d{2}-\d{2}', :value => @invoice.date ? @invoice.date : Time.now.strftime("%Y-%m-%d") %>
+			</div>
+			<div class="form-element">
+				<%= f.label :cost %>
+				<%= f.text_field :cost, :placeholder => '0.00' %>
+			</div>
+			<div class="form-element full">
 				<%= f.label :description %>
 				<div class="description-prefills"><a href="#" data-slug="yesterday">Yesterday</a> | <a href="#" data-slug="today">Today</a></div>
 				<% if @copied_invoice %>
-				<%= f.text_area :description, class: 'form-control', value: @copied_invoice.description %>
+				<%= f.text_area :description, value: @copied_invoice.description %>
 				<% elsif @invoice.description.blank? %>
-				<%= f.text_area :description, class: 'form-control', value: 'This invoice represents work through ' + 1.day.ago.strftime("%Y-%m-%d") + '.' %>
+				<%= f.text_area :description, value: 'This invoice represents work through ' + 1.day.ago.strftime("%Y-%m-%d") + '.' %>
 				<% else %>
-				<%= f.text_area :description, class: 'form-control' %>
+				<%= f.text_area :description %>
 				<% end %>
 			</div>
 		</div>
 	</div>
-	<hr>
-	<div class="row">
-		<div class="col-lg-2 col-sm-6">
-			<div class="form-group">
+	<div class="form-section panel">
+		<div class="form-description">
+			Payment
+		</div>
+		<div class="form-elements">
+			<div class="form-element form-element-radio-wrap full">
 				<%= f.label :paid, 'Paid Status' %><br>
 				<%= radio_button('invoice', 'paid', true) %>
 				<%= label_tag(:invoice_paid_true, 'Paid') %>
@@ -69,18 +56,11 @@
 				<% end %>
 				<%= label_tag(:invoice_paid_false, 'Not Paid') %>
 			</div>
-		</div>
-		<div class="col-lg-2 col-sm-6">
-			<div class="form-group">
+			<div class="form-element">
 				<%= f.label :paiddate, 'Paid Date' %>
-				<div class="input-group">
-					<span id="paid-date-icon-wrap" class="input-group-addon"><%= icon('fas', 'calendar-alt', id: 'paid-date-icon') %></span>
-					<%= f.text_field :paiddate, :placeholder => 'YYYY-MM-DD', class: 'form-control datepicker' %>
-				</div>
+				<%= f.date_field :paiddate, :placeholder => 'YYYY-MM-DD', :pattern => '\d{4}-\d{2}-\d{2}' %>
 			</div>
-		</div>
-		<div class="col-lg-2 col-sm-6">
-			<div class="form-group">
+			<div class="form-element">
 				<%= f.label :paymenttype, 'Payment Type' %>
 				<%
 					selectedPaymentType = nil
@@ -90,15 +70,9 @@
 						selectedPaymentType = Client.find(params[:client_id]).preferred_paymenttype
 					end
 				%>
-				<%= select(:invoice, 'paymenttype', payment_types, { :include_blank => 'None', :selected => selectedPaymentType }, { :class => 'form-control' }) %>
+				<%= select(:invoice, 'paymenttype', payment_types, { :include_blank => 'None', :selected => selectedPaymentType }) %>
 			</div>
 		</div>
 	</div>
-	<div class="row">
-		<div class="col-sm-12">
-			<div class="form-group">
-				<button type="submit" class="btn btn-success"><%= icon('far', 'save', class: 'left') %>Save</button>
-			</div>
-		</div>
-	</div>
+	<button type="submit" class="btn btn-success"><%= icon('far', 'save', class: 'left') %>Save</button>
 <% end %>

@@ -5,10 +5,23 @@
 	<% if @years.blank? %>
 	<p class="lead">No years.</p>
 	<% else %>
-	<ul>
-		<% @years.each do |year| %>
-		<li><%= link_to year do %><%= year.year %><% end %></li>
-		<% end %>
-	</ul>
-	<% end%>
+	<table>
+		<thead>
+			<tr>
+				<th>Year</th>
+				<th>Expenses</th>
+				<th>Revenue</th>
+			</tr>
+		</thead>
+		<tbody>
+			<% @years.each do |year| %>
+			<tr>
+				<td><%= link_to year do %><%= year.year %><% end %></td>
+				<td><%= number_to_currency(year.expenses.sum(:cost), { :negative_format => '(%n)' }) %></td>
+				<td><%= number_to_currency(year.incomeTotal, { :negative_format => '(%n)' }) %></td>
+			</tr>
+			<% end %>
+		</tbody>
+	</table>
+	<% end %>
 </div>
