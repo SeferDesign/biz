@@ -1,50 +1,44 @@
 <% provide(:title, 'Time') %>
-<section id="invoices-time">
-	<div class="container">
-		<div class="row">
-			<div class="col-sm-12">
-				<h1>Time</h1>
-				<h3>Client Summary</h3>
-				<table>
-					<thead>
-						<tr>
-							<th>Client</th>
-							<th>Time</th>
-							<th>Last Logged Date</th>
-						</tr>
-					</thead>
-					<tbody>
-						<% @tClients.each do |key, logs| %>
-						<tr>
-							<% thisClient = Client.where(id: key) %>
-							<td><% if thisClient.first %><%= link_to thisClient.first do %><%= thisClient.first.name %><% end %><% else %><%= key %><% end %></td>
-							<td><%= minutes_to_hours(logs.sum{ |l| l[:minutes].to_i }) %></td>
-							<td><%= logs.last[:date] %> @ <%= logs.last[:timestamp] %></td>
-						</tr>
-						<% end %>
-					</tbody>
-				</table>
-				<h3>Raw Logs</h3>
-				<table>
-					<thead>
-						<tr>
-							<th>Client</th>
-							<th>Minutes</th>
-							<th>Date</th>
-						</tr>
-					</thead>
-					<tbody>
-						<% @rows.each do |row| %>
-						<tr>
-							<% thisClient = Client.where(id: row['client id']) %>
-							<td><% if thisClient.first %><%= link_to thisClient.first do %><%= thisClient.first.name %><% end %><% else %><%= row['client id'] %><% end %></td>
-							<td><%= row['minutes'] %></td>
-							<td><%= row['date'] %> @ <%= row['timestamp'] %></td>
-						</tr>
-						<% end %>
-					</tbody>
-				</table>
-			</div>
-		</div>
-	</div>
-</section>
+<h1><%= icon('far', 'clock', class: 'fa-fw left') %>Time</h1>
+<div class="panel">
+	<h2>Client Summary</h2>
+	<table>
+		<thead>
+			<tr>
+				<th>Client</th>
+				<th>Time</th>
+				<th>Last Logged Date</th>
+			</tr>
+		</thead>
+		<tbody>
+			<% @tClients.each do |key, logs| %>
+			<tr>
+				<% thisClient = Client.where(id: key) %>
+				<td><% if thisClient.first %><%= link_to thisClient.first do %><%= thisClient.first.name %><% end %><% else %><%= key %><% end %></td>
+				<td><%= minutes_to_hours(logs.sum{ |l| l[:minutes].to_i }) %></td>
+				<td><%= logs.last[:date] %> @ <%= logs.last[:timestamp] %></td>
+			</tr>
+			<% end %>
+		</tbody>
+	</table>
+	<h2>Raw Logs</h2>
+	<table>
+		<thead>
+			<tr>
+				<th>Client</th>
+				<th>Minutes</th>
+				<th>Date</th>
+			</tr>
+		</thead>
+		<tbody>
+			<% @rows.each do |row| %>
+			<tr>
+				<% thisClient = Client.where(id: row['client id']) %>
+				<td><% if thisClient.first %><%= link_to thisClient.first do %><%= thisClient.first.name %><% end %><% else %><%= row['client id'] %><% end %></td>
+				<td><%= row['minutes'] %></td>
+				<td><%= row['date'] %> @ <%= row['timestamp'] %></td>
+			</tr>
+			<% end %>
+		</tbody>
+	</table>
+</div>
