@@ -5,10 +5,11 @@ header {
 	top: 0px;
 	display: flex;
 	flex-wrap: wrap;
-	justify-content: space-between;
+	justify-content: flex-start;
 	align-items: center;
-	padding: 1.5rem 1.5rem 1.5rem 0px;
-	background: $blue;
+	padding: 1.5rem 3rem 1.5rem 0px;
+	color: $white;
+	background: $color-primary;
 
 	.logo-wrap {
 
@@ -30,13 +31,14 @@ header {
 	.search-bar {
 
 		position: relative;
-		flex-grow: 1;
+		flex: 1;
 
 		i[class^="fa"] {
 			position: absolute;
 			top: 50%;
 			left: 0.5rem;
 			transform: translate(0px, -50%);
+			color: $black;
 		}
 
 		input {
@@ -55,6 +57,17 @@ header {
 				background: $white;
 			}
 
+		}
+
+	}
+
+	.user-meta-wrap {
+
+		margin-left: 1.5rem;
+
+		a {
+			color: currentColor;
+			text-decoration: none;
 		}
 
 	}

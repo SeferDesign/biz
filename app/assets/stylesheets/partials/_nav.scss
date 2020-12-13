@@ -1,7 +1,13 @@
 nav {
 
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: stretch;
 	flex-basis: $nav-width;
 	padding: 3rem 0px;
+	min-height: calc(var(--vh, 1vh) * 100 - 5.25rem);
 	background: $grey-light;
 	border-right: 1px solid $border-color;
 
@@ -125,6 +131,14 @@ nav {
 
 		}
 
+		&.menu-meta {
+			justify-self: flex-end;
+		}
+
+	}
+
+	.nav-spacer {
+		flex: 1;
 	}
 
 }
