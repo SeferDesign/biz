@@ -9,65 +9,57 @@
       <% end %>
       </ul>
     </div>
-  <% end %>
-  <div class="row">
-		<div class="col-sm-6">
-			<div class="form-group">
-				<%= f.label :name %>
-				<%= f.text_field :name, class: 'form-control' %>
-			</div>
-			<div class="form-group">
-				<%= f.label :vendor_id, 'Vendor' %>
-        <%= collection_select(:expense, 'vendor_id', Vendor.all, :id, :name, {}, { :class => 'form-control' }) %>
-			</div>
-			<div class="form-group">
-				<%= f.label :date, 'Date' %>
-				<div class="input-group">
-					<%= f.date_field :date, :required => true, :placeholder => 'YYYY-MM-DD', :pattern => '\d{4}-\d{2}-\d{2}', :value => @expense.date ? @expense.date : Time.now.strftime("%Y-%m-%d") %>
-				</div>
-			</div>
+	<% end %>
+	<div class="form-section panel">
+		<div class="form-description">
+			Basic Info
 		</div>
-    <div class="col-sm-6">
-			<div class="form-group">
-				<%= f.label :cost %>
-        <div class="input-group">
-          <span class="input-group-addon"><%= icon('fas', 'dollar-sign') %></span>
-          <%= f.number_field :cost, class: 'form-control', :step => '0.01' %>
-        </div>
-      </div>
-			<div class="form-group">
-				<%= f.label :account %>
-				<%= select(:expense, 'account', expense_account_types, {}, { :class => 'form-control' }) %>
+		<div class="form-elements">
+			<div class="form-element full">
+				<%= f.label :name %>
+				<%= f.text_field :name %>
 			</div>
-			<div class="form-group">
+			<div class="form-element">
+				<%= f.label :vendor_id, 'Vendor' %>
+        <%= collection_select(:expense, 'vendor_id', Vendor.all, :id, :name, {}) %>
+			</div>
+			<div class="form-element">
+				<%= f.label :date, 'Date' %>
+				<%= f.date_field :date, :required => true, :placeholder => 'YYYY-MM-DD', :pattern => '\d{4}-\d{2}-\d{2}', :value => @expense.date ? @expense.date : Time.now.strftime("%Y-%m-%d") %>
+			</div>
+			<div class="form-element">
+				<%= f.label :cost %>
+        <%= f.number_field :cost, :step => '0.01' %>
+      </div>
+			<div class="form-element">
+				<%= f.label :account %>
+				<%= select(:expense, 'account', expense_account_types, {}) %>
+			</div>
+			<div class="form-element full">
 				<%= f.label :notes %>
-				<%= f.text_area :notes, class: 'form-control' %>
+				<%= f.text_area :notes %>
 			</div>
 		</div>
   </div>
-  <% if @expense.new_record? %>
-	<div class="row">
-		<div class="col-sm-12">
-			<strong>Type:</strong>
-			<label for="expense_type_one-time"><%= radio_button_tag 'expense_type', 'one-time', true %> One-Time</label>
-			<label for="expense_type_monthly"><%= radio_button_tag 'expense_type', 'monthly' %> Monthly</label>
+	<% if @expense.new_record? %>
+	<div class="form-section panel">
+		<div class="form-description">
+			Frequency
 		</div>
-		<div class="expense-monthly-form-element col-sm-12">
-			<hr>
-      <h2>Additional Months</h2>
-			<p>Exclude the current month (the above date is counted).</p>
-			<div class="row">
+		<div class="form-elements">
+			<div class="form-element form-element-radio-wrap full">
+				<label for="expense_type_one-time"><%= radio_button_tag 'expense_type', 'one-time', true %> One-Time</label>
+				<label for="expense_type_monthly"><%= radio_button_tag 'expense_type', 'monthly' %> Monthly</label>
+			</div>
+			<div class="form-element full expense-monthly-form-element" style="display: none;">
+				<h2>Additional Months</h2>
+				<p>Exclude the current month (the above date is counted).</p>
 				<% 1.upto(12) do |month| %>
-				<div class="col-sm-4"><label>
-					<%= check_box_tag "additionalmonths-#{month}", month, Time.now.month < month ? true : false %> <%= Date::MONTHNAMES[month] %>
-				</label></div>
+				<label><%= check_box_tag "additionalmonths-#{month}", month, Time.now.month < month ? true : false %> <%= Date::MONTHNAMES[month] %></label>
 				<% end %>
 			</div>
 		</div>
 	</div>
   <% end %>
-	<hr>
-  <div class="form-group">
-    <button type="submit" class="btn btn-success"><%= icon('far', 'save', class: 'left') %>Save</button>
-  </div>
+  <button type="submit" class="btn btn-success"><%= icon('far', 'save', class: 'left') %>Save</button>
 <% end %>
