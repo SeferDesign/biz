@@ -1,6 +1,6 @@
 <% provide(:title, "Client ##{@client.id}") %>
 <% if !@client.logo.blank? %>
-<%= image_tag(@client.logo.url(), class: 'client-logo pull-right hidden-xs') %>
+<%= image_tag(@client.logo.url(), class: 'client-logo') %>
 <% end %>
 <h1><%= icon('fas', 'user', class: 'fa-fw left') %><%= @client.name %></h1>
 <p class="doicons">

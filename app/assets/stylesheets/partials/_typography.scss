@@ -28,7 +28,13 @@ h1 {
 }
 
 h2 {
+
 	font-size: 2rem;
+
+	&:not(:first-child) {
+		margin-top: 1rem;
+	}
+
 }
 
 h3 {
@@ -59,4 +65,42 @@ blockquote {
 		margin-bottom: 0px;
 	}
 
+}
+
+.text-center {
+	text-align: center;
+}
+
+.text-right {
+	text-align: right;
+}
+
+.spread {
+	font-size: 0.875em;
+	letter-spacing: 0.01em;
+	text-transform: uppercase;
+	font-weight: bold;
+}
+
+.currency {
+
+	position: relative;
+	font-family: monospace;
+
+	// &:before {
+	// 	content: '$';
+	// 	position: absolute;
+	// 	top: 50%;
+	// 	left: 0.5rem;
+	// 	transform: translate(0px, -50%);
+	// }
+
+}
+
+.green {
+	color: $green;
+}
+
+.red {
+	color: $red;
 }

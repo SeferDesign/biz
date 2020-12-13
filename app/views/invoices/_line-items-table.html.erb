@@ -15,7 +15,7 @@
 	<tfoot>
 		<tr>
 			<td class="text-right" colspan="4"><strong>Total</strong>&nbsp;&nbsp;</td>
-			<td class="currency"><strong><div class="pull-right"><%= number_to_currency(@invoice.lines.sum('total'), { :unit => '', :negative_format => '(%n)' }) %></div>$</strong></td>
+			<td class="currency"><strong><%= number_to_currency(@invoice.lines.sum('total'), { :unit => '', :negative_format => '(%n)' }) %></div>$</strong></td>
 		</tr>
 	</tfoot>
 </table>

@@ -1,6 +1,6 @@
 <% provide(:title, "Invoice #{@invoice.display_id}") %>
 <% if @invoice.client.logo.present? %>
-<%= image_tag(@invoice.client.logo.url(), class: 'client-logo pull-right hidden-xs') %>
+<%= image_tag(@invoice.client.logo.url(), class: 'client-logo') %>
 <% end %>
 <% if user_signed_in? and !@clientView %>
 <h1><%= icon('fas', 'dollar-sign', class: 'fa-fw left') %>Invoice #<%= @invoice.id %></h1>

@@ -1,12 +1,3 @@
 <% provide(:title, "Edit Invoice ##{@invoice.id}") %>
-<section id="invoice-edit">
-	<div class="container">
-		<div class="row">
-			<div class="col-sm-12">
-				<h1>Edit Invoice #<%= @invoice.id %></h1>
-				<%= render 'form' %>
-				<p><%= link_to 'Back', invoices_path %></p>
-			</div>
-		</div>
-	</div>
-</section>
+<h1>Edit Invoice #<%= @invoice.id %></h1>
+<%= render 'form' %>

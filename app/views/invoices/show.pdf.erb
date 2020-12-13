@@ -13,7 +13,7 @@
 		<div class="row">
 			<div class="col-sm-12">
 				<div>
-					<div class="pull-right text-right">
+					<div class="text-right">
 						<p>Attention: <%= @invoice.client.contact %><% if @invoice.client.name.present? and @invoice.client.name != @invoice.client.contact %><br><%= @invoice.client.name %><% end %></p>
 						<% if @invoice.client.address1.present? %>
 						<p>
@@ -66,7 +66,7 @@
 						  <td class="text-center">&mdash;</td>
 						  <td class="text-center">&mdash;</td>
 						  <% end %>
-						  <td><div class="pull-right"><%= number_to_currency(line.total, { :unit => '', :negative_format => '(%n)' }) %></div>$</td>
+						  <td><%= number_to_currency(line.total, { :unit => '', :negative_format => '(%n)' }) %>$</td>
 						</tr>
 						<% end %>
 
@@ -74,7 +74,7 @@
 					<tfoot>
 						<tr>
 			        <td class="text-right" colspan="3"><strong>Total</strong>&nbsp;&nbsp;</td>
-			        <td><strong><div class="pull-right"><%= number_to_currency(@invoice.lines.sum('total'), { :unit => '', :negative_format => '(%n)' }) %></div>$</strong></td>
+			        <td><strong><%= number_to_currency(@invoice.lines.sum('total'), { :unit => '', :negative_format => '(%n)' }) %>$</strong></td>
 			      </tr>
 					</tfoot>
 			  </table>

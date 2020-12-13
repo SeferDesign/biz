@@ -22,7 +22,7 @@
 			</div>
 			<div class="form-element full">
 				<%= f.label :name %>
-				<%= f.text_field :name %>
+				<%= f.text_field :name, :required => true %>
 			</div>
 			<div class="form-element">
 				<%= f.label :contact %>
@@ -30,7 +30,7 @@
 			</div>
 			<div class="form-element">
 				<%= f.label :site_url, 'Site' %>
-				<%= f.text_field :site_url %>
+				<%= f.url_field :site_url %>
 			</div>
 		</div>
 	</div>
