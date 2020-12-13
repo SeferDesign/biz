@@ -4,45 +4,29 @@
 			<%= link_to root_path, { class: (controller_name == 'welcome' and action_name == 'index' ? 'active': '') } do %><%= icon('fas', 'home', class: 'fa-fw') %>Home</a><% end %>
 		</li>
 		<li<% if controller_name == 'clients' %> class="active"<% end %>>
-			<%= link_to clients_path, { class: ((controller_name == 'clients' and ['index', 'show', 'edit'].include? action_name) ? 'active' : '') } do %><%= icon('fas', 'user', class: 'fa-fw') %>Clients<% end %>
-			<% if controller_name == 'clients' %>
-			<ul class="menu-sub">
-				<li><%= link_to new_client_path, { class: (controller_name == 'clients' and action_name == 'new' ? 'active': '') } do %><%= icon('fas', '', class: 'fa-fw') %>New<% end %></li>
-			</ul>
-			<% end %>
+			<%= link_to clients_path, { class: ((controller_name == 'clients' and ['index', 'show', 'edit', 'new'].include? action_name) ? 'active' : '') } do %><%= icon('fas', 'user', class: 'fa-fw') %>Clients<% end %>
+			<%= link_to new_client_path, { class: 'new' } do %><%= icon('fas', 'plus', class: 'fa-fw') %><% end %>
 		</li>
 		<li<% if controller_name == 'invoices' %> class="active"<% end %>>
-			<%= link_to invoices_path, { class: (controller_name == 'invoices' and action_name == 'index' ? 'active' : '') } do %><%= icon('fas', 'dollar-sign', class: 'fa-fw') %>Invoices<% end %>
+			<%= link_to invoices_path, { class: ((controller_name == 'invoices' and ['index', 'show', 'edit', 'new'].include? action_name) ? 'active' : '') } do %><%= icon('fas', 'dollar-sign', class: 'fa-fw') %>Invoices<% end %>
+			<%= link_to new_invoice_path, { class: 'new' } do %><%= icon('fas', 'plus', class: 'fa-fw') %><% end %>
 			<% if controller_name == 'invoices' %>
 			<ul class="menu-sub">
-				<li><%= link_to new_invoice_path, { class: (controller_name == 'invoices' and action_name == 'new' ? 'active': '') } do %><%= icon('fas', '', class: 'fa-fw') %>New<% end %></li>
-				<li><%= link_to time_path, { class: (controller_name == 'invoices' and action_name == 'time' ? 'active' : '') } do %><%= icon('fas', '', class: 'fa-fw') %>Time<% end %></li>
+				<li><%= link_to time_path, { class: (controller_name == 'invoices' and action_name == 'time' ? 'active' : '') } do %><%= icon('fas', '', class: 'fa-fw') %>Time Tracking<% end %></li>
 			</ul>
 			<% end %>
 		</li>
 		<li<% if controller_name == 'vendors' %> class="active"<% end %>>
-			<%= link_to vendors_path, { class: (controller_name == 'vendors' and action_name == 'index' ? 'active' : '') } do %><%= icon('far', 'building', class: 'fa-fw') %>Vendors<% end %>
-			<% if controller_name == 'vendors' %>
-			<ul class="menu-sub">
-				<li><%= link_to new_vendor_path, { class: (controller_name == 'vendors' and action_name == 'new' ? 'active': '') } do %><%= icon('fas', '', class: 'fa-fw') %>New<% end %></li>
-			</ul>
-			<% end %>
+			<%= link_to vendors_path, { class: ((controller_name == 'vendors' and ['index', 'show', 'edit', 'new'].include? action_name) ? 'active' : '') } do %><%= icon('far', 'building', class: 'fa-fw') %>Vendors<% end %>
+			<%= link_to new_vendor_path, { class: 'new' } do %><%= icon('fas', 'plus', class: 'fa-fw') %><% end %>
 		</li>
 		<li<% if controller_name == 'expenses' %> class="active"<% end %>>
-			<%= link_to expenses_path, { class: (controller_name == 'expenses' and action_name == 'index' ? 'active' : '') } do %><%= icon('far', 'credit-card', class: 'fa-fw') %>Expenses<% end %>
-			<% if controller_name == 'expenses' %>
-			<ul class="menu-sub">
-				<li><%= link_to new_expense_path, { class: (controller_name == 'expenses' and action_name == 'new' ? 'active': '') } do %><%= icon('fas', '', class: 'fa-fw') %>New<% end %></li>
-			</ul>
-			<% end %>
+			<%= link_to expenses_path, { class: ((controller_name == 'expenses' and ['index', 'show', 'edit', 'new'].include? action_name) ? 'active' : '') } do %><%= icon('far', 'credit-card', class: 'fa-fw') %>Expenses<% end %>
+			<%= link_to new_expense_path, { class: 'new' } do %><%= icon('fas', 'plus', class: 'fa-fw') %><% end %>
 		</li>
 		<li<% if controller_name == 'years' %> class="active"<% end %>>
-			<%= link_to years_path, { class: (controller_name == 'years' and action_name == 'index' ? 'active' : '') } do %><%= icon('far', 'calendar-alt', class: 'fa-fw') %>Years<% end %>
-			<% if controller_name == 'years' %>
-			<ul class="menu-sub">
-				<li><%= link_to new_year_path, { class: (controller_name == 'years' and action_name == 'new' ? 'active': '') } do %><%= icon('fas', '', class: 'fa-fw') %>New<% end %></li>
-			</ul>
-			<% end %>
+			<%= link_to years_path, { class: ((controller_name == 'years' and ['index', 'show', 'edit', 'new'].include? action_name) ? 'active' : '') } do %><%= icon('far', 'calendar-alt', class: 'fa-fw') %>Years<% end %>
+			<%= link_to new_year_path, { class: 'new' } do %><%= icon('fas', 'plus', class: 'fa-fw') %><% end %>
 		</li>
 	</ul>
 	<ul class="menu-secondary">

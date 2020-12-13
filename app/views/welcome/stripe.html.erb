@@ -1,47 +1,41 @@
-<% provide(:title, '') %>
-<section id="stripe-dash" class="stripe-dash-page">
-	<div class="container">
-		<div class="row">
-			<div class="col-sm-12">
-				<h2>Stripe Payouts</h2>
-				<table>
-					<thead>
-						<tr>
-							<th>Date</th>
-							<th class="text-right">Amount</th>
-						</tr>
-					</thead>
-					<tbody>
-						<% @payouts.each do |payout| %>
-						<tr>
-							<td><%= Time.at(payout.arrival_date).strftime('%B %e, %Y') %></td>
-							<td class="text-right" colspan="3"><%= number_to_currency(payout.amount.to_f / 100, precision: 2) %></td>
-						</tr>
-						<% end %>
-					</tbody>
-				</table>
-				<h2>Invoices paid via Stripe</h2>
-				<table>
-					<thead>
-						<tr>
-							<th>Date</th>
-							<th>Invoice ID</th>
-							<th class="text-right">Amount</th>
-							<th class="text-right">Est. Fee</th>
-						</tr>
-					</thead>
-					<tbody>
-						<% @charges.each do |charge| %>
-						<tr>
-							<td><%= Time.at(charge.created).strftime('%B %e, %Y') %></td>
-							<td><% if charge.metadata['invoice_id'] %><%= link_to invoice_path(charge.metadata['invoice_id']) do %><%= charge.metadata['invoice_id'] %><% end %><% else %>&mdash;<% end %></td>
-							<td class="text-right"><%= number_to_currency(charge.amount.to_f / 100) %></td>
-							<td class="text-right"><%= number_to_currency(((charge.amount.to_f * 0.029) + 30) / 100 * -1, precision: 2) %></td>
-						</tr>
-						<% end %>
-					</tbody>
-				</table>
-			</div>
-		</div>
-	</div>
-</section>
+<% provide(:title, 'Stripe Payouts') %>
+<h1><%= icon('fas', 'university', class: 'fa-fw left') %>Stripe Payouts</h1>
+<div class="panel">
+	<table>
+		<thead>
+			<tr>
+				<th>Date</th>
+				<th class="text-right">Amount</th>
+			</tr>
+		</thead>
+		<tbody>
+			<% @payouts.each do |payout| %>
+			<tr>
+				<td><%= Time.at(payout.arrival_date).strftime('%B %e, %Y') %></td>
+				<td class="text-right" colspan="3"><%= number_to_currency(payout.amount.to_f / 100, precision: 2) %></td>
+			</tr>
+			<% end %>
+		</tbody>
+	</table>
+	<h2>Invoices paid via Stripe</h2>
+	<table>
+		<thead>
+			<tr>
+				<th>Date</th>
+				<th>Invoice ID</th>
+				<th class="text-right">Amount</th>
+				<th class="text-right">Est. Fee</th>
+			</tr>
+		</thead>
+		<tbody>
+			<% @charges.each do |charge| %>
+			<tr>
+				<td><%= Time.at(charge.created).strftime('%B %e, %Y') %></td>
+				<td><% if charge.metadata['invoice_id'] %><%= link_to invoice_path(charge.metadata['invoice_id']) do %><%= charge.metadata['invoice_id'] %><% end %><% else %>&mdash;<% end %></td>
+				<td class="text-right"><%= number_to_currency(charge.amount.to_f / 100) %></td>
+				<td class="text-right"><%= number_to_currency(((charge.amount.to_f * 0.029) + 30) / 100 * -1, precision: 2) %></td>
+			</tr>
+			<% end %>
+		</tbody>
+	</table>
+</div>
