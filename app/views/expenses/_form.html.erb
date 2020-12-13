@@ -20,17 +20,17 @@
 				<%= f.text_field :name %>
 			</div>
 			<div class="form-element">
-				<%= f.label :vendor_id, 'Vendor' %>
-        <%= collection_select(:expense, 'vendor_id', Vendor.all, :id, :name, {}) %>
+				<%= f.label :cost %>
+        <%= f.number_field :cost, :step => '0.01' %>
 			</div>
 			<div class="form-element">
 				<%= f.label :date, 'Date' %>
 				<%= f.date_field :date, :required => true, :placeholder => 'YYYY-MM-DD', :pattern => '\d{4}-\d{2}-\d{2}', :value => @expense.date ? @expense.date : Time.now.strftime("%Y-%m-%d") %>
 			</div>
 			<div class="form-element">
-				<%= f.label :cost %>
-        <%= f.number_field :cost, :step => '0.01' %>
-      </div>
+				<%= f.label :vendor_id, 'Vendor' %>
+        <%= collection_select(:expense, 'vendor_id', Vendor.all, :id, :name, {}) %>
+			</div>
 			<div class="form-element">
 				<%= f.label :account %>
 				<%= select(:expense, 'account', expense_account_types, {}) %>

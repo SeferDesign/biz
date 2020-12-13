@@ -45,11 +45,21 @@ form,
 
 			display: flex;
 			flex-wrap: wrap;
-			justify-content: space-evenly;
+			justify-content: flex-start;
 			align-items: flex-start;
 
 			label[for] {
 				margin-bottom: 0px;
+			}
+
+			label + input,
+			label + label,
+			input:not(:first-child)[type="hidden"] + input {
+				margin-left: 1rem;
+			}
+
+			input + label {
+				margin-left: 0.25rem;
 			}
 
 		}
@@ -117,6 +127,10 @@ form,
 			background: $white;
 		}
 
+	}
+
+	select {
+		border-radius: 0.25em;
 	}
 
 	textarea {

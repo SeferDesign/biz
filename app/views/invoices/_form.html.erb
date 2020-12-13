@@ -46,7 +46,7 @@
 		</div>
 		<div class="form-elements">
 			<div class="form-element form-element-radio-wrap full">
-				<%= f.label :paid, 'Paid Status' %><br>
+				<%= f.label :paid, 'Paid Status' %>
 				<%= radio_button('invoice', 'paid', true) %>
 				<%= label_tag(:invoice_paid_true, 'Paid') %>
 				<% unless @invoice.paid %>
