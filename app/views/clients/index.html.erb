@@ -1,48 +1,38 @@
-<% provide(:title, 'Clients | ') %>
-<section id="clients-list">
-	<div class="container">
-		<div class="row">
-			<div class="col-sm-12">
-				<h1><% if params[:inactive] == 'true' %>Inactive<% else %>Active<% end %> Clients</h1>
-				<% if params[:inactive] == 'true' %>
-				<p><%= link_to 'Active Clients', clients_path %></p>
-				<% else %>
-				<p><%= link_to 'Inactive Clients', clients_path(:inactive => 'true') %></p>
-				<% end %>
-				<p><%= link_to new_client_path, { :class => 'btn btn-success' } do %><%= icon('fas', 'plus', class: 'left') %>New Client<% end %></p>
-				<% if @clients.blank? %>
-				<p class="lead">No clients.</p>
-				<% else %>
-				<div class="row">
-					<div class="col-sm-12">
-						<table class="table table-hover table-striped table-condensed">
-							<thead>
-								<tr>
-									<th>Client</th>
-									<th>&nbsp;</th>
-									<th class="hidden-xs">Contact</th>
-									<th>Hourly</th>
-									<th class="text-right hidden-xs">Unpaid</th>
-									<th class="text-right">Billed</th>
-								</tr>
-							</thead>
-							<tbody>
-								<% @clients.sort { |a,b| a.name <=> b.name }.each do |client| %>
-								<tr id="clientrow<%= client.id %>">
-									<td><%= link_to client do %><%= client.name %><% end %></td>
-									<td><%= link_to new_invoice_path(:client_id => client.id), :class => 'new-invoice-link' do %><%= icon('fas', 'dollar-sign') %><% end %></td>
-									<td class="hidden-xs"><%= client.contact %></td>
-									<td><% if client.currentrate %><%= number_to_currency(client.currentrate) %><% else %>&mdash;<% end %></td>
-									<td class="currency text-right hidden-xs"><% if client.unpaidTotal > 0 %><span class="spread red"><%= number_to_currency(client.unpaidTotal, { :negative_format => '(%n)' }) %></span><% else %>&mdash;<% end %></td>
-									<td class="currency text-right"><%= number_to_currency(client.invoiceTotal, { :negative_format => '(%n)' }) %></td>
-								</tr>
-								<% end %>
-							</tbody>
-						</table>
-					</div>
-				</div>
-				<% end %>
-			</div>
-		</div>
-	</div>
-</section>
+<% provide(:title, 'Clients') %>
+<h1><%= icon('fas', 'user', class: 'fa-fw left') %><% if params[:inactive] == 'true' %>Inactive <% end %>Clients</h1>
+<% if params[:inactive] == 'true' %>
+<p><%= link_to 'Active Clients', clients_path %></p>
+<% else %>
+<p><%= link_to 'Inactive Clients', clients_path(:inactive => 'true') %></p>
+<% end %>
+<p><%= link_to new_client_path, { :class => 'btn btn-success' } do %><%= icon('fas', 'plus', class: 'left') %>New Client<% end %></p>
+<div class="panel">
+	<% if @clients.blank? %>
+	<p class="lead">No clients.</p>
+	<% else %>
+	<table>
+		<thead>
+			<tr>
+				<th>Client</th>
+				<th>&nbsp;</th>
+				<th class="hidden-xs">Contact</th>
+				<th>Hourly</th>
+				<th class="text-right hidden-xs">Unpaid</th>
+				<th class="text-right">Billed</th>
+			</tr>
+		</thead>
+		<tbody>
+			<% @clients.sort { |a,b| a.name <=> b.name }.each do |client| %>
+			<tr id="clientrow<%= client.id %>">
+				<td><%= link_to client do %><%= client.name %><% end %></td>
+				<td><%= link_to new_invoice_path(:client_id => client.id), :class => 'new-invoice-link' do %><%= icon('fas', 'dollar-sign') %><% end %></td>
+				<td class="hidden-xs"><%= client.contact %></td>
+				<td><% if client.currentrate %><%= number_to_currency(client.currentrate) %><% else %>&mdash;<% end %></td>
+				<td class="currency text-right hidden-xs"><% if client.unpaidTotal > 0 %><span class="spread red"><%= number_to_currency(client.unpaidTotal, { :negative_format => '(%n)' }) %></span><% else %>&mdash;<% end %></td>
+				<td class="currency text-right"><%= number_to_currency(client.invoiceTotal, { :negative_format => '(%n)' }) %></td>
+			</tr>
+			<% end %>
+		</tbody>
+	</table>
+	<% end %>
+</div>

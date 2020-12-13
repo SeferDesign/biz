@@ -1,12 +1,3 @@
-<% provide(:title, "Edit Vendor ##{@vendor.id} | ") %>
-<section id="vendor-edit">
-	<div class="container">
-		<div class="row">
-			<div class="col-sm-12">
-				<h1>Edit Vendor #<%= @vendor.id %></h1>
-				<%= render 'form' %>
-				<p><%= link_to 'Back', vendors_path %></p>
-			</div>
-		</div>
-	</div>
-</section>
+<% provide(:title, "Edit #{@vendor.name}") %>
+<h1><%= icon('far', 'building', class: 'fa-fw left') %>Edit <%= @vendor.name %></h1>
+<%= render 'form' %>

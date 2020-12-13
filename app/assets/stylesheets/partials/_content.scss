@@ -1,4 +1,39 @@
 section {
 	flex: 1;
 	padding: 3rem 1.5rem 3rem 3rem;
+	background: $grey-light;
+}
+
+table {
+
+	width: 100%;
+	border-collapse: collapse;
+
+	th,
+	td {
+		padding: 0.5rem;
+		border: 0px;
+	}
+
+	th {
+		text-align: left;
+		border-bottom: 0.125rem solid $grey-light;
+	}
+
+	tbody {
+
+		tr {
+
+			&:first-child {
+
+				td {
+					padding-top: 0.75rem;
+				}
+
+			}
+
+		}
+
+	}
+
 }

@@ -1,47 +1,37 @@
-<% provide(:title, 'Vendors | ') %>
-<section id="vendors-list">
-	<div class="container">
-		<div class="row">
-			<div class="col-sm-12">
-				<h1>Vendors</h1>
-				<p><% if params[:category] == 'true' %><%= link_to 'View Alphabetically', vendors_path %><% else %><%= link_to 'View by Category', vendors_path(:category => 'true') %><% end %>
-				<p><%= link_to new_vendor_path, { :class => 'btn btn-success' } do %><%= icon('fas', 'plus', class: 'left') %>New Vendor<% end %></p>
-				<% if @vendors.blank? %>
-				<p class="lead">No vendors.</p>
-				<% else %>
-				<div class="row">
-					<div class="col-sm-12">
-						<% if params[:category] == 'true' %>
-						<div class="vendors-category-view">
-							<% @vendors.group_by(&:category).sort_by { |k, v| -v.join.length }.each do |category, vend| %>
-							<p><strong><%= category %></strong></h3>
-							<ul>
-								<% vend.each do |v| %><li><%= link_to v do %><%= v.name %><% end %></li><% end %>
-							</ul>
-							<% end %>
-						</div>
-						<% else %>
-						<table class="table table-hover table-striped table-condensed">
-							<thead>
-								<tr>
-									<th>Vendor</th>
-									<th>Category</th>
-								</tr>
-							</thead>
-							<tbody>
-								<% @vendors.each do |vendor| %>
-								<tr id="vendorrow<%= vendor.id %>">
-									<td><%= link_to vendor do %><%= vendor.name %><% end %></td>
-									<td><%= vendor.category %></td>
-								</tr>
-								<% end %>
-							</tbody>
-						</table>
-						<% end %>
-					</div>
-				</div>
-				<% end %>
-			</div>
-		</div>
+<% provide(:title, 'Vendors') %>
+<h1><%= icon('far', 'building', class: 'fa-fw left') %>Vendors</h1>
+<p><% if params[:category] == 'true' %><%= link_to 'View Alphabetically', vendors_path %><% else %><%= link_to 'View by Category', vendors_path(:category => 'true') %><% end %>
+<p><%= link_to new_vendor_path, { :class => 'btn btn-success' } do %><%= icon('fas', 'plus', class: 'left') %>New Vendor<% end %></p>
+<div class="panel">
+	<% if @vendors.blank? %>
+	<p class="lead">No vendors.</p>
+	<% else %>
+	<% if params[:category] == 'true' %>
+	<div class="vendors-category-view">
+		<% @vendors.group_by(&:category).sort_by { |k, v| -v.join.length }.each do |category, vend| %>
+		<p><strong><%= category %></strong></h3>
+		<ul>
+			<% vend.each do |v| %><li><%= link_to v do %><%= v.name %><% end %></li><% end %>
+		</ul>
+		<% end %>
 	</div>
-</section>
+	<% else %>
+	<table>
+		<thead>
+			<tr>
+				<th>Vendor</th>
+				<th>Category</th>
+			</tr>
+		</thead>
+		<tbody>
+			<% @vendors.each do |vendor| %>
+			<tr id="vendorrow<%= vendor.id %>">
+				<td><%= link_to vendor do %><%= vendor.name %><% end %></td>
+				<td><%= vendor.category %></td>
+			</tr>
+			<% end %>
+		</tbody>
+	</table>
+	<% end %>
+	<% end %>
+</div>

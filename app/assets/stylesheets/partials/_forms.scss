@@ -1,6 +1,39 @@
 form,
 .form {
 
+	.form-section {
+
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: flex-start;
+
+		.form-description {
+			flex-basis: 400px;
+		}
+
+		.form-elements {
+
+			flex: 1;
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: space-between;
+			align-items: flex-end;
+
+			& > * {
+
+				flex-basis: calc((100% - 1.5rem) / 2);
+
+				&.full {
+					flex-basis: 100%;
+				}
+
+			}
+
+		}
+
+	}
+
 	.form-element {
 
 		&:not(:first-child) {
@@ -43,7 +76,6 @@ form,
 		margin-bottom: 0.5rem;
 		color: $grey-dark;
 		font-size: 0.75rem;
-		text-align: center;
 		text-transform: uppercase;
 
 		&.checkbox-label {
@@ -64,17 +96,25 @@ form,
 
 	input:not([type="checkbox"]):not([type="radio"]),
 	textarea,
+	select,
 	.input-text-standin {
 		display: block;
 		padding: 0.5em 0.75em;
 		min-height: 2.25em;
 		line-height: 1em;
 		width: 100%;
-		background: $white;
+		background: $grey-light;
 		border: 1px solid $grey;
+		outline: 0px;
 		box-shadow: none;
 		border-radius: 0px;
 		-webkit-appearance: none;
+
+		&:focus {
+			border-color: $grey-dark;
+			background: $white;
+		}
+
 	}
 
 	.input-text-standin {
