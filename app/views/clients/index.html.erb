@@ -4,7 +4,6 @@
 		<div class="row">
 			<div class="col-sm-12">
 				<h1><% if params[:inactive] == 'true' %>Inactive<% else %>Active<% end %> Clients</h1>
-				<p><%= link_to 'Home', root_path %></p>
 				<% if params[:inactive] == 'true' %>
 				<p><%= link_to 'Active Clients', clients_path %></p>
 				<% else %>

@@ -4,7 +4,6 @@
 		<div class="row">
 			<div class="col-sm-12">
 				<h1><% if params[:future] == 'true' %>Future<% elsif params[:inactive] == 'true' %>All Past<% else %>Recent<% end %> Expenses</h1>
-				<p><%= link_to 'Home', root_path %></p>
 				<% if params[:future] == 'true' or params[:inactive] == 'true' %>
 				<p><%= link_to 'Recent Expenses', expenses_path %></p>
 				<% else %>

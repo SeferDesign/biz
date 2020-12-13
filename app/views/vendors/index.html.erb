@@ -4,7 +4,6 @@
 		<div class="row">
 			<div class="col-sm-12">
 				<h1>Vendors</h1>
-				<p><%= link_to 'Home', root_path %></p>
 				<p><% if params[:category] == 'true' %><%= link_to 'View Alphabetically', vendors_path %><% else %><%= link_to 'View by Category', vendors_path(:category => 'true') %><% end %>
 				<p><%= link_to new_vendor_path, { :class => 'btn btn-success' } do %><%= icon('fas', 'plus', class: 'left') %>New Vendor<% end %></p>
 				<% if @vendors.blank? %>
