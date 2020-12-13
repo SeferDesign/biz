@@ -1,0 +1,31 @@
+.chart-wrap {
+
+	margin-top: 60px;
+
+	&.overview-chart-wrap {
+
+		@media screen and (min-width: $screen-md) {
+			margin-top: 0px;
+		}
+
+	}
+
+	.highcharts-plot-line-label {
+		font-size: 6px;
+		text-transform: uppercase;
+	}
+
+	.highcharts-column-series.highcharts-series-2,
+	#year-income-chart .highcharts-column-series.highcharts-series-1 {
+
+		rect {
+			fill: transparent;
+			stroke: #639ec9;
+			stroke-width: 0.25%;
+			stroke-dasharray: 5;
+			opacity: 0.5;
+		}
+
+	}
+
+}
