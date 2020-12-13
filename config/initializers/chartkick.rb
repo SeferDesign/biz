@@ -1,9 +1,9 @@
 Chartkick.options = {
   legend: 'none',
   colors: [
-    '#5cb85c',
-    '#d9534f',
-    '#639ec9',
+    '#29b165',
+    '#f74f4f',
+    '#4492ff',
     '#d49e53',
     '#944de3',
     '#261590',
