@@ -36,7 +36,8 @@ form,
 
 	.form-element {
 
-		&:not(:first-child) {
+		&.full + .form-element,
+		&:nth-child(n+3) {
 			margin-top: 1rem;
 		}
 

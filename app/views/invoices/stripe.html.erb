@@ -1,16 +1,8 @@
 <% provide(:title, "Stripe Payment") %>
-<section id="invoice-stripe-payment">
-	<div class="container">
-		<div class="row">
-			<div class="col-sm-12">
-        <% if @stripeError %>
-        <h2>Payment Failed</h2>
-        <p>Your card has NOT been charged. Please contact us for further instructions.</p>
-        <% else %>
-        <h2>Payment Succeeded</h2>
-        <p>Your card was charged successfully. Thank you!</p>
-        <% end %>
-      </div>
-    </div>
-  </div>
-</section>
+<% if @stripeError %>
+<h2>Payment Failed</h2>
+<p>Your card has NOT been charged. Please contact us for further instructions.</p>
+<% else %>
+<h2>Payment Succeeded</h2>
+<p>Your card was charged successfully. Thank you!</p>
+<% end %>

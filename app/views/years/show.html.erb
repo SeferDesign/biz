@@ -1,33 +1,27 @@
 <% provide(:title, "Year #{@year.year}") %>
-<section id="year<%= @year.year %>" class="yearsummary">
-	<div class="container">
-		<div class="row">
-			<div class="col-sm-12">
-				<h1>Year <%= @year.year %> Summary</h1>
-				<p class="doicons">
-					<%= link_to edit_year_path(@year), title: 'Edit' do %><%= icon_action_edit %><% end %>
-				</p>
-				<br><br>
+<h1><%= icon('far', 'calendar-alt', class: 'fa-fw left') %>Year <%= @year.year %> Summary</h1>
+<p class="doicons">
+	<%= link_to edit_year_path(@year), title: 'Edit' do %><%= icon_action_edit %><% end %>
+</p>
+<div class="panel">
+	<ul class="nav nav-tabs" role="tablist">
+		<li role="presentation" class="active"><a href="#overview" role="tab" data-toggle="tab">Overview</a></li>
+		<li role="presentation"><a href="#goals" role="tab" data-toggle="tab">Goals</a></li>
+		<li role="presentation"><a href="#income" role="tab" data-toggle="tab">Income</a></li>
+		<li role="presentation"><a href="#expenses" role="tab" data-toggle="tab">Expenses</a></li>
+	</ul>
+	<div class="tab-content">
+		<div role="tabpanel" class="tab-pane active" id="overview">
+			<%= render 'tab-overview' %>
 		</div>
-		<ul class="nav nav-tabs" role="tablist">
-			<li role="presentation" class="active"><a href="#overview" role="tab" data-toggle="tab">Overview</a></li>
-			<li role="presentation"><a href="#goals" role="tab" data-toggle="tab">Goals</a></li>
-			<li role="presentation"><a href="#income" role="tab" data-toggle="tab">Income</a></li>
-			<li role="presentation"><a href="#expenses" role="tab" data-toggle="tab">Expenses</a></li>
-		</ul>
-		<div class="tab-content">
-			<div role="tabpanel" class="tab-pane active" id="overview">
-				<%= render 'tab-overview' %>
-			</div>
-			<div role="tabpanel" class="tab-pane" id="goals">
-				<%= render 'tab-goals' %>
-			</div>
-			<div role="tabpanel" class="tab-pane" id="income">
-				<%= render 'tab-income' %>
-			</div>
-			<div role="tabpanel" class="tab-pane" id="expenses">
-				<%= render 'tab-expenses' %>
-			</div>
+		<div role="tabpanel" class="tab-pane" id="goals">
+			<%= render 'tab-goals' %>
+		</div>
+		<div role="tabpanel" class="tab-pane" id="income">
+			<%= render 'tab-income' %>
+		</div>
+		<div role="tabpanel" class="tab-pane" id="expenses">
+			<%= render 'tab-expenses' %>
 		</div>
 	</div>
-</section>
+</div>

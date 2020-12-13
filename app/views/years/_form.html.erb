@@ -9,52 +9,37 @@
 		</ul>
 	</div>
 	<% end %>
-	<div class="row">
-		<div class="col-sm-4">
-			<div class="form-group">
+	<div class="form-section panel">
+		<div class="form-description">
+			Basic Info
+		</div>
+		<div class="form-elements">
+			<div class="form-element">
 				<%= f.label :year %>
-				<%= f.text_field :year, class: 'form-control' %>
+				<%= f.text_field :year %>
 			</div>
-		</div>
-		<div class="col-sm-4">
-			<div class="form-group">
-				<%= f.label :taxrate, 'Tax Rate' %> <small>Ex. 0.XX</small>
-				<%= f.text_field :taxrate, class: 'form-control' %>
-			</div>
-		</div>
-	</div>
-	<hr>
-	<div class="row">
-		<div class="col-sm-12">
-			<h4>Goals</h4>
-		</div>
-		<div class="col-sm-12">
-			<div class="row">
-				<div class="col-sm-12">
-					<div class="form-group">
-						<%= f.label :goal_year, 'Year' %>
-						<div class="input-group">
-							<span class="input-group-addon"><i class="fas fa-dollar-sign"></i></span>
-							<%= f.number_field :goal_year, value: @year.goal_year.to_i, class: 'form-control' %>
-						</div>
-					</div>
-				</div>
-				<% 12.times do |month| %>
-				<div class="col-md-2 col-sm-4 col-xs-6">
-					<div class="form-group">
-						<label><%= Date::MONTHNAMES[month + 1] %></label>
-						<div class="input-group">
-							<span class="input-group-addon"><i class="fas fa-dollar-sign"></i></span>
-							<%= number_field_tag('goals_months[]', @year.goals_months[month].to_i, { :class => 'form-control', :min => 0, :step => 1 }) %>
-						</div>
-					</div>
-				</div>
-				<% end %>
+			<div class="form-element">
+				<%= f.label :taxrate do %>Tax Rate <small>(Ex. 0.XX)</small><% end %>
+				<%= f.text_field :taxrate %>
 			</div>
 		</div>
 	</div>
-	<hr>
-	<div class="form-group">
-		<button type="submit" class="btn btn-success"><%= icon('far', 'save', class: 'left') %>Save</button>
+	<div class="form-section panel">
+		<div class="form-description">
+			Goals
+		</div>
+		<div class="form-elements">
+			<div class="form-element full">
+				<%= f.label :goal_year, 'Year' %>
+				<%= f.number_field :goal_year, value: @year.goal_year.to_i %>
+			</div>
+			<% 12.times do |month| %>
+			<div class="form-element">
+				<label for="goals_month_<%= month.to_s %>"><%= Date::MONTHNAMES[month + 1] %></label>
+				<%= number_field_tag('goals_months[]', @year.goals_months[month].to_i, { :id => 'goals_month_' + month.to_s, :min => 0, :step => 1 }) %>
+			</div>
+			<% end %>
+		</div>
 	</div>
+	<button type="submit" class="btn btn-success"><%= icon('far', 'save', class: 'left') %>Save</button>
 <% end %>
