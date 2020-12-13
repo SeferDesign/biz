@@ -1,50 +1,25 @@
 <%= form_for([@invoice, @invoice.lines.build]) do |f| %>
-<div class="row">
-  <div class="col-md-10">
-    <div class="row">
-      <div class="col-md-6">
-      	<div class="form-group">
-    	    <%= f.text_field :description, :required => true, :placeholder => 'Description', class: 'form-control' %>
-      	</div>
-      </div>
-      <div class="col-md-2">
-      	<div class="form-group">
-      		<div class="input-group">
-    				<span class="input-group-addon"><%= icon('far', 'clock') %></span>
-    				<%= f.text_field :hours, :placeholder => 'Hours', class: 'form-control text-center' %>
-    			</div>
-      	</div>
-      </div>
-      <div class="col-md-2">
-      	<div class="form-group">
-      		<div class="input-group">
-    				<span class="input-group-addon"><%= icon('fas', 'dollar-sign') %></span>
-    				<%= f.text_field :rate, :placeholder => @ratePlaceholder, class: 'form-control text-center' %>
-    			</div>
-      	</div>
-      </div>
-      <div class="col-md-2">
-        <div class="form-group">
-        	<div class="input-group">
-    				<span class="input-group-addon"><%= icon('fas', 'dollar-sign') %></span>
-    				<%= f.text_field :total, :required => true, :placeholder => 'Total', class: 'form-control text-center' %>
-    			</div>
-        </div>
-      </div>
-      <div class="col-md-6 col-md-offset-6">
-        <%= check_box(:line, :discount, {}, 'true', 'false') %>
-				<%= f.label :discount, 'Discount?' %>
-      </div>
-    </div>
+<div class="form-elements">
+	<div class="form-element">
+		<%= f.text_field :description, :required => true, :placeholder => 'Description' %>
+	</div>
+	<div class="form-element">
+		<%= f.text_field :hours, :placeholder => 'Hours', class: 'text-center' %>
+	</div>
+	<div class="form-element">
+		<%= f.text_field :rate, :placeholder => @ratePlaceholder, class: 'text-center' %>
+	</div>
+	<div class="form-element">
+		<%= f.text_field :total, :required => true, :placeholder => 'Total', class: 'text-center' %>
+	</div>
+	<div class="form-element full">
+		<%= check_box(:line, :discount, {}, 'true', 'false') %>
+		<%= f.label :discount, 'Discount?' %>
   </div>
-  <div class="col-md-2">
-  	<div class="form-group">
-    	<button type="submit" class="btn btn-success btn-block"><%= icon('far', 'save', class: 'left') %>Create</button>
-  	</div>
-  </div>
-  <%= hidden_field(:comment, :hourly) %>
 </div>
+<button type="submit" class="btn btn-success btn-block"><%= icon('far', 'save', class: 'left') %>Create</button>
 <% end %>
+
 <script type="text/javascript">
 jQuery(document).ready(function($) {
 	$('#line_hours, #line_rate').change(function() {
