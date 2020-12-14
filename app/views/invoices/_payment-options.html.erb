@@ -1,64 +1,49 @@
 <div class="payment-options">
-	<div class="row">
-		<% if @session.present? %>
-    <div class="col-sm-12 payment-option payment-option-stripe">
-      <h3>Pay with a credit or debit card:<br><small>via the Stripe payment service</small></h3>
-			<% if controller_name == 'invoices' %>
-			<p>Stripe <a href="https://stripe.com/us/pricing" target="_blank">adds a fee</a> of <strong><%= number_to_currency(@invoice.stripeChargeDifference) %></strong> for this transaction, which increases your payment total to <strong><%= number_to_currency(@invoice.stripeChargeCost) %></strong>.</p>
-			<button id="checkout-button" class="btn btn-success" data-secret="<%= @session['id'] %>">Pay with Card</button>
-			<script src="https://js.stripe.com/v3/"></script>
-			<script>
-				var stripe = Stripe('<%= Figaro.env.stripe_api_publishable_key %>');
-				var checkoutButton = document.getElementById('checkout-button');
-				checkoutButton.addEventListener('click', function() {
-					stripe.redirectToCheckout({
-						sessionId: '<%= @session['id'] %>'
-					}).then(function (result) {
-					});
+	<% if @session.present? %>
+	<div class="payment-option payment-option-stripe">
+		<h3>Pay with a credit or debit card:<br><small>via the Stripe payment service</small></h3>
+		<% if controller_name == 'invoices' %>
+		<p>Stripe <a href="https://stripe.com/us/pricing" target="_blank">adds a fee</a> of <strong><%= number_to_currency(@invoice.stripeChargeDifference) %></strong> for this transaction, which increases your payment total to <strong><%= number_to_currency(@invoice.stripeChargeCost) %></strong>.</p>
+		<button id="checkout-button" class="btn btn-success" data-secret="<%= @session['id'] %>">Pay with Card</button>
+		<script src="https://js.stripe.com/v3/"></script>
+		<script>
+			var stripe = Stripe('<%= Figaro.env.stripe_api_publishable_key %>');
+			var checkoutButton = document.getElementById('checkout-button');
+			checkoutButton.addEventListener('click', function() {
+				stripe.redirectToCheckout({
+					sessionId: '<%= @session['id'] %>'
+				}).then(function (result) {
 				});
-			</script>
-      <% elsif controller_name == 'welcome' and action_name == 'payment' %>
-      <p>Stripe <a href="https://stripe.com/us/pricing" target="_blank">adds a fee</a> of <strong>approximately 3%</strong> to each transaction.</p>
-      <% end %>
-		</div>
+			});
+		</script>
+		<% elsif controller_name == 'welcome' and action_name == 'payment' %>
+		<p>Stripe <a href="https://stripe.com/us/pricing" target="_blank">adds a fee</a> of <strong>approximately 3%</strong> to each transaction.</p>
 		<% end %>
-  </div>
+	</div>
+	<% end %>
   <hr>
-  <div class="row">
-    <div class="col-sm-12 payment-option payment-option-check">
-      <h3>Pay via paper check:</h3>
-      <p>Please make the check out to '<strong><%= company[:pay_to] %></strong>' and mail to:</p>
-			<p><%= company[:pay_to] %><br><%= company[:address][:street] %><br><%= company[:address][:city] %>, <%= company[:address][:state_abbrv] %> <%= company[:address][:zipcode] %></p>
-			<p><strong>PLEASE NOTE: Our mailing address has recently changed.</strong></p>
-    </div>
-  </div>
-  <hr>
-  <h3>Pay electronically via Zelle or Chase QuickPay:</h3>
-  <div class="row">
-    <div class="col-sm-10 col-sm-offset-1">
-      <p>Make a <a href="https://www.zellepay.com/" target="_blank">Zelle</a> or Chase QuickPay payment to 'info@seferdesign.com'. For a complete list of supported banks, see <a href="https://www.zellepay.com/get-started" target="_blank">here</a>.</p>
-    </div>
-    <div class="col-sm-12">
-      <div class="payment-images">
-        <%= image_tag('payment/chase.svg') %><%= image_tag('payment/bankofamerica.svg') %><%= image_tag('payment/wellsfargo.svg') %><%= image_tag('payment/capitalone.svg') %><%= image_tag('payment/citi.svg') %><%= image_tag('payment/pnc.svg') %><%= image_tag('payment/tdbank.svg') %><%= image_tag('payment/usbank.svg') %>
-      </div>
-    </div>
-  </div>
-  <hr>
-  <h3>Pay electronically via PayPal:</h3>
-  <div class="row">
-    <div class="col-sm-10 col-sm-offset-1 payment-option payment-option-paypal">
-      <p>Make a PayPal payment to 'info@seferdesign.com' and mark as a 'friends and family' transaction to avoid fees</p>
-      <div class="payment-images">
-        <%= image_tag('payment/paypal.svg') %>
-      </div>
-    </div>
-  </div>
-  <hr>
-  <h3>Pay with cryptocurrency:</h3>
-  <p>Cryptocurrency payments are facilitated through <a href="https://commerce.coinbase.com/" target="_blank">Coinbase Commerce</a>.</p>
-  <% if controller_name == 'invoices' %>
-  <button id="generate-crypto-link" data-invoice-id="<%= @invoice.id %>" data-access-token="<%= @invoice.access_token %>" class="btn btn-success stripe-button-el"><span>Pay with Cryptocurrency</span></button>
-  <a id="crypto-link" href="#"></a>
-  <% end %>
+	<div class="payment-option payment-option-check">
+		<h3>Pay via paper check:</h3>
+		<p>Please make the check out to '<strong><%= company[:pay_to] %></strong>' and mail to:</p>
+		<p><%= company[:pay_to] %><br><%= company[:address][:street] %><br><%= company[:address][:city] %>, <%= company[:address][:state_abbrv] %> <%= company[:address][:zipcode] %></p>
+		<p><strong>PLEASE NOTE: Our mailing address has recently changed.</strong></p>
+	</div>
+	<hr>
+	<div class="payment-option payment-option-electronic">
+		<h3>Pay electronically via Zelle or Chase QuickPay:</h3>
+		<p>Make a <a href="https://www.zellepay.com/" target="_blank">Zelle</a> or Chase QuickPay payment to 'info@seferdesign.com'.<br>For a complete list of supported banks, see <a href="https://www.zellepay.com/get-started" target="_blank">here</a>.</p>
+		<div class="payment-images">
+			<%= image_tag('payment/chase.svg') %><%= image_tag('payment/bankofamerica.svg') %><%= image_tag('payment/wellsfargo.svg') %><%= image_tag('payment/capitalone.svg') %><%= image_tag('payment/citi.svg') %><%= image_tag('payment/pnc.svg') %><%= image_tag('payment/tdbank.svg') %><%= image_tag('payment/usbank.svg') %>
+		</div>
+	</div>
+	<hr>
+	<div class="payment-option payment-option-paypal">
+		<h3>Pay electronically via PayPal:</h3>
+		<div class="payment-option payment-option-paypal">
+			<p>Make a PayPal payment to 'info@seferdesign.com' and mark as a 'friends and family' transaction to avoid fees</p>
+			<div class="payment-images">
+				<%= image_tag('payment/paypal.svg') %>
+			</div>
+		</div>
+	</div>
 </div>

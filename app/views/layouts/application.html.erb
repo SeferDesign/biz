@@ -15,8 +15,16 @@
 </head>
 <body class="controller-<%= controller_name %> action-<%= action_name %>">
 
-<% if !user_signed_in? %>
+<% if !user_signed_in? or @clientView %>
+<% if controller_name == 'sessions' and action_name == 'new' %>
 <%= yield %>
+<% else %>
+<main class="main-solo">
+	<section>
+		<%= yield %>
+	</section>
+</main>
+<% end %>
 <% else %>
 <%= render 'layouts/header' %>
 <main>

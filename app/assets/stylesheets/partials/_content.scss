@@ -132,3 +132,24 @@ table {
 	margin-bottom: 0.5rem;
 	font-size: 0.875rem;
 }
+
+.payment-options {
+
+	text-align: center;
+
+	.payment-images {
+
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-evenly;
+		align-items: center;
+
+		img {
+			margin: 1.5rem;
+			max-width: 10rem;
+			max-height: 5rem;
+		}
+
+	}
+
+}

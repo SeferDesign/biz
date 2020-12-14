@@ -1,15 +1,8 @@
 <% provide(:title, 'Payment Options') %>
-<section id="payment" class="payment-summary-page">
-	<div class="container">
-		<div class="row">
-			<div class="col-sm-12">
-				<div class="payment-summary-intro">
-		      <h2><%= company[:full_name] %><br>Payment Options</h2>
-		      <p>For electronic payments, please see your invidiual invoice email. All payment options are summarized below:</p>
-		      <hr>
-				</div>
-				<%= render 'invoices/payment-options' %>
-			</div>
-		</div>
-	</div>
-</section>
+<div class="page-heading">
+	<h1><%= company[:full_name] %><br>Payment Options</h1>
+</div>
+<div class="panel">
+	<p>For electronic payments, please see your individual invoice email. All payment options are summarized below:</p>
+	<%= render 'invoices/payment-options' %>
+</div>

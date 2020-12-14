@@ -1,10 +1,8 @@
 <% provide(:title, "Invoice #{@invoice.display_id}") %>
-<% if @invoice.client.logo.present? %>
-<%= image_tag(@invoice.client.logo.url(), class: 'client-logo') %>
-<% end %>
-<% if user_signed_in? and !@clientView %>
+
 <div class="page-heading">
-	<h1><%= icon('fas', 'dollar-sign', class: 'fa-fw left') %>Invoice #<%= @invoice.id %></h1>
+	<h1><%= icon('fas', 'dollar-sign', class: 'fa-fw left') %>Invoice #<% if user_signed_in? and !@clientView %><%= @invoice.id %><% else %><%= @invoice.display_id %><% end %></h1>
+	<% if user_signed_in? and !@clientView %>
 	<div class="actions">
 		<%= link_to invoice_path(:format => 'pdf'), title: 'PDF' do %><%= icon('fas', 'file-alt', class: 'fa-fw green') %><% end %>
 		<%= link_to edit_invoice_path(@invoice), title: 'Edit' do %><%= icon_action_edit %><% end %>
@@ -12,48 +10,24 @@
 		<%= link_to email_invoice_path(@invoice), title: 'Send' do %><%= icon('far', 'envelope-open', class: 'fa-fw green') %><% end %>
 		<% if !@invoice.paid? %><%= link_to mark_paid_invoice_path(@invoice), id: 'paid-today-btn', title: 'Paid Today?', class: 'btn btn-sm btn-warning', remote: true do %>Paid Today?<% end %><% end %>
 	</div>
+	<% end %>
 </div>
-
-
 <div class="panel">
-	<% if @invoice.access_token.present? %>
-	<p>
-		<strong>Access Token:</strong> <%= @invoice.access_token %> (<a href="<%= invoice_path(@invoice) %>?access_token=<%= @invoice.access_token %>">Client Link</a>)
-	</p>
+	<% if user_signed_in? and @invoice.access_token.present? %>
+	<p><strong>Access Token:</strong> <%= @invoice.access_token %> (<a href="<%= invoice_path(@invoice) %>?access_token=<%= @invoice.access_token %>">Client Link</a>)</p>
 	<% end %>
 	<% if @invoice.mail_sends.present? %>
-	<p>
-		<strong>Email(s) sent:</strong>
-		<% @invoice.mail_sends.each do |mail_send| %>
-			<br><%= mail_send.strftime('%B %e, %Y @ %l:%M %P') %>
-		<% end %>
-	</p>
-	<% end %>
+	<p><strong>Email(s) sent:</strong> <% @invoice.mail_sends.each do |mail_send| %><br><%= mail_send.strftime('%B %e, %Y @ %l:%M %P') %><% end %></p>
 	<% end %>
 	<% if @invoice.paid == true and !user_signed_in? %>
 	<p><%= link_to invoice_path(:format => 'pdf', :access_token => @invoice.access_token), { :target => '_blank' } do %>Download Invoice marked 'PAID'<% end %></p>
 	<% end %>
-	<p>
-		<strong>Client:</strong>
-		<% if user_signed_in? %><%= link_to @invoice.client do %><%= @invoice.client.name %><% end %><% else %><%= @invoice.client.name %><% end %>
-	</p>
-	<p>
-		<strong>Invoice ID<% if user_signed_in? %> Display<% end %>:</strong>
-		<%= @invoice.display_id %>
-	</p>
-	<p>
-		<strong>Date Issued:</strong>
-		<%= @invoice.date.to_formatted_s(:long) %>
-	</p>
-	<p>
-		<% if @invoice.paid == true %><%= icon('fas', 'check', class: 'green') %> <span class="spread green">Paid</span> on
-		<%= @invoice.paiddate.to_formatted_s(:long) %><% else %><%= icon('fas', 'exclamation', class: 'red') %> <span class="spread red">Not Paid</span><% end %>
-	</p>
+	<p><strong>Client:</strong> <% if user_signed_in? %><%= link_to @invoice.client do %><%= @invoice.client.name %><% end %><% else %><%= @invoice.client.name %><% end %></p>
+	<p><strong>Invoice ID<% if user_signed_in? %> Display<% end %>:</strong> <%= @invoice.display_id %></p>
+	<p><strong>Date Issued:</strong> <%= @invoice.date.to_formatted_s(:long) %></p>
+	<p><% if @invoice.paid == true %><%= icon('fas', 'check', class: 'green') %> <span class="spread green">Paid</span> on <%= @invoice.paiddate.to_formatted_s(:long) %><% else %><%= icon('fas', 'exclamation', class: 'red') %> <span class="spread red">Not Paid</span><% end %></p>
 	<% if !@invoice.paymenttype.blank? %>
-	<p>
-		<strong>Payment Method:</strong>
-		<%= @invoice.paymenttype %>
-	</p>
+	<p><strong>Payment Method:</strong> <%= @invoice.paymenttype %></p>
 	<% end %>
 	<p><strong>Description:</strong></p>
 	<p><%= @invoice.description %></p>
