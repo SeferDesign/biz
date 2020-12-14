@@ -16,7 +16,7 @@
 	<% if user_signed_in? and @invoice.access_token.present? %>
 	<p><strong>Access Token:</strong> <%= @invoice.access_token %> (<a href="<%= invoice_path(@invoice) %>?access_token=<%= @invoice.access_token %>">Client Link</a>)</p>
 	<% end %>
-	<% if @invoice.mail_sends.present? %>
+	<% if user_signed_in? and @invoice.mail_sends.present? %>
 	<p><strong>Email(s) sent:</strong> <% @invoice.mail_sends.each do |mail_send| %><br><%= mail_send.strftime('%B %e, %Y @ %l:%M %P') %><% end %></p>
 	<% end %>
 	<% if @invoice.paid == true and !user_signed_in? %>
