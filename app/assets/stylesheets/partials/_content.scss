@@ -1,7 +1,13 @@
 section {
+
 	flex: 1;
 	padding: 3rem;
 	background: $grey-light;
+
+	@include mq('mobile') {
+		padding: 1.5rem;
+	}
+
 }
 
 .page-heading {
@@ -52,7 +58,7 @@ section {
 }
 
 .panel,
-.table,
+table,
 section > p {
 
 	a {
@@ -76,10 +82,22 @@ table {
 	width: 100%;
 	border-collapse: collapse;
 
+	@include mq('mobile') {
+		table-layout: fixed;
+		overflow: auto;
+	}
+
 	th,
 	td {
+
 		padding: 0.5rem;
 		border: 0px;
+
+		@media (max-width: 50rem) {
+			display: block;
+			clear: both;
+		}
+
 	}
 
 	th {
