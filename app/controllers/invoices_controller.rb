@@ -8,9 +8,9 @@ class InvoicesController < ApplicationController
 		@clientView = false
 
     if @invoice.client.currentrate
-      @ratePlaceholder = "Rate ($#{@invoice.client.currentrate})"
+      @ratePlaceholder = "($#{@invoice.client.currentrate})"
     else
-      @ratePlaceholder = 'Rate'
+      @ratePlaceholder = ''
 		end
 
 		if params[:access_token].present? and params[:access_token] == @invoice.access_token

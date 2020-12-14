@@ -1,9 +1,11 @@
 <% provide(:title, "Vendor #{@vendor.name}") %>
-<h1><%= icon('far', 'building', class: 'fa-fw left') %><%= @vendor.name %></h1>
-<p class="doicons">
-	<%= link_to edit_vendor_path(@vendor), title: 'Edit' do %><%= icon_action_edit %><% end %>
-	<%= link_to vendor_path(@vendor), title: 'Delete', method: :delete, data: { confirm: "Are you sure you would like to delete Client ##{@vendor.id}?" } do %><%= icon_action_delete %><% end %>
-</p>
+<div class="page-heading">
+	<h1><%= icon('far', 'building', class: 'fa-fw left') %><%= @vendor.name %></h1>
+	<div class="actions">
+		<%= link_to edit_vendor_path(@vendor), title: 'Edit' do %><%= icon_action_edit %><% end %>
+		<%= link_to vendor_path(@vendor), title: 'Delete', method: :delete, data: { confirm: "Are you sure you would like to delete Client ##{@vendor.id}?" } do %><%= icon_action_delete %><% end %>
+	</div>
+</div>
 <div class="panel">
 	<p><strong>Category:</strong> <%= @vendor.category %></p>
 	<% if @vendor.notes %>
@@ -11,7 +13,7 @@
 	<% end %>
 	<h3>Expenses</h3>
 	<% if @vendor.expenses.blank? %>
-	<p class="lead">No to-date expenses.</p>
+	<p>No to-date expenses.</p>
 	<% else %>
 	<table>
 		<thead>

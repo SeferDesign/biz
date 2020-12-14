@@ -4,12 +4,69 @@ section {
 	background: $grey-light;
 }
 
+.page-heading {
+
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: center;
+
+	h1 {
+		margin: 0px;
+	}
+
+	.actions {
+
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: center;
+		gap: 0.75rem;
+
+		i[class^="fa"] {
+			font-size: 1.25rem;
+		}
+
+		.btn i[class^="fa"] {
+			font-size: 1em;
+		}
+
+	}
+
+}
+
+.filters {
+
+	text-transform: uppercase;
+	letter-spacing: 0.01em;
+	font-weight: bold;
+
+	&:not(:first-child) {
+		margin-top: 1.5rem;
+	}
+
+	a {
+		color: $color-primary;
+	}
+
+}
+
 .panel,
 .table,
 section > p {
 
 	a {
+
 		color: $color-primary;
+
+		&.copy-invoice-link {
+			color: $orange;
+		}
+
+		&.paid-today-link {
+			color: $green;
+		}
+
 	}
 
 }
@@ -51,26 +108,24 @@ table {
 				background: $grey-light;
 			}
 
-			&:first-child {
-
-				// td {
-				// 	padding-top: 0.75rem;
-				// }
-
-			}
-
 		}
 
 	}
 
 }
 
-.copy-invoice-link {
-	color: $orange;
-}
+.financial-dash {
 
-.paid-today-link {
-	color: $green;
+	&:not(:first-child) {
+		margin-top: 1.5rem;
+	}
+
+	.receivable {
+		margin-bottom: 0.5rem;
+		font-size: 1.25rem;
+		text-align: center;
+	}
+
 }
 
 .description-prefills {

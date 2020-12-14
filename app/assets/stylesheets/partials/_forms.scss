@@ -165,4 +165,28 @@ form,
 		margin-top: 1.5rem;
 	}
 
+	&.new_line {
+
+		.form-element {
+
+			&s {
+				column-gap: 1.5rem;
+			}
+
+			&:nth-child(1) {
+				flex: 4;
+			}
+
+			&:nth-child(n+2) {
+				flex: 1;
+			}
+
+			&.full {
+				flex-basis: 100%;
+			}
+
+		}
+
+	}
+
 }

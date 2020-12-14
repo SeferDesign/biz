@@ -1,14 +1,21 @@
 <% provide(:title, 'Expenses') %>
-<h1><%= icon('far', 'credit-card', class: 'fa-fw left') %><% if params[:future] == 'true' %>Future<% elsif params[:inactive] == 'true' %>All Past<% else %>Recent<% end %> Expenses</h1>
-<% if params[:future] == 'true' or params[:inactive] == 'true' %>
-<p><%= link_to 'Recent Expenses', expenses_path %></p>
-<% else %>
-<p><%= link_to 'All Past Expenses', expenses_path(:inactive => 'true') %> &bull; <%= link_to 'Future Expenses', expenses_path(:future => 'true') %></p>
-<% end %>
-<p><%= link_to new_expense_path, { :class => 'btn btn-success' } do %><%= icon('fas', 'plus', class: 'left') %>New Expense<% end %> <%= link_to new_bulk_expenses_path, { :class => 'btn btn-danger' } do %><%= icon('fas', 'plus', class: 'left') %>Add Bulk Expenses<% end %></p>
+<div class="page-heading">
+	<h1><%= icon('far', 'credit-card', class: 'fa-fw left') %><% if params[:future] == 'true' %>Future<% elsif params[:inactive] == 'true' %>All Past<% else %>Recent<% end %> Expenses</h1>
+	<div class="actions">
+		<%= link_to new_bulk_expenses_path, { :class => 'btn btn-sm btn-danger' } do %><%= icon('fas', 'plus', class: 'left') %>Add Bulk Expenses<% end %>
+		<%= link_to new_expense_path, { :class => 'btn btn-sm btn-success' } do %><%= icon('fas', 'plus', class: 'left') %>New Expense<% end %>
+	</div>
+</div>
+<div class="filters">
+	<% if params[:future] == 'true' or params[:inactive] == 'true' %>
+	<%= link_to 'Recent Expenses', expenses_path %>
+	<% else %>
+	<%= link_to 'All Past Expenses', expenses_path(:inactive => 'true') %> &bull; <%= link_to 'Future Expenses', expenses_path(:future => 'true') %>
+	<% end %>
+</div>
 <div class="panel">
 	<% if @expenses.blank? %>
-	<p class="lead">No expenses.</p>
+	<p>No expenses.</p>
 	<% else %>
 	<table>
 		<thead>

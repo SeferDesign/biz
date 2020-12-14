@@ -13,7 +13,7 @@
 	<div class="col-sm-12">
 		<h3>Unpaid Invoices</h3>
 		<% if @year.invoices.unpaid.blank? %>
-		<p class="lead">No unpaid invoices issued in <%= @year.year %>.</p>
+		<p>No unpaid invoices issued in <%= @year.year %>.</p>
 		<% else %>
 		<table>
 			<thead>
@@ -37,7 +37,7 @@
 		</table>
 		<% end %>
 		<% if Invoice.paidByYear(@year.year).blank? %>
-		<p class="lead">No invoices were paid in <%= @year.year %>.</p>
+		<p>No invoices were paid in <%= @year.year %>.</p>
 		<% else %>
 		<h3>Paid Invoices By Client</h3>
 		<table>

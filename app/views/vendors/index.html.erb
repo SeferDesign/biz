@@ -1,10 +1,20 @@
 <% provide(:title, 'Vendors') %>
-<h1><%= icon('far', 'building', class: 'fa-fw left') %>Vendors</h1>
-<p><% if params[:category] == 'true' %><%= link_to 'View Alphabetically', vendors_path %><% else %><%= link_to 'View by Category', vendors_path(:category => 'true') %><% end %>
-<p><%= link_to new_vendor_path, { :class => 'btn btn-success' } do %><%= icon('fas', 'plus', class: 'left') %>New Vendor<% end %></p>
+<div class="page-heading">
+	<h1><%= icon('far', 'building', class: 'fa-fw left') %>Vendors</h1>
+	<div class="actions">
+		<%= link_to new_vendor_path, { :class => 'btn btn-sm btn-success' } do %><%= icon('fas', 'plus', class: 'left') %>New Vendor<% end %>
+	</div>
+</div>
+<div class="filters">
+	<% if params[:category] == 'true' %>
+	<%= link_to 'View Alphabetically', vendors_path %>
+	<% else %>
+	<%= link_to 'View by Category', vendors_path(:category => 'true') %>
+	<% end %>
+</div>
 <div class="panel">
 	<% if @vendors.blank? %>
-	<p class="lead">No vendors.</p>
+	<p>No vendors.</p>
 	<% else %>
 	<% if params[:category] == 'true' %>
 	<div class="vendors-category-view">

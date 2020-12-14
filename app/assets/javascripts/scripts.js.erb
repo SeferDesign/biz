@@ -82,6 +82,11 @@ jQuery(document).on('turbolinks:load', function() {
 		$('#invoice_description').html(newDescription);
 	});
 
+	$('#line_hours, #line_rate').change(function() {
+		var totalCharged = $('#line_hours').val() * $('#line_rate').val();
+		$('#line_total').val(totalCharged);
+	});
+
 	Highcharts.setOptions({
 		lang: {
 			thousandsSep: ',',

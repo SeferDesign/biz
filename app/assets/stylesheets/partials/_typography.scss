@@ -61,6 +61,10 @@ blockquote {
 
 	line-height: 1.8;
 
+	&:first-child {
+		margin-top: 0px;
+	}
+
 	&:last-child {
 		margin-bottom: 0px;
 	}
@@ -83,18 +87,8 @@ blockquote {
 }
 
 .currency {
-
 	position: relative;
 	font-family: monospace;
-
-	// &:before {
-	// 	content: '$';
-	// 	position: absolute;
-	// 	top: 50%;
-	// 	left: 0.5rem;
-	// 	transform: translate(0px, -50%);
-	// }
-
 }
 
 .green {
@@ -103,4 +97,8 @@ blockquote {
 
 .red {
 	color: $red;
+}
+
+.orange {
+	color: $orange;
 }

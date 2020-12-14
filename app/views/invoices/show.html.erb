@@ -3,14 +3,18 @@
 <%= image_tag(@invoice.client.logo.url(), class: 'client-logo') %>
 <% end %>
 <% if user_signed_in? and !@clientView %>
-<h1><%= icon('fas', 'dollar-sign', class: 'fa-fw left') %>Invoice #<%= @invoice.id %></h1>
-<p class="doicons">
-	<%= link_to invoice_path(:format => 'pdf'), title: 'PDF' do %><%= icon('fas', 'file', class: 'fa-fw fa-2x text-success') %><% end %>
-	<%= link_to edit_invoice_path(@invoice), title: 'Edit' do %><%= icon_action_edit %><% end %>
-	<%= link_to invoice_path(@invoice), title: 'Delete', method: :delete, data: { confirm: "Are you sure you would like to delete Invoice ##{@invoice.id}?" } do %><%= icon_action_delete %><% end %>
-	<%= link_to email_invoice_path(@invoice), title: 'Send' do %><%= icon('far', 'envelope-open', class: 'fa-fw fa-2x text-success') %><% end %>
-	<% if !@invoice.paid? %><%= link_to mark_paid_invoice_path(@invoice), id: 'paid-today-btn', title: 'Paid Today?', class: 'btn btn-sm btn-warning', remote: true do %>Paid Today?<% end %><% end %>
-</p>
+<div class="page-heading">
+	<h1><%= icon('fas', 'dollar-sign', class: 'fa-fw left') %>Invoice #<%= @invoice.id %></h1>
+	<div class="actions">
+		<%= link_to invoice_path(:format => 'pdf'), title: 'PDF' do %><%= icon('fas', 'file-alt', class: 'fa-fw green') %><% end %>
+		<%= link_to edit_invoice_path(@invoice), title: 'Edit' do %><%= icon_action_edit %><% end %>
+		<%= link_to invoice_path(@invoice), title: 'Delete', method: :delete, data: { confirm: "Are you sure you would like to delete Invoice ##{@invoice.id}?" } do %><%= icon_action_delete %><% end %>
+		<%= link_to email_invoice_path(@invoice), title: 'Send' do %><%= icon('far', 'envelope-open', class: 'fa-fw green') %><% end %>
+		<% if !@invoice.paid? %><%= link_to mark_paid_invoice_path(@invoice), id: 'paid-today-btn', title: 'Paid Today?', class: 'btn btn-sm btn-warning', remote: true do %>Paid Today?<% end %><% end %>
+	</div>
+</div>
+
+
 <div class="panel">
 	<% if @invoice.access_token.present? %>
 	<p>

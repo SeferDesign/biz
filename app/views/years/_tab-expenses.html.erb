@@ -1,6 +1,6 @@
 <p><%= link_to 'Download Expenses CSV', expenses_year_path(@year, format: 'csv') %></p>
 <% if @year.expenses.blank? %>
-<p class="lead">No to-date expenses in <%= @year.year %>.</p>
+<p>No to-date expenses in <%= @year.year %>.</p>
 <% else %>
 <div class="row">
 	<div class="col-md-6">
@@ -34,7 +34,7 @@
 <% end %>
 <h3>Expenses (to-date)</h3>
 <% if @year.expenses.blank? %>
-<p class="lead">No to-date expenses in <%= @year.year %>.</p>
+<p>No to-date expenses in <%= @year.year %>.</p>
 <% else %>
 <table>
 	<thead>
@@ -59,7 +59,7 @@
 <% end %>
 <h3>Expenses (future)</h3>
 <% if @year.expensesFuture.blank? %>
-<p class="lead">No future expenses in <%= @year.year %>.</p>
+<p>No future expenses in <%= @year.year %>.</p>
 <% else %>
 <table>
 	<thead>

@@ -67,6 +67,24 @@
 
 }
 
+%btn-danger {
+
+	$btn-color: $red;
+	color: $white;
+	background-color: $btn-color;
+	border-color: $btn-color;
+
+	&:hover {
+		cursor: pointer;
+		background-color: darken($btn-color, 5%);
+	}
+
+	&:active {
+		background-color: darken($btn-color, 10%);
+	}
+
+}
+
 button,
 .btn {
 
@@ -84,8 +102,16 @@ button,
 		@extend %btn-success;
 	}
 
+	&.btn-danger {
+		@extend %btn-danger;
+	}
+
 	&.btn-lg {
 		font-size: 1.125rem;
+	}
+
+	&.btn-sm {
+		font-size: 0.625rem;
 	}
 
 }

@@ -1,14 +1,20 @@
 <% provide(:title, 'Clients') %>
-<h1><%= icon('fas', 'user', class: 'fa-fw left') %><% if params[:inactive] == 'true' %>Inactive <% end %>Clients</h1>
-<% if params[:inactive] == 'true' %>
-<p><%= link_to 'Active Clients', clients_path %></p>
-<% else %>
-<p><%= link_to 'Inactive Clients', clients_path(:inactive => 'true') %></p>
-<% end %>
-<p><%= link_to new_client_path, { :class => 'btn btn-success' } do %><%= icon('fas', 'plus', class: 'left') %>New Client<% end %></p>
+<div class="page-heading">
+	<h1><%= icon('fas', 'user', class: 'fa-fw left') %><% if params[:inactive] == 'true' %>Inactive <% end %>Clients</h1>
+	<div class="actions">
+		<%= link_to new_client_path, { :class => 'btn btn-sm btn-success' } do %><%= icon('fas', 'plus', class: 'left') %>New Client<% end %>
+	</div>
+</div>
+<div class="filters">
+	<% if params[:inactive] == 'true' %>
+	<%= link_to 'Active Clients', clients_path %>
+	<% else %>
+	<%= link_to 'Inactive Clients', clients_path(:inactive => 'true') %>
+	<% end %>
+</div>
 <div class="panel">
 	<% if @clients.blank? %>
-	<p class="lead">No clients.</p>
+	<p>No clients.</p>
 	<% else %>
 	<table>
 		<thead>

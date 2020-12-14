@@ -137,11 +137,11 @@ module ApplicationHelper
 	end
 
 	def icon_action_edit
-		icon('fas', 'edit', class: 'fa-fw fa-2x text-warning')
+		icon('fas', 'edit', class: 'fa-fw orange')
 	end
 
 	def icon_action_delete
-		icon('fas', 'trash-alt', class: 'fa-fw fa-2x text-danger')
+		icon('fas', 'trash-alt', class: 'fa-fw red')
 	end
 
 	def remote_svg_raw(url)

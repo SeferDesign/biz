@@ -2,11 +2,13 @@
 <% if !@client.logo.blank? %>
 <%= image_tag(@client.logo.url(), class: 'client-logo') %>
 <% end %>
-<h1><%= icon('fas', 'user', class: 'fa-fw left') %><%= @client.name %></h1>
-<p class="doicons">
-	<%= link_to edit_client_path(@client), title: 'Edit' do %><%= icon_action_edit %><% end %>
-	<%= link_to client_path(@client), title: 'Delete', method: :delete, data: { confirm: "Are you sure you would like to delete Client ##{@client.id}?" } do %><%= icon_action_delete %><% end %>
-</p>
+<div class="page-heading">
+	<h1><%= icon('fas', 'user', class: 'fa-fw left') %><%= @client.name %></h1>
+	<div class="actions">
+		<%= link_to edit_client_path(@client), title: 'Edit' do %><%= icon_action_edit %><% end %>
+		<%= link_to client_path(@client), title: 'Delete', method: :delete, data: { confirm: "Are you sure you would like to delete Client ##{@client.id}?" } do %><%= icon_action_delete %><% end %>
+	</div>
+</div>
 <div class="panel">
 	<p>
 		<strong>Client ID:</strong>
@@ -55,7 +57,7 @@
 	<h3>Invoices</h3>
 	<p><%= link_to new_invoice_path(:client_id => @client.id), :class => 'btn btn-success btn-sm' do %><%= icon('fas', 'plus', class: 'left') %>New Invoice<% end %></p>
 	<% if @client.invoices.blank? %>
-	<p class="lead">No invoices.</p>
+	<p>No invoices.</p>
 	<% else %>
 	<h4>Paid By Year</h4>
 	<table>

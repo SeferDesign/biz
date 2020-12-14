@@ -1,9 +1,13 @@
 <% provide(:title, 'Years') %>
-<h1><%= icon('far', 'calendar-alt', class: 'fa-fw left') %>Years</h1>
-<p><%= link_to new_year_path, { :class => 'btn btn-success' } do %><%= icon('fas', 'plus', class: 'left') %>New Year<% end %></p>
+<div class="page-heading">
+	<h1><%= icon('far', 'calendar-alt', class: 'fa-fw left') %>Years</h1>
+	<div class="actions">
+		<%= link_to new_year_path, { :class => 'btn btn-sm btn-success' } do %><%= icon('fas', 'plus', class: 'left') %>New Year<% end %>
+	</div>
+</div>
 <div class="panel">
 	<% if @years.blank? %>
-	<p class="lead">No years.</p>
+	<p>No years.</p>
 	<% else %>
 	<table>
 		<thead>

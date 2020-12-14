@@ -1,8 +1,10 @@
-<% provide(:title, "Year #{@year.year}") %>
-<h1><%= icon('far', 'calendar-alt', class: 'fa-fw left') %>Year <%= @year.year %> Summary</h1>
-<p class="doicons">
-	<%= link_to edit_year_path(@year), title: 'Edit' do %><%= icon_action_edit %><% end %>
-</p>
+<% provide(:title, "#{@year.year} Summary") %>
+<div class="page-heading">
+	<h1><%= icon('far', 'calendar-alt', class: 'fa-fw left') %><%= @year.year %> Summary</h1>
+	<div class="actions">
+		<%= link_to edit_year_path(@year), title: 'Edit' do %><%= icon_action_edit %><% end %>
+	</div>
+</div>
 <div class="panel">
 	<ul class="nav nav-tabs" role="tablist">
 		<li role="presentation" class="active"><a href="#overview" role="tab" data-toggle="tab">Overview</a></li>
