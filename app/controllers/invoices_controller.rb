@@ -71,6 +71,8 @@ class InvoicesController < ApplicationController
 		InvoiceMailer.invoice_email(@invoice).deliver
 		existingSends = @invoice.mail_sends || []
 		@invoice.update(:mail_sends => existingSends.concat([ DateTime.now ]))
+		flash[:notice] = 'Invoice email sent.'
+		redirect_to @invoice
   end
 
   def generate_crypto_link
