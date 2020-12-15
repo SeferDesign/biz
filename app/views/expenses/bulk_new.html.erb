@@ -4,41 +4,33 @@
 
 <%= form_tag do |f| %>
 	<div class="panel">
-	<div class="bulk-expenses-row-header">
-		<strong>Date</strong>
-		<strong>Vendor</strong>
-		<strong>Name</strong>
-		<strong>Cost</strong>
-	</div>
-		<div class="new-expense-row">
-			<div class="col-sm-3 col-lg-2">
-				<div class="form-group">
-					<div class="input-group">
+		<table>
+			<thead>
+				<tr class="bulk-expenses-row-header">
+					<th>Date</th>
+					<th>Vendor</th>
+					<th>Name</th>
+					<th>Cost</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr class="new-expense-row">
+					<td>
 						<%= date_field_tag('date[]', Time.now.strftime("%Y-%m-%d"), { :required => true, :placeholder => 'YYYY-MM-DD', :pattern => '\d{4}-\d{2}-\d{2}' }) %>
-					</div>
-				</div>
-			</div>
-			<div class="col-sm-4">
-				<%= select_tag('vendor_id[]', options_from_collection_for_select(Vendor.all, 'id', 'name'), { :required => true }) %>
-			</div>
-			<div class="col-sm-3 col-lg-4">
-				<%= text_field_tag('name[]', nil, { :required => true }) %>
-			</div>
-			<div class="col-sm-2">
-				<div class="input-group">
-					<span class="input-group-addon"><%= icon('fas', 'dollar-sign') %></span>
-					<%= number_field_tag('cost[]', nil, { :required => true, :placeholder => '0.00', :step => '0.01' }) %>
-				</div>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-sm-12">
-				<button id="duplicate-expense-row" class="duplicate-expenses-row btn btn-primary">Duplicate</button>
-			</div>
-		</div>
-		<div class="form-group">
-
-		</div>
+					</td>
+					<td>
+						<%= select_tag('vendor_id[]', options_from_collection_for_select(Vendor.all, 'id', 'name'), { :required => true }) %>
+					</td>
+					<td >
+						<%= text_field_tag('name[]', nil, { :required => true }) %>
+					</td>
+					<td>
+						<%= number_field_tag('cost[]', nil, { :required => true, :placeholder => '0.00', :step => '0.01' }) %>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<button id="duplicate-expense-row" class="duplicate-expenses-row btn btn-primary"><%= icon('far', 'copy', class: 'left') %>Duplicate</button>
 		<button type="submit" class="btn btn-success"><%= icon('far', 'save', class: 'left') %>Save</button>
-	<% end %>
-</div>
+	</div>
+<% end %>
