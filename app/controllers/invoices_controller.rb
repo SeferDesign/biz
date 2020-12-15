@@ -42,15 +42,15 @@ class InvoicesController < ApplicationController
       format.html
       format.pdf do
         render 	:pdf => Client.find(@invoice.client_id).name.gsub(/[^0-9A-Za-z]/, '') + @invoice.date.to_s,
-                #:show_as_html => 'true', # Preview
-        				:disposition => 'inline',
-        				:page_size => 'Letter',
-        				:layout => 'layouts/pdf/invoice.html',
-        				:template => 'invoices/show.pdf.erb',
-        				:disable_internal_links => true,
-        				:disable_external_links => true,
-        				:greyscale => false,
-        				:lowquality => false
+					# :show_as_html => 'true', # Preview
+					:disposition => 'inline',
+					:page_size => 'Letter',
+					:layout => 'layouts/pdf/invoice.html',
+					:template => 'invoices/show.pdf.erb',
+					:disable_internal_links => true,
+					:disable_external_links => true,
+					:greyscale => false,
+					:lowquality => false
 
       end
     end

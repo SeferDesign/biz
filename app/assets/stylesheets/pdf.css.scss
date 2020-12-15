@@ -1,0 +1,58 @@
+@import 'partials/variables';
+@import 'partials/mixins';
+
+.pdf-view {
+
+	&,
+	section {
+		color: $black;
+		background: none;
+	}
+
+	section {
+		padding: 1.5rem 0px;
+	}
+
+	h1 {
+
+		margin-top: 0px;
+		font-size: 28px;
+
+		small {
+			color: $grey-dark;
+			font-size: 0.625em;
+		}
+
+	}
+
+	.pdf-meta {
+
+		border-collapse: collapse;
+
+		&-address {
+			text-align: right;
+		}
+
+		td {
+			vertical-align: top;
+		}
+
+		tr:hover td {
+			background: none;
+		}
+
+	}
+
+	p.indent {
+		margin-left: 4em;
+	}
+
+	.spread {
+		letter-spacing: 0px;
+	}
+
+}
+
+footer {
+	text-align: center;
+}

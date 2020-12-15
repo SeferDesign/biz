@@ -1,33 +1,12 @@
-<header class="pad">
-	<div class="container">
-		<div class="row">
-			<div class="col-sm-12">
-				<div class="sdc-logo-text"><strong><%= company[:full_name] %></strong></div>
-			</div>
-		</div>
-	</div>
-</header>
+<div class="pdf-header">
+	<h1>Invoice <small>from <%= company[:full_name] %></small></h1>
+</div>
 
-<section id="invoice-show">
-	<div class="container">
-		<div class="row">
-			<div class="col-sm-12">
-				<div>
-					<div class="text-right">
-						<p>Attention: <%= @invoice.client.contact %><% if @invoice.client.name.present? and @invoice.client.name != @invoice.client.contact %><br><%= @invoice.client.name %><% end %></p>
-						<% if @invoice.client.address1.present? %>
-						<p>
-							<%= @invoice.client.address1 %>
-							<% if @invoice.client.address2.present? %>
-							<br><%= @invoice.client.address2 %>
-							<% end %>
-							<br><%= @invoice.client.city %><% if @invoice.client.state.present? %>, <%= @invoice.client.state %><% end %> <%= @invoice.client.zipcode %>
-							<% if @invoice.client.intinfo.present? %>
-							<br><%= @invoice.client.intinfo %>
-							<% end %>
-						<% end %>
-					</div>
-					<h1>Invoice</h1>
+<section>
+	<table class="pdf-meta">
+		<tbody>
+			<tr>
+				<td class="pdf-meta-specs" width="55%">
 					<p><%= @invoice.date.to_formatted_s(:long) %></p>
 					<p><strong>Invoice ID:</strong> <%= @invoice.display_id %></p>
 					<% if @invoice.paid %>
@@ -39,47 +18,64 @@
 					<p><%= company[:pay_to] %><br><%= company[:address][:street] %><br><%= company[:address][:city] %>, <%= company[:address][:state_abbrv] %> <%= company[:address][:zipcode] %></p>
 					<p><strong>PLEASE NOTE: Our mailing address has recently changed.</strong></p>
 					<% end %>
-				</div>
-				<div class="clearfix"></div>
-				<hr>
-				<p><%= @invoice.description %><% if @invoice.paid != true %>  <%= invoice_description_suffix_pleasepay %><% end %></p>
-				<p class="indent">Thank you,<br><%= company[:operator_name] %><br><%= company[:full_name] %><br><%= company[:email] %><br><%= company[:phone] %></p>
-				<hr>
-				<% if @invoice.lines.present? %>
-				<table>
-		      <thead>
-		        <tr>
-		          <th>Description</th>
-		          <th class="text-center">Hours</th>
-		          <th class="text-center">Rate ($) per Hour</th>
-		          <th class="text-center">Cost</th>
-		        </tr>
-		      </thead>
-		      <tbody>
-		      	<% @invoice.lines.each do |line| %>
-			      <tr>
-						  <td><%= line.description %></td>
-						  <% if line.hours.present? %>
-						  <td class="text-center"><%= line.hours %></td>
-						  <td class="text-center"><%= number_to_currency(line.rate, { :unit => ''}) %></td>
-						  <% else %>
-						  <td class="text-center">&mdash;</td>
-						  <td class="text-center">&mdash;</td>
-						  <% end %>
-						  <td><%= number_to_currency(line.total, { :unit => '', :negative_format => '(%n)' }) %>$</td>
-						</tr>
+				</td>
+				<td width="5%"></td>
+				<td class="pdf-meta-address" width="40%">
+					<p>Attention: <%= @invoice.client.contact %><% if @invoice.client.name.present? and @invoice.client.name != @invoice.client.contact %><br><%= @invoice.client.name %><% end %></p>
+					<% if @invoice.client.address1.present? %>
+					<p>
+						<%= @invoice.client.address1 %>
+						<% if @invoice.client.address2.present? %>
+						<br><%= @invoice.client.address2 %>
 						<% end %>
-
-			    </tbody>
-					<tfoot>
-						<tr>
-			        <td class="text-right" colspan="3"><strong>Total</strong>&nbsp;&nbsp;</td>
-			        <td><strong><%= number_to_currency(@invoice.lines.sum('total'), { :unit => '', :negative_format => '(%n)' }) %>$</strong></td>
-			      </tr>
-					</tfoot>
-			  </table>
-			  <% end %>
-			</div>
-		</div>
-	</div>
+						<br><%= @invoice.client.city %><% if @invoice.client.state.present? %>, <%= @invoice.client.state %><% end %> <%= @invoice.client.zipcode %>
+						<% if @invoice.client.intinfo.present? %>
+						<br><%= @invoice.client.intinfo %>
+						<% end %>
+					<% end %>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	<hr>
+	<p><%= @invoice.description %><% if @invoice.paid != true %>  <%= invoice_description_suffix_pleasepay %><% end %></p>
+	<p class="indent">Thank you,<br><%= company[:operator_name] %><br><%= company[:full_name] %><br><%= company[:email] %><br><%= company[:phone] %></p>
+	<hr>
+	<% if @invoice.lines.present? %>
+	<table>
+		<thead>
+			<tr>
+				<th>Description</th>
+				<th class="text-center">Hours</th>
+				<th class="text-center">Rate ($) per Hour</th>
+				<th class="text-center">Cost</th>
+			</tr>
+		</thead>
+		<tbody>
+			<% @invoice.lines.each do |line| %>
+			<tr>
+				<td><%= line.description %></td>
+				<% if line.hours.present? %>
+				<td class="text-center"><%= line.hours %></td>
+				<td class="text-center"><%= number_to_currency(line.rate, { :unit => ''}) %></td>
+				<% else %>
+				<td class="text-center">&mdash;</td>
+				<td class="text-center">&mdash;</td>
+				<% end %>
+				<td class="currency text-right"><%= number_to_currency(line.total, { :unit => '', :negative_format => '(%n)' }) %></td>
+			</tr>
+			<% end %>
+		</tbody>
+		<tfoot>
+			<tr>
+				<td class="text-right" colspan="3"><strong>Total</strong>&nbsp;&nbsp;</td>
+				<td class="currency text-right"><strong><%= number_to_currency(@invoice.lines.sum('total'), { :negative_format => '(%n)' }) %></strong></td>
+			</tr>
+		</tfoot>
+	</table>
+	<% end %>
 </section>
+
+<footer>
+	<p>&copy; <%= company[:full_name] %></p>
+</footer>

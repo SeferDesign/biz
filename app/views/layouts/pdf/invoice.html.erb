@@ -4,71 +4,11 @@
   <title><%= company[:abbrv_name] %> Biz Admin</title>
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
   <%= wicked_pdf_stylesheet_link_tag "application", media: "all" %>
-  <%= wicked_pdf_stylesheet_link_tag "font-awesome.min" %>
-  <%= wicked_pdf_stylesheet_link_tag "style" %>
-  <style>
-  	body {
-  		color: #000000;
-	  	background: none;
-  	}
-
-  	.hidden-print {
-	  	display: none;
-  	}
-
-  	.spread {
-	  	letter-spacing: 0px;
-  	}
-
-    .sdc-logo {
-      float: left;
-		}
-
-		.sdc-logo-text {
-			width: 381px;
-			font-size: 20px;
-		}
-
-    .sdc-logo img {
-	  	max-width: 381px;
-	  	max-height: 57px;
-  	}
-
-    h1 {
-      margin-top: 0px;
-      font-size: 28px;
-    }
-
-  	p.indent {
-	  	margin-left: 4em;
-  	}
-
-  	footer .container {
-  		padding: 0px;
-	  	border: 0px;
-      font-size: 12px;
-  	}
-
-  	footer img {
-	  	width: 8%;
-  	}
-  </style>
+	<%= wicked_pdf_stylesheet_link_tag "style" %>
+	<%= wicked_pdf_stylesheet_link_tag "pdf" %>
   <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
 </head>
 <body class="pdf-view">
-
 <%= yield %>
-
-<footer class="pad">
-	<div class="container">
-		<div class="row">
-			<div class="col-sm-12 text-center">
-				<hr>
-				<p>&copy; <%= company[:full_name] %></p>
-			</div>
-		</div>
-	</div>
-</footer>
-
 </body>
 </html>
