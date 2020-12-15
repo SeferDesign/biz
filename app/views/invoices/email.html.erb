@@ -1,15 +1,7 @@
 <% provide(:title, "Invoice ##{@invoice.id}") %>
-<section id="invoice-email">
-	<div class="container">
-		<div class="row">
-			<div class="col-sm-12">
-				<p>An invoice email has been sent to <%= @invoice.client.name %>.</p>
-			</div>
-		</div>
-		<div class="row hidden-print">
-			<div class="col-sm-12">
-				<p><%= link_to 'Back', invoices_path %></p>
-			</div>
-		</div>
-	</div>
-</section>
+<div class="page-heading">
+	<h1><%= icon('far', 'envelope', class: 'fa-fw left') %>Email Sent</h1>
+</div>
+<div class="panel">
+	<p>An invoice email has been sent to <%= link_to @invoice.client.name, @invoice.client %> for <%= link_to "Invoice ##{@invoice.id}", @invoice %>.</p>
+</div>
