@@ -1,6 +1,6 @@
 nav {
 
-	flex-basis: $nav-width;
+	flex-basis: var(--nav-width);
 
 	.nav-inner {
 		position: sticky;

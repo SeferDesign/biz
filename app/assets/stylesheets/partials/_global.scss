@@ -4,6 +4,16 @@
 	box-sizing: border-box;
 }
 
+:root {
+
+	--nav-width: #{$nav-width};
+
+	@include mq('mobile') {
+		--nav-width: #{$nav-width - 5rem};
+	}
+
+}
+
 html,
 body {
 	color: $black;
@@ -17,6 +27,7 @@ main {
 	flex-wrap: wrap;
 	justify-content: flex-start;
 	align-items: stretch;
+	background: $grey-light;
 
 	&.main-solo {
 
