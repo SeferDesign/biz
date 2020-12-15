@@ -1,16 +1,9 @@
 <% if (!notice.nil? or !alert.nil?) and (user_signed_in? or controller_name == 'sessions') %>
-<section class="notice-alert">
-	<div class="container">
-		<div class="row">
-			<div class="col-sm-12">
-				<% if !notice.nil? %>
-				<p><%= notice %></p>
-				<% end %>
-				<% if !alert.nil? %>
-				<p><%= alert %></p>
-				<% end %>
-			</div>
-		</div>
-	</div>
-</section>
+<dialog open class="<% if !notice.nil? %>notice<% elsif !alert.nil? %>alert<% end %>">
+	<% if !notice.nil? %>
+	<p><%= icon('fas', 'info-circle', class: 'fa-fw left') %><%= notice %></p>
+	<% elsif !alert.nil? %>
+	<p><%= icon('fas', 'exclamation-triangle', class: 'fa-fw left') %><%= alert %></p>
+	<% end %>
+</dialog>
 <% end %>
