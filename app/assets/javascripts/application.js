@@ -1,7 +1,7 @@
 //= require jquery
 //= require jquery_ujs
 //= require turbolinks
-//= require highcharts
 //= require chartkick
+//= require highcharts
 //= require scripts
 //= require_tree .

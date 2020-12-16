@@ -129,6 +129,9 @@ jQuery(document).on('turbolinks:load', function() {
 
 window.addEventListener('resize', function() {
 	setVH();
+	Chartkick.eachChart(function(chart) {
+		chart.redraw();
+	});
 });
 
 function setVH() {
