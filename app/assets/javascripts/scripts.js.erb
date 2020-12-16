@@ -7,6 +7,12 @@ jQuery(document).on('turbolinks:load', function() {
 		$('.nav-tabs a[href="' + hash + '"]').tab('show');
 	}
 
+	if ($('dialog').length > 0) {
+		setTimeout(function() {
+			$('dialog').slideUp(500);
+		}, 3500);
+	}
+
 	$('.nav-tabs a').on('shown.bs.tab', function (e) {
 		e.preventDefault();
 		history.pushState({}, document.title, location.href.replace(location.hash, '') + e.target.hash);
