@@ -7,9 +7,9 @@ jQuery(document).on('turbolinks:load', function() {
 		$('.nav-tabs a[href="' + hash + '"]').tab('show');
 	}
 
-	if ($('dialog').length > 0) {
+	if ($('dialog.notice').length > 0) {
 		setTimeout(function() {
-			$('dialog').slideUp(500);
+			$('dialog.notice').slideUp(500);
 		}, 3500);
 	}
 
