@@ -9,23 +9,25 @@
 	<% if @years.blank? %>
 	<p>No years.</p>
 	<% else %>
-	<table>
-		<thead>
-			<tr>
-				<th>Year</th>
-				<th class="text-right">Expenses</th>
-				<th class="text-right">Revenue</th>
-			</tr>
-		</thead>
-		<tbody>
-			<% @years.each do |year| %>
-			<tr>
-				<td><%= link_to year do %><%= year.year %><% end %></td>
-				<td class="currency text-right"><%= number_to_currency(year.expenses.sum(:cost), { :negative_format => '(%n)' }) %></td>
-				<td class="currency text-right"><%= number_to_currency(year.incomeTotal, { :negative_format => '(%n)' }) %></td>
-			</tr>
-			<% end %>
-		</tbody>
-	</table>
+	<div class="table-wrap">
+		<table>
+			<thead>
+				<tr>
+					<th>Year</th>
+					<th class="text-right">Expenses</th>
+					<th class="text-right">Revenue</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% @years.each do |year| %>
+				<tr>
+					<td><%= link_to year do %><%= year.year %><% end %></td>
+					<td class="currency text-right"><%= number_to_currency(year.expenses.sum(:cost), { :negative_format => '(%n)' }) %></td>
+					<td class="currency text-right"><%= number_to_currency(year.incomeTotal, { :negative_format => '(%n)' }) %></td>
+				</tr>
+				<% end %>
+			</tbody>
+		</table>
+	</div>
 	<% end %>
 </div>

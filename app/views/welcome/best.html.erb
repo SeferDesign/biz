@@ -2,58 +2,64 @@
 <h1><%= icon('fas', 'medal', class: 'fa-fw left') %>Best Performances</h1>
 <div class="panel">
 	<h2>Months</h2>
-	<table>
-		<thead>
-			<tr>
-				<th>Month</th>
-				<th class="text-right">Total Income</th>
-			</tr>
-		</thead>
-		<tbody>
-			<% @months.take(8).each do |month| %>
-			<tr>
-				<td><%= link_to month[:year] do %><%= month[:year].year %><% end %> - <%= Date::MONTHNAMES[month[:month]] %><% if Time.current.year == month[:year].year and Time.current.month == month[:month] %> *<% end %></td>
-				<td class="currency text-right"><%= number_to_currency(month[:income], { :negative_format => '(%n)' }) %></td>
-			</tr>
-			<% end %>
-		</tbody>
-	</table>
+	<div class="table-wrap">
+		<table>
+			<thead>
+				<tr>
+					<th>Month</th>
+					<th class="text-right">Total Income</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% @months.take(8).each do |month| %>
+				<tr>
+					<td><%= link_to month[:year] do %><%= month[:year].year %><% end %> - <%= Date::MONTHNAMES[month[:month]] %><% if Time.current.year == month[:year].year and Time.current.month == month[:month] %> *<% end %></td>
+					<td class="currency text-right"><%= number_to_currency(month[:income], { :negative_format => '(%n)' }) %></td>
+				</tr>
+				<% end %>
+			</tbody>
+		</table>
+	</div>
 	<h2>Quarters</h2>
-	<table>
-		<thead>
-			<tr>
-				<th width="40%">Quarter</th>
-				<th class="text-right">Per Month Average</th>
-				<th class="text-right">Total Income</th>
-			</tr>
-		</thead>
-		<tbody>
-			<% @quarters.take(8).each do |quarter| %>
-			<tr>
-				<td><%= link_to quarter[:year] do %><%= quarter[:year].year %><% end %> - Q<%= quarter[:quarter] %><% if Time.current.year == quarter[:year].year and quarter[:quarter] == (1 + ((Time.current.month - 1) / 3).to_i) %> *<% end %></td>
-				<td class="currency text-right"><%= number_to_currency(quarter[:income] / 3, { :negative_format => '(%n)' }) %></td>
-				<td class="currency text-right"><%= number_to_currency(quarter[:income], { :negative_format => '(%n)' }) %></td>
-			</tr>
-			<% end %>
-		</tbody>
-	</table>
+	<div class="table-wrap">
+		<table>
+			<thead>
+				<tr>
+					<th width="40%">Quarter</th>
+					<th class="text-right">Per Month Average</th>
+					<th class="text-right">Total Income</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% @quarters.take(8).each do |quarter| %>
+				<tr>
+					<td><%= link_to quarter[:year] do %><%= quarter[:year].year %><% end %> - Q<%= quarter[:quarter] %><% if Time.current.year == quarter[:year].year and quarter[:quarter] == (1 + ((Time.current.month - 1) / 3).to_i) %> *<% end %></td>
+					<td class="currency text-right"><%= number_to_currency(quarter[:income] / 3, { :negative_format => '(%n)' }) %></td>
+					<td class="currency text-right"><%= number_to_currency(quarter[:income], { :negative_format => '(%n)' }) %></td>
+				</tr>
+				<% end %>
+			</tbody>
+		</table>
+	</div>
 	<h2>Years</h2>
-	<table>
-		<thead>
-			<tr>
-				<th width="40%">Year</th>
-				<th class="text-right">Per Month Average</th>
-				<th class="text-right">Total Income</th>
-			</tr>
-		</thead>
-		<tbody>
-			<% Year.all.sort_by(&:incomeTotal).reverse.take(4).each do |year| %>
-			<tr>
-				<td><%= link_to year do %><%= year.year %><% end %><% if Time.current.year == year.year %> *<% end %></td>
-				<td class="currency text-right"><%= number_to_currency(year.incomeTotal / 12, { :negative_format => '(%n)' }) %></td>
-				<td class="currency text-right"><%= number_to_currency(year.incomeTotal, { :negative_format => '(%n)' }) %></td>
-			</tr>
-			<% end %>
-		</tbody>
-	</table>
+	<div class="table-wrap">
+		<table>
+			<thead>
+				<tr>
+					<th width="40%">Year</th>
+					<th class="text-right">Per Month Average</th>
+					<th class="text-right">Total Income</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% Year.all.sort_by(&:incomeTotal).reverse.take(4).each do |year| %>
+				<tr>
+					<td><%= link_to year do %><%= year.year %><% end %><% if Time.current.year == year.year %> *<% end %></td>
+					<td class="currency text-right"><%= number_to_currency(year.incomeTotal / 12, { :negative_format => '(%n)' }) %></td>
+					<td class="currency text-right"><%= number_to_currency(year.incomeTotal, { :negative_format => '(%n)' }) %></td>
+				</tr>
+				<% end %>
+			</tbody>
+		</table>
+	</div>
 </div>

@@ -1,28 +1,30 @@
-<table>
-	<thead>
-		<tr>
-			<th>&nbsp;</th>
-			<th class="text-right">Goal</th>
-			<th class="text-right">Actual</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td><strong>Year</strong></td>
-			<td class="currency text-right"><%= number_to_currency(@year.goal_year, { :precision => 0 }) %></td>
-			<td class="currency text-right"><%= number_to_currency(@year.incomeTotal, { :negative_format => '(%n)' }) %></td>
-		</tr>
-		<% @year.goals_months.each_with_index do |month, index| %>
-		<tr>
-			<td><strong><%= Date::MONTHNAMES[index + 1] %></strong></td>
-			<td class="currency text-right"><%= number_to_currency(month.to_i, { :precision => 0 }) %></td>
-			<td class="currency text-right"><%
-				monthSum = Invoice.paidByMonth(@year.year, index + 1).sum('cost')
-				if monthSum == 0
-			%>&mdash;<% else %>
-			<%= number_to_currency(monthSum, { :negative_format => '(%n)' }) %>
-			<% end %></td>
-		</tr>
-		<% end %>
-	</tbody>
-</table>
+<div class="table-wrap">
+	<table>
+		<thead>
+			<tr>
+				<th>&nbsp;</th>
+				<th class="text-right">Goal</th>
+				<th class="text-right">Actual</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><strong>Year</strong></td>
+				<td class="currency text-right"><%= number_to_currency(@year.goal_year, { :precision => 0 }) %></td>
+				<td class="currency text-right"><%= number_to_currency(@year.incomeTotal, { :negative_format => '(%n)' }) %></td>
+			</tr>
+			<% @year.goals_months.each_with_index do |month, index| %>
+			<tr>
+				<td><strong><%= Date::MONTHNAMES[index + 1] %></strong></td>
+				<td class="currency text-right"><%= number_to_currency(month.to_i, { :precision => 0 }) %></td>
+				<td class="currency text-right"><%
+					monthSum = Invoice.paidByMonth(@year.year, index + 1).sum('cost')
+					if monthSum == 0
+				%>&mdash;<% else %>
+				<%= number_to_currency(monthSum, { :negative_format => '(%n)' }) %>
+				<% end %></td>
+			</tr>
+			<% end %>
+		</tbody>
+	</table>
+</div>

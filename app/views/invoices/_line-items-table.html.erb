@@ -1,22 +1,24 @@
 <% if !@invoice.lines.blank? %>
-<table>
-	<thead>
-		<tr>
-			<th>&nbsp;</th>
-			<th>Description</th>
-			<th class="text-center">Hours</th>
-			<th class="text-center">Rate ($) per Hour</th>
-			<th class="text-right">Cost</th>
-		</tr>
-	</thead>
-	<tbody>
-		<%= render @invoice.lines %>
-	</tbody>
-	<tfoot>
-		<tr>
-			<td class="text-right" colspan="4"><strong>Total</strong>&nbsp;&nbsp;</td>
-			<td class="currency text-right"><strong><%= number_to_currency(@invoice.lines.sum('total'), { :negative_format => '(%n)' }) %></strong></div></td>
-		</tr>
-	</tfoot>
-</table>
+<div class="table-wrap">
+	<table>
+		<thead>
+			<tr>
+				<th>&nbsp;</th>
+				<th>Description</th>
+				<th class="text-center">Hours</th>
+				<th class="text-center">Rate ($) per Hour</th>
+				<th class="text-right">Cost</th>
+			</tr>
+		</thead>
+		<tbody>
+			<%= render @invoice.lines %>
+		</tbody>
+		<tfoot>
+			<tr>
+				<td class="text-right" colspan="4"><strong>Total</strong>&nbsp;&nbsp;</td>
+				<td class="currency text-right"><strong><%= number_to_currency(@invoice.lines.sum('total'), { :negative_format => '(%n)' }) %></strong></div></td>
+			</tr>
+		</tfoot>
+	</table>
+</div>
 <% end %>

@@ -26,22 +26,24 @@
 		<% end %>
 	</div>
 	<% else %>
-	<table>
-		<thead>
-			<tr>
-				<th>Vendor</th>
-				<th>Category</th>
-			</tr>
-		</thead>
-		<tbody>
-			<% @vendors.each do |vendor| %>
-			<tr id="vendorrow<%= vendor.id %>">
-				<td><%= link_to vendor do %><%= vendor.name %><% end %></td>
-				<td><%= vendor.category %></td>
-			</tr>
-			<% end %>
-		</tbody>
-	</table>
+	<div class="table-wrap">
+		<table>
+			<thead>
+				<tr>
+					<th>Vendor</th>
+					<th>Category</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% @vendors.each do |vendor| %>
+				<tr id="vendorrow<%= vendor.id %>">
+					<td><%= link_to vendor do %><%= vendor.name %><% end %></td>
+					<td><%= vendor.category %></td>
+				</tr>
+				<% end %>
+			</tbody>
+		</table>
+	</div>
 	<% end %>
 	<% end %>
 </div>

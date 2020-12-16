@@ -15,23 +15,25 @@
 	<% if @vendor.expenses.blank? %>
 	<p>No to-date expenses.</p>
 	<% else %>
-	<table>
-		<thead>
-			<tr>
-				<th>Date</th>
-				<th>Name</th>
-				<th class="text-right">Cost</th>
-			</tr>
-		</thead>
-		<tbody>
-			<% @vendor.expenses.each do |expense| %>
-			<tr id="expenserow<%= expense.id %>">
-				<td><%= link_to expense do %><%= expense.date %><% end %></td>
-				<td><%= expense.name %></td>
-				<td class="currency text-right"><%= number_to_currency(expense.cost, { :negative_format => '(%n)' }) %></td>
-			</tr>
-			<% end %>
-		</tbody>
-	</table>
+	<div class="table-wrap">
+		<table>
+			<thead>
+				<tr>
+					<th>Date</th>
+					<th>Name</th>
+					<th class="text-right">Cost</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% @vendor.expenses.each do |expense| %>
+				<tr id="expenserow<%= expense.id %>">
+					<td><%= link_to expense do %><%= expense.date %><% end %></td>
+					<td><%= expense.name %></td>
+					<td class="currency text-right"><%= number_to_currency(expense.cost, { :negative_format => '(%n)' }) %></td>
+				</tr>
+				<% end %>
+			</tbody>
+		</table>
+	</div>
 	<% end %>
 </div>

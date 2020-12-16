@@ -7,6 +7,7 @@ section {
 
 	@include mq('mobile') {
 		padding: 1.5rem;
+		max-width: 100%;
 	}
 
 }
@@ -78,27 +79,25 @@ section > p {
 
 }
 
+.table-wrap {
+
+	overflow-x: auto;
+
+	&::-webkit-scrollbar {
+		display: none;
+	}
+
+}
+
 table {
 
 	width: 100%;
 	border-collapse: collapse;
 
-	@include mq('mobile') {
-		table-layout: fixed;
-		overflow: auto;
-	}
-
 	th,
 	td {
-
 		padding: 0.5rem;
 		border: 0px;
-
-		@media (max-width: 50rem) {
-			display: block;
-			clear: both;
-		}
-
 	}
 
 	th {
