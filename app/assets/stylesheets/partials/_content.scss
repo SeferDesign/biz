@@ -31,6 +31,21 @@ section {
 		align-items: center;
 		gap: 0.75rem;
 
+		.btn + .btn {
+			margin: 0px;
+		}
+
+		@include mq('mobile') {
+
+			justify-content: flex-start;
+			flex-basis: 100%;
+
+			&:not(:first-child) {
+				margin-top: 1.5rem;
+			}
+
+		}
+
 		i[class^="fa"] {
 			font-size: 1.25rem;
 		}
@@ -98,6 +113,11 @@ table {
 	td {
 		padding: 0.5rem;
 		border: 0px;
+
+		@include mq('mobile') {
+			min-width: 7.5rem;
+		}
+
 	}
 
 	th {

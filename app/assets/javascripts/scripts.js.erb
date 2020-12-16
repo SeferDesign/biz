@@ -13,6 +13,10 @@ jQuery(document).on('turbolinks:load', function() {
 		}, 3500);
 	}
 
+	$('body').on('click', '.nav-toggle', function() {
+		$('body').toggleClass('nav-expanded');
+	});
+
 	$('.nav-tabs a').on('shown.bs.tab', function (e) {
 		e.preventDefault();
 		history.pushState({}, document.title, location.href.replace(location.hash, '') + e.target.hash);

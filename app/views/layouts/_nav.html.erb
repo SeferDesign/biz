@@ -40,6 +40,9 @@
 			<li>
 				<%= link_to payment_path, { class: (controller_name == 'welcome' and action_name == 'payment' ? 'active' : '') } do %>Payment Options</a><% end %>
 			</li>
+			<li>
+				<%= link_to destroy_user_session_path, :method => :delete do %>Sign Out<%= icon('fas', 'sign-out-alt', class: 'right') %><% end %>
+			</li>
 		</ul>
 	</div>
 </nav>

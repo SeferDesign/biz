@@ -103,7 +103,7 @@
 			</thead>
 			<tbody>
 				<% @client.invoices.each do |invoice| %>
-				<tr id="invoicerow<%= invoice.id %>">
+				<tr>
 					<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
 					<td><%= link_to new_invoice_path(:copied_id => invoice.id), :class => 'copy-invoice-link' do %><%= icon('far', 'copy') %><% end %><% if !invoice.paid? %><%= link_to mark_paid_invoice_path(invoice), title: 'Paid Today?', class: 'paid-today-btn paid-today-link', remote: true do %><%= icon('fas', 'check-square', class: 'right') %><% end %><% end %></td>
 					<td><%= invoice.display_id %></td>

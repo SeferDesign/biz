@@ -2,7 +2,12 @@ nav {
 
 	flex-basis: var(--nav-width);
 
+	@include mq('mobile') {
+		flex-basis: 100%;
+	}
+
 	.nav-inner {
+
 		position: sticky;
 		top: 84px;
 		display: flex;
@@ -14,6 +19,20 @@ nav {
 		min-height: calc(var(--vh, 1vh) * 100 - 5.25rem);
 		background: $grey-light;
 		border-right: 1px solid $border-color;
+
+		@include mq('mobile') {
+
+			display: none;
+			position: static;
+			padding: 1.5rem 0px;
+			min-height: 0px;
+
+			.nav-expanded & {
+				display: block;
+			}
+
+		}
+
 	}
 
 	a {
@@ -124,6 +143,11 @@ nav {
 			margin-top: 3rem;
 			padding-top: 3rem;
 			border-top: 1px solid $border-color;
+
+			@include mq('mobile') {
+				margin-top: 1.5rem;
+				padding-top: 1.5rem;
+			}
 
 			a {
 

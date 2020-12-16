@@ -20,6 +20,10 @@ header {
 		padding: 0px 1.5rem;
 		flex-basis: var(--nav-width);
 
+		@media (max-width: $screen-sm-px - 1) {
+			flex: auto;
+		}
+
 		a {
 			display: block;
 			max-width: 80%;
@@ -37,6 +41,10 @@ header {
 		position: relative;
 		flex: 1;
 		max-width: #{$content-width-max - 3rem};
+
+		@include mq('mobile') {
+			display: none;
+		}
 
 		i[class^="fa"] {
 			position: absolute;
@@ -66,14 +74,18 @@ header {
 
 	}
 
-	.user-meta-wrap {
+	.nav-toggle {
 
-		margin-left: auto;
-		padding-left: 1.5rem;
+		display: none;
 
-		a {
-			color: currentColor;
-			text-decoration: none;
+		&:hover {
+			cursor: pointer;
+		}
+
+		@include mq('mobile') {
+			display: block;
+			margin-left: auto;
+			padding-left: 1.5rem;
 		}
 
 	}
