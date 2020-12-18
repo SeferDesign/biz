@@ -5,25 +5,18 @@
 		<%= link_to edit_year_path(@year), title: 'Edit' do %><%= icon_action_edit %><% end %>
 	</div>
 </div>
-<div class="panel">
-	<ul class="nav nav-tabs" role="tablist">
-		<li role="presentation" class="active"><a href="#overview" role="tab" data-toggle="tab">Overview</a></li>
-		<li role="presentation"><a href="#goals" role="tab" data-toggle="tab">Goals</a></li>
-		<li role="presentation"><a href="#income" role="tab" data-toggle="tab">Income</a></li>
-		<li role="presentation"><a href="#expenses" role="tab" data-toggle="tab">Expenses</a></li>
-	</ul>
-	<div class="tab-content">
-		<div role="tabpanel" class="tab-pane active" id="overview">
-			<%= render 'tab-overview' %>
-		</div>
-		<div role="tabpanel" class="tab-pane" id="goals">
-			<%= render 'tab-goals' %>
-		</div>
-		<div role="tabpanel" class="tab-pane" id="income">
-			<%= render 'tab-income' %>
-		</div>
-		<div role="tabpanel" class="tab-pane" id="expenses">
-			<%= render 'tab-expenses' %>
-		</div>
-	</div>
+<div class="filters">
+	<a href="#overview">Overview</a>  &bull; <a href="#goals">Goals</a> &bull; <a href="#income">Income</a> &bull; <a href="#expenses">Expenses</a>
+</div>
+<div id="overview" class="panel">
+	<%= render 'overview' %>
+</div>
+<div id="goals" class="panel">
+	<%= render 'goals' %>
+</div>
+<div id="income" class="panel">
+	<%= render 'income' %>
+</div>
+<div id="expenses" class="panel">
+	<%= render 'expenses' %>
 </div>

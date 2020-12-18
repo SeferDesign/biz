@@ -1,0 +1,74 @@
+.year-overview {
+
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: center;
+	gap: 1.5rem;
+
+	&-stats {
+
+		flex-basis: 30%;
+
+		@include mq('mobile') {
+			flex-basis: 100%;
+		}
+
+	}
+
+	&-chart {
+		flex: 1;
+	}
+
+}
+
+.year-income {
+
+	&-quarters {
+
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 1.5rem;
+
+		& > * {
+			flex-basis: calc((100% - 1.5rem) / 2);
+
+			@include mq('mobile') {
+				flex-basis: 100%;
+			}
+
+		}
+
+	}
+
+}
+
+.year-expenses {
+
+	&-charts {
+
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: center;
+		gap: 1.5rem;
+
+		&-categories {
+
+			flex-basis: 40%;
+
+			@include mq('mobile') {
+				flex-basis: 100%;
+			}
+
+		}
+
+		&-monthly {
+			flex: 1;
+		}
+
+	}
+
+}

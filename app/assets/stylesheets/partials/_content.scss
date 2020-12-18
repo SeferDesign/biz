@@ -102,6 +102,16 @@ section > p {
 		display: none;
 	}
 
+	&,
+	table {
+
+		+ h2,
+		+ h3 {
+			margin-top: 1.5rem;
+		}
+
+	}
+
 }
 
 table {
