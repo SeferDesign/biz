@@ -211,8 +211,12 @@ table {
 
 		break-inside: avoid;
 
+		p {
+			margin-bottom: 0px;;
+		}
+
 		ul {
-			margin: 0.75rem 0px;
+			margin: 0px 0px 0.75rem;
 		}
 
 	}
