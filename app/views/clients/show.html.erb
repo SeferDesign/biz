@@ -1,7 +1,4 @@
 <% provide(:title, "Client ##{@client.id}") %>
-<% if !@client.logo.blank? %>
-<%= image_tag(@client.logo.url(), class: 'client-logo') %>
-<% end %>
 <div class="page-heading">
 	<h1><%= icon('fas', 'user', class: 'fa-fw left') %><%= @client.name %></h1>
 	<div class="actions">
@@ -10,25 +7,13 @@
 	</div>
 </div>
 <div class="panel">
-	<p>
-		<strong>Client ID:</strong>
-		<%= @client.id %>
-	</p>
-	<p>
-		<strong>Contact:</strong>
-		<%= @client.contact %>
-	</p>
+	<p><strong>Client ID:</strong> <%= @client.id %></p>
+	<p><strong>Contact:</strong> <%= @client.contact %></p>
 	<% if !@client.email_accounting.blank? %>
-	<p>
-		<strong>Accounting Email(s):</strong><br>
-		<%= @client.email_accounting %><% if @client.email_accounting_2.present? %>, <%= @client.email_accounting_2 %><% end %><% if @client.email_accounting_3.present? %>, <%= @client.email_accounting_3 %><% end %>
-	</p>
+	<p><strong>Accounting Email(s):</strong><br><%= @client.email_accounting %><% if @client.email_accounting_2.present? %>, <%= @client.email_accounting_2 %><% end %><% if @client.email_accounting_3.present? %>, <%= @client.email_accounting_3 %><% end %></p>
 	<% end %>
 	<% if !@client.site_url.blank? %>
-	<p>
-		<strong>Site:</strong>
-		<a href="<%= @client.site_url %>" title="<%= @client.site_url %>"><%= @client.site_url %></a>
-	</p>
+	<p><strong>Site:</strong> <a href="<%= @client.site_url %>" title="<%= @client.site_url %>"><%= @client.site_url %></a></p>
 	<% end %>
 	<% if !@client.address1.blank? %>
 	<p><strong>Address:</strong></p>
@@ -49,10 +34,7 @@
 	<p><strong>Federal EIN:</strong> <%= @client.federalein %></p>
 	<% end %>
 	<% if !@client.currentrate.blank? %>
-	<p>
-		<strong>Current Hourly Rate:</strong><br>
-		<%= number_to_currency(@client.currentrate) %>
-	</p>
+	<p><strong>Current Hourly Rate:</strong> <%= number_to_currency(@client.currentrate) %></p>
 	<% end %>
 	<h3>Invoices</h3>
 	<p><%= link_to new_invoice_path(:client_id => @client.id), :class => 'btn btn-success btn-sm' do %><%= icon('fas', 'plus', class: 'left') %>New Invoice<% end %></p>
