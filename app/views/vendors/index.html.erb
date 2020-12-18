@@ -19,10 +19,12 @@
 	<% if params[:category] == 'true' %>
 	<div class="vendors-category-view">
 		<% @vendors.group_by(&:category).sort_by { |k, v| -v.join.length }.each do |category, vend| %>
-		<p><strong><%= category %></strong></h3>
-		<ul>
-			<% vend.each do |v| %><li><%= link_to v do %><%= v.name %><% end %></li><% end %>
-		</ul>
+		<div class="vendors-category">
+			<p><strong><%= category %></strong></h3>
+			<ul>
+				<% vend.each do |v| %><li><%= link_to v do %><%= v.name %><% end %></li><% end %>
+			</ul>
+		</div>
 		<% end %>
 	</div>
 	<% else %>

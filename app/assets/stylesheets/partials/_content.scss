@@ -201,3 +201,18 @@ table {
 	}
 
 }
+
+.vendors-category-view {
+
+	columns: 2;
+	column-gap: 1.5rem;
+
+	.vendors-category {
+		break-inside: avoid;
+	}
+
+	@media (max-width: $screen-sm-px - 1) {
+		columns: 1;
+	}
+
+}
