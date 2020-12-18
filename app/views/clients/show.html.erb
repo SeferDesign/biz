@@ -34,7 +34,7 @@
 	<p><strong>Federal EIN:</strong> <%= @client.federalein %></p>
 	<% end %>
 	<% if !@client.currentrate.blank? %>
-	<p><strong>Current Hourly Rate:</strong> <%= number_to_currency(@client.currentrate) %></p>
+	<p><strong>Current Hourly Rate:</strong><br><%= number_to_currency(@client.currentrate) %></p>
 	<% end %>
 	<h3>Invoices</h3>
 	<p><%= link_to new_invoice_path(:client_id => @client.id), :class => 'btn btn-success btn-sm' do %><%= icon('fas', 'plus', class: 'left') %>New Invoice<% end %></p>
