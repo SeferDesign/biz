@@ -208,7 +208,13 @@ table {
 	column-gap: 1.5rem;
 
 	.vendors-category {
+
 		break-inside: avoid;
+
+		ul {
+			margin: 0.75rem 0px;
+		}
+
 	}
 
 	@media (max-width: $screen-sm-px - 1) {
