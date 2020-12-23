@@ -6,7 +6,8 @@ class ClientsController < ApplicationController
       @clients = Client.inactive.all
     else
       @clients = Client.active.all
-    end
+		end
+		@clients = @clients.sort_by{ |client| client.sortable_name }
   end
 
   def show

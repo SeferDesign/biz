@@ -29,7 +29,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				<% @clients.sort { |a,b| a.name <=> b.name }.each do |client| %>
+				<% @clients.each do |client| %>
 				<tr id="clientrow<%= client.id %>">
 					<td><%= link_to client do %><%= client.name %><% end %></td>
 					<td><%= link_to new_invoice_path(:client_id => client.id), :class => 'new-invoice-link' do %><%= icon('fas', 'dollar-sign', class: 'green') %><% end %></td>

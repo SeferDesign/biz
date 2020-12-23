@@ -26,6 +26,10 @@ class Client < ActiveRecord::Base
 	scope :active, -> { where(active: true) }
 	scope :inactive, -> { where(active: false) }
 
+	def sortable_name
+		self.name.sub(/^(the|a|an)\s+/i, '')
+	end
+
 	def mostRecentActivityDate
 		if self.invoices.length > 0
 			self.invoices.first.created_at

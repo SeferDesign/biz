@@ -2,7 +2,7 @@ class VendorsController < ApplicationController
   before_action :set_vendor, only: [:show, :edit, :update, :destroy]
 
   def index
-    @vendors = Vendor.all
+		@vendors = Vendor.all.sort_by{ |vendor| vendor.sortable_name }
   end
 
   def show
