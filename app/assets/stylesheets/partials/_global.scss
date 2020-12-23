@@ -17,6 +17,16 @@
 html,
 body {
 	color: $black;
+	background: $grey-light;
+}
+
+.site-wrap {
+
+	@include mq($screen-xl) {
+		margin: 0px auto;
+		max-width: $screen-xl - 2rem;
+	}
+
 }
 
 main {
@@ -27,7 +37,6 @@ main {
 	flex-wrap: wrap;
 	justify-content: flex-start;
 	align-items: stretch;
-	background: $grey-light;
 
 	&.main-solo {
 

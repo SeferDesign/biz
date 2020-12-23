@@ -15,6 +15,8 @@
 </head>
 <body class="controller-<%= controller_name %> action-<%= action_name %>">
 
+<div class="site-wrap">
+
 <% if !user_signed_in? or @clientView %>
 <% if controller_name == 'sessions' and action_name == 'new' %>
 <%= yield %>
@@ -36,6 +38,8 @@
 </main>
 <%= render 'layouts/footer' %>
 <% end %>
+
+</div>
 
 </body>
 </html>
