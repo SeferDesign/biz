@@ -3,7 +3,7 @@ class Invoice < ActiveRecord::Base
 	has_many :lines, :dependent => :destroy
 	belongs_to :client
 
-	default_scope { order('paiddate DESC') }
+	default_scope { order('paiddate DESC, date DESC') }
 
 	scope :paid, -> { where(paid: true) }
 	scope :unpaid, -> { where.not(paid: true) }
