@@ -16,7 +16,7 @@
 		<div class="form-elements">
 			<div class="form-element full">
 				<%= f.label :client_id, 'Client' %>
-				<%= collection_select(:invoice, 'client_id', Client.all, :id, :name, { :include_blank => true, :selected => params[:action] == 'edit' ? @invoice.client.id : (params[:client_id].present? ? params[:client_id] : (@copied_invoice ? @copied_invoice.client.id : '')) }) %>
+				<%= collection_select(:invoice, 'client_id', Client.all.sort_by{ |client| client.sortable_name }, :id, :name, { :include_blank => true, :selected => params[:action] == 'edit' ? @invoice.client.id : (params[:client_id].present? ? params[:client_id] : (@copied_invoice ? @copied_invoice.client.id : '')) }) %>
 				<script>$('invoice_client_id').change();</script>
 			</div>
 			<div class="form-element">
