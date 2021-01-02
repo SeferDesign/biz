@@ -11,9 +11,9 @@
 <% @year.expenses.sort { |a,b| a.date <=> b.date }.each do |expense| %><%= CSV.generate_line([
     expense.date,
     expense.name,
-    expense.vendor.name.sub(',', ''),
-    expense.vendor.category.sub(',', ''),
+    expense.vendor.name.gsub(',', ''),
+    expense.vendor.category.gsub(',', ''),
     expense.account,
     expense.cost,
-    expense.notes.length > 0 ? expense.notes.sub(',', '') : nil,
-  ]) %><% end %>
+    expense.notes.length > 0 ? expense.notes.gsub(',', '') : nil,
+  ]).html_safe %><% end %>
