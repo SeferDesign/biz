@@ -1,5 +1,5 @@
 <div class="financial-dash">
-	<div class="receivable">Total Receivable: <span class="currency red"><%= number_to_currency(Invoice.unpaid.sum('cost'), { :negative_format => '(%n)' }) %></span> <small>(<%= pluralize(Invoice.unpaid.count, 'invoice') %>)</small></div>
+	<div class="receivable">Total Receivable: <span class="currency orange"><%= number_to_currency(Invoice.unpaid.sum('cost'), { :negative_format => '(%n)' }) %></span> <small>(<%= pluralize(Invoice.unpaid.count, 'invoice') %>)</small></div>
 	<div class="table-wrap">
 		<table>
 			<thead>
@@ -7,6 +7,8 @@
 					<th>&nbsp;</th>
 					<th class="text-right">Goal</th>
 					<th class="text-right">Revenue</th>
+					<th class="text-right">Expenses</th>
+					<th class="text-right">Net Income</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -14,11 +16,15 @@
 					<td><%= link_to Date.today.year, year_path(Year.where(year: Date.today.year).first.year) %></td>
 					<td class="text-right"><span class="currency"><%= number_to_currency(Year.where(year: today.year).first.goal_year.to_i) %></span></td>
 					<td class="text-right"><span class="currency green"><%= number_to_currency(Invoice.paidByYear(today.year).sum('cost'), { :negative_format => '(%n)' }) %></span></td>
+					<td class="text-right"><span class="currency red"><%= number_to_currency(Year.where(year: today.year).first.expensesTotal, { :negative_format => '(%n)' }) %></span></td>
+					<td class="text-right"><span class="currency"><%= number_to_currency(Year.where(year: today.year).first.netIncome, { :negative_format => '(%n)' }) %></span></td>
 				</tr>
 				<tr>
 					<td><%= today.strftime('%B') %></td>
 					<td class="text-right"><span class="currency"><%= number_to_currency(Year.where(year: today.year).first.goals_months[today.month - 1].to_i) %></span></td>
 					<td class="text-right"><span class="currency green"><%= number_to_currency(Invoice.paidByMonth(today.year, today.month).sum('cost'), { :negative_format => '(%n)' }) %></span></td>
+					<td class="text-right"><span class="currency red"><%= number_to_currency(Expense.expenseByMonth(today.year, today.month).sum('cost'), { :negative_format => '(%n)' }) %></span></td>
+					<td class="text-right"><span class="currency"><%= number_to_currency(Invoice.paidByMonth(today.year, today.month).sum('cost') - Expense.expenseByMonth(today.year, today.month).sum('cost'), { :negative_format => '(%n)' }) %></span></td>
 				</tr>
 			</tbody>
 		</table>

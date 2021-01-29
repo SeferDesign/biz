@@ -1,10 +1,12 @@
 <div class="year-overview">
 	<div class="year-overview-stats">
-		<p>Total Income: <span class="currency green"><%= number_to_currency(@year.incomeTotal, { :negative_format => '(%n)' }) %></span></p>
+		<p>Total Revenue: <span class="currency green"><%= number_to_currency(@year.incomeTotal, { :negative_format => '(%n)' }) %></span></p>
+		<p>Total Expenses (to-date): <span class="currency red"><%= number_to_currency(@year.expensesTotal, { :negative_format => '(%n)' }) %></span></p>
+		<p>Net Income (before taxes): <span class="currency"><%= number_to_currency(@year.netIncome, { :negative_format => '(%n)' }) %></span></p>
+		<hr>
 		<p>Tax Rate*: <span class="currency"><%= number_to_percentage(@year.taxrate * 100, :precision => 2) %></span></p>
 		<p>Tax Estimate*: <span class="currency red"><%= number_to_currency(@year.taxOwedTotal, { :negative_format => '(%n)' }) %></span></p>
 		<p>Discounts Given^: <span class="currency"><%= number_to_currency(@year.invoiceDiscountsTotal, { :negative_format => '(%n)' }) %></span></p>
-		<p>Expenses (to-date): <span class="currency red"><%= number_to_currency(@year.expenses.sum(:cost), { :negative_format => '(%n)' }) %></span></p>
 		<p><small>*Tax rate and estimates are conservative and independent of expenses and discounts.</small></p>
 	</div>
 	<div class="year-overview-chart">

@@ -22,6 +22,10 @@ class Year < ActiveRecord::Base
 		Invoice.paidByYear(self.year).sum('cost')
 	end
 
+	def netIncome
+		self.incomeTotal - self.expensesTotal
+	end
+
 	def taxOwedTotal
 		self.incomeTotal * self.taxrate
 	end
@@ -58,6 +62,10 @@ class Year < ActiveRecord::Base
 
 	def expenses
 		Expense.where("SELECT extract(YEAR FROM date) = ?", self.year).where(['date <= ?', Time.now])
+	end
+
+	def expensesTotal
+		Expense.expenseByYear(self.year).sum(:cost)
 	end
 
 	def expensesFuture
