@@ -3,7 +3,7 @@ ID: <%= invoice.display_id %>
 Amount: <%= number_to_currency(invoice.lines.sum('total'), { :unit => '$', :negative_format => '(%n)' }) %>
 Status: <% if invoice.paid == true %>PAID<% else %>NOT PAID<% end %>
 
-PLEASE NOTE: Our mailing address has recently changed.
+<%# PLEASE NOTE: Our mailing address has recently changed. %>
 
 <%= company[:pay_to] %>
 <%= company[:address][:street] %>
