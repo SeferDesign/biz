@@ -34,7 +34,7 @@ client = Client.create!(
   :city => 'Chicago',
   :state => 'IL',
   :email_accounting => 'robtest@rsefer.com',
-  :preferred_paymenttype => 'Chase Quick Pay',
+  :preferred_paymenttype => 'Zele',
   :currentrate => 85,
   :active => true,
   :federalein => '81-0123456'
@@ -53,7 +53,7 @@ vendor = Vendor.create!(
     :cost => (i % 2 + i % 3 + i % 4 + 1) * 10000.00,
     :paid => true,
     :paiddate => (x - 1).month.ago,
-    :paymenttype => 'Chase Quick Pay',
+    :paymenttype => 'Zelle',
     :description => 'This invoice represents various work.'
   )
 

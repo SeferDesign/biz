@@ -41,7 +41,7 @@ module ApplicationHelper
 		[
 			'Check',
 			'Credit Card',
-			'Chase Quick Pay',
+			'Zelle',
 			'PayPal',
 			'Stripe',
 			'ACH',
