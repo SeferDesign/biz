@@ -10,11 +10,11 @@ module ApplicationHelper
 			:email => 'info@seferdesign.com',
 			:phone => '(630) 204-0013',
 			:address => {
-				:street => '10 W. Elm #808',
-				:city => 'Chicago',
+				:street => '205 S Hawthorne Ave.',
+				:city => 'Elmhurst',
 				:state => 'Illinois',
 				:state_abbrv => 'IL',
-				:zipcode => '60610'
+				:zipcode => '60126'
 			},
 			:logo => {
 				:default => image_url('sdc.svg'),
