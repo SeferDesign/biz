@@ -2,7 +2,7 @@ class YearsController < ApplicationController
   before_action :set_year, only: [:show, :income, :expenses, :edit, :update, :destroy]
 
   def index
-    @years = Year.all.sort { |a,b| a.year <=> b.year }
+    @years = Year.all.sort { |a,b| b.year <=> a.year }
   end
 
   def show
