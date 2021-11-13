@@ -1578,6 +1578,7 @@ DEPENDENCIES
   roadie (~> 3)
   rqrcode-rails3
   sass-rails
+  sassc
   sdoc
   spring
   stripe (~> 5)
