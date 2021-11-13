@@ -37,7 +37,7 @@ set :puma_workers,    0
 #set :console_env, :production
 set :console_user, nil
 
-# set :bundle_flags, '--deployment' # enable for verbose logging
+set :bundle_flags, '--deployment' # enable for verbose logging
 set :bundle_env_variables, { nokogiri_use_system_libraries: 1 }
 
 # Don't change these unless you know what you're doing

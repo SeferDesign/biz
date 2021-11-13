@@ -1557,6 +1557,7 @@ DEPENDENCIES
   devise (~> 4)
   devise-two-factor
   faraday
+  ffi
   figaro
   font-awesome-sass (~> 5)
   friendly_id
