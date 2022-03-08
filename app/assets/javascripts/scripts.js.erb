@@ -126,7 +126,7 @@ jQuery(document).on('turbolinks:load', function() {
 		{ id: 'year-expenses-chart' }
 	];
 	for (var c = 0; c < averageCharts.length; c++) {
-		addAverageToChart(averageCharts[c].id);
+		addChartPlotlines(averageCharts[c].id);
 	}
 
 });
@@ -143,7 +143,7 @@ function setVH() {
 	document.documentElement.style.setProperty('--vh', vh + 'px');
 }
 
-function addAverageToChart(chartID) {
+function addChartPlotlines(chartID) {
 	var chart = Chartkick.charts[chartID];
 	if (!chart) { return; }
 	setTimeout(function() {
@@ -154,21 +154,42 @@ function addAverageToChart(chartID) {
 		}
 		var options = chart.getOptions();
 		var monthlyAverage = figureTotal / options.days_elapsed * options.days_in_year / 12;
-		options.library.yAxis = {
-			plotLines: [{
+		if (!options.library.yAxis) {
+			options.library.yAxis = {
+				plotLines: []
+			};
+		} else if (!options.library.yAxis.plotlines) {
+			options.library.yAxis.plotLines = [];
+		}
+		options.library.yAxis.plotLines.push({
+			color: '<%= Chartkick.options[:colors][0] %>',
+			label: {
+				text: 'Average $' + numberWithCommas(Math.round(monthlyAverage)),
+				align: 'left',
+				textAlign: 'right',
+				x: -8,
+				y: 2
+			},
+			value: monthlyAverage,
+			width: '1',
+			zIndex: 2
+		});
+		if (options.yearly_goal) {
+			options.library.yAxis.plotLines.push({
 				color: '<%= Chartkick.options[:colors][2] %>',
 				label: {
-					text: 'Average $' + numberWithCommas(Math.round(monthlyAverage)),
+					text: 'Goal $' + numberWithCommas(Math.round(options.yearly_goal / 12)),
 					align: 'left',
 					textAlign: 'right',
 					x: -8,
 					y: 2
 				},
-				value: monthlyAverage,
+				value: options.yearly_goal / 12,
 				width: '1',
-				zIndex: 2
-			}]
-		};
+				zIndex: 2,
+				className: 'yearly-goal-average'
+			});
+		}
 		chart.setOptions(options);
 	}, 1000);
 }

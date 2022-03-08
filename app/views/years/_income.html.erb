@@ -4,7 +4,7 @@
 	<div class="year-income-quarters">
 		<%= render partial: 'quarter', collection: [1, 2, 3, 4], as: :quarterNumber %>
 	</div>
-	<div class="chart-wrap"><%= column_chart chart_year_by_invoice_month_with_goals_path(@year.id), id: 'year-income-chart', colors: [Chartkick.options[:colors][0], Chartkick.options[:colors][2]], days_in_year: @year.days_in_year, days_elapsed: @year.days_elapsed %></div>
+	<div class="chart-wrap"><%= column_chart chart_year_by_invoice_month_with_goals_path(@year.id), id: 'year-income-chart', colors: [Chartkick.options[:colors][0], Chartkick.options[:colors][2]], days_in_year: @year.days_in_year, days_elapsed: @year.days_elapsed, yearly_goal: @year.goal_year %></div>
 	<h3>Unpaid Invoices</h3>
 	<% if @year.invoices.unpaid.blank? %>
 	<p>No unpaid invoices issued in <%= @year.year %>.</p>

@@ -15,6 +15,13 @@
 		text-transform: uppercase;
 	}
 
+	.highcharts-plot-line.yearly-goal-average {
+		stroke: #639ec9;
+		stroke-dasharray: 5;
+		stroke-width: 0.25%;
+		opacity: 0.5;
+	}
+
 	.highcharts-column-series.highcharts-series-2,
 	#year-income-chart .highcharts-column-series.highcharts-series-1 {
 
