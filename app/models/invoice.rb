@@ -31,12 +31,24 @@ class Invoice < ActiveRecord::Base
 		self.lines.any? { |l| l.discount? }
 	end
 
-	def stripeChargeCost
+	def stripeCardChargeCost
 		(((self.cost or 0) + 0.30) / (1 - 0.029)).round(2)
 	end
 
-  def stripeChargeDifference
-		self.stripeChargeCost - self.cost
+  def stripeCardChargeDifference
+		self.stripeCardChargeCost - self.cost
+	end
+
+	def stripeBankChargeCost
+		fee = ((self.cost or 0) * 0.008)
+		if fee > 5
+			fee = 5
+		end
+		((self.cost or 0) + fee).round(2)
+	end
+
+	def stripeBankChargeDifference
+		self.stripeBankChargeCost - self.cost
 	end
 
 	def pdfFileName

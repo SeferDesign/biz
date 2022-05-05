@@ -18,7 +18,7 @@ class InvoicesController < ApplicationController
 		end
 
 		if @clientView and @invoice.unpaid and @invoice.cost.present? and @invoice.cost >= 0.50
-			@session = Stripe::Checkout::Session.create({
+			@sessionCard = Stripe::Checkout::Session.create({
 				payment_method_types: ['card'],
 				customer: @invoice.client.stripe_customer_id,
 				line_items: [
@@ -26,16 +26,41 @@ class InvoicesController < ApplicationController
 						product_data: {
 							name: 'Invoice #' + @invoice.display_id
 						},
-						unit_amount: (@invoice.stripeChargeCost * 100).to_i,
+						unit_amount: (@invoice.stripeCardChargeCost * 100).to_i,
 						currency: 'usd',
 					},
 					quantity: 1,
 				],
 				mode: 'payment',
-				success_url: invoice_url(@invoice) + '/stripe/?session_id={CHECKOUT_SESSION_ID}&access_token='+ @invoice.access_token,
+				success_url: invoice_url(@invoice) + '/stripe/?session_card_id={CHECKOUT_SESSION_ID}&access_token='+ @invoice.access_token,
 				cancel_url: invoice_url(@invoice) + '?access_token='+ @invoice.access_token,
 			})
-			@invoice.stripe_session_id = @session.id
+			@invoice.stripe_card_session_id = @sessionCard.id
+			@sessionBank = Stripe::Checkout::Session.create({
+				payment_method_types: ['us_bank_account'],
+				payment_method_options: {
+					us_bank_account: {
+						financial_connections: {
+							permissions: ['payment_method']
+						}
+					}
+				},
+				customer: @invoice.client.stripe_customer_id,
+				line_items: [
+					price_data: {
+						product_data: {
+							name: 'Invoice #' + @invoice.display_id
+						},
+						unit_amount: (@invoice.stripeBankChargeCost * 100).to_i,
+						currency: 'usd',
+					},
+					quantity: 1,
+				],
+				mode: 'payment',
+				success_url: invoice_url(@invoice) + '/stripe/?session_bank_id={CHECKOUT_SESSION_ID}&access_token='+ @invoice.access_token,
+				cancel_url: invoice_url(@invoice) + '?access_token='+ @invoice.access_token,
+			})
+			@invoice.stripe_bank_session_id = @sessionBank.id
 			@invoice.save
 		end
   	respond_to do |format|
@@ -105,10 +130,28 @@ class InvoicesController < ApplicationController
   end
 
   def stripe
-		if !params[:session_id].present? or params[:session_id].empty? or params[:session_id] != @invoice.stripe_session_id
-			raise 'error'
-		else
-			@invoice.update(:paid => true, :paymenttype => 'Stripe', :paiddate => Date.today)
+		@workingSessionID = nil
+		@paymentStatus = false
+		paymentType = nil
+		if params[:session_card_id] == @invoice.stripe_card_session_id
+			@workingSessionID = @invoice.stripe_card_session_id
+			paymentType = 'Stripe (Card)'
+		elsif params[:session_bank_id] == @invoice.stripe_bank_session_id
+			@workingSessionID = @invoice.stripe_bank_session_id
+			paymentType = 'Stripe (Bank)'
+		end
+
+		if @workingSessionID
+			@workingSession = Stripe::Checkout::Session.retrieve(@workingSessionID)
+			if @workingSession['payment_intent']
+				@workingPaymentIntent = Stripe::PaymentIntent.retrieve(@workingSession['payment_intent'])
+				puts @workingPaymentIntent
+				if @workingPaymentIntent['status'] == 'succeeded'
+					@paymentStatus = true
+					@invoice.update(:paid => true, :paymenttype => paymentType, :paiddate => Date.today)
+				end
+			end
+
 		end
 	end
 
@@ -163,7 +206,7 @@ class InvoicesController < ApplicationController
     end
 
     def invoice_params
-      params.require(:invoice).permit(:client_id, :date, :cost, :paid, :paiddate, :paymenttype, :description, :access_token, :stripe_session_id, :mail_sends)
+      params.require(:invoice).permit(:client_id, :date, :cost, :paid, :paiddate, :paymenttype, :description, :access_token, :stripe_card_session_id, :mail_sends)
 		end
 
 end

@@ -11,6 +11,7 @@ Biz::Application.routes.draw do
 	root 'welcome#index'
 
 	match 'best', to: 'welcome#best', via: [:get]
+	match 'webhook', to: 'welcome#webhook', via: [:post]
 	match 'payment', to: 'welcome#payment', via: [:get]
 	match 'stripe', to: 'welcome#stripe', via: [:get]
 

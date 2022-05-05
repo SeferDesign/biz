@@ -1,23 +1,44 @@
+<script src="https://js.stripe.com/v3/"></script>
 <div class="payment-options">
-	<% if @session.present? %>
+	<% if @sessionCard.present? %>
 	<div class="payment-option payment-option-stripe">
 		<h3>Pay with a credit or debit card:<br><small>via the Stripe payment service</small></h3>
 		<% if controller_name == 'invoices' %>
-		<p>Stripe <a href="https://stripe.com/us/pricing" target="_blank">adds a fee</a> of <strong><%= number_to_currency(@invoice.stripeChargeDifference) %></strong> for this transaction, which increases your payment total to <strong><%= number_to_currency(@invoice.stripeChargeCost) %></strong>.</p>
-		<button id="checkout-button" class="btn btn-success" data-secret="<%= @session['id'] %>">Pay with Card</button>
-		<script src="https://js.stripe.com/v3/"></script>
+		<p>Stripe <a href="https://stripe.com/us/pricing" target="_blank">adds a fee</a> of <strong><%= number_to_currency(@invoice.stripeCardChargeDifference) %></strong> for this transaction, which increases your payment total to <strong><%= number_to_currency(@invoice.stripeCardChargeCost) %></strong>.</p>
+		<button id="checkout-card-button" class="btn btn-success" data-secret="<%= @sessionCard['id'] %>">Pay with Card</button>
 		<script>
 			var stripe = Stripe('<%= Figaro.env.stripe_api_publishable_key %>');
-			var checkoutButton = document.getElementById('checkout-button');
+			var checkoutButton = document.getElementById('checkout-card-button');
 			checkoutButton.addEventListener('click', function() {
 				stripe.redirectToCheckout({
-					sessionId: '<%= @session['id'] %>'
+					sessionId: '<%= @sessionCard['id'] %>'
 				}).then(function (result) {
 				});
 			});
 		</script>
 		<% elsif controller_name == 'welcome' and action_name == 'payment' %>
 		<p>Stripe <a href="https://stripe.com/us/pricing" target="_blank">adds a fee</a> of <strong>approximately 3%</strong> to each transaction.</p>
+		<% end %>
+	</div>
+	<% end %>
+	<% if @sessionBank.present? %>
+	<div class="payment-option payment-option-stripe">
+		<h3>Pay directly with your bank account:<br><small>via the Stripe payment service</small></h3>
+		<% if controller_name == 'invoices' %>
+		<p>Stripe <a href="https://stripe.com/us/pricing" target="_blank">adds a fee</a> of <strong><%= number_to_currency(@invoice.stripeBankChargeDifference) %></strong> for this transaction, which increases your payment total to <strong><%= number_to_currency(@invoice.stripeBankChargeCost) %></strong>.</p>
+		<button id="checkout-bank-button" class="btn btn-success" data-secret="<%= @sessionBank['id'] %>">Pay with Bank</button>
+		<script>
+			var stripe = Stripe('<%= Figaro.env.stripe_api_publishable_key %>');
+			var checkoutButton = document.getElementById('checkout-bank-button');
+			checkoutButton.addEventListener('click', function() {
+				stripe.redirectToCheckout({
+					sessionId: '<%= @sessionBank['id'] %>'
+				}).then(function (result) {
+				});
+			});
+		</script>
+		<% elsif controller_name == 'welcome' and action_name == 'payment' %>
+		<p>Stripe <a href="https://stripe.com/us/pricing" target="_blank">adds a fee</a> of <strong>approximately 0.8%</strong> to each transaction.</p>
 		<% end %>
 	</div>
 	<% end %>

@@ -1,8 +1,13 @@
 <% provide(:title, "Stripe Payment") %>
-<% if @stripeError %>
-<h2>Payment Failed</h2>
-<p>Your card has NOT been charged. Please contact us for further instructions.</p>
-<% else %>
+<% if @paymentStatus %>
 <h2>Payment Succeeded</h2>
-<p>Your card was charged successfully. Thank you!</p>
+<p>Your card was charged successfully. Thank you! Redirecting to your paid invoice...</p>
+<script>
+/*setTimeout(function() {
+	window.location.replace('/invoices/<%= @invoice.id %>?access_token=<%= @invoice.access_token %>');
+}, 1500);*/
+</script>
+<% else %>
+<h2>Payment Failed</h2>
+<p>Your card/bank has NOT been charged. Please contact us for further instructions or <a href="/invoices/<%= @invoice.id %>?access_token=<%= @invoice.access_token %>">try to make the payment again</a>.</p>
 <% end %>

@@ -35,7 +35,7 @@ class Api::V1::InvoicesController < Api::ApiController
     end
 
     def invoice_params
-      params.require(:invoice).permit(:client_id, :date, :cost, :paid, :paiddate, :paymenttype, :description, :access_token, :stripe_session_id, :mail_sends)
+      params.require(:invoice).permit(:client_id, :date, :cost, :paid, :paiddate, :paymenttype, :description, :access_token, :stripe_card_session_id, :stripe_bank_session_id, :mail_sends)
     end
 
 end
