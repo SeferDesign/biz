@@ -25,7 +25,7 @@
 				<% Invoice.notable.each do |invoice| %>
 				<tr>
 					<td><%= link_to Client.find(invoice.client_id) do %><%= Client.find(invoice.client_id).name %><% end %></td>
-					<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
+					<td><%= link_to invoice do %><%= invoice.date %><% end %><% if not invoice.mail_sends.present? %><div class="not-mailed-icon" title="Not Mailed"><%= icon('fas', 'exclamation') %></div><% end %></td>
 					<td><%= link_to new_invoice_path(:copied_id => invoice.id), :class => 'copy-invoice-link' do %><%= icon('far', 'copy') %><% end %><% if !invoice.paid? %><%= link_to mark_paid_invoice_path(invoice), title: 'Paid Today?', class: 'paid-today-btn paid-today-link', remote: true do %><%= icon('fas', 'check-square', class: 'right') %><% end %><% end %></td>
 					<td class="currency text-right"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
 					<td class="text-center"><% if invoice.paid == true %><%= icon('fas', 'check', class: 'green') %><% else %><span class="spread red">Not Paid</span><% end %></td>

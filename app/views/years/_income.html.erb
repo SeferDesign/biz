@@ -23,7 +23,7 @@
 				<% @year.invoices.unpaid.each do |invoice| %>
 				<tr>
 					<td><%= link_to Client.find(invoice.client_id) do %><%= Client.find(invoice.client_id).name %><% end %></td>
-					<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
+					<td><%= link_to invoice do %><%= invoice.date %><% end %><% if not invoice.mail_sends.present? %><div class="not-mailed-icon" title="Not Mailed"><%= icon('fas', 'exclamation') %></div><% end %></td>
 					<td class="text-center"><%= (Date.today - invoice.date).to_i %></td>
 					<td class="currency text-right"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
 				</tr>

@@ -92,6 +92,18 @@ section > p {
 
 	}
 
+	.not-mailed-icon {
+
+		display: inline-block;
+		vertical-align: middle;
+		color: $red;
+
+		&:not(:first-child) {
+			margin-left: 0.5em;
+		}
+
+	}
+
 }
 
 .table-wrap {
