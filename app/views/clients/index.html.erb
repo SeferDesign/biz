@@ -13,7 +13,7 @@
 	<% end %>
 </div>
 <div class="panel">
-	<% if @clients.blank? %>
+	<% if @clientsAll.blank? %>
 	<p>No clients.</p>
 	<% else %>
 	<div class="table-wrap">
@@ -29,15 +29,17 @@
 				</tr>
 			</thead>
 			<tbody>
-				<% @clients.each do |client| %>
-				<tr id="clientrow<%= client.id %>">
-					<td><%= link_to client do %><%= client.name %><% end %></td>
-					<td><%= link_to new_invoice_path(:client_id => client.id), :class => 'new-invoice-link' do %><%= icon('fas', 'dollar-sign', class: 'green') %><% end %></td>
-					<td><%= client.contact %></td>
-					<td><% if client.currentrate %><%= number_to_currency(client.currentrate) %><% else %>&mdash;<% end %></td>
-					<td class="currency text-right"><% if client.unpaidTotal > 0 %><span class="spread red"><%= number_to_currency(client.unpaidTotal, { :negative_format => '(%n)' }) %></span><% else %>&mdash;<% end %></td>
-					<td class="currency text-right"><%= number_to_currency(client.invoiceTotal, { :negative_format => '(%n)' }) %></td>
-				</tr>
+				<% @clientsRecent.each do |client| %>
+					<%= render 'row', :client => client %>
+				<% end %>
+				<tr>
+					<td colspan="6"><hr></td>
+				<tr>
+				<tr>
+					<td colspan="6"><strong>All Clients</strong></td>
+				<tr>
+				<% @clientsAll.each do |client| %>
+					<%= render 'row', :client => client %>
 				<% end %>
 			</tbody>
 		</table>

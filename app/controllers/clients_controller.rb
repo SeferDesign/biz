@@ -2,12 +2,8 @@ class ClientsController < ApplicationController
 	before_action :set_client, only: [:show, :edit, :update, :destroy]
 
   def index
-    if params[:inactive] == 'true'
-      @clients = Client.inactive.all
-    else
-      @clients = Client.active.all
-		end
-		@clients = @clients.sort_by{ |client| client.sortable_name }
+		@clientsRecent = Client.all.sort { |a,b| a.mostRecentActivityDate <=> b.mostRecentActivityDate }.reverse.take(10)
+		@clientsAll = Client.all
   end
 
   def show
