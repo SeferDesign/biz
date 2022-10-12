@@ -36,7 +36,6 @@ client = Client.create!(
   :email_accounting => 'robtest@rsefer.com',
   :preferred_paymenttype => 'Zelle',
   :currentrate => 85,
-  :active => true,
   :federalein => '81-0123456'
 )
 
