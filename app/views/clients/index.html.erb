@@ -1,16 +1,9 @@
 <% provide(:title, 'Clients') %>
 <div class="page-heading">
-	<h1><%= icon('fas', 'user', class: 'fa-fw left') %><% if params[:inactive] == 'true' %>Inactive <% end %>Clients</h1>
+	<h1><%= icon('fas', 'user', class: 'fa-fw left') %>Clients</h1>
 	<div class="actions">
 		<%= link_to new_client_path, { :class => 'btn btn-sm btn-success' } do %><%= icon('fas', 'plus', class: 'left') %>New Client<% end %>
 	</div>
-</div>
-<div class="filters">
-	<% if params[:inactive] == 'true' %>
-	<%= link_to 'Active Clients', clients_path %>
-	<% else %>
-	<%= link_to 'Inactive Clients', clients_path(:inactive => 'true') %>
-	<% end %>
 </div>
 <div class="panel">
 	<% if @clientsAll.blank? %>

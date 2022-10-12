@@ -23,9 +23,6 @@ class Client < ActiveRecord::Base
 
 	default_scope { order('name ASC') }
 
-	scope :active, -> { where(active: true) }
-	scope :inactive, -> { where(active: false) }
-
 	def sortable_name
 		self.name.sub(/^(the|a|an)\s+/i, '')
 	end
