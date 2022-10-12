@@ -14,12 +14,6 @@
 			Basic Info
 		</div>
 		<div class="form-elements">
-			<div class="form-element form-element-radio-wrap full">
-				<%= check_box(:client, :active, {}, 'true', 'false') %>
-				<%= f.label :active, 'Active?' %>
-				<%= check_box(:client, :international, {}, 'true', 'false') %>
-				<%= f.label :international, 'International?' %>
-			</div>
 			<div class="form-element full">
 				<%= f.label :name %>
 				<%= f.text_field :name, :required => true %>
