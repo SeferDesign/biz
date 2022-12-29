@@ -43,4 +43,8 @@ class Invoice < ActiveRecord::Base
 		self.client.name.gsub(/[^0-9A-Za-z]/, '') + '-' + self.display_id_number + '-' + self.date.to_s
 	end
 
+	def needsMailing
+		self.unpaid and not self.mail_sends.present?
+	end
+
 end
