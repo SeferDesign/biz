@@ -21,12 +21,6 @@
 		<% end %>
 	</div>
 	<% end %>
-  <hr>
-	<div class="payment-option payment-option-check">
-		<h3>Pay via paper check:</h3>
-		<p>Please make the check out to '<strong><%= company[:pay_to] %></strong>' and mail to:</p>
-		<p><%= company[:pay_to] %><br><%= company[:address][:street] %><br><%= company[:address][:city] %>, <%= company[:address][:state_abbrv] %> <%= company[:address][:zipcode] %></p>
-	</div>
 	<hr>
 	<div class="payment-option payment-option-electronic">
 		<h3>Pay electronically via Zelle:</h3>
@@ -36,6 +30,12 @@
 		</div>
 	</div>
 	<hr>
+	<div class="payment-option payment-option-check">
+		<h3>Pay via paper check:</h3>
+		<p>Please make the check out to '<strong><%= company[:pay_to] %></strong>' and mail to:</p>
+		<p><%= company[:pay_to] %><br><%= company[:address][:street] %><br><%= company[:address][:city] %>, <%= company[:address][:state_abbrv] %> <%= company[:address][:zipcode] %></p>
+	</div>
+	<!--<hr>
 	<div class="payment-option payment-option-paypal">
 		<h3>Pay electronically via PayPal:</h3>
 		<div class="payment-option payment-option-paypal">
@@ -44,5 +44,5 @@
 				<%= image_tag('payment/paypal.svg') %>
 			</div>
 		</div>
-	</div>
+	</div>-->
 </div>
