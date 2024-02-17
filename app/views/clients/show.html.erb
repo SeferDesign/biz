@@ -1,13 +1,17 @@
 <% provide(:title, "Client ##{@client.id}") %>
 <div class="page-heading">
 	<h1><%= icon('fas', 'user', class: 'fa-fw left') %><%= @client.name %></h1>
+	<% if user_signed_in? and !@clientView %>
 	<div class="actions">
 		<%= link_to edit_client_path(@client), title: 'Edit' do %><%= icon_action_edit %><% end %>
 		<%= link_to client_path(@client), title: 'Delete', method: :delete, data: { confirm: "Are you sure you would like to delete Client ##{@client.id}?" } do %><%= icon_action_delete %><% end %>
 	</div>
+	<% end %>
 </div>
 <div class="panel">
+	<% if user_signed_in? and !@clientView %>
 	<p><strong>Client ID:</strong> <%= @client.id %></p>
+	<p><strong>Access Token:</strong> <%= @client.access_token %> (<a href="<%= client_path(@client) %>?access_token=<%= @client.access_token %>">Client Link</a>)</p>
 	<p><strong>Contact:</strong> <%= @client.contact %></p>
 	<% if !@client.email_accounting.blank? %>
 	<p><strong>Accounting Email(s):</strong><br><%= @client.email_accounting %><% if @client.email_accounting_2.present? %>, <%= @client.email_accounting_2 %><% end %><% if @client.email_accounting_3.present? %>, <%= @client.email_accounting_3 %><% end %></p>
@@ -36,11 +40,57 @@
 	<% if !@client.currentrate.blank? %>
 	<p><strong>Current Hourly Rate:</strong><br><%= number_to_currency(@client.currentrate) %></p>
 	<% end %>
+	<% end %>
 	<h3>Invoices</h3>
+	<% if user_signed_in? and !@clientView %>
 	<p><%= link_to new_invoice_path(:client_id => @client.id), :class => 'btn btn-success btn-sm' do %><%= icon('fas', 'plus', class: 'left') %>New Invoice<% end %></p>
+	<% end %>
 	<% if @client.invoices.blank? %>
 	<p>No invoices.</p>
 	<% else %>
+	<% if @client.invoices.unpaid.present? %>
+	<h4>Unpaid Invoices</h4>
+	<div class="table-wrap">
+		<table>
+			<thead>
+				<tr>
+					<th>Date Sent</th>
+					<% if user_signed_in? and !@clientView %><th>&nbsp;</th><% end %>
+					<th>ID</th>
+					<th class="text-right">Cost</th>
+					<th class="text-center">Date Paid</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% @client.invoices.unpaid.each do |invoice| %>
+				<tr>
+					<td>
+						<% if user_signed_in? and !@clientView %>
+						<%= link_to invoice do %><%= invoice.date %><% end %>
+						<% else %>
+						<%= link_to invoice.date, invoice_path(invoice, params: { access_token: invoice.access_token }) %>
+						<% end %>
+					</td>
+					<% if user_signed_in? and !@clientView %>
+					<td><%= link_to new_invoice_path(:copied_id => invoice.id), :class => 'copy-invoice-link' do %><%= icon('far', 'copy') %><% end %><% if !invoice.paid? %><%= link_to mark_paid_invoice_path(invoice), title: 'Paid Today?', class: 'paid-today-btn paid-today-link', remote: true do %><%= icon('fas', 'check-square', class: 'right') %><% end %><% end %></td>
+					<% end %>
+					<td><%= invoice.display_id %></td>
+					<td class="currency text-right"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
+					<td class="text-center"><% if invoice.paid == true %><span class="green"><%= invoice.paiddate %></span><% else %><span class="spread red">Not Paid</span><% end %></td>
+				</tr>
+				<% end %>
+			</tbody>
+			<tfoot>
+				<tr>
+					<td<% if user_signed_in? and !@clientView %> colspan="2"<% end %>>&nbsp;</td>
+					<td class="text-right"><strong>Total</strong></td>
+					<td class="currency text-right"><strong><%= number_to_currency(@client.unpaidTotal, { :negative_format => '(%n)' }) %></strong></td>
+					<td>&nbsp;</td>
+				</tr>
+			</tfoot>
+		</table>
+	</div>
+	<% end %>
 	<h4>Paid By Year</h4>
 	<div class="table-wrap">
 		<table>
@@ -56,7 +106,7 @@
 					if Invoice.paidByYear(year.year).where(:client_id => @client.id).length > 0
 				%>
 				<tr>
-					<td><%= link_to year do %><%= year.year %><% end %></td>
+					<td><% if user_signed_in? and !@clientView %><%= link_to year do %><%= year.year %><% end %><% else %><%= year.year %><% end %></td>
 					<td>&nbsp;</td>
 					<td class="currency text-right"><%= number_to_currency(Invoice.paidByYear(year.year).where(:client_id => @client.id).sum(:cost), { :negative_format => '(%n)' }) %></td>
 				</tr>
@@ -71,48 +121,13 @@
 			</tfoot>
 		</table>
 	</div>
-	<% if @client.invoices.unpaid.present? %>
-	<h4>Unpaid Invoices</h4>
-	<div class="table-wrap">
-		<table>
-			<thead>
-				<tr>
-					<th>Date Sent</th>
-					<th>&nbsp;</th>
-					<th>ID</th>
-					<th class="text-right">Cost</th>
-					<th class="text-center">Date Paid</th>
-				</tr>
-			</thead>
-			<tbody>
-				<% @client.invoices.unpaid.each do |invoice| %>
-				<tr>
-					<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
-					<td><%= link_to new_invoice_path(:copied_id => invoice.id), :class => 'copy-invoice-link' do %><%= icon('far', 'copy') %><% end %><% if !invoice.paid? %><%= link_to mark_paid_invoice_path(invoice), title: 'Paid Today?', class: 'paid-today-btn paid-today-link', remote: true do %><%= icon('fas', 'check-square', class: 'right') %><% end %><% end %></td>
-					<td><%= invoice.display_id %></td>
-					<td class="currency text-right"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
-					<td class="text-center"><% if invoice.paid == true %><span class="green"><%= invoice.paiddate %></span><% else %><span class="spread red">Not Paid</span><% end %></td>
-				</tr>
-				<% end %>
-			</tbody>
-			<tfoot>
-				<tr>
-					<td colspan="2">&nbsp;</td>
-					<td class="text-right"><strong>Total</strong></td>
-					<td class="currency text-right"><strong><%= number_to_currency(@client.unpaidTotal, { :negative_format => '(%n)' }) %></strong></td>
-					<td>&nbsp;</td>
-				</tr>
-			</tfoot>
-		</table>
-	</div>
-	<% end %>
 	<h4>All Invoices</h4>
 	<div class="table-wrap">
 		<table>
 			<thead>
 				<tr>
 					<th>Date Sent</th>
-					<th>&nbsp;</th>
+					<% if user_signed_in? and !@clientView %><th>&nbsp;</th><% end %>
 					<th>ID</th>
 					<th class="text-right">Cost</th>
 					<th class="text-center">Date Paid</th>
@@ -121,8 +136,16 @@
 			<tbody>
 				<% @client.invoices.each do |invoice| %>
 				<tr>
-					<td><%= link_to invoice do %><%= invoice.date %><% end %></td>
+					<td>
+						<% if user_signed_in? and !@clientView %>
+						<%= link_to invoice do %><%= invoice.date %><% end %>
+						<% else %>
+						<%= link_to invoice.date, invoice_path(invoice, params: { access_token: invoice.access_token }) %>
+						<% end %>
+					</td>
+					<% if user_signed_in? and !@clientView %>
 					<td><%= link_to new_invoice_path(:copied_id => invoice.id), :class => 'copy-invoice-link' do %><%= icon('far', 'copy') %><% end %><% if !invoice.paid? %><%= link_to mark_paid_invoice_path(invoice), title: 'Paid Today?', class: 'paid-today-btn paid-today-link', remote: true do %><%= icon('fas', 'check-square', class: 'right') %><% end %><% end %></td>
+					<% end %>
 					<td><%= invoice.display_id %></td>
 					<td class="currency text-right"><% if invoice.cost %><%= number_to_currency(invoice.cost, { :negative_format => '(%n)' }) %><% else %>&mdash;<% end %></td>
 					<td class="text-center"><% if invoice.paid == true %><span class="green"><%= invoice.paiddate %></span><% else %><span class="spread red">Not Paid</span><% end %></td>
@@ -131,7 +154,7 @@
 			</tbody>
 			<tfoot>
 				<tr>
-					<td colspan="2">&nbsp;</td>
+					<td<% if user_signed_in? and !@clientView %> colspan="2"<% end %>>&nbsp;</td>
 					<td class="text-right"><strong>Total</strong></td>
 					<td class="currency text-right"><strong><%= number_to_currency(@client.invoiceTotal, { :negative_format => '(%n)' }) %></strong></td>
 					<td>&nbsp;</td>

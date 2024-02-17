@@ -12,3 +12,7 @@ Status: <% if invoice.paid == true %>PAID<% else %>NOT PAID<% end %>
 View Payment Instructions:
 
 <%= invoice_url(@invoice) %>?access_token=<%= @invoice.access_token %>
+
+View all <%= invoice.client.name %> Invoices:
+
+<%= client_url(invoice.client) %>?access_token=<%= invoice.client.access_token %>

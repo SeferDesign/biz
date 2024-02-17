@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20221012183733) do
+ActiveRecord::Schema.define(version: 20240217023501) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -41,6 +41,8 @@ ActiveRecord::Schema.define(version: 20221012183733) do
     t.string "federalein"
     t.string "gsheet_id"
     t.string "stripe_customer_id"
+    t.string "access_token"
+    t.index ["access_token"], name: "index_clients_on_access_token"
   end
 
   create_table "expenses", id: :serial, force: :cascade do |t|

@@ -1,7 +1,6 @@
 class Client < ActiveRecord::Base
-
 	after_save :stripe_customer_create_update
-
+	has_secure_token :access_token
 	has_many :invoices
 
 	has_attached_file :logo,

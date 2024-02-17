@@ -1,5 +1,6 @@
 class ClientsController < ApplicationController
 	before_action :set_client, only: [:show, :edit, :update, :destroy]
+	before_action :get_set_access_token, only: [:show, :create, :update]
 
   def index
 		@clientsRecent = Client.all.sort { |a,b| a.mostRecentActivityDate <=> b.mostRecentActivityDate }.reverse.take(10)
@@ -7,6 +8,10 @@ class ClientsController < ApplicationController
   end
 
   def show
+		@clientView = false
+		if params[:access_token].present? and params[:access_token] == @client.access_token
+			@clientView = true
+		end
   end
 
   def new
@@ -50,7 +55,14 @@ class ClientsController < ApplicationController
       @client = Client.find(params[:id])
 		end
 
+		def get_set_access_token
+			if !@client.access_token.present? or @client.access_token == ''
+				@client.access_token
+				@client.regenerate_access_token
+			end
+		end
+
     def client_params
-      params.require(:client).permit(:name, :contact, :email_accounting, :email_accounting_2, :email_accounting_3, :site_url, :logo, :address1, :address2, :city, :state, :zipcode, :international, :intinfo, :preferred_paymenttype, :currentrate, :federalein, :gsheet_id, :stripe_customer_id)
+      params.require(:client).permit(:name, :contact, :email_accounting, :email_accounting_2, :email_accounting_3, :site_url, :logo, :address1, :address2, :city, :state, :zipcode, :international, :intinfo, :preferred_paymenttype, :currentrate, :federalein, :gsheet_id, :stripe_customer_id, :access_token)
     end
 end
