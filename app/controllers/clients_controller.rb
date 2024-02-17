@@ -1,6 +1,6 @@
 class ClientsController < ApplicationController
 	before_action :set_client, only: [:show, :edit, :update, :destroy]
-	before_action :get_set_access_token, only: [:show, :create, :update]
+	before_action :get_set_access_token, only: [:show, :update]
 
   def index
 		@clientsRecent = Client.all.sort { |a,b| a.mostRecentActivityDate <=> b.mostRecentActivityDate }.reverse.take(10)
@@ -23,6 +23,7 @@ class ClientsController < ApplicationController
 
   def create
     @client = Client.new(client_params)
+		@client.regenerate_access_token
 
     respond_to do |format|
       if @client.save
@@ -56,8 +57,8 @@ class ClientsController < ApplicationController
 		end
 
 		def get_set_access_token
-			if !@client.access_token.present? or @client.access_token == ''
-				@client.access_token
+			if @client.access_token.empty? or @client.access_token == ''
+				puts 'setting access token'
 				@client.regenerate_access_token
 			end
 		end
