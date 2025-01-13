@@ -25,7 +25,13 @@
 	<p><strong>Client:</strong> <% if user_signed_in? %><%= link_to @invoice.client do %><%= @invoice.client.name %><% end %><% else %><%= @invoice.client.name %><% end %></p>
 	<p><strong>Invoice ID<% if user_signed_in? %> Display<% end %>:</strong> <%= @invoice.display_id %></p>
 	<p><strong>Date Issued:</strong> <%= @invoice.date.to_formatted_s(:long) %></p>
-	<p><% if @invoice.paid == true %><%= icon('fas', 'check', class: 'green') %> <span class="spread green">Paid</span><% if @invoice.paiddate.present? %> on <%= @invoice.paiddate.to_formatted_s(:long) %><% end %><% else %><%= icon('fas', 'exclamation', class: 'red') %> <span class="spread red">Not Paid</span><% end %></p>
+	<% if @invoice.paid == true %>
+	<p><%= icon('fas', 'check', class: 'green') %> <span class="spread green">Paid</span><% if @invoice.paiddate.present? %> on <%= @invoice.paiddate.to_formatted_s(:long) %><% end %>
+	</p>
+	<% else %>
+	<p><strong>Payment Terms:</strong> <%= @invoice.paymentterms %></p>
+	<p><%= icon('fas', 'exclamation', class: 'red') %> <span class="spread red">Not Paid</span></p>
+	<% end %>
 	<% if !@invoice.paymenttype.blank? %>
 	<p><strong>Payment Method:</strong> <%= @invoice.paymenttype %></p>
 	<% end %>

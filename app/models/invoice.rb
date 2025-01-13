@@ -47,4 +47,8 @@ class Invoice < ActiveRecord::Base
 		self.unpaid and not self.mail_sends.present?
 	end
 
+	def paymentterms
+		'Net 15'
+	end
+
 end

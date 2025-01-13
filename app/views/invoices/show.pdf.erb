@@ -13,6 +13,7 @@
 					<p><strong>Status:</strong> <span class="spread green">Paid</span><% if @invoice.paiddate.present? %> on <%= @invoice.paiddate.to_formatted_s(:long) %><% end %></p>
 					<p><strong>Payment Method:</strong> <%= @invoice.paymenttype %></p>
 					<% else %>
+					<p><strong>Payment Terms:</strong> <%= @invoice.paymentterms %></p>
 					<p><strong>Status:</strong> <span class="spread red">Not Paid</span></p>
 					<p>This payment can be made out to '<%= company[:pay_to] %>' and sent to &nbsp;<%= mail_to company[:email] %> or mailed to:</p>
 					<p><%= company[:pay_to] %><br><%= company[:address][:street] %><br><%= company[:address][:city] %>, <%= company[:address][:state_abbrv] %> <%= company[:address][:zipcode] %></p>
