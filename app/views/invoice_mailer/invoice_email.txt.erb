@@ -13,6 +13,8 @@ View Payment Instructions:
 
 <%= invoice_url(@invoice) %>?access_token=<%= @invoice.access_token %>
 
+Payment Terms: <%= invoice.paymentterms %>
+
 View all <%= invoice.client.name %> Invoices:
 
 <%= client_url(invoice.client) %>?access_token=<%= invoice.client.access_token %>
