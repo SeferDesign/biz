@@ -1,7 +1,8 @@
 <div class="payment-options">
-	<% if @session.present? %>
+
 	<div class="payment-option payment-option-stripe">
 		<h3>Pay with a credit or debit card:<br><small>via the Stripe payment service</small></h3>
+		<% if @session.present? %>
 		<% if controller_name == 'invoices' %>
 		<p>Stripe <a href="https://stripe.com/us/pricing" target="_blank">adds a fee</a> of <strong><%= number_to_currency(@invoice.stripeChargeDifference) %></strong> for this transaction, which increases your payment total to <strong><%= number_to_currency(@invoice.stripeChargeCost) %></strong>.</p>
 		<button id="checkout-button" class="btn btn-success" data-secret="<%= @session['id'] %>">Pay with Card</button>
@@ -19,8 +20,10 @@
 		<% elsif controller_name == 'welcome' and action_name == 'payment' %>
 		<p>Stripe <a href="https://stripe.com/us/pricing" target="_blank">adds a fee</a> of <strong>approximately 3%</strong> to each transaction.</p>
 		<% end %>
+		<% else %>
+		Please see your individual invoice email
+		<% end %>
 	</div>
-	<% end %>
 	<hr>
 	<div class="payment-option payment-option-electronic">
 		<h3>Pay electronically via Zelle:</h3>
@@ -28,6 +31,11 @@
 		<div class="payment-images">
 			<%= image_tag('payment/chase.svg') %><%= image_tag('payment/bankofamerica.svg') %><%= image_tag('payment/wellsfargo.svg') %><%= image_tag('payment/capitalone.svg') %><%= image_tag('payment/citi.svg') %><%= image_tag('payment/pnc.svg') %><%= image_tag('payment/tdbank.svg') %><%= image_tag('payment/usbank.svg') %>
 		</div>
+	</div>
+	<hr>
+	<div class="payment-option payment-option-ach">
+		<h3>Pay via ACH:</h3>
+		<p>Please contact us for bank account information.</p>
 	</div>
 	<hr>
 	<div class="payment-option payment-option-check">
