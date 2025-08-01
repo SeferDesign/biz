@@ -92,4 +92,8 @@ class Year < ActiveRecord::Base
 		end
 	end
 
+	def run_rate
+		self.incomeTotal / (self.days_elapsed.to_f / self.days_in_year.to_f)
+	end
+
 end

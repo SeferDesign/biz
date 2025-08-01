@@ -4,6 +4,9 @@
 		<p>Total Expenses (to-date): <span class="currency red"><%= number_to_currency(@year.expensesTotal, { :negative_format => '(%n)' }) %></span></p>
 		<p>Net Income (before taxes): <span class="currency"><%= number_to_currency(@year.netIncome, { :negative_format => '(%n)' }) %></span></p>
 		<hr>
+		<% if @year.year >= Date.today.year %>
+		<p>Current Run Rate: <span class="currency"><%= number_to_currency(@year.run_rate, { :negative_format => '(%n)' }) %></span></p>
+		<% end %>
 		<p>Tax Rate*: <span class="currency"><%= number_to_percentage(@year.taxrate * 100, :precision => 2) %></span></p>
 		<p>Tax Estimate*: <span class="currency red"><%= number_to_currency(@year.taxOwedTotal, { :negative_format => '(%n)' }) %></span></p>
 		<p>Discounts Given^: <span class="currency"><%= number_to_currency(@year.invoiceDiscountsTotal, { :negative_format => '(%n)' }) %></span></p>
