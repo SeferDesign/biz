@@ -7,9 +7,9 @@ class Api::V1::ClientsController < Api::ApiController
 			@clients = @clients.sort { |a,b| a.mostRecentActivityDate <=> b.mostRecentActivityDate }.reverse
 		end
 		if params[:filter] == 'active'
-			@clients.select! { |c| c.archived? == false }
+			@clients.select! { |c| not c.archived == false }
 		elsif params[:filter] == 'archived'
-			@clients.select! { |c| c.archived? == true }
+			@clients.select! { |c| c.archived }
 		end
 		respond_with @clients, methods: :mostRecentActivityDate
   end
