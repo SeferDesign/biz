@@ -6,12 +6,7 @@ class Api::V1::ClientsController < Api::ApiController
 		if params[:sortBy] == 'recentActivityDate'
 			@clients = @clients.sort { |a,b| a.mostRecentActivityDate <=> b.mostRecentActivityDate }.reverse
 		end
-		if params[:filter] == 'active'
-			@clients = @clients.select { |c| c.archived == false }
-		elsif params[:filter] == 'archived'
-			@clients = @clients.select { |c| c.archived == true }
-		end
-		respond_with @clients, methods: :mostRecentActivityDate
+		respond_with @clients, methods: [:mostRecentActivityDate, :archived]
   end
 
 	def show
