@@ -37,9 +37,9 @@ class Client < ActiveRecord::Base
 	def archived
 		most_recent_invoice = self.invoices.order(:created_at).last
 		if most_recent_invoice
-			most_recent_invoice.created_at > 5.years.ago
+			most_recent_invoice.created_at < 5.years.ago
 		else
-			self.created_at > 5.years.ago
+			self.created_at < 5.years.ago
 		end
 	end
 
