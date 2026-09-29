@@ -82,12 +82,12 @@ GET    /charts_controller/year_expense_category/{id}
 GET    /charts_controller/year_expense_month/{id}
 
 # API endpoints
-GET    /api/v1/invoices/{invoice_id}/lines
-POST   /api/v1/invoices/{invoice_id}/lines
-GET    /api/v1/invoices/{invoice_id}/lines/{id}
-GET    /api/v1/invoices/{id}/email
-GET    /api/v1/invoices
-POST   /api/v1/invoices
-GET    /api/v1/invoices/{id}
-GET    /api/v1/clients
-GET    /api/v1/clients/{id}
+GET    /v1/invoices/{invoice_id}/lines
+POST   /v1/invoices/{invoice_id}/lines
+GET    /v1/invoices/{invoice_id}/lines/{id}
+GET    /v1/invoices/{id}/email
+GET    /v1/invoices
+POST   /v1/invoices
+GET    /v1/invoices/{id}
+GET    /v1/clients
+GET    /v1/clients/{id}
