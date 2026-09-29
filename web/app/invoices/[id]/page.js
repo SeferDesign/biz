@@ -1,0 +1,51 @@
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { DetailGrid, ResourcePage, StatusLabel } from '../../../components/ResourcePage.js';
+import { formatDate, formatMoney, getApiData, invoiceStatus } from '../../../lib/api.js';
+
+export default async function InvoiceDetailPage({ params }) {
+  const { id } = await params;
+  const [invoiceResult, lineResult] = await Promise.all([
+    getApiData(`/v1/invoices/${encodeURIComponent(id)}`),
+    getApiData(`/v1/invoices/${encodeURIComponent(id)}/lines`)
+  ]);
+  if (invoiceResult.status === 404) notFound();
+  if (invoiceResult.error) {
+    return <div className="notice" role="alert"><strong>Invoice unavailable</strong><span>{invoiceResult.error}</span></div>;
+  }
+
+  const invoice = invoiceResult.data;
+  const lines = lineResult.data || [];
+  return (
+    <>
+      <Link className="back-link" href="/invoices">&lt; All invoices</Link>
+      <div className="page-heading">
+        <div><p className="eyebrow">INVOICE / {String(invoice.id).padStart(4, '0')}</p><h1>{invoice.description || 'Invoice details'}</h1><p className="page-description">Issued {formatDate(invoice.date)}</p></div>
+        <StatusLabel status={invoiceStatus(invoice)} />
+      </div>
+      <DetailGrid items={[
+        ['Amount', formatMoney(invoice.cost ?? invoice.total, invoice.currency)],
+        ['Client', <Link href={`/clients/${invoice.client_id}`} key="client">Client {invoice.client_id}</Link>],
+        ['Payment type', invoice.paymenttype],
+        ['Issue date', formatDate(invoice.date)],
+        ['Paid date', formatDate(invoice.paiddate)],
+        ['Description', invoice.description]
+      ]} />
+      <section className="detail-section">
+        <div className="section-heading"><h2>Line items</h2><span className="section-note">{lines.length} items</span></div>
+        {lineResult.error ? <div className="notice" role="alert"><span>{lineResult.error}</span></div> : (
+          <ResourcePage
+            hideHeading
+            data={lines}
+            columns={[
+              { key: 'description', label: 'Description' },
+              { key: 'hours', label: 'Hours', render: (line) => line.hours ?? '-' },
+              { key: 'rate', label: 'Rate', className: 'numeric-cell', render: (line) => line.rate ? formatMoney(line.rate) : '-' },
+              { key: 'total', label: 'Line total', className: 'numeric-cell', render: (line) => formatMoney(line.total ?? line.amount, invoice.currency) }
+            ]}
+          />
+        )}
+      </section>
+    </>
+  );
+}

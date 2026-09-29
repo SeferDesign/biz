@@ -91,56 +91,56 @@ paths:
           description: Client record
   /years:
     get:
-      summary: List financial years
+      summary: List years
       responses:
         '200':
-          description: Financial years ordered newest first
+          description: Years ordered newest first
   /years/new:
     get:
-      summary: Get defaults for a new financial year
+      summary: Get defaults for a new year
       responses:
         '200':
           description: New year form values
   /years/{id}:
     get:
-      summary: Get financial year totals
+      summary: Get year totals
       parameters:
         - $ref: '#/components/parameters/IdParam'
       responses:
         '200':
-          description: Financial year and totals
+          description: Year and totals
         '404':
-          description: Financial year not found
+          description: Year not found
   /years/{id}/edit:
     get:
-      summary: Get a financial year for editing
+      summary: Get a year for editing
       parameters:
         - $ref: '#/components/parameters/IdParam'
       responses:
         '200':
-          description: Financial year record
+          description: Year record
         '404':
-          description: Financial year not found
+          description: Year not found
   /years/{id}/income:
     get:
-      summary: Get paid invoice income for a financial year
+      summary: Get paid invoice income for a year
       parameters:
         - $ref: '#/components/parameters/IdParam'
       responses:
         '200':
           description: Income report
         '404':
-          description: Financial year not found
+          description: Year not found
   /years/{id}/expenses:
     get:
-      summary: Get expenses for a financial year
+      summary: Get expenses for a year
       parameters:
         - $ref: '#/components/parameters/IdParam'
       responses:
         '200':
           description: Expense report
         '404':
-          description: Financial year not found
+          description: Year not found
   /invoices/{id}/email:
     get:
       summary: Queue an invoice email
@@ -200,7 +200,7 @@ paths:
         '200':
           description: Monthly invoice chart series
         '404':
-          description: Financial year not found
+          description: Year not found
   /charts_controller/year_invoice_month_with_goal/{id}:
     get:
       summary: Get monthly invoice totals and goals
@@ -210,7 +210,7 @@ paths:
         '200':
           description: Monthly invoice and goal chart series
         '404':
-          description: Financial year not found
+          description: Year not found
   /charts_controller/year_all_data/{id}:
     get:
       summary: Get invoice, expense, and goal data for a year
@@ -220,7 +220,7 @@ paths:
         '200':
           description: Monthly chart series
         '404':
-          description: Financial year not found
+          description: Year not found
   /charts_controller/year_expense_category/{id}:
     get:
       summary: Get expense totals by category
@@ -230,7 +230,7 @@ paths:
         '200':
           description: Expense category totals
         '404':
-          description: Financial year not found
+          description: Year not found
   /charts_controller/year_expense_month/{id}:
     get:
       summary: Get monthly expense totals
@@ -240,7 +240,7 @@ paths:
         '200':
           description: Monthly expense chart series
         '404':
-          description: Financial year not found
+          description: Year not found
 components:
   parameters:
     IdParam:

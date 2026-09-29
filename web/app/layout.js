@@ -1,12 +1,15 @@
+import AppShell from '../components/AppShell.js';
+import './globals.css';
+
 export const metadata = {
-  title: 'Sefer Design Biz',
-  description: 'Invoicing and expense tracking'
+  title: 'Sefer Design | Business Office',
+  description: 'Business operations ledger for Sefer Design Company.'
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body><AppShell>{children}</AppShell></body>
     </html>
   );
 }
