@@ -1,0 +1,93 @@
+# Business app endpoints
+# Placeholders: {id}, {invoice_id}, {number_of_months}
+
+GET    /
+GET    /best
+GET    /payment
+GET    /stripe
+GET|POST /expenses/bulk/new
+
+GET    /invoices/time
+GET    /invoices/time/redirect
+GET    /invoices/time/callback
+
+GET    /users/sign_in
+POST   /users/sign_in
+DELETE /users/sign_out
+GET    /users/password/new
+GET    /users/password/edit
+PATCH|PUT|POST /users/password
+
+GET    /years/{id}/income
+GET    /years/{id}/expenses
+GET    /years
+POST   /years
+GET    /years/new
+GET    /years/{id}/edit
+GET    /years/{id}
+PATCH|PUT /years/{id}
+DELETE /years/{id}
+
+GET    /invoices/{invoice_id}/lines
+POST   /invoices/{invoice_id}/lines
+GET    /invoices/{invoice_id}/lines/new
+GET    /invoices/{invoice_id}/lines/{id}/edit
+GET    /invoices/{invoice_id}/lines/{id}
+PATCH|PUT /invoices/{invoice_id}/lines/{id}
+DELETE /invoices/{invoice_id}/lines/{id}
+
+GET    /invoices/{id}/email
+GET    /invoices/{id}/stripe
+GET    /invoices
+POST   /invoices
+GET    /invoices/new
+GET    /invoices/{id}/edit
+GET    /invoices/{id}
+PATCH|PUT /invoices/{id}
+DELETE /invoices/{id}
+
+GET    /clients
+POST   /clients
+GET    /clients/new
+GET    /clients/{id}/edit
+GET    /clients/{id}
+PATCH|PUT /clients/{id}
+DELETE /clients/{id}
+
+GET    /expenses
+POST   /expenses
+GET    /expenses/new
+GET    /expenses/{id}/edit
+GET    /expenses/{id}
+PATCH|PUT /expenses/{id}
+DELETE /expenses/{id}
+
+GET    /vendors
+POST   /vendors
+GET    /vendors/new
+GET    /vendors/{id}/edit
+GET    /vendors/{id}
+PATCH|PUT /vendors/{id}
+DELETE /vendors/{id}
+
+GET    /invoices_controller/populate
+GET    /invoices_controller/generate_crypto_link
+GET    /invoices_controller/mark_paid/{id}
+
+GET    /charts_controller/trailing_x_months/{number_of_months}
+GET    /charts_controller/year_invoice_month/{id}
+GET    /charts_controller/year_invoice_month_with_goal/{id}
+GET    /charts_controller/year_all_data/{id}
+GET    /charts_controller/year_expense_category/{id}
+GET    /charts_controller/year_expense_month/{id}
+
+# API endpoints
+GET    /api/v1/invoices/{invoice_id}/lines
+POST   /api/v1/invoices/{invoice_id}/lines
+GET    /api/v1/invoices/{invoice_id}/lines/{id}
+GET    /api/v1/invoices/{id}/email
+GET    /api/v1/invoices
+POST   /api/v1/invoices
+GET    /api/v1/invoices/{id}
+GET    /api/v1/clients
+GET    /api/v1/clients/{id}
