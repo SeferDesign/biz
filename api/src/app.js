@@ -99,7 +99,7 @@ export function createApp() {
   app.use(express.json());
 
   const openApiDocument = yaml.parse(
-    fs.readFileSync(path.join(__dirname, 'openapi.yaml'), 'utf8')
+    fs.readFileSync(path.join(__dirname, 'openapi/openapi.yaml'), 'utf8')
   );
 
   app.get('/openapi.json', (req, res) => {

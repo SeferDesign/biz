@@ -1,1 +1,1 @@
-export { createApp, default } from '../api/src/app.js';
+export { createApp, default } from '../api/src/routing/app.js';
