@@ -4,12 +4,18 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "api"
+    "api",
+    "web"
   ],
   "scripts": {
-    "start": "npm run start --workspace @seferbiz/api",
+    "start": "bash ./scripts/local.sh start",
+    "restart": "bash ./scripts/local.sh restart",
+    "stop": "bash ./scripts/local.sh stop",
+    "local": "bash ./scripts/local.sh",
     "dev": "npm run dev --workspace @seferbiz/api",
     "dev:api": "npm run dev --workspace @seferbiz/api",
+    "dev:web": "npm run dev --workspace @seferbiz/web",
+    "build:web": "npm run build --workspace @seferbiz/web",
     "test": "npm run test --workspace @seferbiz/api",
     "openapi:validate": "npm run openapi:validate --workspace @seferbiz/api"
   }

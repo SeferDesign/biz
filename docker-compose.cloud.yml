@@ -1,0 +1,33 @@
+# Cloud/production image definitions. These build the same Dockerfile targets
+# that run locally, so the only difference between environments is configuration.
+x-biz-defaults: &biz-defaults
+  build:
+    args:
+      BUILD_ENV: ${BUILD_ENV:-prod}
+  restart: always
+
+services:
+  biz-api:
+    <<: *biz-defaults
+    extends:
+      file: docker-compose.yml
+      service: api-build-base
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: ${DATABASE_URL:-}
+      REDIS_URL: ${REDIS_URL:-}
+      PUBLIC_APP_URL: ${PUBLIC_APP_URL:-}
+      PUBLIC_API_URL: ${PUBLIC_API_URL:-}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-}
+
+  biz-web:
+    <<: *biz-defaults
+    extends:
+      file: docker-compose.yml
+      service: web-build-base
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-}
+      API_INTERNAL_URL: ${API_INTERNAL_URL:-}

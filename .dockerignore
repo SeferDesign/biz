@@ -1,0 +1,37 @@
+.git
+.github
+docker/certs
+
+# Installed/built artifacts — recreated inside the container
+node_modules
+**/node_modules
+web/.next
+api/coverage
+
+# Legacy Rails application is not part of the container build
+app
+bin
+config
+db
+lib
+public
+server
+test
+tmp
+vendor
+Gemfile
+Gemfile.lock
+Capfile
+Rakefile
+Guardfile
+Procfile
+config.ru
+
+# Local dev / OS cruft
+.env
+.env.*
+*.local
+.DS_Store
+**/.DS_Store
+*.log
+log

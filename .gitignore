@@ -29,3 +29,9 @@ config/secrets.yml
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 node_modules
+
+# Local Docker environment
+.env
+/docker/certs
+/web/.next
+/web/out
