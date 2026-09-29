@@ -30,18 +30,22 @@ npm run local -- reset    # recreate and wipe volumes
 | https://biz.loc:9443 | Next.js web client |
 | https://api.biz.loc:9443/v1/... | Express API |
 | https://api.biz.loc:9443/docs | Swagger UI |
-| http://127.0.0.1:9082 | AdminNeo (Postgres) |
+| http://127.0.0.1:9082 | AdminNeo (MySQL) |
 | http://127.0.0.1:18026 | Mailpit |
+
+The API uses MySQL. On a fresh local stack, seed the legacy sample records with:
+
+```bash
+npm run local -- seed
+```
+
+The seed command creates the schema if needed and can be rerun to refresh its
+sample records. Use `npm run local -- mysql` to open a MySQL client. Production
+`DATABASE_URL` values must use the `mysql://` scheme.
 
 The API hostname mirrors production: `api.biz.seferdesign.com` maps to
 `api.biz.loc` locally. Because the client and API are separate origins, the API
 only accepts browser requests from the hosts listed in `CORS_ALLOWED_ORIGINS`.
-
-RedisInsight is opt-in to keep the footprint small:
-
-```bash
-docker compose --env-file build.env -f docker-compose.local.yml --profile tools up -d redisinsight
-```
 
 ### Resource requirements
 
@@ -56,7 +60,7 @@ colima stop && colima start --cpu 4 --memory 8
 
 - `Dockerfile` — multi-stage build with `api-local`, `api-production`, `web-local`, and `web-production` targets.
 - `docker-compose.yml` — shared build definitions extended by the local and cloud files.
-- `docker-compose.local.yml` — nginx (TLS), API, web, Postgres, Valkey, AdminNeo, Mailpit.
+- `docker-compose.local.yml` — nginx (TLS), API, web, MySQL, AdminNeo, Mailpit.
 - `docker-compose.cloud.yml` — production image definitions.
 - `build.env` — versions and ports shared by every compose file.
 - `.env.sample` — copy to `.env` for secrets and cloud endpoints.

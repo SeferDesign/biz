@@ -40,17 +40,14 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      redis:
-        condition: service_started
       mailpit:
         condition: service_started
     environment:
       BUILD_ENV: local
       NODE_ENV: development
       PORT: 3000
-      WAIT_FOR: 'db:5432 redis:6379'
-      DATABASE_URL: postgres://biz:biz@db:5432/biz_db_development
-      REDIS_URL: redis://redis:6379/0
+      WAIT_FOR: 'db:3306'
+      DATABASE_URL: mysql://biz:biz@db:3306/biz_db_development
       SMTP_HOST: mailpit
       SMTP_PORT: 1025
       PUBLIC_APP_URL: https://biz.loc:9443
@@ -88,21 +85,21 @@ services:
       - '127.0.0.1:9002:3000'
 
   db:
-    image: postgres:${POSTGRES_VERSION}-alpine
+    image: mysql:${MYSQL_VERSION}
     container_name: biz-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: biz_db_development
-      POSTGRES_USER: biz
-      POSTGRES_PASSWORD: biz
-      POSTGRES_INITDB_ARGS: '--encoding=UTF8 --locale=C'
-    command: ['postgres', '-c', 'shared_buffers=128MB', '-c', 'max_connections=100']
+      MYSQL_DATABASE: biz_db_development
+      MYSQL_USER: biz
+      MYSQL_PASSWORD: biz
+      MYSQL_ROOT_PASSWORD: local-root-only
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
     ports:
-      - '127.0.0.1:9432:5432'
+      - '127.0.0.1:9432:3306'
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U biz -d biz_db_development']
+      test: ['CMD-SHELL', 'mysqladmin ping -h 127.0.0.1 -ubiz -pbiz --silent']
       interval: 10s
       timeout: 5s
       retries: 10
@@ -117,29 +114,9 @@ services:
     ports:
       - '127.0.0.1:9082:8080'
     environment:
-      NEO_DEFAULT_DRIVER: pgsql
-      NEO_DEFAULT_SERVER: db:5432
+      NEO_DEFAULT_DRIVER: mysql
+      NEO_DEFAULT_SERVER: db:3306
       NEO_DEFAULT_DATABASE: biz_db_development
-
-  # Valkey matches the Redis-compatible engine used by managed cloud caches.
-  redis:
-    image: valkey/valkey:${VALKEY_VERSION}-alpine
-    container_name: biz-valkey
-    restart: unless-stopped
-    command: ['valkey-server', '--maxmemory', '256mb', '--maxmemory-policy', 'allkeys-lru']
-
-  # Opt-in: start with `docker compose --profile tools up -d redisinsight`.
-  redisinsight:
-    image: redis/redisinsight:latest
-    container_name: biz-redisinsight
-    profiles: ['tools']
-    restart: unless-stopped
-    depends_on:
-      - redis
-    ports:
-      - '127.0.0.1:5541:5540'
-    volumes:
-      - redisinsight_data:/data
 
   mailpit:
     image: axllent/mailpit:latest
@@ -150,5 +127,4 @@ services:
       - '127.0.0.1:18026:8025'
 
 volumes:
-  db_data:
-  redisinsight_data:
+  mysql_data:

@@ -14,7 +14,7 @@ gem 'loofah', '>= 2.2.3'
 gem 'ffi'
 gem 'sassc'
 
-gem 'aws-sdk', '~> 3'
+gem 'aws-sdk-s3', '~> 1'
 gem 'figaro'
 gem 'devise', '~> 4'
 gem 'devise-two-factor'

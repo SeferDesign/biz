@@ -2,9 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import request from 'supertest';
 import { createApp } from '../src/routing/app.js';
+import { createMemoryStore } from '../test-support/memory-store.js';
+
+function createTestApp() {
+  return createApp({ store: createMemoryStore() });
+}
 
 test('GET /v1/invoices returns an invoice list', async () => {
-  const app = createApp();
+  const app = createTestApp();
 
   const response = await request(app).get('/v1/invoices');
 
@@ -13,7 +18,7 @@ test('GET /v1/invoices returns an invoice list', async () => {
 });
 
 test('legacy year endpoints return records and report totals', async () => {
-  const app = createApp();
+  const app = createTestApp();
 
   const years = await request(app).get('/years');
   const income = await request(app).get('/years/2025/income');
@@ -33,7 +38,7 @@ test('legacy year endpoints return records and report totals', async () => {
 });
 
 test('legacy invoice, expense, and vendor endpoints return useful responses', async () => {
-  const app = createApp();
+  const app = createTestApp();
 
   const email = await request(app).get('/invoices/1/email');
   const invalidStripe = await request(app).get('/invoices/1/stripe');
@@ -51,7 +56,7 @@ test('legacy invoice, expense, and vendor endpoints return useful responses', as
 });
 
 test('legacy chart routes preserve their expected response shapes', async () => {
-  const app = createApp();
+  const app = createTestApp();
 
   const trailing = await request(app).get('/charts_controller/trailing_x_months/3');
   const monthly = await request(app).get('/charts_controller/year_invoice_month/2025');

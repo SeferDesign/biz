@@ -1,5 +1,3 @@
-import { expenses, invoices } from './data.js';
-
 export function findYear(id, years) {
   return years.find((item) => item.id === Number(id) || String(item.year) === String(id));
 }
@@ -34,13 +32,13 @@ export function series(name, data) {
   return { name, data };
 }
 
-export function yearIncome(year) {
+export function yearIncome(year, invoices) {
   return invoices.filter((invoice) => {
     const date = invoiceDate(invoice);
     return isPaid(invoice) && date && new Date(`${date}T00:00:00Z`).getUTCFullYear() === year;
   });
 }
 
-export function yearExpenses(year) {
+export function yearExpenses(year, expenses) {
   return expenses.filter((expense) => new Date(`${expense.date}T00:00:00Z`).getUTCFullYear() === year);
 }

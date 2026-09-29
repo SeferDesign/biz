@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Optional dependency gate so the app does not crash-loop while Postgres or
-# Valkey are still starting. Set WAIT_FOR to a space-separated host:port list.
+# Optional dependency gate so the app does not crash-loop while dependencies
+# are starting. Set WAIT_FOR to a space-separated host:port list.
 wait_for_targets="${WAIT_FOR:-}"
 wait_timeout="${WAIT_FOR_TIMEOUT:-60}"
 

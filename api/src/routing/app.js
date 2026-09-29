@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import yaml from 'yaml';
 import swaggerUi from 'swagger-ui-express';
+import { MySqlStore } from '../db/store.js';
 import chartsRouter from './charts/routes.js';
 import clientsRouter from './clients/routes.js';
 import expensesRouter from './expenses/routes.js';
@@ -19,7 +20,7 @@ const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
   .map((value) => value.trim())
   .filter(Boolean);
 
-export function createApp() {
+export function createApp({ store = new MySqlStore() } = {}) {
   const app = express();
   app.use(express.json());
 
@@ -50,12 +51,12 @@ export function createApp() {
   app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
   app.get('/health', (req, res) => res.json({ status: 'ok', service: 'api' }));
 
-  app.use(clientsRouter);
-  app.use(invoicesRouter);
-  app.use(yearsRouter);
-  app.use(expensesRouter);
-  app.use(vendorsRouter);
-  app.use(chartsRouter);
+  app.use(clientsRouter(store));
+  app.use(invoicesRouter(store));
+  app.use(yearsRouter(store));
+  app.use(expensesRouter(store));
+  app.use(vendorsRouter(store));
+  app.use(chartsRouter(store));
 
   app.use((req, res) => {
     res.status(404).json({ error: 'Route not found', path: req.originalUrl });

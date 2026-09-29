@@ -7,10 +7,13 @@
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "test": "node --test",
+    "db:setup": "node src/db/setup.js",
+    "db:seed": "node src/db/seed.js",
     "openapi:validate": "node --input-type=module -e \"import fs from 'node:fs'; import yaml from 'yaml'; yaml.parse(fs.readFileSync('./src/openapi/openapi.yaml', 'utf8')); console.log('OpenAPI YAML is valid');\""
   },
   "dependencies": {
     "express": "5.2.1",
+    "mysql2": "^3.24.5",
     "swagger-ui-express": "5.0.1",
     "yaml": "2.9.1"
   },

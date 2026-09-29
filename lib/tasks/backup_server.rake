@@ -2,7 +2,7 @@ desc "PG Backup"
 namespace :pg do
   task :backup => [:environment] do
 
-    require 'aws-sdk'
+    require 'aws-sdk-s3'
 
     # Database Dump
     datestamp = Time.now.strftime("%Y-%m-%d_%H-%M-%S")

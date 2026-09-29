@@ -18,8 +18,10 @@ Commands:
   ps                   Show container status
   logs [service]       Tail logs (all services by default)
   test                 Run the API test suite inside the container
+	db:setup             Create the local MySQL tables
+	seed                 Load the legacy sample records into MySQL
   sh <service> [cmd]   Open a shell (or run a command) in a service container
-  psql [arguments]     Open psql against the local database
+	mysql [arguments]    Open the MySQL client against the local database
   reset                Recreate the stack and wipe volumes
   clean                Remove local and cloud compose resources including images
 EOF
@@ -80,6 +82,14 @@ case "$command_name" in
 		load_local_env
 		compose_local exec api npm test
 		;;
+	db:setup)
+		load_local_env
+		compose_local exec api npm run db:setup --workspace @seferbiz/api
+		;;
+	seed)
+		load_local_env
+		compose_local exec api npm run db:seed --workspace @seferbiz/api
+		;;
 	sh)
 		load_local_env
 		service_name="${1:-api}"
@@ -90,9 +100,9 @@ case "$command_name" in
 			compose_local exec "$service_name" "$@"
 		fi
 		;;
-	psql)
+	mysql)
 		load_local_env
-		compose_local exec db psql -U biz -d biz_db_development "$@"
+		compose_local exec db mysql -ubiz -pbiz biz_db_development "$@"
 		;;
 	reset)
 		load_local_env
