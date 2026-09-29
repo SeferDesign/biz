@@ -12,6 +12,8 @@ export default async function ClientsPage() {
       data={result.data}
       error={result.error}
       countLabel="clients"
+      actionHref="/clients/new"
+      actionLabel="New Client"
       columns={[
         { key: 'name', label: 'Company', render: (client) => <Link className="table-link" href={`/clients/${client.id}`}>{client.name || 'Unnamed client'}</Link> },
         { key: 'contact', label: 'Contact' },

@@ -1,4 +1,6 @@
-export function ResourcePage({ eyebrow, title, description, data, error, columns, countLabel, count, hideHeading = false }) {
+import Link from 'next/link';
+
+export function ResourcePage({ eyebrow, title, description, data, error, columns, countLabel, count, hideHeading = false, actionHref, actionLabel }) {
   const records = Array.isArray(data) ? data : [];
   const itemCount = count ?? records.length;
 
@@ -11,12 +13,15 @@ export function ResourcePage({ eyebrow, title, description, data, error, columns
             <h1>{title}</h1>
             <p className="page-description">{description}</p>
           </div>
-          {!error && (
-            <div className="heading-count">
-              <strong>{itemCount.toLocaleString('en-US')}</strong>
-              <span>{countLabel || 'records'}</span>
-            </div>
-          )}
+          <div className="heading-actions">
+            {actionHref && <Link className="primary-button" href={actionHref}>{actionLabel || 'New record'}</Link>}
+            {!error && (
+              <div className="heading-count">
+                <strong>{itemCount.toLocaleString('en-US')}</strong>
+                <span>{countLabel || 'records'}</span>
+              </div>
+            )}
+          </div>
         </div>
       )}
       {error ? (

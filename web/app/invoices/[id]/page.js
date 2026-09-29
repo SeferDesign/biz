@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { DetailGrid, ResourcePage, StatusLabel } from '../../../components/ResourcePage.js';
-import { formatDate, formatMoney, getApiData, invoiceStatus } from '../../../lib/api.js';
+import ResourceActions from '../../../components/ResourceActions.js';
+import { browserApiBaseUrl, formatDate, formatMoney, getApiData, invoiceStatus } from '../../../lib/api.js';
 
 export default async function InvoiceDetailPage({ params }) {
   const { id } = await params;
@@ -21,7 +22,10 @@ export default async function InvoiceDetailPage({ params }) {
       <Link className="back-link" href="/invoices">&lt; All invoices</Link>
       <div className="page-heading">
         <div><p className="eyebrow">INVOICE / {String(invoice.id).padStart(4, '0')}</p><h1>{invoice.description || 'Invoice details'}</h1><p className="page-description">Issued {formatDate(invoice.date)}</p></div>
-        <StatusLabel status={invoiceStatus(invoice)} />
+        <div className="detail-actions">
+          <StatusLabel status={invoiceStatus(invoice)} />
+          <ResourceActions editHref={`/invoices/${invoice.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/v1/invoices/${invoice.id}`} returnTo="/invoices" label="invoice" />
+        </div>
       </div>
       <DetailGrid items={[
         ['Amount', formatMoney(invoice.cost ?? invoice.total, invoice.currency)],

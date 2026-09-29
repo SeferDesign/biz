@@ -17,6 +17,8 @@ export default async function InvoicesPage() {
       data={invoiceResult.data}
       error={invoiceResult.error || clientResult.error}
       countLabel="invoices"
+      actionHref="/invoices/new"
+      actionLabel="New Invoice"
       columns={[
         { key: 'id', label: 'Invoice', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}`}>INV-{String(invoice.id).padStart(4, '0')}</Link> },
         { key: 'client', label: 'Client', render: (invoice) => {

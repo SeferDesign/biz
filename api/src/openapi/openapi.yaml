@@ -37,6 +37,39 @@ paths:
       responses:
         '200':
           description: Invoice record
+    put:
+      summary: Replace invoice fields
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvoiceInput'
+      responses:
+        '200':
+          description: Invoice updated
+    patch:
+      summary: Update invoice fields
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvoiceInput'
+      responses:
+        '200':
+          description: Invoice updated
+    delete:
+      summary: Delete invoice and its line items
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Invoice deleted
   /v1/invoices/{id}/email:
     get:
       summary: Send invoice email
@@ -81,6 +114,17 @@ paths:
       responses:
         '200':
           description: Client list
+    post:
+      summary: Create client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientInput'
+      responses:
+        '201':
+          description: Client created
   /v1/clients/{id}:
     get:
       summary: Get client by id
@@ -89,12 +133,56 @@ paths:
       responses:
         '200':
           description: Client record
+    put:
+      summary: Replace client fields
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientInput'
+      responses:
+        '200':
+          description: Client updated
+    patch:
+      summary: Update client fields
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientInput'
+      responses:
+        '200':
+          description: Client updated
+    delete:
+      summary: Delete client
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Client deleted
   /years:
     get:
       summary: List years
       responses:
         '200':
           description: Years ordered newest first
+    post:
+      summary: Create financial year
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/YearInput'
+      responses:
+        '201':
+          description: Financial year created
   /years/new:
     get:
       summary: Get defaults for a new year
@@ -111,6 +199,39 @@ paths:
           description: Year and totals
         '404':
           description: Year not found
+    put:
+      summary: Replace financial year fields
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/YearInput'
+      responses:
+        '200':
+          description: Financial year updated
+    patch:
+      summary: Update financial year fields
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/YearInput'
+      responses:
+        '200':
+          description: Financial year updated
+    delete:
+      summary: Delete financial year
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Financial year deleted
   /years/{id}/edit:
     get:
       summary: Get a year for editing
@@ -169,12 +290,120 @@ paths:
       responses:
         '200':
           description: Expense list
+    post:
+      summary: Create expense
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseInput'
+      responses:
+        '201':
+          description: Expense created
+  /expenses/{id}:
+    get:
+      summary: Get expense by id
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Expense record
+        '404':
+          description: Expense not found
+    put:
+      summary: Replace expense fields
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseInput'
+      responses:
+        '200':
+          description: Expense updated
+    patch:
+      summary: Update expense fields
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseInput'
+      responses:
+        '200':
+          description: Expense updated
+    delete:
+      summary: Delete expense
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Expense deleted
   /vendors:
     get:
       summary: List vendors
       responses:
         '200':
           description: Vendor list
+    post:
+      summary: Create vendor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VendorInput'
+      responses:
+        '201':
+          description: Vendor created
+  /vendors/{id}:
+    get:
+      summary: Get vendor by id
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Vendor record
+        '404':
+          description: Vendor not found
+    put:
+      summary: Replace vendor fields
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VendorInput'
+      responses:
+        '200':
+          description: Vendor updated
+    patch:
+      summary: Update vendor fields
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VendorInput'
+      responses:
+        '200':
+          description: Vendor updated
+    delete:
+      summary: Delete vendor
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Vendor deleted
   /charts_controller/trailing_x_months/{number_of_months}:
     get:
       summary: Get trailing monthly invoice, expense, and goal data
@@ -271,9 +500,87 @@ components:
           type: integer
         status:
           type: string
+        date:
+          type: string
+          format: date
+        cost:
+          type: number
         total:
           type: number
+          description: Accepted as an alias for cost.
         currency:
+          type: string
+        description:
+          type: string
+    ClientInput:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        contact:
+          type: string
+        email_accounting:
+          type: string
+          format: email
+        site_url:
+          type: string
+          format: uri
+        currentrate:
+          type: number
+        city:
+          type: string
+        state:
+          type: string
+    VendorInput:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        category:
+          type: string
+        notes:
+          type: string
+    YearInput:
+      type: object
+      required:
+        - year
+      properties:
+        year:
+          type: integer
+        taxrate:
+          type: number
+        goal_year:
+          type: number
+        goals_months:
+          type: array
+          minItems: 12
+          maxItems: 12
+          items:
+            type: number
+    ExpenseInput:
+      type: object
+      required:
+        - name
+        - date
+        - cost
+      properties:
+        name:
+          type: string
+        vendor_id:
+          type: integer
+          nullable: true
+        date:
+          type: string
+          format: date
+        cost:
+          type: number
+        account:
+          type: string
+        notes:
           type: string
     InvoiceLineInput:
       type: object

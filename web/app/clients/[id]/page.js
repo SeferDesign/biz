@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { DetailGrid, ResourcePage } from '../../../components/ResourcePage.js';
-import { formatDate, formatMoney, getApiData } from '../../../lib/api.js';
+import ResourceActions from '../../../components/ResourceActions.js';
+import { browserApiBaseUrl, formatDate, formatMoney, getApiData } from '../../../lib/api.js';
 
 export default async function ClientDetailPage({ params }) {
   const { id } = await params;
@@ -23,6 +24,7 @@ export default async function ClientDetailPage({ params }) {
       <Link className="back-link" href="/clients">&lt; All clients</Link>
       <div className="page-heading">
         <div><p className="eyebrow">CLIENT RECORD</p><h1>{client.name || 'Unnamed client'}</h1><p className="page-description">{client.contact || 'No primary contact listed'}</p></div>
+        <ResourceActions editHref={`/clients/${client.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/v1/clients/${client.id}`} returnTo="/clients" label="client" />
       </div>
       <DetailGrid items={[
         ['Contact', client.contact],

@@ -26,8 +26,10 @@ export default async function ExpensesPage({ searchParams }) {
         data={expenseResult.data}
         error={expenseResult.error || vendorResult.error}
         countLabel="expenses"
+        actionHref="/expenses/new"
+        actionLabel="New expense"
         columns={[
-          { key: 'date', label: 'Date', render: (expense) => formatDate(expense.date) },
+          { key: 'date', label: 'Date', render: (expense) => <Link className="table-link" href={`/expenses/${expense.id}`}>{formatDate(expense.date)}</Link> },
           { key: 'name', label: 'Expense' },
           { key: 'vendor', label: 'Vendor', render: (expense) => vendorsById.get(expense.vendor_id)?.name || '-' },
           { key: 'account', label: 'Account' },

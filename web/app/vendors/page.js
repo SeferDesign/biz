@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { ResourcePage } from '../../components/ResourcePage.js';
 import { formatMoney, getApiData } from '../../lib/api.js';
 
@@ -22,8 +23,10 @@ export default async function VendorsPage() {
       data={vendorResult.data}
       error={vendorResult.error || expenseResult.error}
       countLabel="vendors"
+      actionHref="/vendors/new"
+      actionLabel="New Vendor"
       columns={[
-        { key: 'name', label: 'Vendor' },
+        { key: 'name', label: 'Vendor', render: (vendor) => <Link className="table-link" href={`/vendors/${vendor.id}`}>{vendor.name}</Link> },
         { key: 'category', label: 'Category' },
         { key: 'expenses', label: 'Expense records', render: (vendor) => totalsByVendor.get(vendor.id)?.count || 0 },
         { key: 'amount', label: 'Recorded spend', className: 'numeric-cell', render: (vendor) => formatMoney(totalsByVendor.get(vendor.id)?.amount || 0) },

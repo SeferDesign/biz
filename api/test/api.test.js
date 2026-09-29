@@ -55,6 +55,75 @@ test('legacy invoice, expense, and vendor endpoints return useful responses', as
   assert.equal((await request(app).get('/invoices/999/email')).status, 404);
 });
 
+test('clients, vendors, years, and expenses support validated CRUD', async () => {
+  const app = createTestApp();
+
+  assert.equal((await request(app).post('/v1/clients').send({ contact: 'No name' })).status, 400);
+  const createdClient = await request(app).post('/v1/clients').send({
+    name: 'Bright Studio',
+    contact: 'Jamie Bright',
+    email_accounting: 'billing@bright.example'
+  });
+  assert.equal(createdClient.status, 201);
+  assert.equal((await request(app).get(`/v1/clients/${createdClient.body.id}`)).body.name, 'Bright Studio');
+  assert.equal((await request(app).patch(`/v1/clients/${createdClient.body.id}`).send({ city: 'Chicago' })).body.city, 'Chicago');
+  assert.equal((await request(app).delete(`/v1/clients/${createdClient.body.id}`)).status, 204);
+  assert.equal((await request(app).get(`/v1/clients/${createdClient.body.id}`)).status, 404);
+
+  const createdVendor = await request(app).post('/vendors').send({ name: 'Studio Supply', category: 'Supplies' });
+  assert.equal(createdVendor.status, 201);
+  assert.equal((await request(app).patch(`/vendors/${createdVendor.body.id}`).send({ notes: 'Local supplier' })).body.notes, 'Local supplier');
+  assert.equal((await request(app).delete(`/vendors/${createdVendor.body.id}`)).status, 204);
+  assert.equal((await request(app).get(`/vendors/${createdVendor.body.id}`)).status, 404);
+
+  assert.equal((await request(app).post('/years').send({ year: 'not-a-year' })).status, 400);
+  const createdYear = await request(app).post('/years').send({ year: 2026, taxrate: 0.3, goal_year: 36000 });
+  assert.equal(createdYear.status, 201);
+  assert.equal(createdYear.body.goals_months.length, 12);
+  assert.equal((await request(app).patch(`/years/${createdYear.body.id}`).send({ taxrate: 0.35 })).body.taxrate, 0.35);
+  assert.equal((await request(app).delete(`/years/${createdYear.body.id}`)).status, 204);
+  assert.equal((await request(app).get(`/years/${createdYear.body.id}`)).status, 404);
+
+  assert.equal((await request(app).post('/expenses').send({ name: 'Invalid expense' })).status, 400);
+  const createdExpense = await request(app).post('/expenses').send({
+    name: 'Domain renewal',
+    vendor_id: 1,
+    date: '2025-03-03',
+    cost: 28.5,
+    account: 'Business'
+  });
+  assert.equal(createdExpense.status, 201);
+  assert.equal((await request(app).get(`/expenses/${createdExpense.body.id}`)).body.name, 'Domain renewal');
+  assert.equal((await request(app).patch(`/expenses/${createdExpense.body.id}`).send({ cost: 30 })).body.cost, 30);
+  assert.equal((await request(app).delete(`/expenses/${createdExpense.body.id}`)).status, 204);
+  assert.equal((await request(app).get(`/expenses/${createdExpense.body.id}`)).status, 404);
+});
+
+test('invoices support validated CRUD and cascade line removal', async () => {
+  const app = createTestApp();
+
+  assert.equal((await request(app).post('/v1/invoices').send({ client_id: 1 })).status, 400);
+  const created = await request(app).post('/v1/invoices').send({
+    client_id: 1,
+    date: '2025-04-10',
+    total: 750,
+    description: 'Brand identity work',
+    status: 'sent'
+  });
+  assert.equal(created.status, 201);
+  assert.equal(created.body.status, 'sent');
+  const line = await request(app).post(`/v1/invoices/${created.body.id}/lines`).send({ description: 'Design', total: 750 });
+  assert.equal(line.status, 201);
+  assert.equal((await request(app).get(`/v1/invoices/${created.body.id}`)).body.description, 'Brand identity work');
+  const updated = await request(app).patch(`/v1/invoices/${created.body.id}`).send({ status: 'paid', paiddate: '2025-04-12' });
+  assert.equal(updated.body.status, 'paid');
+  assert.equal(updated.body.paid, true);
+  assert.equal((await request(app).patch(`/v1/invoices/${created.body.id}`).send({ status: 'unknown' })).status, 400);
+  assert.equal((await request(app).delete(`/v1/invoices/${created.body.id}`)).status, 204);
+  assert.equal((await request(app).get(`/v1/invoices/${created.body.id}`)).status, 404);
+  assert.equal((await request(app).get(`/v1/invoices/${created.body.id}/lines`)).body.length, 0);
+});
+
 test('legacy chart routes preserve their expected response shapes', async () => {
   const app = createTestApp();
 

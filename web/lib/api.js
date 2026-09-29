@@ -4,6 +4,8 @@ const apiBaseUrl = (
   'https://api.biz.loc:9443'
 ).replace(/\/$/, '');
 
+export const browserApiBaseUrl = (process.env.NEXT_PUBLIC_API_URL || 'https://api.biz.loc:9443').replace(/\/$/, '');
+
 export async function getApiData(path) {
   try {
     const response = await fetch(`${apiBaseUrl}${path}`, { cache: 'no-store' });

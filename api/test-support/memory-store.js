@@ -33,6 +33,74 @@ export function createMemoryStore() {
     async getSnapshot() {
       return snapshot;
     },
+    async getClient(id) {
+      return snapshot.clients.find((item) => item.id === Number(id));
+    },
+    async createClient(input) {
+      const client = {
+        id: Math.max(0, ...snapshot.clients.map((item) => item.id)) + 1,
+        ...input,
+        email: input.email_accounting || input.email || null
+      };
+      snapshot.clients.push(client);
+      return client;
+    },
+    async updateClient(id, input) {
+      const client = await this.getClient(id);
+      if (client) Object.assign(client, input, { email: input.email_accounting ?? client.email });
+      return client;
+    },
+    async deleteClient(id) {
+      return removeById(snapshot.clients, id);
+    },
+    async getVendor(id) {
+      return snapshot.vendors.find((item) => item.id === Number(id));
+    },
+    async createVendor(input) {
+      const vendor = { id: Math.max(0, ...snapshot.vendors.map((item) => item.id)) + 1, ...input };
+      snapshot.vendors.push(vendor);
+      return vendor;
+    },
+    async updateVendor(id, input) {
+      const vendor = await this.getVendor(id);
+      if (vendor) Object.assign(vendor, input);
+      return vendor;
+    },
+    async deleteVendor(id) {
+      return removeById(snapshot.vendors, id);
+    },
+    async getYear(id) {
+      return snapshot.years.find((item) => item.id === Number(id));
+    },
+    async createYear(input) {
+      const year = { id: Math.max(0, ...snapshot.years.map((item) => item.id)) + 1, ...input };
+      snapshot.years.push(year);
+      return year;
+    },
+    async updateYear(id, input) {
+      const year = await this.getYear(id);
+      if (year) Object.assign(year, input);
+      return year;
+    },
+    async deleteYear(id) {
+      return removeById(snapshot.years, id);
+    },
+    async getExpense(id) {
+      return snapshot.expenses.find((item) => item.id === Number(id));
+    },
+    async createExpense(input) {
+      const expense = { id: Math.max(0, ...snapshot.expenses.map((item) => item.id)) + 1, ...input };
+      snapshot.expenses.push(expense);
+      return expense;
+    },
+    async updateExpense(id, input) {
+      const expense = await this.getExpense(id);
+      if (expense) Object.assign(expense, input);
+      return expense;
+    },
+    async deleteExpense(id) {
+      return removeById(snapshot.expenses, id);
+    },
     async createInvoice(input) {
       const paid = input.paid ?? input.status === 'paid';
       const invoice = {
@@ -46,6 +114,9 @@ export function createMemoryStore() {
       };
       snapshot.invoices.push(invoice);
       return invoice;
+    },
+    async getInvoice(id) {
+      return snapshot.invoices.find((item) => item.id === Number(id));
     },
     async createInvoiceLine(invoiceId, input) {
       const total = input.total ?? input.amount ?? null;
@@ -63,6 +134,21 @@ export function createMemoryStore() {
       const invoice = snapshot.invoices.find((item) => item.id === Number(id));
       if (invoice) Object.assign(invoice, updates);
       return invoice;
+    },
+    async deleteInvoice(id) {
+      const invoiceId = Number(id);
+      const removed = removeById(snapshot.invoices, invoiceId);
+      if (removed) {
+        snapshot.lines = snapshot.lines.filter((line) => line.invoice_id !== invoiceId);
+      }
+      return removed;
     }
   };
+}
+
+function removeById(records, id) {
+  const index = records.findIndex((item) => item.id === Number(id));
+  if (index === -1) return false;
+  records.splice(index, 1);
+  return true;
 }
