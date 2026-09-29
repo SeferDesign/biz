@@ -85,6 +85,7 @@ test('clients, vendors, years, and expenses support validated CRUD', async () =>
   assert.equal((await request(app).get(`/years/${createdYear.body.id}`)).status, 404);
 
   assert.equal((await request(app).post('/expenses').send({ name: 'Invalid expense' })).status, 400);
+  assert.equal((await request(app).post('/expenses').send({ name: 'Invalid account', date: '2025-03-03', cost: 20, account: 'Personal-ish' })).status, 400);
   const createdExpense = await request(app).post('/expenses').send({
     name: 'Domain renewal',
     vendor_id: 1,
@@ -97,6 +98,34 @@ test('clients, vendors, years, and expenses support validated CRUD', async () =>
   assert.equal((await request(app).patch(`/expenses/${createdExpense.body.id}`).send({ cost: 30 })).body.cost, 30);
   assert.equal((await request(app).delete(`/expenses/${createdExpense.body.id}`)).status, 204);
   assert.equal((await request(app).get(`/expenses/${createdExpense.body.id}`)).status, 404);
+});
+
+test('expenses support transactional bulk creation and updates', async () => {
+  const app = createTestApp();
+  const before = await request(app).get('/expenses?all=true');
+  const created = await request(app).post('/expenses/bulk').send({ expenses: [
+    { name: 'Annual hosting', vendor_id: 1, date: '2025-06-01', cost: 120, account: 'Business' },
+    { name: 'Domain renewal', vendor_id: 2, date: '2025-06-02', cost: 18, account: 'Business' }
+  ] });
+
+  assert.equal(created.status, 201);
+  assert.equal(created.body.expenses.length, 2);
+  assert.equal((await request(app).get('/expenses?all=true')).body.length, before.body.length + 2);
+
+  const updated = await request(app).patch('/expenses/bulk').send({ expenses: created.body.expenses.map((expense) => ({
+    ...expense,
+    cost: Number(expense.cost) + 1
+  })) });
+  assert.equal(updated.status, 200);
+  assert.deepEqual(updated.body.expenses.map((expense) => expense.cost), [121, 19]);
+
+  const missingRow = await request(app).patch('/expenses/bulk').send({ expenses: [
+    { ...updated.body.expenses[0], cost: 999 },
+    { ...updated.body.expenses[1], id: 999, cost: 999 }
+  ] });
+  assert.equal(missingRow.status, 404);
+  assert.equal((await request(app).get(`/expenses/${updated.body.expenses[0].id}`)).body.cost, 121);
+  assert.equal((await request(app).post('/expenses/bulk').send({ expenses: [{ name: 'Missing fields' }] })).status, 400);
 });
 
 test('invoices support validated CRUD and cascade line removal', async () => {

@@ -47,7 +47,7 @@ export default function yearsRouter(store) {
     try {
       return res.status(201).json(await store.createYear(input));
     } catch (cause) {
-      if (cause.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'That financial year already exists' });
+      if (cause.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'That year already exists' });
       throw cause;
     }
   });
@@ -86,7 +86,7 @@ export default function yearsRouter(store) {
       if (!year) return res.status(404).json({ error: 'Year not found' });
       return res.json(year);
     } catch (cause) {
-      if (cause.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'That financial year already exists' });
+      if (cause.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'That year already exists' });
       throw cause;
     }
   });
@@ -107,7 +107,7 @@ export default function yearsRouter(store) {
       if (!year) return res.status(404).json({ error: 'Year not found' });
       return res.json(year);
     } catch (cause) {
-      if (cause.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'That financial year already exists' });
+      if (cause.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'That year already exists' });
       throw cause;
     }
   });

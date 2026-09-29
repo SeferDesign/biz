@@ -18,9 +18,10 @@ export default async function ExpensesPage({ searchParams }) {
         <Link className="filter-link" href="/expenses" aria-current={!filter ? 'page' : undefined}>Recent</Link>
         <Link className="filter-link" href="/expenses?inactive=true" aria-current={filter === 'inactive' ? 'page' : undefined}>Past</Link>
         <Link className="filter-link" href="/expenses?future=true" aria-current={filter === 'future' ? 'page' : undefined}>Upcoming</Link>
+        <Link className="filter-link" href="/expenses/bulk">Spreadsheet</Link>
       </nav>
       <ResourcePage
-        eyebrow="OPERATIONS / EXPENSES"
+        eyebrow="EXPENSES"
         title="Expenses"
         description="Business spending by date, vendor, and account."
         data={expenseResult.data}

@@ -93,10 +93,22 @@ export function createMemoryStore() {
       snapshot.expenses.push(expense);
       return expense;
     },
+    async createExpenses(inputs) {
+      return inputs.map((input) => {
+        const expense = { id: Math.max(0, ...snapshot.expenses.map((item) => item.id)) + 1, ...input };
+        snapshot.expenses.push(expense);
+        return expense;
+      });
+    },
     async updateExpense(id, input) {
       const expense = await this.getExpense(id);
       if (expense) Object.assign(expense, input);
       return expense;
+    },
+    async updateExpenses(records) {
+      const expenses = records.map((record) => snapshot.expenses.find((item) => item.id === Number(record.id)));
+      if (expenses.some((expense) => !expense)) return null;
+      return records.map((record, index) => Object.assign(expenses[index], record));
     },
     async deleteExpense(id) {
       return removeById(snapshot.expenses, id);

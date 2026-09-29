@@ -134,9 +134,58 @@ export class MySqlStore {
     return this.getExpense(id);
   }
 
+  async createExpenses(inputs) {
+    const connection = await this.database.getConnection();
+    let transactionStarted = false;
+    const ids = [];
+    try {
+      await connection.beginTransaction();
+      transactionStarted = true;
+      for (const input of inputs) {
+        ids.push(await insertRecord(connection, 'expenses', expenseFields, input));
+      }
+      await connection.commit();
+      transactionStarted = false;
+      return Promise.all(ids.map((id) => this.getExpense(id)));
+    } catch (error) {
+      if (transactionStarted) await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
   async updateExpense(id, input) {
     await updateRecord(this.database, 'expenses', expenseFields, id, input);
     return this.getExpense(id);
+  }
+
+  async updateExpenses(records) {
+    const connection = await this.database.getConnection();
+    let transactionStarted = false;
+    const ids = [];
+    try {
+      await connection.beginTransaction();
+      transactionStarted = true;
+      for (const record of records) {
+        const [existing] = await connection.execute('SELECT id FROM expenses WHERE id = ? FOR UPDATE', [record.id]);
+        if (!existing.length) {
+          await connection.rollback();
+          transactionStarted = false;
+          return null;
+        }
+        await updateRecord(connection, 'expenses', expenseFields, record.id, record);
+        ids.push(record.id);
+      }
+      await connection.commit();
+      transactionStarted = false;
+      return Promise.all(ids.map((id) => this.getExpense(id)));
+    } catch (error) {
+      if (transactionStarted) await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
   }
 
   async deleteExpense(id) {

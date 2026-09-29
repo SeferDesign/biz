@@ -166,6 +166,30 @@ h2 { font-family: Georgia, "Times New Roman", serif; font-size: 23px; font-weigh
 .filter-link[aria-current="page"] { border-color: var(--forest); color: var(--white); background: var(--forest); }
 .inline-link { color: var(--forest-soft); text-decoration: underline; text-decoration-color: #a7b7ad; text-underline-offset: 3px; }
 .inline-link:hover { color: var(--coral); }
+.sheet-count { color: var(--muted); font-size: 12px; }
+.sheet-toolbar, .sheet-add-action { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.sheet-toolbar { margin-bottom: 18px; padding: 13px 15px; border: 1px solid var(--line); background: #fff; }
+.sheet-state { color: var(--muted); font-size: 12px; }
+.sheet-section { margin-top: 30px; }
+.sheet-section .section-heading { align-items: center; }
+.spreadsheet-wrap { max-width: 100%; }
+.spreadsheet-table { min-width: 1040px; table-layout: fixed; }
+.spreadsheet-table th:nth-child(1) { width: 125px; }
+.spreadsheet-table th:nth-child(2) { width: 205px; }
+.spreadsheet-table th:nth-child(3) { width: 190px; }
+.spreadsheet-table th:nth-child(4) { width: 150px; }
+.spreadsheet-table th:nth-child(5) { width: 130px; }
+.spreadsheet-table th:nth-child(6) { width: 130px; }
+.spreadsheet-table th:nth-child(7) { width: 240px; }
+.spreadsheet-table th:first-child:nth-last-child(7) { width: 66px; }
+.spreadsheet-table td { padding: 5px; }
+.spreadsheet-table .sheet-id { color: var(--muted); text-align: center; font-size: 11px; }
+.spreadsheet-table input, .spreadsheet-table select { display: block; width: 100%; min-width: 0; height: 35px; padding: 6px 8px; border: 1px solid transparent; color: var(--ink); background: transparent; font: inherit; font-size: 12px; }
+.spreadsheet-table input:focus, .spreadsheet-table select:focus { outline: 2px solid #84a796; outline-offset: -1px; border-color: #84a796; background: #fff; }
+.spreadsheet-table input[type="number"] { text-align: right; }
+.spreadsheet-table input[type="date"] { min-width: 130px; }
+.sheet-add-action { justify-content: end; margin-top: 13px; }
+.sheet-notice { margin-bottom: 18px; }
 .detail-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; }
 .delete-action { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; }
 .action-error, .form-error { color: #a94833; font-size: 12px; }
@@ -213,6 +237,7 @@ h2 { font-family: Georgia, "Times New Roman", serif; font-size: 23px; font-weigh
   h1 { font-size: 32px; }
   .heading-count { min-width: 70px; padding-left: 11px; }
   .dashboard-columns { grid-template-columns: 1fr; gap: 32px; }
+  .sheet-toolbar { align-items: flex-start; flex-wrap: wrap; }
   .heading-actions { gap: 10px; }
   .heading-actions .heading-count { min-width: 60px; }
   .record-form { padding: 18px; }

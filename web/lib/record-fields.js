@@ -48,13 +48,15 @@ export const yearFields = [
   { name: 'goals_months', label: 'Monthly Goals', type: 'months', wide: true }
 ];
 
+export const expenseAccountOptions = ['Business', 'Personal'].map((account) => ({ value: account, label: account }));
+
 export function expenseFields(vendors) {
   return [
     { name: 'name', label: 'Expense name', required: true },
     { name: 'vendor_id', label: 'Vendor', type: 'relation', options: vendors.map((vendor) => ({ value: vendor.id, label: vendor.name })) },
     { name: 'date', label: 'Date', type: 'date', required: true },
     { name: 'cost', label: 'Cost', type: 'number', min: 0, step: '0.01', required: true },
-    { name: 'account', label: 'Account' },
+    { name: 'account', label: 'Account', type: 'select', options: expenseAccountOptions },
     { name: 'notes', label: 'Notes', type: 'textarea', wide: true }
   ];
 }

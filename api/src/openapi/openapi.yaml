@@ -160,7 +160,7 @@ paths:
         '200':
           description: Client updated
     delete:
-      summary: Delete client
+      summary: Delete Client
       parameters:
         - $ref: '#/components/parameters/IdParam'
       responses:
@@ -168,12 +168,12 @@ paths:
           description: Client deleted
   /years:
     get:
-      summary: List years
+      summary: List Years
       responses:
         '200':
           description: Years ordered newest first
     post:
-      summary: Create financial year
+      summary: Create Year
       requestBody:
         required: true
         content:
@@ -182,7 +182,7 @@ paths:
               $ref: '#/components/schemas/YearInput'
       responses:
         '201':
-          description: Financial year created
+          description: Year created
   /years/new:
     get:
       summary: Get defaults for a new year
@@ -200,7 +200,7 @@ paths:
         '404':
           description: Year not found
     put:
-      summary: Replace financial year fields
+      summary: Replace year fields
       parameters:
         - $ref: '#/components/parameters/IdParam'
       requestBody:
@@ -211,9 +211,9 @@ paths:
               $ref: '#/components/schemas/YearInput'
       responses:
         '200':
-          description: Financial year updated
+          description: Year updated
     patch:
-      summary: Update financial year fields
+      summary: Update year fields
       parameters:
         - $ref: '#/components/parameters/IdParam'
       requestBody:
@@ -224,14 +224,14 @@ paths:
               $ref: '#/components/schemas/YearInput'
       responses:
         '200':
-          description: Financial year updated
+          description: Year updated
     delete:
-      summary: Delete financial year
+      summary: Delete year
       parameters:
         - $ref: '#/components/parameters/IdParam'
       responses:
         '204':
-          description: Financial year deleted
+          description: Year deleted
   /years/{id}/edit:
     get:
       summary: Get a year for editing
@@ -287,6 +287,13 @@ paths:
   /expenses:
     get:
       summary: List expenses
+      parameters:
+        - name: all
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Return all expenses for spreadsheet editing.
       responses:
         '200':
           description: Expense list
@@ -301,6 +308,31 @@ paths:
       responses:
         '201':
           description: Expense created
+  /expenses/bulk:
+    post:
+      summary: Create multiple expenses atomically
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseBatchInput'
+      responses:
+        '201':
+          description: Expenses created
+    patch:
+      summary: Update multiple expenses atomically
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseBatchUpdateInput'
+      responses:
+        '200':
+          description: Expenses updated
+        '404':
+          description: One or more expenses were not found; no changes were saved
   /expenses/{id}:
     get:
       summary: Get expense by id
@@ -580,8 +612,41 @@ components:
           type: number
         account:
           type: string
+          enum:
+            - Business
+            - Personal
+          nullable: true
         notes:
           type: string
+    ExpenseBatchInput:
+      type: object
+      required:
+        - expenses
+      properties:
+        expenses:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/ExpenseInput'
+    ExpenseBatchUpdateInput:
+      type: object
+      required:
+        - expenses
+      properties:
+        expenses:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            allOf:
+              - $ref: '#/components/schemas/ExpenseInput'
+              - type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    type: integer
     InvoiceLineInput:
       type: object
       required:
