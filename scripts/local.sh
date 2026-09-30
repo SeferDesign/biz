@@ -60,6 +60,7 @@ case "$command_name" in
 	restart)
 		load_local_env
 		compose_local up -d --build --remove-orphans
+		compose_local restart nginx
 		;;
 	stop)
 		load_local_env
