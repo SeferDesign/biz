@@ -15,8 +15,12 @@ const navigation = [
   { href: '/payment', label: 'Payment', index: '07' }
 ];
 
-export default function AppShell({ children }) {
+export default function AppShell({ children, accountEmail }) {
   const pathname = usePathname();
+  if (['/login', '/forgot-password', '/reset-password'].includes(pathname)) return children;
+  const accountHref = '/settings/account/security';
+  const accountActive = pathname.startsWith('/settings/account');
+  const avatarInitial = accountEmail?.trim().charAt(0).toUpperCase() || '?';
 
   return (
     <div className="app-shell">
@@ -45,16 +49,29 @@ export default function AppShell({ children }) {
           })}
         </nav>
         <div className="sidebar-foot">
-          <span className="sidebar-rule" />
-          <span>Sefer Design Company LLC</span>
-          <span className="sidebar-foot-note">BUSINESS LEDGER</span>
+          <div className="sidebar-company">
+            <span className="sidebar-rule" />
+            <span>Sefer Design Company LLC</span>
+            <span className="sidebar-foot-note">BUSINESS LEDGER</span>
+          </div>
+          <div className="sidebar-account">
+            <Link className={`account-link${accountActive ? ' is-active' : ''}`} href={accountHref} aria-current={accountActive ? 'page' : undefined}>
+              <span className="account-avatar" aria-hidden="true">{avatarInitial}</span>
+              <span className="account-copy">
+                <strong>Account</strong>
+                <span>{accountEmail || 'Sign in to your account'}</span>
+              </span>
+            </Link>
+            {accountEmail
+              ? <form action="/api/auth/logout" method="post"><button className="sidebar-sign-out" type="submit">Sign out</button></form>
+              : <Link className="sidebar-sign-out" href="/login">Sign in</Link>}
+          </div>
         </div>
       </aside>
       <div className="main-frame">
         <header className="topbar">
           <span className="topbar-section">OPERATIONS</span>
-          <OmniSearch />
-          <span className="topbar-date">SEFER DESIGN COMPANY</span>
+          {pathname === '/payment' ? <span className="topbar-date">SEFER DESIGN COMPANY</span> : <OmniSearch />}
         </header>
         <main className="main-content">{children}</main>
       </div>

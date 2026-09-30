@@ -2,13 +2,129 @@ openapi: 3.0.3
 info:
   title: SeferBiz API
   version: 1.0.0
-  description: Express-based API rebuilt from the existing route map and resource list.
+  description: Protected routes accept a user session or the configured API bearer token; login, health, and record-tokenized invoice/client reads are public exceptions.
 servers:
   - url: https://api.biz.loc:9443/v1
+security:
+  - ApiToken: []
 paths:
+  /auth/login:
+    post:
+      summary: Sign in with a legacy user account
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginInput'
+      responses:
+        '200':
+          description: Signed bearer session
+        '401':
+          description: Invalid email, password, or two-factor code
+  /auth/session:
+    get:
+      summary: Validate the current user session
+      responses:
+        '200':
+          description: Authenticated user identity
+        '401':
+          description: Session is missing or expired
+  /auth/password-reset:
+    post:
+      summary: Request a password reset email
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '202':
+          description: Generic response that does not reveal whether the account exists
+  /auth/password-reset/confirm:
+    post:
+      summary: Set a password using a single-use reset token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, password]
+              properties:
+                token:
+                  type: string
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Password updated
+        '400':
+          description: Reset token is invalid or expired
+  /auth/password:
+    post:
+      summary: Change the signed-in user's password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [current_password, new_password]
+              properties:
+                current_password:
+                  type: string
+                  format: password
+                new_password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Password updated
+        '401':
+          description: Current password is incorrect or session is missing
+  /auth/security:
+    get:
+      summary: Get the current user's two-factor settings
+      responses:
+        '200':
+          description: Authenticator status without exposing the secret
+  /auth/otp/setup:
+    post:
+      summary: Generate an authenticator secret for the current user
+      responses:
+        '200':
+          description: One-time secret and authenticator provisioning URI
+  /auth/otp/enable:
+    post:
+      summary: Enable two-factor login after verifying a code
+      responses:
+        '200':
+          description: Two-factor authentication enabled
+        '401':
+          description: Invalid authenticator code
+  /auth/otp/disable:
+    post:
+      summary: Disable two-factor login after verifying a code
+      responses:
+        '200':
+          description: Two-factor authentication disabled
+        '401':
+          description: Invalid authenticator code
   /health:
     get:
       summary: Health check
+      security: []
       responses:
         '200':
           description: Service is healthy
@@ -57,6 +173,9 @@ paths:
   /invoices/{id}:
     get:
       summary: Get invoice by id
+      security:
+        - ApiToken: []
+        - RecordAccessToken: []
       parameters:
         - $ref: '#/components/parameters/IdParam'
       responses:
@@ -98,6 +217,9 @@ paths:
   /invoices/{id}/pdf:
     get:
       summary: Download an invoice PDF
+      security:
+        - ApiToken: []
+        - RecordAccessToken: []
       parameters:
         - $ref: '#/components/parameters/IdParam'
       responses:
@@ -113,6 +235,9 @@ paths:
   /invoices/{invoice_id}/lines:
     get:
       summary: List invoice lines
+      security:
+        - ApiToken: []
+        - RecordAccessToken: []
       parameters:
         - $ref: '#/components/parameters/InvoiceIdParam'
       responses:
@@ -175,6 +300,9 @@ paths:
   /clients/{id}:
     get:
       summary: Get client by id
+      security:
+        - ApiToken: []
+        - RecordAccessToken: []
       parameters:
         - $ref: '#/components/parameters/IdParam'
       responses:
@@ -343,6 +471,9 @@ paths:
   /invoices/{id}/stripe:
     get:
       summary: Confirm a Stripe invoice payment
+      security:
+        - ApiToken: []
+        - RecordAccessToken: []
       parameters:
         - $ref: '#/components/parameters/IdParam'
       responses:
@@ -571,6 +702,16 @@ paths:
         '404':
           description: Year not found
 components:
+  securitySchemes:
+    ApiToken:
+      type: http
+      scheme: bearer
+      description: The API_ACCESS_TOKEN configured for the API service.
+    RecordAccessToken:
+      type: apiKey
+      in: query
+      name: access_token
+      description: A matching invoice or client access token; allowed only on that record's read routes.
   parameters:
     IdParam:
       name: id
@@ -591,6 +732,21 @@ components:
       schema:
         type: integer
   schemas:
+    LoginInput:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        otp_attempt:
+          type: string
+          description: Required when two-factor authentication is enabled for the user.
     InvoiceInput:
       type: object
       required:

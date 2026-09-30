@@ -2,14 +2,17 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { DetailGrid, ResourcePage } from '../../../components/ResourcePage.js';
 import ResourceActions from '../../../components/ResourceActions.js';
-import { browserApiBaseUrl, formatDate, formatMoney, getApiData, parsePage } from '../../../lib/api.js';
+import { browserApiBaseUrl, formatDate, formatMoney, parsePage } from '../../../lib/api.js';
+import { getApiData } from '../../../lib/api-server.js';
 
 export default async function ClientDetailPage({ params, searchParams }) {
   const { id } = await params;
   const query = await searchParams;
+  const accessToken = typeof query?.access_token === 'string' ? query.access_token : '';
+  const accessTokenQuery = accessToken ? `?access_token=${encodeURIComponent(accessToken)}` : '';
   const [clientResult, invoiceResult] = await Promise.all([
-    getApiData(`/clients/${encodeURIComponent(id)}`),
-    getApiData('/invoices')
+    getApiData(`/clients/${encodeURIComponent(id)}${accessTokenQuery}`),
+    accessToken ? Promise.resolve({ data: [] }) : getApiData('/invoices')
   ]);
   if (clientResult.status === 404) notFound();
   if (clientResult.error) {
@@ -22,10 +25,10 @@ export default async function ClientDetailPage({ params, searchParams }) {
 
   return (
     <>
-      <Link className="back-link" href="/clients">&lt; All clients</Link>
+      {!accessToken && <Link className="back-link" href="/clients">&lt; All clients</Link>}
       <div className="page-heading">
         <div><p className="eyebrow">CLIENT RECORD</p><h1>{client.name || 'Unnamed client'}</h1><p className="page-description">{client.contact || 'No primary contact listed'}</p></div>
-        <ResourceActions editHref={`/clients/${client.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/clients/${client.id}`} returnTo="/clients" label="client" />
+        {!accessToken && <ResourceActions editHref={`/clients/${client.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/clients/${client.id}`} returnTo="/clients" label="client" />}
       </div>
       <DetailGrid items={[
         ['Contact', client.contact],
@@ -35,7 +38,7 @@ export default async function ClientDetailPage({ params, searchParams }) {
         ['Preferred payment', client.preferred_paymenttype],
         ['Current rate', client.currentrate ? formatMoney(client.currentrate) : '-']
       ]} />
-      <section className="detail-section">
+      {!accessToken && <section className="detail-section">
         <div className="section-heading"><h2>Invoices</h2><span className="section-note">{invoices.length} for this client</span></div>
         {invoiceResult.error ? <div className="notice" role="alert"><span>{invoiceResult.error}</span></div> : (
           <ResourcePage
@@ -51,7 +54,7 @@ export default async function ClientDetailPage({ params, searchParams }) {
             ]}
           />
         )}
-      </section>
+      </section>}
     </>
   );
 }

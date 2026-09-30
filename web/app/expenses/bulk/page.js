@@ -1,5 +1,6 @@
 import ExpenseSpreadsheet from '../../../components/ExpenseSpreadsheet.js';
-import { browserApiBaseUrl, getApiData } from '../../../lib/api.js';
+import { browserApiBaseUrl } from '../../../lib/api.js';
+import { getApiData } from '../../../lib/api-server.js';
 
 export default async function ExpenseSpreadsheetPage() {
   const [expenseResult, vendorResult] = await Promise.all([

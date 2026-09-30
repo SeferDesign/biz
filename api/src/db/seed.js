@@ -1,5 +1,6 @@
 import { closePool, getPool } from './pool.js';
 import { initializeSchema } from './schema.js';
+import bcrypt from 'bcryptjs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -29,8 +30,20 @@ async function insertRows(database, table, columns, rows) {
   }
 }
 
+export async function seedUser(database, password = process.env.SEED_USER_PASSWORD ?? (process.env.NODE_ENV === 'production' ? null : 'example123')) {
+  if (typeof password !== 'string' || password.length === 0) return false;
+  const encryptedPassword = await bcrypt.hash(password, 10);
+  await database.execute(
+    `INSERT INTO users (email, encrypted_password, otp_required_for_login)
+     VALUES (?, ?, FALSE) ON DUPLICATE KEY UPDATE id = id`,
+    ['rob@seferdesign.com', encryptedPassword]
+  );
+  return true;
+}
+
 export async function seedDatabase(database = getPool(), now = new Date()) {
   await initializeSchema(database);
+  await seedUser(database);
 
   const connection = await database.getConnection();
   await connection.beginTransaction();
@@ -162,8 +175,15 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     if (process.env.NODE_ENV === 'production' && process.env.ALLOW_PRODUCTION_SEED !== 'true') {
       throw new Error('Refusing to seed production. Set ALLOW_PRODUCTION_SEED=true to override.');
     }
-    await seedDatabase();
-    console.log('MySQL seed data is ready.');
+    if (process.argv.includes('--user-only')) {
+      const database = getPool();
+      await initializeSchema(database);
+      if (!await seedUser(database)) throw new Error('SEED_USER_PASSWORD must be configured to seed a production user.');
+      console.log('Seed user is ready.');
+    } else {
+      await seedDatabase();
+      console.log('MySQL seed data is ready.');
+    }
   } finally {
     await closePool();
   }

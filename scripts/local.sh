@@ -20,6 +20,7 @@ Commands:
   test                 Run the API test suite inside the container
 	db:setup             Create the local MySQL tables
 	seed                 Load the legacy sample records into MySQL
+	seed-user            Create or preserve the local sign-in account
   sh <service> [cmd]   Open a shell (or run a command) in a service container
 	mysql [arguments]    Open the MySQL client against the local database
   reset                Recreate the stack and wipe volumes
@@ -90,6 +91,10 @@ case "$command_name" in
 	seed)
 		load_local_env
 		compose_local exec api npm run db:seed --workspace @seferbiz/api
+		;;
+	seed-user)
+		load_local_env
+		compose_local exec api npm run db:seed-user --workspace @seferbiz/api
 		;;
 	sh)
 		load_local_env

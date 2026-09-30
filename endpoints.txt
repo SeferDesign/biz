@@ -1,5 +1,7 @@
 # Business app endpoints
 # Placeholders: {id}, {invoice_id}, {number_of_months}
+# All web routes require a user session except /login, /payment, and matching
+# invoice/client access-token reads.
 
 GET    /
 GET    /best
@@ -17,6 +19,13 @@ DELETE /users/sign_out
 GET    /users/password/new
 GET    /users/password/edit
 PATCH|PUT|POST /users/password
+
+GET    /login
+GET    /forgot-password
+GET    /reset-password
+GET    /settings/account
+GET    /settings/account/security
+GET    /settings/account/password
 
 GET    /years/{id}/income
 GET    /years/{id}/expenses
@@ -82,9 +91,20 @@ GET    /charts_controller/year_expense_category/{id}
 GET    /charts_controller/year_expense_month/{id}
 
 # API endpoints
+# Protected by a user session or API_ACCESS_TOKEN except public auth/login,
+# health, docs/spec, and matching invoice/client access-token reads.
 GET    /v1/health
 GET    /v1/openapi.json
 GET    /v1/docs
+POST   /v1/auth/login
+POST   /v1/auth/password-reset
+POST   /v1/auth/password-reset/confirm
+GET    /v1/auth/session
+POST   /v1/auth/password
+GET    /v1/auth/security
+POST   /v1/auth/otp/setup
+POST   /v1/auth/otp/enable
+POST   /v1/auth/otp/disable
 GET    /v1/search
 
 GET    /v1/clients
@@ -96,6 +116,7 @@ DELETE /v1/clients/{id}
 GET    /v1/invoices
 POST   /v1/invoices
 GET    /v1/invoices/{id}
+GET    /v1/invoices/{id}/pdf
 PATCH|PUT /v1/invoices/{id}
 DELETE /v1/invoices/{id}
 GET    /v1/invoices/{id}/email

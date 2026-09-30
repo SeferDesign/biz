@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ResourcePage, StatusLabel } from '../../components/ResourcePage.js';
-import { formatDate, formatMoney, getApiData, invoiceStatus, parsePage } from '../../lib/api.js';
+import { formatDate, formatMoney, invoiceStatus, parsePage } from '../../lib/api.js';
+import { getApiData } from '../../lib/api-server.js';
 
 export default async function InvoicesPage({ searchParams }) {
   const params = await searchParams;

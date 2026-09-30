@@ -9,9 +9,11 @@
     "test": "node --test",
     "db:setup": "node src/db/setup.js",
     "db:seed": "node src/db/seed.js",
+    "db:seed-user": "node src/db/seed.js --user-only",
     "openapi:validate": "node --input-type=module -e \"import fs from 'node:fs'; import yaml from 'yaml'; yaml.parse(fs.readFileSync('./src/openapi/openapi.yaml', 'utf8')); console.log('OpenAPI YAML is valid');\""
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "express": "5.2.1",
     "mysql2": "^3.24.5",
     "nodemailer": "^10.0.12",

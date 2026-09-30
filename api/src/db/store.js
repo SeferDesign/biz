@@ -45,6 +45,104 @@ export class MySqlStore {
     this.database = database;
   }
 
+  async getUserByEmail(email) {
+    const [rows] = await this.database.execute(
+      `SELECT id, email, encrypted_password, encrypted_otp_secret,
+        encrypted_otp_secret_iv, encrypted_otp_secret_salt, consumed_timestep,
+        otp_required_for_login
+       FROM users WHERE email = ? LIMIT 1`,
+      [email]
+    );
+    return rows[0];
+  }
+
+  async getUserPassword(id) {
+    const [rows] = await this.database.execute(
+      'SELECT id, encrypted_password FROM users WHERE id = ? LIMIT 1',
+      [id]
+    );
+    return rows[0];
+  }
+
+  async updateUserPassword(id, encryptedPassword) {
+    await this.database.execute(
+      'UPDATE users SET encrypted_password = ?, reset_password_token = NULL, reset_password_sent_at = NULL WHERE id = ?',
+      [encryptedPassword, id]
+    );
+  }
+
+  async createPasswordReset(id, tokenDigest) {
+    await this.database.execute(
+      'UPDATE users SET reset_password_token = ?, reset_password_sent_at = CURRENT_TIMESTAMP WHERE id = ?',
+      [tokenDigest, id]
+    );
+  }
+
+  async consumePasswordReset(tokenDigest, encryptedPassword) {
+    const [result] = await this.database.execute(
+      `UPDATE users SET encrypted_password = ?, reset_password_token = NULL,
+        reset_password_sent_at = NULL WHERE reset_password_token = ?
+        AND reset_password_sent_at >= DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 6 HOUR)`,
+      [encryptedPassword, tokenDigest]
+    );
+    return result.affectedRows > 0;
+  }
+
+  async recordUserSignIn(id, ipAddress) {
+    await this.database.execute(
+      `UPDATE users SET sign_in_count = sign_in_count + 1,
+        last_sign_in_at = current_sign_in_at, current_sign_in_at = CURRENT_TIMESTAMP,
+        last_sign_in_ip = current_sign_in_ip, current_sign_in_ip = ? WHERE id = ?`,
+      [ipAddress || null, id]
+    );
+  }
+
+  async consumeUserOtp(id, timestep) {
+    const [result] = await this.database.execute(
+      'UPDATE users SET consumed_timestep = ? WHERE id = ? AND (consumed_timestep IS NULL OR consumed_timestep <> ?)',
+      [timestep, id, timestep]
+    );
+    return result.affectedRows > 0;
+  }
+
+  async getUserOtpSettings(id) {
+    const [rows] = await this.database.execute(
+      `SELECT id, otp_required_for_login, encrypted_otp_secret,
+        encrypted_otp_secret_iv, encrypted_otp_secret_salt, consumed_timestep
+       FROM users WHERE id = ? LIMIT 1`,
+      [id]
+    );
+    return rows[0];
+  }
+
+  async saveUserOtpSecret(id, secret) {
+    const [result] = await this.database.execute(
+      `UPDATE users SET encrypted_otp_secret = ?, encrypted_otp_secret_iv = ?,
+        encrypted_otp_secret_salt = ?, consumed_timestep = NULL
+       WHERE id = ? AND (otp_required_for_login IS NULL OR otp_required_for_login = FALSE)`,
+      [secret.encrypted_otp_secret, secret.encrypted_otp_secret_iv, secret.encrypted_otp_secret_salt, id]
+    );
+    return result.affectedRows > 0;
+  }
+
+  async enableUserOtp(id) {
+    const [result] = await this.database.execute(
+      `UPDATE users SET otp_required_for_login = TRUE
+       WHERE id = ? AND encrypted_otp_secret IS NOT NULL`,
+      [id]
+    );
+    return result.affectedRows > 0;
+  }
+
+  async disableUserOtp(id) {
+    await this.database.execute(
+      `UPDATE users SET otp_required_for_login = FALSE, encrypted_otp_secret = NULL,
+        encrypted_otp_secret_iv = NULL, encrypted_otp_secret_salt = NULL,
+        consumed_timestep = NULL WHERE id = ?`,
+      [id]
+    );
+  }
+
   async getSnapshot() {
     const [clients, invoices, lines, expenses, vendors, years] = await Promise.all([
       this.database.query('SELECT *, email_accounting AS email FROM clients ORDER BY id'),

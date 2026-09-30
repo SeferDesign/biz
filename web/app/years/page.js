@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ResourcePage } from '../../components/ResourcePage.js';
-import { formatMoney, getApiData, parsePage } from '../../lib/api.js';
+import { formatMoney, parsePage } from '../../lib/api.js';
+import { getApiData } from '../../lib/api-server.js';
 
 export default async function YearsPage({ searchParams }) {
   const params = await searchParams;

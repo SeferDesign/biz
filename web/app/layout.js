@@ -1,4 +1,5 @@
 import AppShell from '../components/AppShell.js';
+import { getApiData } from '../lib/api-server.js';
 import './globals.css';
 
 export const metadata = {
@@ -6,10 +7,11 @@ export const metadata = {
   description: 'Business operations ledger for Sefer Design Company.'
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const session = await getApiData('/auth/session');
   return (
     <html lang="en">
-      <body><AppShell>{children}</AppShell></body>
+      <body><AppShell accountEmail={session.data?.user?.email}>{children}</AppShell></body>
     </html>
   );
 }

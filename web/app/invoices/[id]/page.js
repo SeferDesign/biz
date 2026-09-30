@@ -3,15 +3,18 @@ import { notFound } from 'next/navigation';
 import { DetailGrid, ResourcePage, StatusLabel } from '../../../components/ResourcePage.js';
 import ResourceActions from '../../../components/ResourceActions.js';
 import InvoiceEmailPanel from '../../../components/InvoiceEmailPanel.js';
-import { browserApiBaseUrl, formatDate, formatMoney, getApiData, invoiceStatus, parsePage } from '../../../lib/api.js';
+import { browserApiBaseUrl, formatDate, formatMoney, invoiceStatus, parsePage } from '../../../lib/api.js';
+import { getApiData } from '../../../lib/api-server.js';
 
 export default async function InvoiceDetailPage({ params, searchParams }) {
   const { id } = await params;
   const query = await searchParams;
+  const accessToken = typeof query?.access_token === 'string' ? query.access_token : '';
+  const accessTokenQuery = accessToken ? `?access_token=${encodeURIComponent(accessToken)}` : '';
   const [invoiceResult, lineResult, emailSendsResult] = await Promise.all([
-    getApiData(`/invoices/${encodeURIComponent(id)}`),
-    getApiData(`/invoices/${encodeURIComponent(id)}/lines`),
-    getApiData(`/invoices/${encodeURIComponent(id)}/email-sends`)
+    getApiData(`/invoices/${encodeURIComponent(id)}${accessTokenQuery}`),
+    getApiData(`/invoices/${encodeURIComponent(id)}/lines${accessTokenQuery}`),
+    accessToken ? Promise.resolve({ data: [] }) : getApiData(`/invoices/${encodeURIComponent(id)}/email-sends`)
   ]);
   if (invoiceResult.status === 404) notFound();
   if (invoiceResult.error) {
@@ -22,31 +25,31 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
   const lines = lineResult.data || [];
   return (
     <>
-      <Link className="back-link" href="/invoices">&lt; All invoices</Link>
+      {!accessToken && <Link className="back-link" href="/invoices">&lt; All invoices</Link>}
       <div className="page-heading">
         <div><p className="eyebrow">INVOICE / {String(invoice.id).padStart(4, '0')}</p><h1>{invoice.description || 'Invoice details'}</h1><p className="page-description">Issued {formatDate(invoice.date)}</p></div>
         <div className="detail-actions">
           <StatusLabel status={invoiceStatus(invoice)} />
-          <a className="secondary-button" href={`${browserApiBaseUrl}/invoices/${invoice.id}/pdf`}>Download PDF</a>
-          <ResourceActions editHref={`/invoices/${invoice.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/invoices/${invoice.id}`} returnTo="/invoices" label="invoice" />
+          <a className="secondary-button" href={`${browserApiBaseUrl}/invoices/${invoice.id}/pdf${accessTokenQuery}`}>Download PDF</a>
+          {!accessToken && <ResourceActions editHref={`/invoices/${invoice.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/invoices/${invoice.id}`} returnTo="/invoices" label="invoice" />}
         </div>
       </div>
       <DetailGrid items={[
         ['Amount', formatMoney(invoice.cost ?? invoice.total, invoice.currency)],
-        ['Client', <Link href={`/clients/${invoice.client_id}`} key="client">Client {invoice.client_id}</Link>],
+        ['Client', accessToken ? `Client ${invoice.client_id}` : <Link href={`/clients/${invoice.client_id}`} key="client">Client {invoice.client_id}</Link>],
         ['Payment type', invoice.paymenttype],
         ['Issue date', formatDate(invoice.date)],
         ['Paid date', formatDate(invoice.paiddate)],
         ['Description', invoice.description]
       ]} />
-      <InvoiceEmailPanel invoiceId={invoice.id} initialSends={emailSendsResult.data || []} historyError={emailSendsResult.error} />
+      {!accessToken && <InvoiceEmailPanel invoiceId={invoice.id} initialSends={emailSendsResult.data || []} historyError={emailSendsResult.error} />}
       <section className="detail-section">
         <div className="section-heading"><h2>Line items</h2><span className="section-note">{lines.length} items</span></div>
         {lineResult.error ? <div className="notice" role="alert"><span>{lineResult.error}</span></div> : (
           <ResourcePage
             hideHeading
             data={lines}
-            pageHref={`/invoices/${invoice.id}`}
+            pageHref={`/invoices/${invoice.id}${accessTokenQuery}`}
             page={parsePage(query?.page)}
             columns={[
               { key: 'description', label: 'Description' },

@@ -1,6 +1,29 @@
 import { getPool } from './pool.js';
 
 const statements = [
+  `CREATE TABLE IF NOT EXISTS users (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL DEFAULT '',
+    encrypted_password VARCHAR(255) NOT NULL DEFAULT '',
+    reset_password_token VARCHAR(255),
+    reset_password_sent_at DATETIME,
+    remember_created_at DATETIME,
+    sign_in_count INT NOT NULL DEFAULT 0,
+    current_sign_in_at DATETIME,
+    last_sign_in_at DATETIME,
+    current_sign_in_ip VARCHAR(255),
+    last_sign_in_ip VARCHAR(255),
+    created_at DATETIME,
+    updated_at DATETIME,
+    encrypted_otp_secret VARCHAR(255),
+    encrypted_otp_secret_iv VARCHAR(255),
+    encrypted_otp_secret_salt VARCHAR(255),
+    consumed_timestep INT,
+    otp_required_for_login BOOLEAN,
+    google_token VARCHAR(255),
+    UNIQUE INDEX users_email_unique (email),
+    UNIQUE INDEX users_reset_password_token_unique (reset_password_token)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   `CREATE TABLE IF NOT EXISTS clients (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255), contact VARCHAR(255), site_url VARCHAR(255), logo VARCHAR(255),

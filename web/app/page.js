@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ResourcePage, StatusLabel } from '../components/ResourcePage.js';
-import { formatDate, formatMoney, getApiData, invoiceStatus } from '../lib/api.js';
+import { formatDate, formatMoney, invoiceStatus } from '../lib/api.js';
+import { getApiData } from '../lib/api-server.js';
 
 function Metric({ label, value, note }) {
   return (

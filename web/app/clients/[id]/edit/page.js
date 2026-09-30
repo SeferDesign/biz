@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import RecordForm from '../../../../components/RecordForm.js';
-import { browserApiBaseUrl, getApiData } from '../../../../lib/api.js';
+import { browserApiBaseUrl } from '../../../../lib/api.js';
+import { getApiData } from '../../../../lib/api-server.js';
 import { clientFields } from '../../../../lib/record-fields.js';
 
 export default async function EditClientPage({ params }) {

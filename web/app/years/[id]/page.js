@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { DetailGrid, ResourcePage } from '../../../components/ResourcePage.js';
 import ResourceActions from '../../../components/ResourceActions.js';
-import { browserApiBaseUrl, formatDate, formatMoney, getApiData, parsePage } from '../../../lib/api.js';
+import { browserApiBaseUrl, formatDate, formatMoney, parsePage } from '../../../lib/api.js';
+import { getApiData } from '../../../lib/api-server.js';
 
 export default async function YearDetailPage({ params, searchParams }) {
   const { id } = await params;

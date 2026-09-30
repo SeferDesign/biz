@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ResourcePage } from '../../components/ResourcePage.js';
-import { formatDate, formatMoney, getApiData, parsePage } from '../../lib/api.js';
+import { formatDate, formatMoney, parsePage } from '../../lib/api.js';
+import { getApiData } from '../../lib/api-server.js';
 
 export default async function ExpensesPage({ searchParams }) {
   const params = await searchParams;

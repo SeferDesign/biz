@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { formatMoney, getApiData } from '../../lib/api.js';
+import { formatMoney } from '../../lib/api.js';
+import { getApiData } from '../../lib/api-server.js';
 
 const monthNames = [
   'January', 'February', 'March', 'April', 'May', 'June',

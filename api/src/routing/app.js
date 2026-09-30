@@ -9,9 +9,12 @@ import chartsRouter from './charts/routes.js';
 import clientsRouter from './clients/routes.js';
 import expensesRouter from './expenses/routes.js';
 import invoicesRouter from './invoices/routes.js';
+import { createAuthRouter } from './auth.js';
 import searchRouter from './search/routes.js';
 import vendorsRouter from './vendors/routes.js';
 import yearsRouter from './years/routes.js';
+import { timingSafeEqual } from 'node:crypto';
+import { verifySessionToken } from '../auth/session.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,7 +24,49 @@ const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
   .map((value) => value.trim())
   .filter(Boolean);
 
-export function createApp({ store = new MySqlStore(), sendInvoiceEmail } = {}) {
+function tokenMatches(candidate, expected) {
+  if (typeof candidate !== 'string' || !expected) return false;
+  const candidateBuffer = Buffer.from(candidate);
+  const expectedBuffer = Buffer.from(expected);
+  return candidateBuffer.length === expectedBuffer.length && timingSafeEqual(candidateBuffer, expectedBuffer);
+}
+
+function createAuthenticationMiddleware(store, apiAccessToken) {
+  return async (req, res, next) => {
+    const bearerToken = req.get('authorization')?.match(/^Bearer\s+(.+)$/i)?.[1];
+    if (tokenMatches(bearerToken || req.query.access_token, apiAccessToken)) return next();
+    const sessionUser = verifySessionToken(bearerToken, apiAccessToken);
+    if (sessionUser) {
+      req.authUser = sessionUser;
+      return next();
+    }
+
+    if (req.method === 'GET' && typeof req.query.access_token === 'string') {
+      const clientMatch = req.path.match(/^\/clients\/(\d+)$/);
+      const invoiceMatch = req.path.match(/^\/invoices\/(\d+)(?:\/(?:stripe|pdf))?$/);
+      const invoiceLinesMatch = req.path.match(/^\/invoices\/(\d+)\/lines$/);
+      const record = clientMatch
+        ? await store.getClient(clientMatch[1])
+        : invoiceMatch
+          ? await store.getInvoice(invoiceMatch[1])
+          : invoiceLinesMatch
+            ? await store.getInvoice(invoiceLinesMatch[1])
+          : null;
+      if (record?.access_token && tokenMatches(req.query.access_token, record.access_token)) return next();
+    }
+
+    res.set('WWW-Authenticate', 'Bearer');
+    return res.status(401).json({ error: 'Unauthorized' });
+  };
+}
+
+export function createApp({
+  store = new MySqlStore(),
+  sendInvoiceEmail,
+  sendResetEmail,
+  apiAccessToken = process.env.API_ACCESS_TOKEN,
+  otpSecretEncryptionKey = process.env.OTP_SECRET_ENCRYPTION_KEY
+} = {}) {
   const app = express();
   app.use(express.json());
 
@@ -51,7 +96,12 @@ export function createApp({ store = new MySqlStore(), sendInvoiceEmail } = {}) {
 
   app.use('/v1/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
   app.get('/v1/health', (req, res) => res.json({ status: 'ok', service: 'api' }));
-
+  const authenticationMiddleware = createAuthenticationMiddleware(store, apiAccessToken);
+  app.use('/v1', (req, res, next) => {
+    if (req.method === 'POST' && ['/auth/login', '/auth/password-reset', '/auth/password-reset/confirm'].includes(req.path)) return next();
+    return authenticationMiddleware(req, res, next);
+  });
+  app.use('/v1/auth', createAuthRouter(store, { apiAccessToken, otpSecretEncryptionKey, sendResetEmail }));
   app.use('/v1', clientsRouter(store));
   app.use('/v1', invoicesRouter(store, { sendInvoiceEmail }));
   app.use('/v1', yearsRouter(store));

@@ -30,7 +30,70 @@ const initialSnapshot = {
 export function createMemoryStore() {
   const snapshot = structuredClone(initialSnapshot);
   const invoiceEmailSends = [];
+  const users = [];
   return {
+    users,
+    async getUserByEmail(email) {
+      return users.find((user) => user.email.toLowerCase() === email.toLowerCase());
+    },
+    async getUserPassword(id) {
+      const user = users.find((item) => item.id === Number(id));
+      return user ? { id: user.id, encrypted_password: user.encrypted_password } : undefined;
+    },
+    async updateUserPassword(id, encryptedPassword) {
+      const user = users.find((item) => item.id === Number(id));
+      if (user) Object.assign(user, { encrypted_password: encryptedPassword, reset_password_token: null, reset_password_sent_at: null });
+    },
+    async createPasswordReset(id, tokenDigest) {
+      const user = users.find((item) => item.id === Number(id));
+      if (user) Object.assign(user, { reset_password_token: tokenDigest, reset_password_sent_at: new Date() });
+    },
+    async consumePasswordReset(tokenDigest, encryptedPassword) {
+      const user = users.find((item) => item.reset_password_token === tokenDigest);
+      if (!user || !user.reset_password_sent_at || Date.now() - new Date(user.reset_password_sent_at).getTime() > 6 * 60 * 60 * 1000) return false;
+      Object.assign(user, { encrypted_password: encryptedPassword, reset_password_token: null, reset_password_sent_at: null });
+      return true;
+    },
+    async recordUserSignIn() {},
+    async consumeUserOtp(id, timestep) {
+      const user = users.find((item) => item.id === Number(id));
+      if (!user || Number(user.consumed_timestep) === timestep) return false;
+      user.consumed_timestep = timestep;
+      return true;
+    },
+    async getUserOtpSettings(id) {
+      const user = users.find((item) => item.id === Number(id));
+      return user ? {
+        id: user.id,
+        otp_required_for_login: user.otp_required_for_login,
+        encrypted_otp_secret: user.encrypted_otp_secret,
+        encrypted_otp_secret_iv: user.encrypted_otp_secret_iv,
+        encrypted_otp_secret_salt: user.encrypted_otp_secret_salt,
+        consumed_timestep: user.consumed_timestep
+      } : undefined;
+    },
+    async saveUserOtpSecret(id, secret) {
+      const user = users.find((item) => item.id === Number(id));
+      if (!user || user.otp_required_for_login) return false;
+      Object.assign(user, secret, { consumed_timestep: null });
+      return true;
+    },
+    async enableUserOtp(id) {
+      const user = users.find((item) => item.id === Number(id));
+      if (!user || !user.encrypted_otp_secret) return false;
+      user.otp_required_for_login = true;
+      return true;
+    },
+    async disableUserOtp(id) {
+      const user = users.find((item) => item.id === Number(id));
+      if (user) Object.assign(user, {
+        otp_required_for_login: false,
+        encrypted_otp_secret: null,
+        encrypted_otp_secret_iv: null,
+        encrypted_otp_secret_salt: null,
+        consumed_timestep: null
+      });
+    },
     async getSnapshot() {
       return snapshot;
     },

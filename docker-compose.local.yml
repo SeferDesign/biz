@@ -48,6 +48,8 @@ services:
       PORT: 3000
       WAIT_FOR: 'db:3306'
       DATABASE_URL: mysql://biz:biz@db:3306/biz_db_development
+      API_ACCESS_TOKEN: ${API_ACCESS_TOKEN:-local-development-api-token}
+      OTP_SECRET_ENCRYPTION_KEY: ${OTP_SECRET_ENCRYPTION_KEY:-local-only-otp-encryption-key-change-before-deploy}
       SMTP_HOST: mailpit
       SMTP_PORT: 1025
       SMTP_FROM: 'Sefer Design Co. <info@seferdesign.com>'
@@ -78,6 +80,7 @@ services:
       # Browser-side calls go through nginx; server-side calls stay on the network.
       NEXT_PUBLIC_API_URL: https://api.biz.loc:9443
       API_INTERNAL_URL: http://api:3000
+      PUBLIC_APP_URL: https://biz.loc:9443
       NEXT_TELEMETRY_DISABLED: '1'
     volumes:
       - ./web:/app/web

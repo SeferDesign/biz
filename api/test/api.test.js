@@ -1,12 +1,40 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import request from 'supertest';
+import supertest from 'supertest';
+import bcrypt from 'bcryptjs';
+import { createCipheriv, pbkdf2Sync, randomBytes } from 'node:crypto';
+import { generateOtpSecret, generateTotpCode, validOtpTimestep } from '../src/auth/session.js';
+import { seedUser } from '../src/db/seed.js';
 import { createApp } from '../src/routing/app.js';
 import { sendInvoiceEmail } from '../src/email/invoice-mailer.js';
 import { createMemoryStore } from '../test-support/memory-store.js';
 
+const TEST_API_ACCESS_TOKEN = 'test-api-token';
+
+function encryptOtpSecret(secret, encryptionKey) {
+  const salt = randomBytes(16);
+  const iv = randomBytes(12);
+  const key = pbkdf2Sync(encryptionKey, salt, 2000, 32, 'sha1');
+  const cipher = createCipheriv('aes-256-gcm', key, iv);
+  const encrypted = Buffer.concat([cipher.update(secret, 'utf8'), cipher.final(), cipher.getAuthTag()]);
+  return {
+    encrypted_otp_secret: encrypted.toString('base64'),
+    encrypted_otp_secret_iv: iv.toString('base64'),
+    encrypted_otp_secret_salt: salt.toString('base64')
+  };
+}
+
+function request(app) {
+  const agent = supertest(app);
+  for (const method of ['get', 'post', 'put', 'patch', 'delete']) {
+    const original = agent[method].bind(agent);
+    agent[method] = (...args) => original(...args).set('Authorization', `Bearer ${TEST_API_ACCESS_TOKEN}`);
+  }
+  return agent;
+}
+
 function createTestApp(options = {}) {
-  return createApp({ store: createMemoryStore(), ...options });
+  return createApp({ store: createMemoryStore(), apiAccessToken: TEST_API_ACCESS_TOKEN, ...options });
 }
 
 test('all API endpoints are exposed under /v1', async () => {
@@ -18,6 +46,162 @@ test('all API endpoints are exposed under /v1', async () => {
   assert.equal((await request(app).get('/health')).status, 404);
   assert.equal((await request(app).get('/clients')).status, 404);
   assert.equal((await request(app).get('/expenses')).status, 404);
+});
+
+test('API authentication protects resources while preserving public and access-token routes', async () => {
+  const store = createMemoryStore();
+  const app = createApp({ store, apiAccessToken: TEST_API_ACCESS_TOKEN });
+  const client = await store.getClient(1);
+  const invoice = await store.getInvoice(1);
+  client.access_token = 'client-link-token';
+  invoice.access_token = 'invoice-link-token';
+
+  assert.equal((await supertest(app).get('/v1/health')).status, 200);
+  assert.equal((await supertest(app).get('/v1/invoices')).status, 401);
+  assert.equal((await supertest(app).get('/v1/invoices').set('Authorization', `Bearer ${TEST_API_ACCESS_TOKEN}`)).status, 200);
+  assert.equal((await supertest(app).get('/v1/clients/1?access_token=client-link-token')).status, 200);
+  assert.equal((await supertest(app).get('/v1/clients/1?access_token=wrong-token')).status, 401);
+  assert.equal((await supertest(app).get('/v1/clients?access_token=client-link-token')).status, 401);
+  assert.equal((await supertest(app).post('/v1/clients?access_token=client-link-token').send({ name: 'Blocked' })).status, 401);
+  assert.equal((await supertest(app).get('/v1/invoices/1?access_token=invoice-link-token')).status, 200);
+  assert.equal((await supertest(app).get('/v1/invoices/1/lines?access_token=invoice-link-token')).status, 200);
+  assert.equal((await supertest(app).get('/v1/invoices/1/email?access_token=invoice-link-token')).status, 401);
+});
+
+test('legacy user credentials establish expiring API sessions and enforce OTP replay protection', async () => {
+  const store = createMemoryStore();
+  const apiAccessToken = TEST_API_ACCESS_TOKEN;
+  const otpKey = 'legacy-otp-encryption-key-for-test';
+  const user = {
+    id: 7,
+    email: 'owner@example.test',
+    encrypted_password: await bcrypt.hash('correct horse', 4),
+    otp_required_for_login: true,
+    consumed_timestep: null,
+    ...encryptOtpSecret('JBSWY3DPEHPK3PXP', otpKey)
+  };
+  store.users.push(user);
+  const app = createApp({ store, apiAccessToken, otpSecretEncryptionKey: otpKey });
+
+  assert.equal((await supertest(app).post('/v1/auth/login').send({ email: user.email, password: 'incorrect', otp_attempt: '000000' })).status, 401);
+  assert.equal((await supertest(app).post('/v1/auth/login').send({ email: user.email, password: 'correct horse' })).status, 401);
+
+  const otp = generateTotpCode('JBSWY3DPEHPK3PXP');
+  const login = await supertest(app).post('/v1/auth/login').send({ email: user.email, password: 'correct horse', otp_attempt: otp });
+  assert.equal(login.status, 200);
+  assert.equal(login.body.user.id, user.id);
+  assert.equal((await supertest(app).get('/v1/auth/session').set('Authorization', `Bearer ${login.body.access_token}`)).status, 200);
+  assert.equal((await supertest(app).post('/v1/auth/login').send({ email: user.email, password: 'correct horse', otp_attempt: otp })).status, 401);
+});
+
+test('seedUser creates the requested bcrypt account without replacing an existing account', async () => {
+  const inserts = [];
+  const database = {
+    async execute(query, values) {
+      inserts.push({ query, values });
+    }
+  };
+
+  assert.equal(await seedUser(database), true);
+  assert.equal(inserts.length, 1);
+  assert.match(inserts[0].query, /ON DUPLICATE KEY UPDATE id = id/);
+  assert.equal(inserts[0].values[0], 'rob@seferdesign.com');
+  assert.equal(await bcrypt.compare('example123', inserts[0].values[1]), true);
+});
+
+test('web-managed OTP can be set up, enabled, required at login, and disabled', async () => {
+  const store = createMemoryStore();
+  const otpKey = 'web-otp-encryption-test-key';
+  const user = {
+    id: 8,
+    email: 'rob@seferdesign.com',
+    encrypted_password: await bcrypt.hash('example123', 4),
+    otp_required_for_login: false,
+    consumed_timestep: null
+  };
+  store.users.push(user);
+  const app = createApp({ store, apiAccessToken: TEST_API_ACCESS_TOKEN, otpSecretEncryptionKey: otpKey });
+  assert.equal((await supertest(app).get('/v1/auth/security')).status, 401);
+  assert.equal((await supertest(app).post('/v1/auth/otp/setup').send({})).status, 401);
+  const login = await supertest(app).post('/v1/auth/login').send({ email: user.email, password: 'example123' });
+  const session = `Bearer ${login.body.access_token}`;
+
+  const initial = await supertest(app).get('/v1/auth/security').set('Authorization', session);
+  assert.deepEqual(initial.body, { otp_enabled: false, otp_configured: false });
+  const setup = await supertest(app).post('/v1/auth/otp/setup').set('Authorization', session);
+  assert.equal(setup.status, 200);
+  assert.match(setup.body.secret, /^[A-Z2-7]{32}$/);
+  assert.match(setup.body.otpauth_uri, /^otpauth:\/\/totp\//);
+
+  const code = generateTotpCode(setup.body.secret);
+  const enabled = await supertest(app).post('/v1/auth/otp/enable').set('Authorization', session).send({ otp_attempt: code });
+  assert.deepEqual(enabled.body, { otp_enabled: true, otp_configured: true });
+  assert.equal((await supertest(app).post('/v1/auth/login').send({ email: user.email, password: 'example123' })).status, 401);
+  assert.equal((await supertest(app).post('/v1/auth/otp/disable').set('Authorization', session).send({ otp_attempt: '000000' })).status, 401);
+
+  user.consumed_timestep = Math.floor(Date.now() / 30_000) - 1;
+  assert.notEqual(validOtpTimestep(await store.getUserOtpSettings(user.id), generateTotpCode(setup.body.secret), otpKey), null);
+  const disabled = await supertest(app).post('/v1/auth/otp/disable').set('Authorization', session)
+    .send({ otp_attempt: generateTotpCode(setup.body.secret) });
+  assert.deepEqual(disabled.body, { otp_enabled: false, otp_configured: false });
+});
+
+test('password reset is non-enumerating, single-use, and changes the Devise-compatible password', async () => {
+  const store = createMemoryStore();
+  const user = {
+    id: 9,
+    email: 'reset@example.test',
+    encrypted_password: await bcrypt.hash('old-password', 4),
+    otp_required_for_login: false
+  };
+  store.users.push(user);
+  let resetEmail;
+  const app = createApp({
+    store,
+    apiAccessToken: TEST_API_ACCESS_TOKEN,
+    sendResetEmail: async (message) => { resetEmail = message; }
+  });
+
+  const unknown = await supertest(app).post('/v1/auth/password-reset').send({ email: 'unknown@example.test' });
+  const requested = await supertest(app).post('/v1/auth/password-reset').send({ email: user.email });
+  assert.equal(unknown.status, 202);
+  assert.deepEqual(requested.body, unknown.body);
+  assert.equal(resetEmail.email, user.email);
+  assert.equal(resetEmail.token.length, 43);
+  assert.notEqual(user.reset_password_token, resetEmail.token);
+
+  const reset = await supertest(app).post('/v1/auth/password-reset/confirm').send({
+    token: resetEmail.token,
+    password: 'new-password'
+  });
+  assert.equal(reset.status, 200);
+  assert.equal(await bcrypt.compare('new-password', user.encrypted_password), true);
+  assert.equal(user.reset_password_token, null);
+  assert.equal((await supertest(app).post('/v1/auth/password-reset/confirm').send({
+    token: resetEmail.token,
+    password: 'another-password'
+  })).status, 400);
+});
+
+test('signed-in users can change passwords only after verifying the current password', async () => {
+  const store = createMemoryStore();
+  const user = {
+    id: 10,
+    email: 'change@example.test',
+    encrypted_password: await bcrypt.hash('old-password', 4),
+    otp_required_for_login: false
+  };
+  store.users.push(user);
+  const app = createApp({ store, apiAccessToken: TEST_API_ACCESS_TOKEN });
+  const login = await supertest(app).post('/v1/auth/login').send({ email: user.email, password: 'old-password' });
+  const authorization = `Bearer ${login.body.access_token}`;
+
+  assert.equal((await supertest(app).post('/v1/auth/password').send({ current_password: 'old-password', new_password: 'new-password' })).status, 401);
+  assert.equal((await supertest(app).post('/v1/auth/password').set('Authorization', authorization)
+    .send({ current_password: 'wrong-password', new_password: 'new-password' })).status, 401);
+  assert.equal((await supertest(app).post('/v1/auth/password').set('Authorization', authorization)
+    .send({ current_password: 'old-password', new_password: 'new-password' })).status, 200);
+  assert.equal(await bcrypt.compare('new-password', user.encrypted_password), true);
 });
 
 test('GET /v1/invoices returns an invoice list', async () => {
