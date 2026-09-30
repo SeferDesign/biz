@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import OmniSearch from './OmniSearch.js';
 
 const navigation = [
   { href: '/', label: 'Overview', index: '00' },
@@ -50,6 +51,7 @@ export default function AppShell({ children }) {
       <div className="main-frame">
         <header className="topbar">
           <span className="topbar-section">OPERATIONS</span>
+          <OmniSearch />
           <span className="topbar-date">SEFER DESIGN COMPANY</span>
         </header>
         <main className="main-content">{children}</main>

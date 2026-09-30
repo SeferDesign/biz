@@ -12,6 +12,31 @@ paths:
       responses:
         '200':
           description: Service is healthy
+  /v1/search:
+    get:
+      summary: Search clients, invoices, line items, vendors, expenses, and years
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 100
+      responses:
+        '200':
+          description: Ranked search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SearchResult'
+        '400':
+          description: Invalid search query
   /v1/invoices:
     get:
       summary: List invoices
@@ -647,6 +672,21 @@ components:
                 properties:
                   id:
                     type: integer
+    SearchResult:
+      type: object
+      required:
+        - type
+        - title
+        - href
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        detail:
+          type: string
+        href:
+          type: string
     InvoiceLineInput:
       type: object
       required:

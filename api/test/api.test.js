@@ -17,6 +17,25 @@ test('GET /v1/invoices returns an invoice list', async () => {
   assert.ok(Array.isArray(response.body));
 });
 
+test('omni-search finds clients, vendors, expenses, invoices, and line items', async () => {
+  const app = createTestApp();
+
+  const client = await request(app).get('/v1/search?q=acme');
+  const vendorAndExpense = await request(app).get('/v1/search?q=office');
+  const line = await request(app).get('/v1/search?q=development');
+  const empty = await request(app).get('/v1/search?q=nomatch');
+  const tooShort = await request(app).get('/v1/search?q=a');
+
+  assert.equal(client.status, 200);
+  assert.equal(client.body.results[0].type, 'Client');
+  assert.equal(client.body.results[0].href, '/clients/1');
+  assert.deepEqual(vendorAndExpense.body.results.map((item) => item.type), ['Vendor', 'Expense']);
+  assert.equal(line.body.results[0].type, 'Line item');
+  assert.equal(line.body.results[0].href, '/invoices/1');
+  assert.deepEqual(empty.body.results, []);
+  assert.equal(tooShort.status, 400);
+});
+
 test('legacy year endpoints return records and report totals', async () => {
   const app = createTestApp();
 

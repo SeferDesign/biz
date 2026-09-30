@@ -9,6 +9,7 @@ import chartsRouter from './charts/routes.js';
 import clientsRouter from './clients/routes.js';
 import expensesRouter from './expenses/routes.js';
 import invoicesRouter from './invoices/routes.js';
+import searchRouter from './search/routes.js';
 import vendorsRouter from './vendors/routes.js';
 import yearsRouter from './years/routes.js';
 
@@ -56,6 +57,7 @@ export function createApp({ store = new MySqlStore() } = {}) {
   app.use(yearsRouter(store));
   app.use(expensesRouter(store));
   app.use(vendorsRouter(store));
+  app.use(searchRouter(store));
   app.use(chartsRouter(store));
 
   app.use((req, res) => {

@@ -20,6 +20,12 @@ export default async function YearDetailPage({ params, searchParams }) {
   const year = yearResult.data;
   const invoices = incomeResult.data?.invoices || [];
   const expenses = expenseResult.data?.expenses || [];
+  const incomePageQuery = new URLSearchParams();
+  const expensePageQuery = new URLSearchParams();
+  if (query?.expense_page) incomePageQuery.set('expense_page', String(query.expense_page));
+  if (query?.income_page) expensePageQuery.set('income_page', String(query.income_page));
+  const incomePageHref = `/years/${year.id}${incomePageQuery.size ? `?${incomePageQuery}` : ''}`;
+  const expensePageHref = `/years/${year.id}${expensePageQuery.size ? `?${expensePageQuery}` : ''}`;
   return (
     <>
       <Link className="back-link" href="/years">&lt; All years</Link>
@@ -41,7 +47,7 @@ export default async function YearDetailPage({ params, searchParams }) {
           <ResourcePage
             hideHeading
             data={invoices}
-            pageHref={`/years/${year.id}`}
+            pageHref={incomePageHref}
             pageParam="income_page"
             page={parsePage(query?.income_page)}
             columns={[
@@ -59,7 +65,7 @@ export default async function YearDetailPage({ params, searchParams }) {
           <ResourcePage
             hideHeading
             data={expenses}
-            pageHref={`/years/${year.id}`}
+            pageHref={expensePageHref}
             pageParam="expense_page"
             page={parsePage(query?.expense_page)}
             columns={[
