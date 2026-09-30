@@ -3,8 +3,8 @@ import { getApiData } from '../lib/api-server.js';
 import './globals.css';
 
 export const metadata = {
-  title: 'Sefer Design | Business Office',
-  description: 'Business operations ledger for Sefer Design Company.'
+  title: 'Sefer Design Co. Biz Admin',
+  description: ''
 };
 
 export default async function RootLayout({ children }) {

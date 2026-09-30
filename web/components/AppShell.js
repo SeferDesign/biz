@@ -12,8 +12,7 @@ const navigation = [
   { href: '/vendors', label: 'Vendors', index: '04' },
   { href: '/years', label: 'Years', index: '05' },
   { href: '/best', label: 'Best', index: '06' },
-  { href: '/payments', label: 'Payment', index: '07' },
-  { href: '/stripe', label: 'Stripe', index: '08' }
+  { href: '/payments', label: 'Payment', index: '07' }
 ];
 
 export default function AppShell({ children, accountEmail }) {

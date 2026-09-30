@@ -83,13 +83,16 @@ test('API authentication protects resources while preserving public and access-t
 
   client.stripe_customer_id = 'cus_private';
   client.currentrate = 150;
+  client.payment_terms = 'Net 60';
   const publicInvoice = (await supertest(app).get('/v1/invoices/1?access_token=invoice-link-token')).body;
   assert.equal(publicInvoice.client.name, 'Acme Inc.');
+  assert.equal(publicInvoice.client.payment_terms, 'Net 60');
   assert.equal(publicInvoice.status, 'due');
   assert.equal(publicInvoice.access_token, undefined);
   assert.equal(publicInvoice.client_id, undefined);
   const publicClient = (await supertest(app).get('/v1/clients/1?access_token=client-link-token')).body;
   assert.equal(publicClient.name, 'Acme Inc.');
+  assert.equal(publicClient.payment_terms, 'Net 60');
   assert.equal(publicClient.stripe_customer_id, undefined);
   assert.equal(publicClient.currentrate, undefined);
   assert.equal(publicClient.access_token, undefined);
@@ -262,7 +265,11 @@ test('invoice email includes the generated invoice PDF attachment', async () => 
   let message;
   await sendInvoiceEmail({
     invoice: { id: 10, client_id: 1, date: '2025-04-10', cost: 125, currency: 'USD' },
-    client: { name: 'Bright Studio', email: 'billing@bright.example' },
+    client: {
+      name: 'Bright Studio', email: 'billing@bright.example',
+      email_accounting_2: 'ap@bright.example', email_accounting_3: 'owner@bright.example',
+      payment_terms: 'Net 90'
+    },
     lines: [{ description: 'Design', hours: 1, rate: 125, total: 125 }]
   }, {
     async sendMail(value) {
@@ -274,6 +281,8 @@ test('invoice email includes the generated invoice PDF attachment', async () => 
   assert.equal(message.attachments[0].filename, 'Invoice-0010.pdf');
   assert.equal(message.attachments[0].contentType, 'application/pdf');
   assert.equal(message.attachments[0].content.subarray(0, 5).toString(), '%PDF-');
+  assert.match(message.text, /Payment terms: Net 90/);
+  assert.deepEqual(message.cc, ['ap@bright.example', 'owner@bright.example']);
 });
 
 test('omni-search finds clients, vendors, expenses, invoices, and line items', async () => {
@@ -413,8 +422,16 @@ test('Stripe embedded checkout charges card fees, confirms payment, and accepts 
   assert.equal(options.body.enabled, true);
   assert.deepEqual(options.body.methods.map((method) => [method.method, method.fee_cents, method.total_cents]), [
     ['card', 3615, 123615],
-    ['us_bank_account', 0, 120000]
+    ['us_bank_account', 500, 120500]
   ]);
+  const invoice = await store.getInvoice(1);
+  invoice.cost = 100;
+  const lowerAmountOptions = await supertest(app).get('/v1/invoices/1/payment-options?access_token=invoice-link-token');
+  assert.deepEqual(lowerAmountOptions.body.methods.map((method) => [method.method, method.fee_cents, method.total_cents]), [
+    ['card', 330, 10330],
+    ['us_bank_account', 81, 10081]
+  ]);
+  invoice.cost = 1200;
   assert.equal((await supertest(app).post('/v1/invoices/1/checkout?access_token=wrong').send({ method: 'card' })).status, 401);
   assert.equal((await supertest(app).post('/v1/invoices/1/checkout?access_token=invoice-link-token').send({ method: 'paypal' })).status, 400);
 
@@ -430,7 +447,10 @@ test('Stripe embedded checkout charges card fees, confirms payment, and accepts 
   const bank = await supertest(app).post('/v1/invoices/1/checkout?access_token=invoice-link-token').send({ method: 'us_bank_account' });
   assert.equal(bank.status, 201);
   assert.deepEqual(stripe.expired, ['cs_test_1']);
-  assert.equal(stripe.created[1].line_items.length, 1);
+  assert.deepEqual(stripe.created[1].line_items.map((item) => [item.price_data.product_data.name, item.price_data.unit_amount]), [
+    ['Invoice #0001', 120000],
+    ['ACH processing fee', 500]
+  ]);
   assert.equal((await store.getInvoice(1)).stripe_session_id, 'cs_test_2');
 
   const unpaid = await supertest(app).get('/v1/invoices/1/stripe?session_id=cs_test_2&access_token=invoice-link-token');
@@ -520,10 +540,20 @@ test('clients, vendors, years, and expenses support validated CRUD', async () =>
   const createdClient = await request(app).post('/v1/clients').send({
     name: 'Bright Studio',
     contact: 'Jamie Bright',
-    email_accounting: 'billing@bright.example'
+    email_accounting: 'billing@bright.example',
+    email_accounting_2: 'ap@bright.example',
+    email_accounting_3: 'owner@bright.example'
   });
   assert.equal(createdClient.status, 201);
+  assert.equal(createdClient.body.payment_terms, 'Net 15');
+  assert.equal(createdClient.body.email_accounting_2, 'ap@bright.example');
+  assert.equal(createdClient.body.email_accounting_3, 'owner@bright.example');
   assert.equal((await request(app).get(`/v1/clients/${createdClient.body.id}`)).body.name, 'Bright Studio');
+  assert.equal((await request(app).patch(`/v1/clients/${createdClient.body.id}`).send({ payment_terms: 'Net 60' })).body.payment_terms, 'Net 60');
+  assert.equal((await request(app).patch(`/v1/clients/${createdClient.body.id}`).send({ payment_terms: 'Net 45' })).status, 400);
+  assert.equal((await request(app).patch(`/v1/clients/${createdClient.body.id}`).send({ preferred_paymenttype: 'Credit Card' })).body.preferred_paymenttype, 'Credit Card');
+  assert.equal((await request(app).patch(`/v1/clients/${createdClient.body.id}`).send({ preferred_paymenttype: 'Wire transfer' })).status, 400);
+  assert.equal((await request(app).patch(`/v1/clients/${createdClient.body.id}`).send({ preferred_paymenttype: '' })).body.preferred_paymenttype, null);
   assert.equal((await request(app).patch(`/v1/clients/${createdClient.body.id}`).send({ city: 'Chicago' })).body.city, 'Chicago');
   assert.equal((await request(app).delete(`/v1/clients/${createdClient.body.id}`)).status, 204);
   assert.equal((await request(app).get(`/v1/clients/${createdClient.body.id}`)).status, 404);

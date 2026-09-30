@@ -31,6 +31,7 @@ const statements = [
     state VARCHAR(255), international BOOLEAN, intinfo VARCHAR(255),
     email_accounting VARCHAR(255), email_accounting_2 VARCHAR(255), email_accounting_3 VARCHAR(255),
     preferred_paymenttype VARCHAR(255), currentrate INT, federalein VARCHAR(255),
+    payment_terms VARCHAR(16) NOT NULL DEFAULT 'Net 15',
     gsheet_id VARCHAR(255), stripe_customer_id VARCHAR(255), access_token VARCHAR(255),
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -125,5 +126,12 @@ const statements = [
 export async function initializeSchema(database = getPool()) {
   for (const statement of statements) {
     await database.query(statement);
+  }
+  const [columns] = await database.query(
+    `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'clients' AND COLUMN_NAME = 'payment_terms'`
+  );
+  if (!columns.length) {
+    await database.query("ALTER TABLE clients ADD COLUMN payment_terms VARCHAR(16) NOT NULL DEFAULT 'Net 15'");
   }
 }

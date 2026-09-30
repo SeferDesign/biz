@@ -27,7 +27,8 @@ export function createInvoicePdf({ invoice, client, lines }) {
         .text(invoiceNumber(invoice.id), margin, 96);
       document.font('Helvetica').fontSize(10).fillColor('#65736d')
         .text(`Issue date: ${invoice.date || '-'}`, margin, 112)
-        .text(`Status: ${invoice.status || (invoice.paid ? 'paid' : 'draft')}`, margin, 128);
+        .text(`Status: ${invoice.status || (invoice.paid ? 'paid' : 'draft')}`, margin, 128)
+        .text(`Payment terms: ${client.payment_terms || 'Net 15'}`, margin, 144);
 
       const billingDetails = [
         client.name || 'Client',
@@ -35,11 +36,11 @@ export function createInvoicePdf({ invoice, client, lines }) {
         client.email || client.email_accounting,
         [client.address1, client.address2, client.city, client.state, client.zipcode].filter(Boolean).join(', ')
       ].filter(Boolean).join('\n');
-      document.font('Helvetica-Bold').fontSize(9).fillColor('#19372f').text('BILL TO', margin, 158);
+      document.font('Helvetica-Bold').fontSize(9).fillColor('#19372f').text('BILL TO', margin, 174);
       document.font('Helvetica').fontSize(10).fillColor('#1c2b27')
-        .text(billingDetails, margin, 173, { width: contentWidth * 0.58 });
+        .text(billingDetails, margin, 189, { width: contentWidth * 0.58 });
 
-      let tableTop = Math.max(230, 173 + document.heightOfString(billingDetails, { width: contentWidth * 0.58 }) + 30);
+      let tableTop = Math.max(246, 189 + document.heightOfString(billingDetails, { width: contentWidth * 0.58 }) + 30);
       if (invoice.description) {
         document.font('Helvetica').fontSize(10).fillColor('#1c2b27')
           .text(invoice.description, margin, tableTop, { width: contentWidth });

@@ -109,7 +109,7 @@ export default function stripeRouter(store, { stripe, appUrl, notify }) {
         client_reference_id: String(invoice.id),
         line_items: [
           lineItem(invoiceName, breakdown.amount_cents),
-          ...(breakdown.fee_cents ? [lineItem('Card processing fee', breakdown.fee_cents)] : [])
+          ...(breakdown.fee_cents ? [lineItem(method === 'us_bank_account' ? 'ACH processing fee' : 'Card processing fee', breakdown.fee_cents)] : [])
         ],
         payment_method_types: [method],
         ...(method === 'us_bank_account' ? {

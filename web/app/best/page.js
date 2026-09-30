@@ -137,7 +137,6 @@ export default async function BestPage() {
           }))}
           emptyMessage="No annual income to rank."
         />
-        <p className="section-note">* Current period</p>
       </>}
     </>
   );

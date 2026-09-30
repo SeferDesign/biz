@@ -40,6 +40,7 @@ export async function sendInvoiceEmail({ invoice, client, lines }, transport) {
     `Invoice #${String(invoice.id).padStart(4, '0')}`,
     `Client: ${client.name || 'Client'}`,
     `Issue date: ${invoice.date || 'Not specified'}`,
+    `Payment terms: ${client.payment_terms || 'Net 15'}`,
     '',
     'Line items:',
     ...(lineDetails.length ? lineDetails : ['- No line items']),

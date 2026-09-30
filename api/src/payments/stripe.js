@@ -6,7 +6,7 @@ export const minimumChargeCents = 50;
 
 const methods = {
   card: { label: 'Credit or debit card', paymenttype: 'Stripe', feeRate: 0.029, feeFixedCents: 30 },
-  us_bank_account: { label: 'Bank account (ACH)', paymenttype: 'Stripe ACH', feeRate: 0, feeFixedCents: 0 }
+  us_bank_account: { label: 'Bank account (ACH)', paymenttype: 'Stripe ACH', feeRate: 0.008, feeFixedCents: 0, feeCapCents: 500 }
 };
 
 export function createStripeClient(secretKey = process.env.STRIPE_SECRET_KEY) {
@@ -27,11 +27,12 @@ export function paymentMethodsFor(invoice) {
 }
 
 export function paymentBreakdown(invoice, method) {
-  const { label, feeRate, feeFixedCents } = methods[method];
+  const { label, feeRate, feeFixedCents, feeCapCents } = methods[method];
   const amount = invoiceAmountCents(invoice);
   // Gross up so the payout after Stripe's fee still covers the invoice amount.
-  const total = feeRate || feeFixedCents ? Math.round((amount + feeFixedCents) / (1 - feeRate)) : amount;
-  return { method, label, amount_cents: amount, fee_cents: total - amount, total_cents: total };
+  const uncappedTotal = feeRate || feeFixedCents ? Math.round((amount + feeFixedCents) / (1 - feeRate)) : amount;
+  const fee = Math.min(uncappedTotal - amount, feeCapCents ?? Infinity);
+  return { method, label, amount_cents: amount, fee_cents: fee, total_cents: amount + fee };
 }
 
 export async function recordCheckoutPayment(store, session, status, { failureMessage = null, notify } = {}) {

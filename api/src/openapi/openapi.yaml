@@ -868,6 +868,14 @@ components:
           type: string
         state:
           type: string
+        payment_terms:
+          type: string
+          enum: [Net 15, Net 30, Net 60, Net 90]
+          default: Net 15
+        preferred_paymenttype:
+          type: string
+          nullable: true
+          enum: [Check, Credit Card, Zelle, PayPal, Stripe, ACH, Cryptocurrency, Cash, Venmo, Other]
     VendorInput:
       type: object
       required:
@@ -1005,3 +1013,11 @@ components:
           type: string
         email:
           type: string
+        payment_terms:
+          type: string
+          enum: [Net 15, Net 30, Net 60, Net 90]
+          default: Net 15
+        preferred_paymenttype:
+          type: string
+          nullable: true
+          enum: [Check, Credit Card, Zelle, PayPal, Stripe, ACH, Cryptocurrency, Cash, Venmo, Other]

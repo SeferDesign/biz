@@ -5,8 +5,8 @@ const initialSnapshot = {
     { id: 3, client_id: 1, status: 'paid', total: 2150, cost: 2150, currency: 'USD', date: '2025-03-01', paiddate: '2025-03-15', paid: true }
   ],
   clients: [
-    { id: 1, name: 'Acme Inc.', email: 'billing@acme.com' },
-    { id: 2, name: 'Northwind', email: 'finance@northwind.example' }
+    { id: 1, name: 'Acme Inc.', email: 'billing@acme.com', payment_terms: 'Net 15' },
+    { id: 2, name: 'Northwind', email: 'finance@northwind.example', payment_terms: 'Net 15' }
   ],
   lines: [
     { id: 1, invoice_id: 1, description: 'Design retainer', amount: 600, total: 600 },
@@ -105,6 +105,7 @@ export function createMemoryStore() {
     async createClient(input) {
       const client = {
         id: Math.max(0, ...snapshot.clients.map((item) => item.id)) + 1,
+        payment_terms: 'Net 15',
         ...input,
         email: input.email_accounting || input.email || null
       };

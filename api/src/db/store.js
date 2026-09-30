@@ -6,7 +6,7 @@ const createAccessToken = () => randomBytes(24).toString('base64url');
 const clientFields = [
   'name', 'contact', 'site_url', 'address1', 'address2', 'zipcode', 'city', 'state',
   'international', 'intinfo', 'email_accounting', 'email_accounting_2', 'email_accounting_3',
-  'preferred_paymenttype', 'currentrate', 'federalein'
+  'preferred_paymenttype', 'currentrate', 'federalein', 'payment_terms'
 ];
 const vendorFields = ['name', 'category', 'notes'];
 const yearFields = ['year', 'taxrate', 'goal_year', 'goals_months'];
@@ -173,7 +173,7 @@ export class MySqlStore {
   }
 
   async createClient(input) {
-    const id = await insertRecord(this.database, 'clients', clientFields, input);
+    const id = await insertRecord(this.database, 'clients', clientFields, { payment_terms: 'Net 15', ...input });
     return this.getClient(id);
   }
 

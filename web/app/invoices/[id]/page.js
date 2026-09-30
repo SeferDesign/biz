@@ -44,6 +44,7 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
       [isPaid ? 'Amount' : 'Amount due', formatMoney(invoice.cost ?? invoice.total, invoice.currency)],
       ['Billed to', billedTo?.name],
       ['Issue date', formatDate(invoice.date)],
+      ['Payment terms', billedTo?.payment_terms || 'Net 15'],
       ...(billedToAddress ? [['Address', billedToAddress]] : []),
       ...(isPaid ? [['Paid date', formatDate(invoice.paiddate)], ['Payment method', invoice.paymenttype]] : [])
     ]

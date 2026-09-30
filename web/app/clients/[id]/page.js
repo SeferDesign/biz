@@ -34,10 +34,15 @@ export default async function ClientDetailPage({ params, searchParams }) {
       <DetailGrid items={[
         ['Contact', client.contact],
         ['Billing email', client.email_accounting || client.email],
+        ...(!accessToken ? [
+          ['Additional accounting email 1', client.email_accounting_2],
+          ['Additional accounting email 2', client.email_accounting_3]
+        ] : []),
         ['Website', client.site_url ? <a href={client.site_url} rel="noreferrer" target="_blank">{client.site_url}</a> : '-'],
         ['Address', address],
         ...(accessToken ? [] : [
           ['Preferred payment', client.preferred_paymenttype],
+          ['Payment terms', client.payment_terms || 'Net 15'],
           ['Current rate', client.currentrate ? formatMoney(client.currentrate) : '-']
         ])
       ]} />
