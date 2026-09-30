@@ -142,6 +142,11 @@ export function createMemoryStore() {
       snapshot.lines.push(line);
       return line;
     },
+    async replaceInvoiceLines(invoiceId, inputs) {
+      if (!snapshot.invoices.some((item) => item.id === Number(invoiceId))) return null;
+      snapshot.lines = snapshot.lines.filter((line) => line.invoice_id !== Number(invoiceId));
+      return Promise.all(inputs.map((input) => this.createInvoiceLine(invoiceId, input)));
+    },
     async updateInvoice(id, updates) {
       const invoice = snapshot.invoices.find((item) => item.id === Number(id));
       if (invoice) Object.assign(invoice, updates);

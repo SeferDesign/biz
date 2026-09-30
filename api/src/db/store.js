@@ -244,6 +244,41 @@ export class MySqlStore {
     return rows[0];
   }
 
+  async replaceInvoiceLines(invoiceId, inputs) {
+    const connection = await this.database.getConnection();
+    let transactionStarted = false;
+    const lines = [];
+    try {
+      await connection.beginTransaction();
+      transactionStarted = true;
+      const [invoiceRows] = await connection.execute('SELECT id FROM invoices WHERE id = ? FOR UPDATE', [invoiceId]);
+      if (!invoiceRows.length) {
+        await connection.rollback();
+        transactionStarted = false;
+        return null;
+      }
+      await connection.execute('DELETE FROM `lines` WHERE invoice_id = ?', [invoiceId]);
+      for (const input of inputs) {
+        const [result] = await connection.execute(
+          `INSERT INTO \`lines\` (description, hourly, hours, rate, total, invoice_id, discount)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          [input.description ?? null, input.hourly ?? null, input.hours ?? null, input.rate ?? null,
+            input.total ?? input.amount ?? null, invoiceId, input.discount ?? false]
+        );
+        const [rows] = await connection.query('SELECT *, total AS amount FROM `lines` WHERE id = ?', [result.insertId]);
+        lines.push(rows[0]);
+      }
+      await connection.commit();
+      transactionStarted = false;
+      return lines;
+    } catch (error) {
+      if (transactionStarted) await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
   async updateInvoice(id, updates) {
     const allowed = [
       'client_id', 'date', 'cost', 'paid', 'paiddate', 'paymenttype', 'description',

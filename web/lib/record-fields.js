@@ -26,7 +26,7 @@ export const vendorFields = [
 
 export function invoiceFields(clients) {
   return [
-    { name: 'client_id', label: 'Client', type: 'relation', required: true, options: clients.map((client) => ({ value: client.id, label: client.name })) },
+    { name: 'client_id', label: 'Client', type: 'relation', required: true, options: clients.map((client) => ({ value: client.id, label: client.name, rate: client.currentrate })) },
     { name: 'date', label: 'Issue date', type: 'date', required: true },
     { name: 'cost', label: 'Amount', type: 'number', min: 0, step: '0.01', required: true },
     { name: 'status', label: 'Status', type: 'select', defaultValue: 'draft', options: [

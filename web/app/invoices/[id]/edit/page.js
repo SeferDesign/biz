@@ -5,11 +5,13 @@ import { invoiceFields } from '../../../../lib/record-fields.js';
 
 export default async function EditInvoicePage({ params }) {
   const { id } = await params;
-  const [invoiceResult, clientResult] = await Promise.all([
+  const [invoiceResult, clientResult, linesResult] = await Promise.all([
     getApiData(`/invoices/${encodeURIComponent(id)}`),
-    getApiData('/clients')
+    getApiData('/clients'),
+    getApiData(`/invoices/${encodeURIComponent(id)}/lines`)
   ]);
   if (invoiceResult.status === 404) notFound();
   if (invoiceResult.error) return <div className="notice" role="alert"><strong>Invoice unavailable</strong><span>{invoiceResult.error}</span></div>;
-  return <RecordForm title={`Edit Invoice ${String(invoiceResult.data.id).padStart(4, '0')}`} description="Update the client, amount, or payment status." fields={invoiceFields(clientResult.data || [])} initialValues={invoiceResult.data} endpoint={`${browserApiBaseUrl}/invoices/${invoiceResult.data.id}`} method="PATCH" returnTo={`/invoices/${invoiceResult.data.id}`} submitLabel="Save Changes" />;
+  if (linesResult.error) return <div className="notice" role="alert"><strong>Invoice lines unavailable</strong><span>{linesResult.error}</span></div>;
+  return <RecordForm title={`Edit Invoice ${String(invoiceResult.data.id).padStart(4, '0')}`} description="Update billing details, line items, or payment status." fields={invoiceFields(clientResult.data || [])} initialValues={invoiceResult.data} initialLines={linesResult.data || []} endpoint={`${browserApiBaseUrl}/invoices/${invoiceResult.data.id}`} lineItemsEndpoint={`${browserApiBaseUrl}/invoices/:id/lines`} lineItemsEnabled method="PATCH" returnTo={`/invoices/${invoiceResult.data.id}`} submitLabel="Save Changes" />;
 }

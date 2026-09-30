@@ -183,6 +183,26 @@ test('invoices support validated CRUD and cascade line removal', async () => {
   assert.equal((await request(app).get(`/v1/invoices/${created.body.id}/lines`)).body.length, 0);
 });
 
+test('invoice lines can be replaced on edit and invalid replacements are rejected', async () => {
+  const app = createTestApp();
+  const endpoint = '/v1/invoices/1/lines';
+
+  const updated = await request(app).put(endpoint).send([
+    { description: 'Updated design', hours: 2, rate: 150, total: 300 },
+    { description: 'Hosting', total: 25 }
+  ]);
+  assert.equal(updated.status, 200);
+  assert.deepEqual(updated.body.map((line) => [line.description, line.total]), [
+    ['Updated design', 300],
+    ['Hosting', 25]
+  ]);
+
+  assert.equal((await request(app).put(endpoint).send([{ description: 'Bad hours', hours: 'many' }])).status, 400);
+  assert.deepEqual((await request(app).get(endpoint)).body.map((line) => line.description), ['Updated design', 'Hosting']);
+  assert.deepEqual((await request(app).put(endpoint).send([])).body, []);
+  assert.equal((await request(app).put('/v1/invoices/999/lines').send([])).status, 404);
+});
+
 test('chart routes preserve their expected response shapes', async () => {
   const app = createTestApp();
 

@@ -228,6 +228,16 @@ h2 { font-family: Georgia, "Times New Roman", serif; font-size: 23px; font-weigh
 .form-field textarea { min-height: 92px; resize: vertical; }
 .form-field input:focus, .form-field select:focus, .form-field textarea:focus { outline: 2px solid #84a796; outline-offset: 1px; }
 .form-help { color: var(--muted); font-size: 11px; }
+.invoice-line-editor { display: grid; gap: 12px; padding-top: 6px; }
+.invoice-line-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
+.invoice-line-heading h2 { margin: 0; font-size: 16px; font-weight: 600; }
+.invoice-line-heading span, .invoice-line-row label > span { color: var(--muted); font-size: 11px; }
+.invoice-line-row { display: grid; grid-template-columns: minmax(150px, 2fr) repeat(3, minmax(75px, 0.8fr)) auto; align-items: end; gap: 9px; }
+.invoice-line-row label { display: grid; min-width: 0; gap: 5px; }
+.invoice-line-row input { width: 100%; min-width: 0; min-height: 38px; padding: 8px; border: 1px solid #ccd7cf; color: var(--ink); background: #fff; }
+.invoice-line-row input:focus { outline: 2px solid #84a796; outline-offset: 1px; }
+.invoice-line-remove { min-height: 38px; padding: 0 9px; }
+.invoice-line-add { justify-self: start; }
 .checkbox-control { display: flex; min-height: 40px; align-items: center; gap: 9px; color: var(--muted); }
 .checkbox-control input { width: 16px; height: 16px; accent-color: var(--forest); }
 .month-goal-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
@@ -268,6 +278,9 @@ h2 { font-family: Georgia, "Times New Roman", serif; font-size: 23px; font-weigh
   .heading-actions { gap: 10px; }
   .heading-actions .heading-count { min-width: 60px; }
   .record-form { padding: 18px; }
+  .invoice-line-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .invoice-line-row label:first-child { grid-column: 1 / -1; }
+  .invoice-line-remove { justify-self: start; }
   .detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .detail-item { padding: 15px; }
   .data-table th, .data-table td { padding: 12px 13px; }

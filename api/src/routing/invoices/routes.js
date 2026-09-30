@@ -114,6 +114,28 @@ export default function invoicesRouter(store) {
     res.status(201).json(line);
   });
 
+  router.put('/invoices/:invoice_id/lines', async (req, res) => {
+    const invoiceId = parseId(req.params.invoice_id);
+    if (!invoiceId) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
+    if (!Array.isArray(req.body)) return res.status(400).json({ error: 'Invoice lines must be an array' });
+    const invalidLine = req.body.some((line) => !line || typeof line !== 'object' || Array.isArray(line) ||
+      (line.description !== undefined && line.description !== null && typeof line.description !== 'string') ||
+      ['hours', 'rate', 'total', 'amount'].some((field) => line[field] !== undefined && line[field] !== null &&
+        line[field] !== '' && !isFiniteNumber(line[field])));
+    if (invalidLine) return res.status(400).json({ error: 'Invoice lines contain invalid values' });
+    const lines = req.body.map((line) => ({
+      description: line.description?.trim() || null,
+      hours: line.hours === '' ? null : line.hours,
+      rate: line.rate === '' ? null : line.rate,
+      total: line.total ?? line.amount ?? null,
+      hourly: line.hourly ?? null,
+      discount: Boolean(line.discount)
+    }));
+    const updatedLines = await store.replaceInvoiceLines(invoiceId, lines);
+    if (!updatedLines) return res.status(404).json({ error: 'Invoice not found' });
+    return res.json(updatedLines);
+  });
+
   router.get('/invoices/:invoice_id/lines/:id', async (req, res) => {
     const snapshot = await store.getSnapshot();
     const line = snapshot.lines.find((item) =>

@@ -116,6 +116,21 @@ paths:
       responses:
         '201':
           description: Invoice line created
+    put:
+      summary: Replace all invoice lines
+      parameters:
+        - $ref: '#/components/parameters/InvoiceIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/InvoiceLineInput'
+      responses:
+        '200':
+          description: Invoice lines replaced
   /invoices/{invoice_id}/lines/{id}:
     get:
       summary: Get invoice line by id
@@ -681,13 +696,22 @@ components:
           type: string
     InvoiceLineInput:
       type: object
-      required:
-        - description
       properties:
         description:
           type: string
+          nullable: true
+        hours:
+          type: number
+          nullable: true
+        rate:
+          type: number
+          nullable: true
+        total:
+          type: number
+          nullable: true
         amount:
           type: number
+          nullable: true
     Invoice:
       type: object
       properties:
