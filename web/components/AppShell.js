@@ -10,7 +10,9 @@ const navigation = [
   { href: '/clients', label: 'Clients', index: '02' },
   { href: '/expenses', label: 'Expenses', index: '03' },
   { href: '/vendors', label: 'Vendors', index: '04' },
-  { href: '/years', label: 'Years', index: '05' }
+  { href: '/years', label: 'Years', index: '05' },
+  { href: '/best', label: 'Best', index: '06' },
+  { href: '/payment', label: 'Payment', index: '07' }
 ];
 
 export default function AppShell({ children }) {

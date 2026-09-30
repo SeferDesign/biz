@@ -185,6 +185,13 @@ h2 { font-family: Georgia, "Times New Roman", serif; font-size: 23px; font-weigh
 .quick-links { display: grid; align-content: start; gap: 0; border-top: 1px solid var(--line); }
 .quick-link { display: flex; min-height: 56px; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); color: var(--forest-soft); font-weight: 600; }
 .quick-link span:last-child { color: var(--coral); font-size: 18px; }
+.payment-intro { max-width: 760px; margin: -7px 0 24px; color: var(--muted); }
+.payment-options { border-top: 1px solid var(--line); }
+.payment-method { display: grid; grid-template-columns: minmax(170px, .7fr) minmax(0, 1.6fr); gap: 24px; padding: 23px 0; border-bottom: 1px solid var(--line); }
+.payment-method h2 { margin: 0; font-size: 19px; }
+.payment-method p { margin-bottom: 8px; }
+.payment-method p:last-child { margin-bottom: 0; }
+.payment-method address { color: var(--muted); font-style: normal; line-height: 1.7; }
 .filter-row { display: flex; flex-wrap: wrap; gap: 8px; margin: -9px 0 19px; }
 .filter-link { padding: 7px 11px; border: 1px solid var(--line); color: var(--muted); background: var(--white); font-size: 11px; }
 .filter-link[aria-current="page"] { border-color: var(--forest); color: var(--white); background: var(--forest); }
@@ -277,6 +284,7 @@ h2 { font-family: Georgia, "Times New Roman", serif; font-size: 23px; font-weigh
   h1 { font-size: 32px; }
   .heading-count { min-width: 70px; padding-left: 11px; }
   .dashboard-columns { grid-template-columns: 1fr; gap: 32px; }
+  .payment-method { grid-template-columns: 1fr; gap: 8px; }
   .sheet-toolbar { align-items: flex-start; flex-wrap: wrap; }
   .pagination { flex-wrap: wrap; }
   .heading-actions { gap: 10px; }
