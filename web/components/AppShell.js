@@ -18,16 +18,14 @@ const navigation = [
 export default function AppShell({ children, accountEmail }) {
   const pathname = usePathname();
   if (['/login', '/forgot-password', '/reset-password'].includes(pathname)) return children;
-  if (pathname === '/payments') return <main className="main-content">{children}</main>;
   // Visitors without a session only reach public pages and access-token record links.
   if (!accountEmail) {
     return (
       <div className="public-shell">
         <header className="public-header">
-          <span className="brand">
-            <span className="brand-mark">SD</span>
-            <span className="brand-name">Sefer Design Company<span>info@seferdesign.com</span></span>
-          </span>
+          <a className="brand" href="https://seferdesign.com">
+            <img className="brand-logo" src="/images/sdc_white.svg" alt="Sefer Design Co." />
+          </a>
         </header>
         <main className="main-content">{children}</main>
       </div>
@@ -41,8 +39,7 @@ export default function AppShell({ children, accountEmail }) {
     <div className="app-shell">
       <aside className="sidebar">
         <Link className="brand" href="/" aria-label="Sefer Design Company overview">
-          <span className="brand-mark">SD</span>
-          <span className="brand-name">Sefer Design<span>Business office</span></span>
+          <img className="brand-logo" src="/images/sdc_white.svg" alt="" />
         </Link>
         <div className="nav-caption">WORKSPACE</div>
         <nav className="primary-nav" aria-label="Main navigation">
@@ -86,7 +83,7 @@ export default function AppShell({ children, accountEmail }) {
       <div className="main-frame">
         <header className="topbar">
           <span className="topbar-section">OPERATIONS</span>
-          {pathname === '/payment' ? <span className="topbar-date">SEFER DESIGN COMPANY</span> : <OmniSearch />}
+          {['/payment', '/payments'].includes(pathname) ? <span className="topbar-date">SEFER DESIGN COMPANY</span> : <OmniSearch />}
         </header>
         <main className="main-content">{children}</main>
       </div>

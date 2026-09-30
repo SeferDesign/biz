@@ -8,6 +8,7 @@ import { browserApiBaseUrl } from '../lib/api.js';
 export default function OmniSearch() {
   const router = useRouter();
   const rootRef = useRef(null);
+  const inputRef = useRef(null);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -61,6 +62,24 @@ export default function OmniSearch() {
     return () => document.removeEventListener('pointerdown', closeOutside);
   }, []);
 
+  useEffect(() => {
+    function toggleShortcut(event) {
+      if (!event.metaKey || event.key.toLowerCase() !== 'k') return;
+      event.preventDefault();
+      const input = inputRef.current;
+      if (document.activeElement === input) {
+        input.blur();
+        setOpen(false);
+        setActiveIndex(-1);
+      } else {
+        input?.focus();
+        input?.select();
+      }
+    }
+    document.addEventListener('keydown', toggleShortcut);
+    return () => document.removeEventListener('keydown', toggleShortcut);
+  }, []);
+
   function onKeyDown(event) {
     if (event.key === 'Escape') {
       setOpen(false);
@@ -87,6 +106,7 @@ export default function OmniSearch() {
       <label className="omni-search-field">
         <span className="search-mark" aria-hidden="true">⌕</span>
         <input
+          ref={inputRef}
           type="search"
           role="combobox"
           aria-label="Search records"
@@ -94,13 +114,14 @@ export default function OmniSearch() {
           aria-expanded={showResults}
           aria-controls="omni-search-results"
           aria-activedescendant={activeIndex >= 0 ? `omni-result-${activeIndex}` : undefined}
+          aria-keyshortcuts="Meta+K"
           placeholder="Search records..."
           value={query}
           onFocus={() => { if (canSearch) setOpen(true); }}
           onChange={(event) => { setQuery(event.target.value); setOpen(true); }}
           onKeyDown={onKeyDown}
         />
-        {loading && <span className="search-loading" aria-label="Searching" />}
+        {loading ? <span className="search-loading" aria-label="Searching" /> : <kbd className="search-shortcut" aria-hidden="true">⌘K</kbd>}
       </label>
       {showResults && (
         <div className="omni-results" id="omni-search-results" role="listbox" aria-label="Search results">

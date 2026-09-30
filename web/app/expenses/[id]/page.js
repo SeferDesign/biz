@@ -20,7 +20,7 @@ export default async function ExpenseDetailPage({ params }) {
     <>
       <Link className="back-link" href="/expenses">&lt; All expenses</Link>
       <div className="page-heading">
-        <div><p className="eyebrow">EXPENSE RECORD</p><h1>{expense.name}</h1><p className="page-description">{formatDate(expense.date)}</p></div>
+        <div><h1>{expense.name}</h1><p className="page-description">{formatDate(expense.date)}</p></div>
         <ResourceActions editHref={`/expenses/${expense.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/expenses/${expense.id}`} returnTo="/expenses" label="expense" />
       </div>
       <DetailGrid items={[

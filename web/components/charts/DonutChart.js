@@ -32,6 +32,7 @@ export default function DonutChart({
             paddingAngle={1}
             stroke="#ffffff"
             label={SliceLabel}
+            isAnimationActive={false}
           >
             {data.map((entry, index) => <Cell key={entry[nameKey]} fill={colors[index % colors.length]} />)}
           </Pie>

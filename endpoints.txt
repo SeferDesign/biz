@@ -154,4 +154,3 @@ POST   /v1/vendors
 GET    /v1/vendors/{id}
 PATCH|PUT /v1/vendors/{id}
 DELETE /v1/vendors/{id}
-

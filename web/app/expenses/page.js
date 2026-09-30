@@ -22,7 +22,6 @@ export default async function ExpensesPage({ searchParams }) {
         <Link className="filter-link" href="/expenses/bulk">Spreadsheet</Link>
       </nav>
       <ResourcePage
-        eyebrow="EXPENSES"
         title="Expenses"
         description="Business spending by date, vendor, and account."
         data={expenseResult.data}

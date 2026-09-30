@@ -91,7 +91,6 @@ export default async function BestPage() {
     <>
       <div className="page-heading">
         <div>
-          <p className="eyebrow">BUSINESS OFFICE / RECORDS</p>
           <h1>Best Performances</h1>
           <p className="page-description">The strongest paid-income periods across the ledger.</p>
         </div>

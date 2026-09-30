@@ -28,7 +28,7 @@ export default async function ClientDetailPage({ params, searchParams }) {
     <>
       {!accessToken && <Link className="back-link" href="/clients">&lt; All clients</Link>}
       <div className="page-heading">
-        <div><p className="eyebrow">CLIENT RECORD</p><h1>{client.name || 'Unnamed client'}</h1><p className="page-description">{client.contact || 'No primary contact listed'}</p></div>
+        <div><h1>{client.name || 'Unnamed client'}</h1><p className="page-description">{client.contact || 'No primary contact listed'}</p></div>
         {!accessToken && <ResourceActions editHref={`/clients/${client.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/clients/${client.id}`} returnTo="/clients" label="client" />}
       </div>
       <DetailGrid items={[

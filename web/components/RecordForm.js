@@ -127,7 +127,7 @@ export default function RecordForm({ title, description, fields, initialValues =
   return (
     <section className="editor-section">
       <div className="page-heading">
-        <div><p className="eyebrow">RECORD EDITOR</p><h1>{title}</h1><p className="page-description">{description}</p></div>
+        <div><h1>{title}</h1><p className="page-description">{description}</p></div>
       </div>
       <form className="record-form" onSubmit={submit}>
         {fields.map((field) => (

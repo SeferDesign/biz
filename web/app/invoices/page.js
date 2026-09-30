@@ -14,7 +14,6 @@ export default async function InvoicesPage({ searchParams }) {
 
   return (
     <ResourcePage
-      eyebrow="BILLING / INVOICES"
       title="Invoices"
       description="Issued invoices, payment status, and client billing history."
       data={invoiceResult.data?.toSorted(newestInvoicesFirst)}

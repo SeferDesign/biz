@@ -46,7 +46,7 @@ export default async function YearDetailPage({ params, searchParams }) {
     <>
       <Link className="back-link" href="/years">&lt; All years</Link>
       <div className="page-heading">
-        <div><p className="eyebrow">YEAR</p><h1>{year.year}</h1><p className="page-description">Annual income, expenses, and tax estimate.</p></div>
+        <div><h1>{year.year}</h1><p className="page-description">Annual income, expenses, and tax estimate.</p></div>
         <ResourceActions editHref={`/years/${year.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/years/${year.id}`} returnTo="/years" label="year" />
       </div>
       <DetailGrid items={[

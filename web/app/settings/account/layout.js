@@ -5,7 +5,6 @@ export default function AccountLayout({ children }) {
     <section className="account-layout">
       <div className="page-heading">
         <div>
-          <p className="eyebrow">PREFERENCES</p>
           <h1>Account</h1>
           <p className="page-description">Manage sign-in and account security.</p>
         </div>

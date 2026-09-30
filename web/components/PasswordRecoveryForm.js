@@ -37,7 +37,7 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <AuthPanel eyebrow="ACCOUNT RECOVERY" title="Forgot your password">
+    <AuthPanel title="Forgot your password">
       <p className="auth-description">Enter the email address on your account. If it matches, we’ll send a reset link.</p>
       <form className="login-form" onSubmit={submit}>
         <label className="form-field">
@@ -83,7 +83,7 @@ export function ResetPasswordForm({ token }) {
   }
 
   return (
-    <AuthPanel eyebrow="ACCOUNT RECOVERY" title="Choose a new password">
+    <AuthPanel title="Choose a new password">
       <form className="login-form" onSubmit={submit}>
         <label className="form-field">
           <span className="form-label">New password</span>
@@ -102,7 +102,7 @@ export function ResetPasswordForm({ token }) {
   );
 }
 
-function AuthPanel({ eyebrow, title, children }) {
+function AuthPanel({ title, children }) {
   return (
     <main className="login-page">
       <div className="login-brand">
@@ -110,7 +110,6 @@ function AuthPanel({ eyebrow, title, children }) {
         <span className="brand-name">Sefer Design<span>Business office</span></span>
       </div>
       <section className="login-panel" aria-labelledby="auth-title">
-        <p className="eyebrow">{eyebrow}</p>
         <h1 id="auth-title">{title}</h1>
         {children}
       </section>

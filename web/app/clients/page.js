@@ -8,7 +8,6 @@ export default async function ClientsPage({ searchParams }) {
   const result = await getApiData('/clients');
   return (
     <ResourcePage
-      eyebrow="DIRECTORY / CLIENTS"
       title="Clients"
       description="Client contacts and billing details."
       data={result.data}

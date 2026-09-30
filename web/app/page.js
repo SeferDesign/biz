@@ -18,17 +18,15 @@ function Metric({ label, value, note }) {
 }
 
 export default async function Home() {
-  const [clientResult, invoiceResult, expenseResult, vendorResult, yearResult] = await Promise.all([
+  const [clientResult, invoiceResult, expenseResult, yearResult] = await Promise.all([
     getApiData('/clients'),
     getApiData('/invoices'),
     getApiData('/expenses'),
-    getApiData('/vendors'),
     getApiData('/years')
   ]);
   const clients = clientResult.data || [];
   const invoices = invoiceResult.data || [];
   const expenses = expenseResult.data || [];
-  const vendors = vendorResult.data || [];
   const years = yearResult.data || [];
   const clientsById = new Map(clients.map((client) => [client.id, client]));
   const paidInvoices = invoices.filter((invoice) => invoiceStatus(invoice) === 'paid');
@@ -38,14 +36,13 @@ export default async function Home() {
   const totalExpenses = expenses.reduce((sum, expense) => sum + Number(expense.cost || 0), 0);
   const recentInvoices = [...invoices].sort(newestInvoicesFirst).slice(0, 6);
   const trailingFinances = monthlyFinances(trailingMonths(5), { invoices, expenses, years });
-  const error = [clientResult, invoiceResult, expenseResult, vendorResult, yearResult]
+  const error = [clientResult, invoiceResult, expenseResult, yearResult]
     .find((result) => result.error)?.error;
 
   return (
     <>
       <div className="page-heading">
         <div>
-          <p className="eyebrow">BUSINESS OFFICE / OVERVIEW</p>
           <h1>Overview</h1>
           <p className="page-description">A current view of billing, expenses, and the people behind them.</p>
         </div>
@@ -79,37 +76,26 @@ export default async function Home() {
         />
       </section>
 
-      <div className="dashboard-columns">
-        <section>
-          <div className="section-heading">
-            <h2>Recent invoices</h2>
-            <Link className="inline-link section-note" href="/invoices">All invoices</Link>
-          </div>
-          <ResourcePage
-            hideHeading
-            data={recentInvoices}
-            error={invoiceResult.error}
-            count={recentInvoices.length}
-            columns={[
-              { key: 'id', label: 'Invoice', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}`}>INV-{String(invoice.id).padStart(4, '0')}</Link> },
-              { key: 'client', label: 'Client', render: (invoice) => clientsById.get(invoice.client_id)?.name || `Client ${invoice.client_id || '-'}` },
-              { key: 'date', label: 'Date', render: (invoice) => formatDate(invoice.date) },
-              { key: 'status', label: 'Status', render: (invoice) => <StatusLabel status={invoiceStatus(invoice)} /> },
-              { key: 'cost', label: 'Amount', className: 'numeric-cell', render: (invoice) => formatMoney(invoice.cost ?? invoice.total, invoice.currency) },
-              { key: 'actions', label: 'Actions', render: (invoice) => <InvoiceActions invoice={invoice} compact /> }
-            ]}
-          />
-        </section>
-        <section>
-          <div className="section-heading"><h2>Records</h2><span className="section-note">Browse by type</span></div>
-          <div className="quick-links">
-            <Link className="quick-link" href="/clients"><span>Clients</span><span>{clients.length}</span></Link>
-            <Link className="quick-link" href="/vendors"><span>Vendors</span><span>{vendors.length}</span></Link>
-            <Link className="quick-link" href="/years"><span>Years</span><span>{years.length}</span></Link>
-            <Link className="quick-link" href="/expenses"><span>Expenses</span><span>{expenses.length}</span></Link>
-          </div>
-        </section>
-      </div>
+      <section>
+        <div className="section-heading">
+          <h2>Recent invoices</h2>
+          <Link className="inline-link section-note" href="/invoices">All invoices</Link>
+        </div>
+        <ResourcePage
+          hideHeading
+          data={recentInvoices}
+          error={invoiceResult.error}
+          count={recentInvoices.length}
+          columns={[
+            { key: 'id', label: 'Invoice', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}`}>INV-{String(invoice.id).padStart(4, '0')}</Link> },
+            { key: 'client', label: 'Client', render: (invoice) => clientsById.get(invoice.client_id)?.name || `Client ${invoice.client_id || '-'}` },
+            { key: 'date', label: 'Date', render: (invoice) => formatDate(invoice.date) },
+            { key: 'status', label: 'Status', render: (invoice) => <StatusLabel status={invoiceStatus(invoice)} /> },
+            { key: 'cost', label: 'Amount', className: 'numeric-cell', render: (invoice) => formatMoney(invoice.cost ?? invoice.total, invoice.currency) },
+            { key: 'actions', label: 'Actions', render: (invoice) => <InvoiceActions invoice={invoice} compact /> }
+          ]}
+        />
+      </section>
     </>
   );
 }

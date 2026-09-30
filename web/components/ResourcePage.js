@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { recordsPerPage } from '../lib/api.js';
 
-export function ResourcePage({ eyebrow, title, description, data, error, columns, countLabel, count, hideHeading = false, actionHref, actionLabel, pageHref, page = 1, pageParam = 'page' }) {
+export function ResourcePage({ title, description, data, error, columns, countLabel, count, hideHeading = false, actionHref, actionLabel, pageHref, page = 1, pageParam = 'page' }) {
   const records = Array.isArray(data) ? data : [];
   const itemCount = count ?? records.length;
   const pageCount = Math.max(1, Math.ceil(records.length / recordsPerPage));
@@ -21,7 +21,6 @@ export function ResourcePage({ eyebrow, title, description, data, error, columns
       {!hideHeading && (
         <div className="page-heading">
           <div>
-            <p className="eyebrow">{eyebrow}</p>
             <h1>{title}</h1>
             <p className="page-description">{description}</p>
           </div>

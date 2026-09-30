@@ -19,7 +19,6 @@ export default async function VendorsPage({ searchParams }) {
 
   return (
     <ResourcePage
-      eyebrow="DIRECTORY / VENDORS"
       title="Vendors"
       description="Suppliers and service providers associated with business expenses."
       data={vendorResult.data}

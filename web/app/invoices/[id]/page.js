@@ -73,7 +73,7 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
       )}
       {!accessToken && <Link className="back-link" href="/invoices">&lt; All invoices</Link>}
       <div className="page-heading">
-        <div><p className="eyebrow">INVOICE / {String(invoice.id).padStart(4, '0')}</p><h1>{invoice.description || 'Invoice details'}</h1><p className="page-description">Issued {formatDate(invoice.date)}</p></div>
+        <div><h1>{invoice.description || 'Invoice details'}</h1><p className="page-description">Issued {formatDate(invoice.date)}</p></div>
         <div className="detail-actions">
           {accessToken ? <StatusLabel status={invoiceStatus(invoice)} /> : <InvoiceActions key={`${invoice.id}-${invoiceStatus(invoice)}`} invoice={invoice} lines={lines} linesAvailable={!lineResult.error} />}
           <a className="secondary-button" href={`${browserApiBaseUrl}/invoices/${invoice.id}/pdf${accessTokenQuery}`}>Download PDF</a>

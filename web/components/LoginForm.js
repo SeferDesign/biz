@@ -45,7 +45,6 @@ export default function LoginForm({ returnTo }) {
         <span className="brand-name">Sefer Design<span>Business office</span></span>
       </div>
       <section className="login-panel" aria-labelledby="login-title">
-        <p className="eyebrow">BUSINESS OFFICE</p>
         <h1 id="login-title">Sign in</h1>
         <form className="login-form" onSubmit={submit}>
           <label className="form-field">

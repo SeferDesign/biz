@@ -72,7 +72,6 @@ export default function SecuritySettings({ initialSettings }) {
     <section className="security-section">
       <div className="page-heading">
         <div>
-          <p className="eyebrow">ACCOUNT SECURITY</p>
           <h1>Two-factor authentication</h1>
           <p className="page-description">Require an authenticator code whenever this account signs in.</p>
         </div>

@@ -13,7 +13,7 @@ export const chartPalette = [
 
 export const financeBars = [
   { key: 'expenses', label: 'Expenses', color: chartColors.expenses },
-  { key: 'revenue', label: 'Revenue', color: chartColors.revenue }
+  { key: 'revenueOverExpenses', valueKey: 'revenue', label: 'Revenue', color: chartColors.revenue }
 ];
 
 export const goalOutlines = [{ key: 'goal', label: 'Goal', color: chartColors.goal }];

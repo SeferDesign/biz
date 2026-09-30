@@ -6,7 +6,7 @@ import { chartColors, chartFormat } from './theme.js';
 const outlineAxisId = 'outline';
 
 /**
- * bars: [{ key, label, color }] drawn as columns (stacked when `stacked`).
+ * bars: [{ key, label, color, valueKey }] drawn as columns (stacked when `stacked`); tooltips show `valueKey` when set.
  * outlines: [{ key, label, color }] drawn as dashed targets over each column; null values are skipped.
  * lines: [{ value, label, color, dashed }] drawn as horizontal reference lines; null values are skipped.
  */
@@ -24,6 +24,8 @@ export default function ColumnChart({
 }) {
   const formatter = chartFormat(format);
   const tick = { fill: chartColors.axis, fontSize: 12 };
+  const valueKeys = new Map(bars.filter((bar) => bar.valueKey).map((bar) => [bar.key, bar.valueKey]));
+  const tooltipValue = (value, name, item) => formatter.value(valueKeys.has(item?.dataKey) ? item.payload[valueKeys.get(item.dataKey)] : value);
 
   return (
     <figure className="chart" role="img" aria-label={label}>
@@ -33,7 +35,7 @@ export default function ColumnChart({
           <XAxis dataKey={categoryKey} tick={tick} tickLine={false} axisLine={{ stroke: chartColors.grid }} />
           {outlines.length > 0 && <XAxis dataKey={categoryKey} xAxisId={outlineAxisId} hide />}
           <YAxis tick={tick} tickFormatter={formatter.axis} tickLine={false} axisLine={false} width={76} />
-          <Tooltip formatter={formatter.value} cursor={{ fill: 'rgb(28 43 39 / 4%)' }} />
+          <Tooltip formatter={tooltipValue} cursor={{ fill: 'rgb(28 43 39 / 4%)' }} />
           {bars.map((bar) => (
             <Bar
               key={bar.key}
@@ -43,6 +45,7 @@ export default function ColumnChart({
               stackId={stacked ? 'stack' : undefined}
               stroke={stacked ? '#ffffff' : undefined}
               maxBarSize={maxBarSize}
+              isAnimationActive={false}
             />
           ))}
           {outlines.map((outline) => (
@@ -56,6 +59,7 @@ export default function ColumnChart({
               strokeWidth={2}
               strokeDasharray="6 4"
               maxBarSize={maxBarSize}
+              isAnimationActive={false}
             />
           ))}
           {lines.filter((line) => line.value != null).map((line) => (

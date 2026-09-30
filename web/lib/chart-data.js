@@ -115,10 +115,16 @@ export function quarterlyTaxes(monthlyRows, taxrate) {
 export function monthlyFinances(months, { invoices = [], expenses = [], years = [] }) {
   const revenue = totalsByMonth(invoices.filter(isPaidInvoice), (invoice) => invoice.paiddate || invoice.date, invoiceAmount);
   const spending = totalsByMonth(expenses, (expense) => expense.date, (expense) => expense.cost);
-  return months.map(({ key, year, month, label }) => ({
-    label,
-    revenue: roundMoney(revenue.get(key) || 0),
-    expenses: roundMoney(spending.get(key) || 0),
-    goal: monthlyGoal(years, year, month)
-  }));
+  return months.map(({ key, year, month, label }) => {
+    const monthRevenue = roundMoney(revenue.get(key) || 0);
+    const monthExpenses = roundMoney(spending.get(key) || 0);
+    return {
+      label,
+      revenue: monthRevenue,
+      expenses: monthExpenses,
+      // Stacked on expenses so the column's full height equals revenue.
+      revenueOverExpenses: roundMoney(Math.max(monthRevenue - monthExpenses, 0)),
+      goal: monthlyGoal(years, year, month)
+    };
+  });
 }

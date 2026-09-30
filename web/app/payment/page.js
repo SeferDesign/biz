@@ -16,7 +16,6 @@ export default function PaymentPage() {
     <>
       <div className="page-heading">
         <div>
-          <p className="eyebrow">SEFER DESIGN COMPANY LLC</p>
           <h1>Payment Options</h1>
           <p className="page-description">Choose the payment method that works best for you.</p>
         </div>

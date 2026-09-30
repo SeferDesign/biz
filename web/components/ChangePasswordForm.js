@@ -42,7 +42,7 @@ export default function ChangePasswordForm() {
   return (
     <section className="editor-section">
       <div className="page-heading">
-        <div><p className="eyebrow">ACCOUNT SETTINGS</p><h1>Change password</h1><p className="page-description">Verify your current password before setting a new one.</p></div>
+        <div><h1>Change password</h1><p className="page-description">Verify your current password before setting a new one.</p></div>
       </div>
       <form className="record-form password-change-form" onSubmit={submit}>
         <label className="form-field form-field-wide">

@@ -8,7 +8,6 @@ export default async function YearsPage({ searchParams }) {
   const result = await getApiData('/years');
   return (
     <ResourcePage
-      eyebrow="REPORTING / YEARS"
       title="Years"
       description="Tax rates, targets, and annual summaries."
       data={result.data}

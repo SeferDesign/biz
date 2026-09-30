@@ -20,7 +20,7 @@ export default async function VendorDetailPage({ params }) {
     <>
       <Link className="back-link" href="/vendors">&lt; All vendors</Link>
       <div className="page-heading">
-        <div><p className="eyebrow">VENDOR RECORD</p><h1>{vendor.name}</h1><p className="page-description">{vendor.category || 'Uncategorized vendor'}</p></div>
+        <div><h1>{vendor.name}</h1><p className="page-description">{vendor.category || 'Uncategorized vendor'}</p></div>
         <ResourceActions editHref={`/vendors/${vendor.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/vendors/${vendor.id}`} returnTo="/vendors" label="vendor" />
       </div>
       <DetailGrid items={[

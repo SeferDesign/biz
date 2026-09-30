@@ -678,4 +678,3 @@ test('invoice lines can be replaced on edit and invalid replacements are rejecte
   assert.deepEqual((await request(app).put(endpoint).send([])).body, []);
   assert.equal((await request(app).put('/v1/invoices/999/lines').send([])).status, 404);
 });
-
