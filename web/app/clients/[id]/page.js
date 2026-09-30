@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { DetailGrid, ResourcePage } from '../../../components/ResourcePage.js';
 import ResourceActions from '../../../components/ResourceActions.js';
-import { browserApiBaseUrl, formatDate, formatMoney, parsePage } from '../../../lib/api.js';
+import InvoiceActions from '../../../components/InvoiceActions.js';
+import { browserApiBaseUrl, formatDate, formatMoney, newestInvoicesFirst, parsePage } from '../../../lib/api.js';
 import { getApiData } from '../../../lib/api-server.js';
 
 export default async function ClientDetailPage({ params, searchParams }) {
@@ -20,7 +21,7 @@ export default async function ClientDetailPage({ params, searchParams }) {
   }
 
   const client = clientResult.data;
-  const invoices = (invoiceResult.data || []).filter((invoice) => Number(invoice.client_id) === Number(client.id));
+  const invoices = (invoiceResult.data || []).filter((invoice) => Number(invoice.client_id) === Number(client.id)).sort(newestInvoicesFirst);
   const address = [client.address1, client.address2, [client.city, client.state, client.zipcode].filter(Boolean).join(' ')].filter(Boolean).join(', ');
 
   return (
@@ -52,7 +53,8 @@ export default async function ClientDetailPage({ params, searchParams }) {
               { key: 'id', label: 'Invoice', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}`}>INV-{String(invoice.id).padStart(4, '0')}</Link> },
               { key: 'date', label: 'Date', render: (invoice) => formatDate(invoice.date) },
               { key: 'description', label: 'Description' },
-              { key: 'cost', label: 'Amount', className: 'numeric-cell', render: (invoice) => formatMoney(invoice.cost ?? invoice.total, invoice.currency) }
+              { key: 'cost', label: 'Amount', className: 'numeric-cell', render: (invoice) => formatMoney(invoice.cost ?? invoice.total, invoice.currency) },
+              { key: 'actions', label: 'Actions', render: (invoice) => <InvoiceActions invoice={invoice} compact /> }
             ]}
           />
         )}

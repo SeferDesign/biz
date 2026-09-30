@@ -47,7 +47,7 @@ export default function RecordForm({ title, description, fields, initialValues =
   function getPayload(lines) {
     return Object.fromEntries(fields.map((field) => {
       const value = values[field.name];
-      if (lineItemsEnabled && field.name === 'cost' && lines.length) {
+      if (lineItemsEnabled && field.name === 'cost') {
         return [field.name, lines.reduce((total, line) => total + line.total, 0)];
       }
       if (field.type === 'checkbox') return [field.name, Boolean(value)];
@@ -170,8 +170,8 @@ export default function RecordForm({ title, description, fields, initialValues =
                 max={field.max}
                 step={field.step}
                 required={field.required}
-                value={lineItemsEnabled && field.name === 'cost' && linePayload.length ? lineItemsTotal : values[field.name]}
-                readOnly={lineItemsEnabled && field.name === 'cost' && linePayload.length > 0}
+                value={lineItemsEnabled && field.name === 'cost' ? lineItemsTotal : values[field.name]}
+                readOnly={lineItemsEnabled && field.name === 'cost'}
                 onChange={(event) => setField(field.name, event.target.value)}
               />
             )}

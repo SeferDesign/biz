@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ResourcePage, StatusLabel } from '../components/ResourcePage.js';
-import { formatDate, formatMoney, invoiceStatus } from '../lib/api.js';
+import InvoiceActions from '../components/InvoiceActions.js';
+import { formatDate, formatMoney, invoiceStatus, newestInvoicesFirst } from '../lib/api.js';
 import { getApiData } from '../lib/api-server.js';
 
 function Metric({ label, value, note }) {
@@ -32,7 +33,7 @@ export default async function Home() {
   const totalBilled = invoices.reduce((sum, invoice) => sum + Number(invoice.cost ?? invoice.total ?? 0), 0);
   const totalOpen = openInvoices.reduce((sum, invoice) => sum + Number(invoice.cost ?? invoice.total ?? 0), 0);
   const totalExpenses = expenses.reduce((sum, expense) => sum + Number(expense.cost || 0), 0);
-  const recentInvoices = [...invoices].sort((left, right) => String(right.date).localeCompare(String(left.date))).slice(0, 6);
+  const recentInvoices = [...invoices].sort(newestInvoicesFirst).slice(0, 6);
   const error = [clientResult, invoiceResult, expenseResult, vendorResult, yearResult]
     .find((result) => result.error)?.error;
 
@@ -75,7 +76,8 @@ export default async function Home() {
               { key: 'client', label: 'Client', render: (invoice) => clientsById.get(invoice.client_id)?.name || `Client ${invoice.client_id || '-'}` },
               { key: 'date', label: 'Date', render: (invoice) => formatDate(invoice.date) },
               { key: 'status', label: 'Status', render: (invoice) => <StatusLabel status={invoiceStatus(invoice)} /> },
-              { key: 'cost', label: 'Amount', className: 'numeric-cell', render: (invoice) => formatMoney(invoice.cost ?? invoice.total, invoice.currency) }
+              { key: 'cost', label: 'Amount', className: 'numeric-cell', render: (invoice) => formatMoney(invoice.cost ?? invoice.total, invoice.currency) },
+              { key: 'actions', label: 'Actions', render: (invoice) => <InvoiceActions invoice={invoice} compact /> }
             ]}
           />
         </section>

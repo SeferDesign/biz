@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ResourcePage, StatusLabel } from '../../components/ResourcePage.js';
-import { formatDate, formatMoney, invoiceStatus, parsePage } from '../../lib/api.js';
+import InvoiceActions from '../../components/InvoiceActions.js';
+import { formatDate, formatMoney, invoiceStatus, newestInvoicesFirst, parsePage } from '../../lib/api.js';
 import { getApiData } from '../../lib/api-server.js';
 
 export default async function InvoicesPage({ searchParams }) {
@@ -16,7 +17,7 @@ export default async function InvoicesPage({ searchParams }) {
       eyebrow="BILLING / INVOICES"
       title="Invoices"
       description="Issued invoices, payment status, and client billing history."
-      data={invoiceResult.data}
+      data={invoiceResult.data?.toSorted(newestInvoicesFirst)}
       error={invoiceResult.error || clientResult.error}
       countLabel="invoices"
       actionHref="/invoices/new"
@@ -32,7 +33,8 @@ export default async function InvoicesPage({ searchParams }) {
         { key: 'date', label: 'Issue date', render: (invoice) => formatDate(invoice.date) },
         { key: 'status', label: 'Status', render: (invoice) => <StatusLabel status={invoiceStatus(invoice)} /> },
         { key: 'paiddate', label: 'Paid date', render: (invoice) => formatDate(invoice.paiddate) },
-        { key: 'cost', label: 'Amount', className: 'numeric-cell', render: (invoice) => formatMoney(invoice.cost ?? invoice.total, invoice.currency) }
+        { key: 'cost', label: 'Amount', className: 'numeric-cell', render: (invoice) => formatMoney(invoice.cost ?? invoice.total, invoice.currency) },
+        { key: 'actions', label: 'Actions', render: (invoice) => <InvoiceActions invoice={invoice} compact /> }
       ]}
     />
   );

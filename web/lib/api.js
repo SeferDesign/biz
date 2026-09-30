@@ -54,3 +54,7 @@ export function invoiceStatus(invoice) {
   const status = invoice.status || (invoice.paid ? 'paid' : 'draft');
   return status !== 'paid' && invoice.payment_status === 'processing' ? 'processing' : status;
 }
+
+export function newestInvoicesFirst(left, right) {
+  return String(right.date || '').localeCompare(String(left.date || '')) || Number(right.id) - Number(left.id);
+}

@@ -76,7 +76,8 @@ export function createApp({
   stripe = createStripeClient(),
   stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET,
   publicAppUrl = process.env.PUBLIC_APP_URL,
-  sendPaymentNotification = deliverPaymentNotification
+  sendPaymentNotification = deliverPaymentNotification,
+  buildEnv = process.env.BUILD_ENV
 } = {}) {
   const app = express();
   // Signature verification needs the raw request body.
@@ -100,15 +101,17 @@ export function createApp({
     return next();
   });
 
-  const openApiDocument = yaml.parse(
-    fs.readFileSync(path.join(__dirname, '../openapi/openapi.yaml'), 'utf8')
-  );
+  if (buildEnv === 'local') {
+    const openApiDocument = yaml.parse(
+      fs.readFileSync(path.join(__dirname, '../openapi/openapi.yaml'), 'utf8')
+    );
 
-  app.get('/v1/openapi.json', (req, res) => {
-    res.json(openApiDocument);
-  });
+    app.get('/v1/openapi.json', (req, res) => {
+      res.json(openApiDocument);
+    });
 
-  app.use('/v1/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
+    app.use('/v1/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
+  }
   app.get('/v1/health', (req, res) => res.json({ status: 'ok', service: 'api' }));
   const authenticationMiddleware = createAuthenticationMiddleware(store, apiAccessToken);
   app.use('/v1', (req, res, next) => {

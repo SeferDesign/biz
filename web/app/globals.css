@@ -153,6 +153,11 @@ h2 { font-family: Georgia, "Times New Roman", serif; font-size: 23px; font-weigh
 .table-link:hover { color: var(--coral); }
 .numeric-cell { text-align: right; white-space: nowrap; }
 .muted-cell { color: var(--muted); }
+.invoice-row-actions { display: flex; align-items: center; gap: 4px; }
+.invoice-row-actions button { display: inline-grid; width: 32px; height: 32px; place-items: center; border: 1px solid transparent; color: var(--forest); background: transparent; cursor: pointer; }
+.invoice-row-actions button:hover, .invoice-row-actions button:focus-visible { border-color: var(--line); background: var(--green-wash); }
+.invoice-row-actions button:disabled { cursor: wait; opacity: .45; }
+.invoice-row-actions .action-error { min-width: 150px; }
 
 .status-label { display: inline-flex; align-items: center; padding: 4px 9px; border-radius: 4px; color: #5e6c65; background: #edf1ee; font-size: 10px; font-weight: 700; text-transform: uppercase; }
 .status-paid { color: #285b43; background: var(--green-wash); }

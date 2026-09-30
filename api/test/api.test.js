@@ -36,18 +36,29 @@ function request(app) {
 }
 
 function createTestApp(options = {}) {
-  return createApp({ store: createMemoryStore(), apiAccessToken: TEST_API_ACCESS_TOKEN, ...options });
+  return createApp({ store: createMemoryStore(), apiAccessToken: TEST_API_ACCESS_TOKEN, buildEnv: 'local', ...options });
 }
 
 test('all API endpoints are exposed under /v1', async () => {
   const app = createTestApp();
 
   assert.equal((await request(app).get('/v1/health')).status, 200);
-  assert.equal((await request(app).get('/v1/openapi.json')).status, 200);
-  assert.equal((await request(app).get('/v1/docs/')).status, 200);
+  assert.equal((await supertest(app).get('/v1/openapi.json')).status, 200);
+  assert.equal((await supertest(app).get('/v1/docs/')).status, 200);
   assert.equal((await request(app).get('/health')).status, 404);
   assert.equal((await request(app).get('/clients')).status, 404);
   assert.equal((await request(app).get('/expenses')).status, 404);
+});
+
+test('Swagger is unavailable outside local builds while API routes remain authenticated', async () => {
+  const app = createTestApp({ buildEnv: 'prod' });
+
+  assert.equal((await supertest(app).get('/v1/openapi.json')).status, 401);
+  assert.equal((await supertest(app).get('/v1/docs/')).status, 401);
+  assert.equal((await request(app).get('/v1/openapi.json')).status, 404);
+  assert.equal((await request(app).get('/v1/docs/')).status, 404);
+  assert.equal((await supertest(app).get('/v1/invoices')).status, 401);
+  assert.equal((await request(app).get('/v1/invoices')).status, 200);
 });
 
 test('API authentication protects resources while preserving public and access-token routes', async () => {

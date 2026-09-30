@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { DetailGrid, ResourcePage, StatusLabel } from '../../../components/ResourcePage.js';
 import ResourceActions from '../../../components/ResourceActions.js';
+import InvoiceActions from '../../../components/InvoiceActions.js';
 import InvoiceEmailPanel from '../../../components/InvoiceEmailPanel.js';
 import InvoicePayment from '../../../components/InvoicePayment.js';
 import ClientLinkPanel from '../../../components/ClientLinkPanel.js';
@@ -73,7 +74,7 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
       <div className="page-heading">
         <div><p className="eyebrow">INVOICE / {String(invoice.id).padStart(4, '0')}</p><h1>{invoice.description || 'Invoice details'}</h1><p className="page-description">Issued {formatDate(invoice.date)}</p></div>
         <div className="detail-actions">
-          <StatusLabel status={invoiceStatus(invoice)} />
+          {accessToken ? <StatusLabel status={invoiceStatus(invoice)} /> : <InvoiceActions key={`${invoice.id}-${invoiceStatus(invoice)}`} invoice={invoice} lines={lines} linesAvailable={!lineResult.error} />}
           <a className="secondary-button" href={`${browserApiBaseUrl}/invoices/${invoice.id}/pdf${accessTokenQuery}`}>Download PDF</a>
           {!accessToken && <ResourceActions editHref={`/invoices/${invoice.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/invoices/${invoice.id}`} returnTo="/invoices" label="invoice" />}
         </div>
