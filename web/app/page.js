@@ -1,8 +1,11 @@
 import Link from 'next/link';
 import { ResourcePage, StatusLabel } from '../components/ResourcePage.js';
 import InvoiceActions from '../components/InvoiceActions.js';
+import ColumnChart from '../components/charts/ColumnChart.js';
+import { financeBars, goalOutlines } from '../components/charts/theme.js';
 import { formatDate, formatMoney, invoiceStatus, newestInvoicesFirst } from '../lib/api.js';
 import { getApiData } from '../lib/api-server.js';
+import { monthlyFinances, trailingMonths } from '../lib/chart-data.js';
 
 function Metric({ label, value, note }) {
   return (
@@ -34,6 +37,7 @@ export default async function Home() {
   const totalOpen = openInvoices.reduce((sum, invoice) => sum + Number(invoice.cost ?? invoice.total ?? 0), 0);
   const totalExpenses = expenses.reduce((sum, expense) => sum + Number(expense.cost || 0), 0);
   const recentInvoices = [...invoices].sort(newestInvoicesFirst).slice(0, 6);
+  const trailingFinances = monthlyFinances(trailingMonths(5), { invoices, expenses, years });
   const error = [clientResult, invoiceResult, expenseResult, vendorResult, yearResult]
     .find((result) => result.error)?.error;
 
@@ -58,6 +62,21 @@ export default async function Home() {
         <Metric label="Collected" value={formatMoney(paidInvoices.reduce((sum, invoice) => sum + Number(invoice.cost ?? invoice.total ?? 0), 0))} note={`${paidInvoices.length} paid`} />
         <Metric label="Outstanding" value={formatMoney(totalOpen)} note={`${openInvoices.length} open`} />
         <Metric label="Expenses" value={formatMoney(totalExpenses)} note={`${expenses.length} recent records`} />
+      </section>
+
+      <section className="chart-section">
+        <div className="section-heading">
+          <h2>Trailing 5 months</h2>
+          <span className="section-note">Revenue and expenses against monthly goals</span>
+        </div>
+        <ColumnChart
+          label="Revenue, expenses, and goals for the trailing 5 months"
+          data={trailingFinances}
+          stacked
+          format="currency"
+          bars={financeBars}
+          outlines={goalOutlines}
+        />
       </section>
 
       <div className="dashboard-columns">

@@ -437,6 +437,34 @@ paths:
           description: Expense report
         '404':
           description: Year not found
+  /years/{id}/income/csv:
+    get:
+      summary: Download paid invoices for a year as CSV
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Paid invoices CSV
+          content:
+            text/csv:
+              schema:
+                type: string
+        '404':
+          description: Year not found
+  /years/{id}/expenses/csv:
+    get:
+      summary: Download expenses to date for a year as CSV
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Expenses CSV
+          content:
+            text/csv:
+              schema:
+                type: string
+        '404':
+          description: Year not found
   /invoices/{id}/email:
     get:
       summary: Send an invoice email
@@ -714,72 +742,6 @@ paths:
       responses:
         '204':
           description: Vendor deleted
-  /charts_controller/trailing_x_months/{number_of_months}:
-    get:
-      summary: Get trailing monthly invoice, expense, and goal data
-      parameters:
-        - name: number_of_months
-          in: path
-          required: true
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 120
-      responses:
-        '200':
-          description: Trailing monthly chart series
-        '400':
-          description: Invalid month count
-  /charts_controller/year_invoice_month/{id}:
-    get:
-      summary: Get monthly paid invoice totals
-      parameters:
-        - $ref: '#/components/parameters/IdParam'
-      responses:
-        '200':
-          description: Monthly invoice chart series
-        '404':
-          description: Year not found
-  /charts_controller/year_invoice_month_with_goal/{id}:
-    get:
-      summary: Get monthly invoice totals and goals
-      parameters:
-        - $ref: '#/components/parameters/IdParam'
-      responses:
-        '200':
-          description: Monthly invoice and goal chart series
-        '404':
-          description: Year not found
-  /charts_controller/year_all_data/{id}:
-    get:
-      summary: Get invoice, expense, and goal data for a year
-      parameters:
-        - $ref: '#/components/parameters/IdParam'
-      responses:
-        '200':
-          description: Monthly chart series
-        '404':
-          description: Year not found
-  /charts_controller/year_expense_category/{id}:
-    get:
-      summary: Get expense totals by category
-      parameters:
-        - $ref: '#/components/parameters/IdParam'
-      responses:
-        '200':
-          description: Expense category totals
-        '404':
-          description: Year not found
-  /charts_controller/year_expense_month/{id}:
-    get:
-      summary: Get monthly expense totals
-      parameters:
-        - $ref: '#/components/parameters/IdParam'
-      responses:
-        '200':
-          description: Monthly expense chart series
-        '404':
-          description: Year not found
 components:
   securitySchemes:
     ApiToken:

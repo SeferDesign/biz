@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { findYear, invoiceAmount, sum, yearExpenses, yearIncome } from '../shared/finance.js';
+import { sendCsv } from '../shared/csv.js';
+import { findYear, invoiceAmount, invoiceDate, sum, yearExpenses, yearIncome } from '../shared/finance.js';
 import { isFiniteNumber, parseId } from '../shared/validation.js';
 
 function validateYearInput(input, { partial = false } = {}) {
@@ -66,6 +67,39 @@ export default function yearsRouter(store) {
     if (!year) return res.status(404).json({ error: 'Year not found' });
     const records = yearExpenses(year.year, snapshot.expenses);
     return res.json({ year: year.year, expenses: records, total: sum(records.map((expense) => expense.cost)) });
+  });
+
+  router.get('/years/:id/income/csv', async (req, res) => {
+    const snapshot = await store.getSnapshot();
+    const year = findYear(req.params.id, snapshot.years);
+    if (!year) return res.status(404).json({ error: 'Year not found' });
+    const clients = new Map(snapshot.clients.map((client) => [client.id, client]));
+    const rows = yearIncome(year.year, snapshot.invoices)
+      .sort((left, right) => String(invoiceDate(left)).localeCompare(String(invoiceDate(right))) || left.id - right.id)
+      .map((invoice) => [
+        invoiceDate(invoice),
+        clients.get(invoice.client_id)?.name,
+        invoiceAmount(invoice),
+        invoice.paymenttype,
+        invoice.description
+      ]);
+    return sendCsv(res, `${year.year}paidinvoices.csv`, ['Paid Date', 'Client', 'Amount', 'Payment Type', 'Description'], rows);
+  });
+
+  router.get('/years/:id/expenses/csv', async (req, res) => {
+    const snapshot = await store.getSnapshot();
+    const year = findYear(req.params.id, snapshot.years);
+    if (!year) return res.status(404).json({ error: 'Year not found' });
+    const vendors = new Map(snapshot.vendors.map((vendor) => [vendor.id, vendor]));
+    const today = new Date().toISOString().slice(0, 10);
+    const rows = yearExpenses(year.year, snapshot.expenses)
+      .filter((expense) => expense.date <= today)
+      .sort((left, right) => left.date.localeCompare(right.date) || left.id - right.id)
+      .map((expense) => {
+        const vendor = vendors.get(expense.vendor_id);
+        return [expense.date, expense.name, vendor?.name, vendor?.category, expense.account, Number(expense.cost || 0), expense.notes || null];
+      });
+    return sendCsv(res, `${year.year}expenses.csv`, ['Date', 'Item', 'Vendor', 'Category', 'Account', 'Cost', 'Description'], rows);
   });
 
   router.get('/years/:id/edit', async (req, res) => {

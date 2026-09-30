@@ -155,9 +155,3 @@ GET    /v1/vendors/{id}
 PATCH|PUT /v1/vendors/{id}
 DELETE /v1/vendors/{id}
 
-GET    /v1/charts_controller/trailing_x_months/{number_of_months}
-GET    /v1/charts_controller/year_invoice_month/{id}
-GET    /v1/charts_controller/year_invoice_month_with_goal/{id}
-GET    /v1/charts_controller/year_all_data/{id}
-GET    /v1/charts_controller/year_expense_category/{id}
-GET    /v1/charts_controller/year_expense_month/{id}

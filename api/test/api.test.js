@@ -7,6 +7,7 @@ import { createCipheriv, pbkdf2Sync, randomBytes } from 'node:crypto';
 import { generateOtpSecret, generateTotpCode, validOtpTimestep } from '../src/auth/session.js';
 import { seedUser } from '../src/db/seed.js';
 import { createApp } from '../src/routing/app.js';
+import { toCsv } from '../src/routing/shared/csv.js';
 import { sendInvoiceEmail } from '../src/email/invoice-mailer.js';
 import { sendPaymentNotification } from '../src/email/payment-notification-mailer.js';
 import { createMemoryStore } from '../test-support/memory-store.js';
@@ -322,6 +323,23 @@ test('year endpoints return records and report totals', async () => {
   assert.equal(edit.body.year.year, 2025);
   assert.equal(form.body.year.goals_months.length, 12);
   assert.equal((await request(app).get('/v1/years/1900')).status, 404);
+});
+
+test('year CSV exports list paid invoices and expenses', async () => {
+  const app = createTestApp();
+
+  const income = await request(app).get('/v1/years/2025/income/csv');
+  const expenses = await request(app).get('/v1/years/2025/expenses/csv');
+
+  assert.equal(income.status, 200);
+  assert.match(income.headers['content-type'], /^text\/csv/);
+  assert.equal(income.headers['content-disposition'], 'attachment; filename="2025paidinvoices.csv"');
+  assert.equal(income.text.split('\r\n')[0], 'Paid Date,Client,Amount,Payment Type,Description');
+  assert.equal(expenses.headers['content-disposition'], 'attachment; filename="2025expenses.csv"');
+  assert.equal(expenses.text.split('\r\n')[0], 'Date,Item,Vendor,Category,Account,Cost,Description');
+  assert.ok(expenses.text.split('\r\n').length > 2);
+  assert.equal((await request(app).get('/v1/years/1900/income/csv')).status, 404);
+  assert.equal(toCsv(['A', 'B'], [['x, "y"', '=SUM(1)'], [-5, null]]), 'A,B\r\n"x, ""y""",\'=SUM(1)\r\n-5,\r\n');
 });
 
 test('invoice, expense, and vendor endpoints return useful responses', async () => {
@@ -661,23 +679,3 @@ test('invoice lines can be replaced on edit and invalid replacements are rejecte
   assert.equal((await request(app).put('/v1/invoices/999/lines').send([])).status, 404);
 });
 
-test('chart routes preserve their expected response shapes', async () => {
-  const app = createTestApp();
-
-  const trailing = await request(app).get('/v1/charts_controller/trailing_x_months/3');
-  const monthly = await request(app).get('/v1/charts_controller/year_invoice_month/2025');
-  const monthlyGoals = await request(app).get('/v1/charts_controller/year_invoice_month_with_goal/1');
-  const allData = await request(app).get('/v1/charts_controller/year_all_data/1');
-  const categories = await request(app).get('/v1/charts_controller/year_expense_category/1');
-  const expenseMonths = await request(app).get('/v1/charts_controller/year_expense_month/1');
-
-  assert.deepEqual(trailing.body.map((item) => item.name), ['Invoices', 'Expenses', 'Goal']);
-  assert.deepEqual(monthly.body.map((item) => item.name), ['Invoices']);
-  assert.equal(monthly.body[0].data.Mar, 2150);
-  assert.deepEqual(monthlyGoals.body.map((item) => item.name), ['Invoices', 'Goal']);
-  assert.deepEqual(allData.body.map((item) => item.name), ['Invoices', 'Expenses', 'Goal']);
-  assert.deepEqual(categories.body, [['Software', 59.99], ['Supplies', 42.5]]);
-  assert.deepEqual(expenseMonths.body.map((item) => item.name), ['Expenses']);
-  assert.equal((await request(app).get('/v1/charts_controller/trailing_x_months/nope')).status, 400);
-  assert.equal((await request(app).get('/v1/charts_controller/year_all_data/1900')).status, 404);
-});

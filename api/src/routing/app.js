@@ -5,7 +5,6 @@ import { fileURLToPath } from 'node:url';
 import yaml from 'yaml';
 import swaggerUi from 'swagger-ui-express';
 import { MySqlStore } from '../db/store.js';
-import chartsRouter from './charts/routes.js';
 import clientsRouter from './clients/routes.js';
 import expensesRouter from './expenses/routes.js';
 import invoicesRouter from './invoices/routes.js';
@@ -126,7 +125,6 @@ export function createApp({
   app.use('/v1', expensesRouter(store));
   app.use('/v1', vendorsRouter(store));
   app.use('/v1', searchRouter(store));
-  app.use('/v1', chartsRouter(store));
 
   app.use((req, res) => {
     res.status(404).json({ error: 'Route not found', path: req.originalUrl });

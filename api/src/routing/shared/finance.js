@@ -19,19 +19,6 @@ export function sum(values) {
   return Math.round((total + Number.EPSILON) * 100) / 100;
 }
 
-export function monthlyAmount(records, year, month, dateOf, amountOf) {
-  return sum(records
-    .filter((record) => {
-      const date = new Date(`${dateOf(record)}T00:00:00Z`);
-      return !Number.isNaN(date.getTime()) && date.getUTCFullYear() === year && date.getUTCMonth() + 1 === month;
-    })
-    .map(amountOf));
-}
-
-export function series(name, data) {
-  return { name, data };
-}
-
 export function yearIncome(year, invoices) {
   return invoices.filter((invoice) => {
     const date = invoiceDate(invoice);
