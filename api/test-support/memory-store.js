@@ -29,6 +29,7 @@ const initialSnapshot = {
 
 export function createMemoryStore() {
   const snapshot = structuredClone(initialSnapshot);
+  const invoiceEmailSends = [];
   return {
     async getSnapshot() {
       return snapshot;
@@ -130,6 +131,21 @@ export function createMemoryStore() {
     async getInvoice(id) {
       return snapshot.invoices.find((item) => item.id === Number(id));
     },
+    async getInvoiceEmailSends(invoiceId) {
+      return invoiceEmailSends
+        .filter((send) => send.invoice_id === Number(invoiceId))
+        .sort((first, second) => second.sent_at.localeCompare(first.sent_at) || second.id - first.id);
+    },
+    async recordInvoiceEmailSend(invoiceId, recipient) {
+      const send = {
+        id: Math.max(0, ...invoiceEmailSends.map((item) => item.id)) + 1,
+        invoice_id: Number(invoiceId),
+        recipient,
+        sent_at: new Date().toISOString()
+      };
+      invoiceEmailSends.push(send);
+      return send;
+    },
     async createInvoiceLine(invoiceId, input) {
       const total = input.total ?? input.amount ?? null;
       const line = {
@@ -157,6 +173,8 @@ export function createMemoryStore() {
       const removed = removeById(snapshot.invoices, invoiceId);
       if (removed) {
         snapshot.lines = snapshot.lines.filter((line) => line.invoice_id !== invoiceId);
+        const sendIndexes = invoiceEmailSends.filter((send) => send.invoice_id === invoiceId);
+        for (const send of sendIndexes) invoiceEmailSends.splice(invoiceEmailSends.indexOf(send), 1);
       }
       return removed;
     }

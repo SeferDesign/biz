@@ -11,7 +11,7 @@ function initialValue(field, initialValues) {
   return field.multiplier && value !== '' ? Number(value) * field.multiplier : value;
 }
 
-export default function RecordForm({ title, description, fields, initialValues = {}, endpoint, method = 'POST', returnTo, submitLabel, lineItemsEnabled = false, initialLines = [], lineItemsEndpoint }) {
+export default function RecordForm({ title, description, fields, initialValues = {}, endpoint, method = 'POST', returnTo, submitLabel, lineItemsEnabled = false, initialLines = [], lineItemsEndpoint, emailEndpoint }) {
   const router = useRouter();
   const [values, setValues] = useState(() => Object.fromEntries(fields.map((field) => [field.name, initialValue(field, initialValues)])));
   const [lineItems, setLineItems] = useState(() => initialLines.map((line) => ({
@@ -76,8 +76,8 @@ export default function RecordForm({ title, description, fields, initialValues =
         setSaving(false);
         return;
       }
+      const invoiceId = body?.id ?? initialValues.id;
       if (lineItemsEnabled) {
-        const invoiceId = body?.id ?? initialValues.id;
         if (saveMethod === 'POST' && invoiceId) {
           setSaveEndpoint(`${endpoint}/${invoiceId}`);
           setSaveMethod('PATCH');
@@ -90,6 +90,22 @@ export default function RecordForm({ title, description, fields, initialValues =
         const linesBody = await linesResponse.json().catch(() => null);
         if (!linesResponse.ok) {
           setError(linesBody?.error || 'Invoice saved, but its line items could not be saved. Try again.');
+          setSaving(false);
+          return;
+        }
+      }
+      if (emailEndpoint && values.status === 'sent' && initialValues.status !== 'sent') {
+        let emailResponse;
+        try {
+          emailResponse = await fetch(emailEndpoint.replace(':id', encodeURIComponent(invoiceId)), { method: 'POST' });
+        } catch {
+          setError('Invoice saved, but email delivery could not be reached. Try saving again.');
+          setSaving(false);
+          return;
+        }
+        const emailBody = await emailResponse.json().catch(() => null);
+        if (!emailResponse.ok) {
+          setError(emailBody?.error || 'Invoice saved, but the email could not be sent. Try saving again.');
           setSaving(false);
           return;
         }

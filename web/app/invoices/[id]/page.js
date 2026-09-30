@@ -2,14 +2,16 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { DetailGrid, ResourcePage, StatusLabel } from '../../../components/ResourcePage.js';
 import ResourceActions from '../../../components/ResourceActions.js';
+import InvoiceEmailPanel from '../../../components/InvoiceEmailPanel.js';
 import { browserApiBaseUrl, formatDate, formatMoney, getApiData, invoiceStatus, parsePage } from '../../../lib/api.js';
 
 export default async function InvoiceDetailPage({ params, searchParams }) {
   const { id } = await params;
   const query = await searchParams;
-  const [invoiceResult, lineResult] = await Promise.all([
+  const [invoiceResult, lineResult, emailSendsResult] = await Promise.all([
     getApiData(`/invoices/${encodeURIComponent(id)}`),
-    getApiData(`/invoices/${encodeURIComponent(id)}/lines`)
+    getApiData(`/invoices/${encodeURIComponent(id)}/lines`),
+    getApiData(`/invoices/${encodeURIComponent(id)}/email-sends`)
   ]);
   if (invoiceResult.status === 404) notFound();
   if (invoiceResult.error) {
@@ -36,6 +38,7 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
         ['Paid date', formatDate(invoice.paiddate)],
         ['Description', invoice.description]
       ]} />
+      <InvoiceEmailPanel invoiceId={invoice.id} initialSends={emailSendsResult.data || []} historyError={emailSendsResult.error} />
       <section className="detail-section">
         <div className="section-heading"><h2>Line items</h2><span className="section-note">{lines.length} items</span></div>
         {lineResult.error ? <div className="notice" role="alert"><span>{lineResult.error}</span></div> : (

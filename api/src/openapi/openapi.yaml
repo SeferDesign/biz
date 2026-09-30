@@ -296,12 +296,33 @@ paths:
           description: Year not found
   /invoices/{id}/email:
     get:
-      summary: Queue an invoice email
+      summary: Send an invoice email
       parameters:
         - $ref: '#/components/parameters/IdParam'
       responses:
         '200':
-          description: Email queued
+          description: Email sent
+        '404':
+          description: Invoice not found
+    post:
+      summary: Send an invoice email
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Email sent
+        '404':
+          description: Invoice not found
+        '502':
+          description: Email delivery failed
+  /invoices/{id}/email-sends:
+    get:
+      summary: List successful invoice email sends
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Invoice email send history
         '404':
           description: Invoice not found
   /invoices/{id}/stripe:

@@ -50,6 +50,7 @@ services:
       DATABASE_URL: mysql://biz:biz@db:3306/biz_db_development
       SMTP_HOST: mailpit
       SMTP_PORT: 1025
+      SMTP_FROM: 'Sefer Design Co. <info@seferdesign.com>'
       PUBLIC_APP_URL: https://biz.loc:9443
       PUBLIC_API_URL: https://api.biz.loc:9443
       CORS_ALLOWED_ORIGINS: https://biz.loc:9443,http://localhost:3000,http://127.0.0.1:3000

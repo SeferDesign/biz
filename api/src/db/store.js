@@ -223,6 +223,26 @@ export class MySqlStore {
     return rows[0];
   }
 
+  async getInvoiceEmailSends(invoiceId) {
+    const [rows] = await this.database.query(
+      'SELECT id, invoice_id, recipient, sent_at FROM invoice_email_sends WHERE invoice_id = ? ORDER BY sent_at DESC, id DESC',
+      [invoiceId]
+    );
+    return rows;
+  }
+
+  async recordInvoiceEmailSend(invoiceId, recipient) {
+    const [result] = await this.database.execute(
+      'INSERT INTO invoice_email_sends (invoice_id, recipient) VALUES (?, ?)',
+      [invoiceId, recipient]
+    );
+    const [rows] = await this.database.query(
+      'SELECT id, invoice_id, recipient, sent_at FROM invoice_email_sends WHERE id = ?',
+      [result.insertId]
+    );
+    return rows[0];
+  }
+
   async createInvoiceLine(invoiceId, input) {
     const [result] = await this.database.execute(
       `INSERT INTO \`lines\` (description, hourly, hours, rate, total, invoice_id, discount)

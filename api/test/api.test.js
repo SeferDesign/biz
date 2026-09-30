@@ -4,8 +4,8 @@ import request from 'supertest';
 import { createApp } from '../src/routing/app.js';
 import { createMemoryStore } from '../test-support/memory-store.js';
 
-function createTestApp() {
-  return createApp({ store: createMemoryStore() });
+function createTestApp(options = {}) {
+  return createApp({ store: createMemoryStore(), ...options });
 }
 
 test('all API endpoints are exposed under /v1', async () => {
@@ -68,21 +68,44 @@ test('year endpoints return records and report totals', async () => {
 });
 
 test('invoice, expense, and vendor endpoints return useful responses', async () => {
-  const app = createTestApp();
+  const deliveries = [];
+  const app = createTestApp({ sendInvoiceEmail: async (message) => {
+    deliveries.push(message);
+    return { recipient: message.client.email };
+  } });
 
-  const email = await request(app).get('/v1/invoices/1/email');
+  const email = await request(app).post('/v1/invoices/1/email');
   const invalidStripe = await request(app).get('/v1/invoices/1/stripe');
   const expenseList = await request(app).get('/v1/expenses?inactive=true');
   const vendorList = await request(app).get('/v1/vendors');
 
   assert.equal(email.status, 200);
-  assert.equal(email.body.status, 'queued');
+  assert.equal(email.body.status, 'sent');
+  assert.equal(email.body.recipient, 'billing@acme.com');
+  assert.ok(email.body.email_send.sent_at);
+  assert.equal(deliveries.length, 1);
+  assert.equal(deliveries[0].lines.length, 2);
+  const resent = await request(app).post('/v1/invoices/1/email');
+  const emailSends = await request(app).get('/v1/invoices/1/email-sends');
+  assert.equal(resent.status, 200);
+  assert.equal(emailSends.body.length, 2);
+  assert.equal(emailSends.body[0].recipient, 'billing@acme.com');
+  assert.ok(emailSends.body[0].sent_at);
   assert.equal(invalidStripe.status, 400);
   assert.equal(expenseList.status, 200);
   assert.equal(expenseList.body.length, 2);
   assert.equal(vendorList.status, 200);
   assert.deepEqual(vendorList.body.map((vendor) => vendor.name), ['Adobe', 'Office Depot']);
   assert.equal((await request(app).get('/v1/invoices/999/email')).status, 404);
+});
+
+test('invoice email failures are reported instead of claiming delivery', async () => {
+  const app = createTestApp({ sendInvoiceEmail: async () => { throw new Error('SMTP unavailable'); } });
+  const response = await request(app).post('/v1/invoices/1/email');
+
+  assert.equal(response.status, 502);
+  assert.deepEqual(response.body, { error: 'SMTP unavailable' });
+  assert.deepEqual((await request(app).get('/v1/invoices/1/email-sends')).body, []);
 });
 
 test('clients, vendors, years, and expenses support validated CRUD', async () => {

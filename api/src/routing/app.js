@@ -21,7 +21,7 @@ const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
   .map((value) => value.trim())
   .filter(Boolean);
 
-export function createApp({ store = new MySqlStore() } = {}) {
+export function createApp({ store = new MySqlStore(), sendInvoiceEmail } = {}) {
   const app = express();
   app.use(express.json());
 
@@ -53,7 +53,7 @@ export function createApp({ store = new MySqlStore() } = {}) {
   app.get('/v1/health', (req, res) => res.json({ status: 'ok', service: 'api' }));
 
   app.use('/v1', clientsRouter(store));
-  app.use('/v1', invoicesRouter(store));
+  app.use('/v1', invoicesRouter(store, { sendInvoiceEmail }));
   app.use('/v1', yearsRouter(store));
   app.use('/v1', expensesRouter(store));
   app.use('/v1', vendorsRouter(store));

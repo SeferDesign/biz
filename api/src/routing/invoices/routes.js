@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { isDate, isFiniteNumber, parseId } from '../shared/validation.js';
+import { sendInvoiceEmail as deliverInvoiceEmail } from '../../email/invoice-mailer.js';
 
 const invoiceStatuses = new Set(['draft', 'sent', 'paid']);
 
@@ -30,7 +31,7 @@ function validateInvoiceInput(input, { partial = false } = {}) {
   return null;
 }
 
-export default function invoicesRouter(store) {
+export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoiceEmail } = {}) {
   const router = Router();
 
   router.get('/invoices', async (req, res) => res.json((await store.getSnapshot()).invoices));
@@ -93,14 +94,29 @@ export default function invoicesRouter(store) {
     return res.sendStatus(204);
   });
 
-  async function queueInvoiceEmail(invoice, res) {
-    const clients = (await store.getSnapshot()).clients;
-    return res.json({
-      invoice_id: invoice.id,
-      status: 'queued',
-      recipient: clients.find((client) => client.id === invoice.client_id)?.email || 'billing@example.com',
-      message: 'Invoice email queued for delivery.'
-    });
+  async function sendInvoiceEmailRoute(req, res) {
+    const id = parseId(req.params.id);
+    if (!id) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
+    const invoice = await store.getInvoice(id);
+    if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
+    const snapshot = await store.getSnapshot();
+    const client = snapshot.clients.find((item) => item.id === invoice.client_id);
+    if (!client) return res.status(400).json({ error: 'Invoice client not found' });
+    const lines = snapshot.lines.filter((line) => line.invoice_id === invoice.id);
+    try {
+      const result = await sendInvoiceEmail({ invoice, client, lines });
+      const recipient = result?.recipient || client.email || client.email_accounting;
+      const emailSend = await store.recordInvoiceEmailSend(invoice.id, recipient);
+      return res.json({
+        invoice_id: invoice.id,
+        status: 'sent',
+        recipient,
+        email_send: emailSend,
+        message: 'Invoice email sent.'
+      });
+    } catch (error) {
+      return res.status(502).json({ error: error.message || 'Invoice email could not be sent' });
+    }
   }
 
   router.get('/invoices/:invoice_id/lines', async (req, res) => {
@@ -144,10 +160,14 @@ export default function invoicesRouter(store) {
     return res.json(line);
   });
 
-  router.get('/invoices/:id/email', async (req, res) => {
-    const invoice = await store.getInvoice(Number(req.params.id));
-    if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
-    return queueInvoiceEmail(invoice, res);
+  router.get('/invoices/:id/email', sendInvoiceEmailRoute);
+  router.post('/invoices/:id/email', sendInvoiceEmailRoute);
+
+  router.get('/invoices/:id/email-sends', async (req, res) => {
+    const id = parseId(req.params.id);
+    if (!id) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
+    if (!await store.getInvoice(id)) return res.status(404).json({ error: 'Invoice not found' });
+    return res.json(await store.getInvoiceEmailSends(id));
   });
 
   router.get('/invoices/:id/stripe', async (req, res) => {
