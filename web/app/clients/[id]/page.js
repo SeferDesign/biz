@@ -35,8 +35,10 @@ export default async function ClientDetailPage({ params, searchParams }) {
         ['Billing email', client.email_accounting || client.email],
         ['Website', client.site_url ? <a href={client.site_url} rel="noreferrer" target="_blank">{client.site_url}</a> : '-'],
         ['Address', address],
-        ['Preferred payment', client.preferred_paymenttype],
-        ['Current rate', client.currentrate ? formatMoney(client.currentrate) : '-']
+        ...(accessToken ? [] : [
+          ['Preferred payment', client.preferred_paymenttype],
+          ['Current rate', client.currentrate ? formatMoney(client.currentrate) : '-']
+        ])
       ]} />
       {!accessToken && <section className="detail-section">
         <div className="section-heading"><h2>Invoices</h2><span className="section-note">{invoices.length} for this client</span></div>

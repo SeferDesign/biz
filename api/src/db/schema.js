@@ -90,6 +90,23 @@ const statements = [
     CONSTRAINT invoice_email_sends_invoice_fk FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
     INDEX invoice_email_sends_invoice_idx (invoice_id, sent_at)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS invoice_payments (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    invoice_id BIGINT UNSIGNED NOT NULL,
+    stripe_checkout_session_id VARCHAR(255) NOT NULL,
+    stripe_payment_intent_id VARCHAR(255),
+    method VARCHAR(32),
+    amount DECIMAL(12, 2),
+    currency VARCHAR(8) NOT NULL DEFAULT 'USD',
+    status VARCHAR(32) NOT NULL,
+    failure_message VARCHAR(500),
+    submitted_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE INDEX invoice_payments_session_unique (stripe_checkout_session_id),
+    CONSTRAINT invoice_payments_invoice_fk FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
+    INDEX invoice_payments_invoice_idx (invoice_id, submitted_at)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   `CREATE TABLE IF NOT EXISTS expenses (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255), vendor_id BIGINT UNSIGNED,

@@ -33,7 +33,9 @@ export async function sendInvoiceEmail({ invoice, client, lines }, transport) {
     return `- ${line.description || 'Invoice item'}${quantity}: ${currency} ${amount}`;
   });
   const appUrl = process.env.PUBLIC_APP_URL?.replace(/\/$/, '');
-  const invoiceUrl = appUrl ? `${appUrl}/invoices/${invoice.id}` : null;
+  const invoiceUrl = appUrl
+    ? `${appUrl}/invoices/${invoice.id}${invoice.access_token ? `?access_token=${encodeURIComponent(invoice.access_token)}` : ''}`
+    : null;
   const text = [
     `Invoice #${String(invoice.id).padStart(4, '0')}`,
     `Client: ${client.name || 'Client'}`,
@@ -43,7 +45,7 @@ export async function sendInvoiceEmail({ invoice, client, lines }, transport) {
     ...(lineDetails.length ? lineDetails : ['- No line items']),
     '',
     `Total: ${currency} ${total}`,
-    ...(invoiceUrl ? ['', `View invoice: ${invoiceUrl}`] : [])
+    ...(invoiceUrl ? ['', `View and pay this invoice online: ${invoiceUrl}`] : [])
   ].join('\n');
   const pdf = await createInvoicePdf({ invoice, client, lines });
 

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { hasText, parseId } from '../shared/validation.js';
+import { publicClient } from '../shared/public-views.js';
 
 export default function clientsRouter(store) {
   const router = Router();
@@ -11,7 +12,7 @@ export default function clientsRouter(store) {
     if (!id) return res.status(400).json({ error: 'Client id must be a positive integer' });
     const client = await store.getClient(id);
     if (!client) return res.status(404).json({ error: 'Client not found' });
-    return res.json(client);
+    return res.json(req.recordAccess ? publicClient(client) : client);
   });
 
   router.post('/clients', async (req, res) => {

@@ -51,5 +51,6 @@ export function formatDateTime(value) {
 }
 
 export function invoiceStatus(invoice) {
-  return invoice.status || (invoice.paid ? 'paid' : 'draft');
+  const status = invoice.status || (invoice.paid ? 'paid' : 'draft');
+  return status !== 'paid' && invoice.payment_status === 'processing' ? 'processing' : status;
 }

@@ -2,11 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import supertest from 'supertest';
 import bcrypt from 'bcryptjs';
+import Stripe from 'stripe';
 import { createCipheriv, pbkdf2Sync, randomBytes } from 'node:crypto';
 import { generateOtpSecret, generateTotpCode, validOtpTimestep } from '../src/auth/session.js';
 import { seedUser } from '../src/db/seed.js';
 import { createApp } from '../src/routing/app.js';
 import { sendInvoiceEmail } from '../src/email/invoice-mailer.js';
+import { sendPaymentNotification } from '../src/email/payment-notification-mailer.js';
 import { createMemoryStore } from '../test-support/memory-store.js';
 
 const TEST_API_ACCESS_TOKEN = 'test-api-token';
@@ -66,6 +68,24 @@ test('API authentication protects resources while preserving public and access-t
   assert.equal((await supertest(app).get('/v1/invoices/1?access_token=invoice-link-token')).status, 200);
   assert.equal((await supertest(app).get('/v1/invoices/1/lines?access_token=invoice-link-token')).status, 200);
   assert.equal((await supertest(app).get('/v1/invoices/1/email?access_token=invoice-link-token')).status, 401);
+  assert.equal((await supertest(app).post('/v1/invoices/1/access-token?access_token=invoice-link-token')).status, 401);
+
+  client.stripe_customer_id = 'cus_private';
+  client.currentrate = 150;
+  const publicInvoice = (await supertest(app).get('/v1/invoices/1?access_token=invoice-link-token')).body;
+  assert.equal(publicInvoice.client.name, 'Acme Inc.');
+  assert.equal(publicInvoice.status, 'due');
+  assert.equal(publicInvoice.access_token, undefined);
+  assert.equal(publicInvoice.client_id, undefined);
+  const publicClient = (await supertest(app).get('/v1/clients/1?access_token=client-link-token')).body;
+  assert.equal(publicClient.name, 'Acme Inc.');
+  assert.equal(publicClient.stripe_customer_id, undefined);
+  assert.equal(publicClient.currentrate, undefined);
+  assert.equal(publicClient.access_token, undefined);
+  const adminInvoice = (await supertest(app).get('/v1/invoices/1').set('Authorization', `Bearer ${TEST_API_ACCESS_TOKEN}`)).body;
+  assert.equal(adminInvoice.access_token, 'invoice-link-token');
+  const created = await supertest(app).post('/v1/invoices/2/access-token').set('Authorization', `Bearer ${TEST_API_ACCESS_TOKEN}`);
+  assert.equal(created.body.access_token, 'invoice-token-2');
 });
 
 test('legacy user credentials establish expiring API sessions and enforce OTP replay protection', async () => {
@@ -323,6 +343,163 @@ test('invoice email failures are reported instead of claiming delivery', async (
   assert.equal(response.status, 502);
   assert.deepEqual(response.body, { error: 'SMTP unavailable' });
   assert.deepEqual((await request(app).get('/v1/invoices/1/email-sends')).body, []);
+});
+
+function createFakeStripe() {
+  const sessions = new Map();
+  const created = [];
+  const expired = [];
+  return {
+    sessions,
+    created,
+    expired,
+    webhooks: new Stripe('sk_test_placeholder').webhooks,
+    paymentIntents: {
+      async retrieve(id) { return { id, last_payment_error: { message: 'The customer bank account has insufficient funds.' } }; }
+    },
+    customers: {
+      async create() { return { id: 'cus_test' }; },
+      async update() {}
+    },
+    checkout: {
+      sessions: {
+        async create(params) {
+          const id = `cs_test_${created.length + 1}`;
+          const session = { id, url: `https://checkout.stripe.com/c/pay/${id}`, status: 'open', payment_status: 'unpaid', metadata: params.metadata };
+          sessions.set(id, session);
+          created.push(params);
+          return session;
+        },
+        async retrieve(id) {
+          if (!sessions.has(id)) throw Object.assign(new Error('No such checkout session'), { code: 'resource_missing' });
+          return sessions.get(id);
+        },
+        async expire(id) {
+          sessions.get(id).status = 'expired';
+          expired.push(id);
+        }
+      }
+    }
+  };
+}
+
+test('Stripe embedded checkout charges card fees, confirms payment, and accepts signed webhooks', async () => {
+  const store = createMemoryStore();
+  const stripe = createFakeStripe();
+  const webhookSecret = 'whsec_test_secret';
+  const app = createApp({
+    store,
+    apiAccessToken: TEST_API_ACCESS_TOKEN,
+    stripe,
+    stripeWebhookSecret: webhookSecret,
+    publicAppUrl: 'https://biz.example.test',
+    sendPaymentNotification: async () => {}
+  });
+  (await store.getInvoice(1)).access_token = 'invoice-link-token';
+
+  const options = await supertest(app).get('/v1/invoices/1/payment-options?access_token=invoice-link-token');
+  assert.equal(options.status, 200);
+  assert.equal(options.body.enabled, true);
+  assert.deepEqual(options.body.methods.map((method) => [method.method, method.fee_cents, method.total_cents]), [
+    ['card', 3615, 123615],
+    ['us_bank_account', 0, 120000]
+  ]);
+  assert.equal((await supertest(app).post('/v1/invoices/1/checkout?access_token=wrong').send({ method: 'card' })).status, 401);
+  assert.equal((await supertest(app).post('/v1/invoices/1/checkout?access_token=invoice-link-token').send({ method: 'paypal' })).status, 400);
+
+  const card = await supertest(app).post('/v1/invoices/1/checkout?access_token=invoice-link-token').send({ method: 'card' });
+  assert.equal(card.status, 201);
+  assert.equal(card.body.url, 'https://checkout.stripe.com/c/pay/cs_test_1');
+  assert.equal(stripe.created[0].ui_mode, undefined);
+  assert.equal(stripe.created[0].customer, 'cus_test');
+  assert.deepEqual(stripe.created[0].line_items.map((item) => item.price_data.unit_amount), [120000, 3615]);
+  assert.match(stripe.created[0].success_url, /^https:\/\/biz\.example\.test\/invoices\/1\?access_token=invoice-link-token&checkout_session_id=\{CHECKOUT_SESSION_ID\}$/);
+  assert.equal(stripe.created[0].cancel_url, 'https://biz.example.test/invoices/1?access_token=invoice-link-token&checkout=canceled');
+
+  const bank = await supertest(app).post('/v1/invoices/1/checkout?access_token=invoice-link-token').send({ method: 'us_bank_account' });
+  assert.equal(bank.status, 201);
+  assert.deepEqual(stripe.expired, ['cs_test_1']);
+  assert.equal(stripe.created[1].line_items.length, 1);
+  assert.equal((await store.getInvoice(1)).stripe_session_id, 'cs_test_2');
+
+  const unpaid = await supertest(app).get('/v1/invoices/1/stripe?session_id=cs_test_2&access_token=invoice-link-token');
+  assert.equal(unpaid.body.status, 'open');
+  assert.equal((await supertest(app).get('/v1/invoices/2/stripe?session_id=cs_test_2').set('Authorization', `Bearer ${TEST_API_ACCESS_TOKEN}`)).status, 400);
+
+  Object.assign(stripe.sessions.get('cs_test_2'), { status: 'complete', payment_status: 'paid' });
+  const confirmed = await supertest(app).get('/v1/invoices/1/stripe?session_id=cs_test_2&access_token=invoice-link-token');
+  assert.equal(confirmed.body.status, 'paid');
+  assert.equal((await store.getInvoice(1)).paymenttype, 'Stripe ACH');
+  assert.equal((await supertest(app).post('/v1/invoices/1/checkout?access_token=invoice-link-token').send({ method: 'card' })).status, 409);
+
+  const payload = JSON.stringify({
+    id: 'evt_test', object: 'event', type: 'checkout.session.completed',
+    data: { object: { id: 'cs_test_9', object: 'checkout.session', payment_status: 'paid', metadata: { invoice_id: '2', payment_method: 'card' } } }
+  });
+  const badSignature = await supertest(app).post('/v1/stripe/webhook').set('Content-Type', 'application/json').set('Stripe-Signature', 't=1,v1=bad').send(payload);
+  assert.equal(badSignature.status, 400);
+  const signature = stripe.webhooks.generateTestHeaderString({ payload, secret: webhookSecret });
+  const webhook = await supertest(app).post('/v1/stripe/webhook').set('Content-Type', 'application/json').set('Stripe-Signature', signature).send(payload);
+  assert.equal(webhook.status, 200);
+  assert.equal((await store.getInvoice(2)).status, 'paid');
+  assert.equal((await store.getInvoice(2)).paymenttype, 'Stripe');
+});
+
+test('ACH payments are tracked from submission through success or failure', async () => {
+  const store = createMemoryStore();
+  const stripe = createFakeStripe();
+  const webhookSecret = 'whsec_test_secret';
+  const notifications = [];
+  const app = createApp({
+    store,
+    apiAccessToken: TEST_API_ACCESS_TOKEN,
+    stripe,
+    stripeWebhookSecret: webhookSecret,
+    publicAppUrl: 'https://biz.example.test',
+    sendPaymentNotification: async (message) => { notifications.push(message); }
+  });
+  const sendEvent = (type, object) => {
+    const payload = JSON.stringify({ id: `evt_${type}`, object: 'event', type, data: { object } });
+    return supertest(app).post('/v1/stripe/webhook').set('Content-Type', 'application/json')
+      .set('Stripe-Signature', stripe.webhooks.generateTestHeaderString({ payload, secret: webhookSecret })).send(payload);
+  };
+  const session = (id, invoiceId, paymentStatus) => ({
+    id, object: 'checkout.session', payment_status: paymentStatus, payment_intent: `pi_${id}`,
+    amount_total: 98050, currency: 'usd', metadata: { invoice_id: String(invoiceId), payment_method: 'us_bank_account' }
+  });
+  const auth = { Authorization: `Bearer ${TEST_API_ACCESS_TOKEN}` };
+
+  assert.equal((await sendEvent('checkout.session.completed', session('cs_ach_1', 2, 'unpaid'))).status, 200);
+  assert.equal((await store.getInvoice(2)).payment_status, 'processing');
+  assert.notEqual((await store.getInvoice(2)).status, 'paid');
+  const options = await supertest(app).get('/v1/invoices/2/payment-options').set(auth);
+  assert.equal(options.body.enabled, false);
+  assert.equal(options.body.processing, true);
+  assert.equal((await supertest(app).post('/v1/invoices/2/checkout').set(auth).send({ method: 'card' })).status, 409);
+
+  await sendEvent('checkout.session.async_payment_succeeded', session('cs_ach_1', 2, 'paid'));
+  await sendEvent('checkout.session.completed', session('cs_ach_1', 2, 'unpaid'));
+  const payments = (await supertest(app).get('/v1/invoices/2/payments').set(auth)).body;
+  assert.equal(payments.length, 1);
+  assert.equal(payments[0].status, 'succeeded');
+  assert.equal(payments[0].amount, 980.5);
+  assert.equal((await store.getInvoice(2)).paymenttype, 'Stripe ACH');
+
+  await sendEvent('checkout.session.completed', session('cs_ach_2', 1, 'unpaid'));
+  await sendEvent('checkout.session.async_payment_failed', session('cs_ach_2', 1, 'unpaid'));
+  const failed = (await supertest(app).get('/v1/invoices/1/payments').set(auth)).body[0];
+  assert.equal(failed.status, 'failed');
+  assert.match(failed.failure_message, /insufficient funds/);
+  assert.equal((await supertest(app).get('/v1/invoices/1/payment-options').set(auth)).body.enabled, true);
+  assert.deepEqual(notifications.map(({ payment, invoice }) => [invoice.id, payment.status]), [
+    [2, 'processing'], [2, 'succeeded'], [1, 'processing'], [1, 'failed']
+  ]);
+  assert.equal(notifications[0].client.name, 'Northwind');
+
+  const sent = [];
+  await sendPaymentNotification({ ...notifications[0], livemode: false }, { sendMail: async (mail) => sent.push(mail) });
+  assert.match(sent[0].subject, /ACH payment submitted: Invoice #0002 \(Northwind, \$980\.50\)/);
+  assert.match(sent[0].text, /dashboard\.stripe\.com\/test\/payments\/pi_cs_ach_1/);
 });
 
 test('clients, vendors, years, and expenses support validated CRUD', async () => {

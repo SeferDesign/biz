@@ -28,6 +28,9 @@ services:
       SMTP_SECURE: 'false'
       SMTP_FROM: '${SMTP_FROM:-Sefer Design Co. <info@seferdesign.com>}'
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      PAYMENT_NOTIFICATION_EMAIL: ${PAYMENT_NOTIFICATION_EMAIL:-info@seferdesign.com}
 
   biz-web:
     <<: *biz-defaults

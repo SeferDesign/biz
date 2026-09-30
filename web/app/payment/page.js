@@ -26,9 +26,9 @@ export default function PaymentPage() {
 
       <div className="payment-options">
         <section className="payment-method">
-          <h2>Credit or debit card</h2>
+          <h2>Card or bank account</h2>
           <div>
-            <p>Pay securely through Stripe using the payment link in your invoice email. Stripe adds a processing fee of approximately 3% to each transaction.</p>
+            <p>Pay securely online through Stripe using the link in your invoice email. Card payments include a processing fee of 2.9% + $0.30; bank (ACH) payments have no added fee.</p>
             <a className="inline-link" href="https://stripe.com/us/pricing" target="_blank" rel="noreferrer">View Stripe pricing</a>
           </div>
         </section>

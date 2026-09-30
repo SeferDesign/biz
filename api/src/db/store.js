@@ -1,4 +1,7 @@
+import { randomBytes } from 'node:crypto';
 import { getPool } from './pool.js';
+
+const createAccessToken = () => randomBytes(24).toString('base64url');
 
 const clientFields = [
   'name', 'contact', 'site_url', 'address1', 'address2', 'zipcode', 'city', 'state',
@@ -146,7 +149,9 @@ export class MySqlStore {
   async getSnapshot() {
     const [clients, invoices, lines, expenses, vendors, years] = await Promise.all([
       this.database.query('SELECT *, email_accounting AS email FROM clients ORDER BY id'),
-      this.database.query("SELECT *, cost AS total, CASE WHEN paid THEN 'paid' ELSE status END AS status FROM invoices ORDER BY id"),
+      this.database.query(`SELECT *, cost AS total, CASE WHEN paid THEN 'paid' ELSE status END AS status,
+        (SELECT p.status FROM invoice_payments p WHERE p.invoice_id = invoices.id ORDER BY p.submitted_at DESC, p.id DESC LIMIT 1) AS payment_status
+        FROM invoices ORDER BY id`),
       this.database.query('SELECT *, total AS amount FROM `lines` ORDER BY id'),
       this.database.query('SELECT * FROM expenses ORDER BY date, name'),
       this.database.query('SELECT * FROM vendors ORDER BY name'),
@@ -180,6 +185,10 @@ export class MySqlStore {
   async deleteClient(id) {
     const [result] = await this.database.execute('DELETE FROM clients WHERE id = ?', [id]);
     return result.affectedRows > 0;
+  }
+
+  async setClientStripeCustomerId(id, customerId) {
+    await this.database.execute('UPDATE clients SET stripe_customer_id = ? WHERE id = ?', [customerId, id]);
   }
 
   async getVendor(id) {
@@ -295,8 +304,8 @@ export class MySqlStore {
     const paid = input.paid ?? input.status === 'paid';
     const [result] = await this.database.execute(
       `INSERT INTO invoices
-        (client_id, date, cost, paid, paiddate, paymenttype, description, status, currency, stripe_session_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (client_id, date, cost, paid, paiddate, paymenttype, description, status, currency, stripe_session_id, access_token)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         input.client_id ?? null,
         input.date ?? null,
@@ -307,7 +316,8 @@ export class MySqlStore {
         input.description ?? null,
         input.status ?? (paid ? 'paid' : 'draft'),
         input.currency ?? 'USD',
-        input.stripe_session_id ?? null
+        input.stripe_session_id ?? null,
+        createAccessToken()
       ]
     );
     return this.getInvoice(result.insertId);
@@ -315,10 +325,43 @@ export class MySqlStore {
 
   async getInvoice(id) {
     const [rows] = await this.database.query(
-      "SELECT *, cost AS total, CASE WHEN paid THEN 'paid' ELSE status END AS status FROM invoices WHERE id = ?",
+      `SELECT *, cost AS total, CASE WHEN paid THEN 'paid' ELSE status END AS status,
+        (SELECT p.status FROM invoice_payments p WHERE p.invoice_id = invoices.id ORDER BY p.submitted_at DESC, p.id DESC LIMIT 1) AS payment_status
+       FROM invoices WHERE id = ?`,
       [id]
     );
     return rows[0];
+  }
+
+  async getInvoicePayments(invoiceId) {
+    const [rows] = await this.database.query(
+      'SELECT * FROM invoice_payments WHERE invoice_id = ? ORDER BY submitted_at DESC, id DESC',
+      [invoiceId]
+    );
+    return rows;
+  }
+
+  async recordInvoicePayment(payment) {
+    const [existing] = await this.database.query(
+      'SELECT status FROM invoice_payments WHERE stripe_checkout_session_id = ?',
+      [payment.stripe_checkout_session_id]
+    );
+    const previousStatus = existing[0]?.status;
+    // Succeeded and failed are final, so late or out-of-order events cannot revert them.
+    await this.database.execute(
+      `INSERT INTO invoice_payments
+        (invoice_id, stripe_checkout_session_id, stripe_payment_intent_id, method, amount, currency, status, failure_message, completed_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, IF(? = 'processing', NULL, CURRENT_TIMESTAMP)) AS incoming
+       ON DUPLICATE KEY UPDATE
+        stripe_payment_intent_id = COALESCE(incoming.stripe_payment_intent_id, invoice_payments.stripe_payment_intent_id),
+        failure_message = IF(invoice_payments.status IN ('succeeded', 'failed'), invoice_payments.failure_message, incoming.failure_message),
+        completed_at = IF(invoice_payments.status IN ('succeeded', 'failed'), invoice_payments.completed_at, incoming.completed_at),
+        status = IF(invoice_payments.status IN ('succeeded', 'failed'), invoice_payments.status, incoming.status)`,
+      [payment.invoice_id, payment.stripe_checkout_session_id, payment.stripe_payment_intent_id ?? null, payment.method ?? null,
+        payment.amount ?? null, payment.currency ?? 'USD', payment.status, payment.failure_message ?? null, payment.status]
+    );
+    return previousStatus === undefined
+      || (!['succeeded', 'failed'].includes(previousStatus) && previousStatus !== payment.status);
   }
 
   async getInvoiceEmailSends(invoiceId) {
@@ -414,6 +457,26 @@ export class MySqlStore {
 
   async deleteInvoice(id) {
     const [result] = await this.database.execute('DELETE FROM invoices WHERE id = ?', [id]);
+    return result.affectedRows > 0;
+  }
+
+  async ensureInvoiceAccessToken(id) {
+    await this.database.execute(
+      "UPDATE invoices SET access_token = ? WHERE id = ? AND (access_token IS NULL OR access_token = '')",
+      [createAccessToken(), id]
+    );
+    return (await this.getInvoice(id))?.access_token;
+  }
+
+  async setInvoiceStripeSession(id, sessionId) {
+    await this.database.execute('UPDATE invoices SET stripe_session_id = ? WHERE id = ?', [sessionId, id]);
+  }
+
+  async markInvoicePaid(id, { paiddate, paymenttype }) {
+    const [result] = await this.database.execute(
+      "UPDATE invoices SET paid = TRUE, status = 'paid', paiddate = ?, paymenttype = ? WHERE id = ? AND paid = FALSE",
+      [paiddate, paymenttype, id]
+    );
     return result.affectedRows > 0;
   }
 }

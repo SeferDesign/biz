@@ -15,6 +15,7 @@
     "dev": "npm run dev --workspace @seferbiz/api",
     "dev:api": "npm run dev --workspace @seferbiz/api",
     "dev:web": "npm run dev --workspace @seferbiz/web",
+    "dev:stripe": "bash -c 'set -a; source build.env; set +a; exec stripe listen --skip-verify --events checkout.session.completed,checkout.session.async_payment_succeeded,checkout.session.async_payment_failed --forward-to \"https://${API_DOMAIN}:${HTTPS_PORT}/v1/stripe/webhook\"'",
     "build:web": "npm run build --workspace @seferbiz/web",
     "test": "npm run test --workspace @seferbiz/api",
     "openapi:validate": "npm run openapi:validate --workspace @seferbiz/api"

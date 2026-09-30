@@ -202,6 +202,24 @@ h2 { font-family: Georgia, "Times New Roman", serif; font-size: 23px; font-weigh
 .payment-method p { margin-bottom: 8px; }
 .payment-method p:last-child { margin-bottom: 0; }
 .payment-method address { color: var(--muted); font-style: normal; line-height: 1.7; }
+.notice-success { margin-bottom: 24px; border-left-color: var(--forest-soft); }
+.payment-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.payment-choice { display: grid; gap: 4px; padding: 17px 19px; border: 1px solid var(--line); color: var(--ink); background: var(--white); box-shadow: var(--shadow); cursor: pointer; text-align: left; }
+.payment-choice:hover:not(:disabled) { border-color: var(--forest-soft); }
+.payment-choice:disabled { cursor: wait; opacity: .65; }
+.payment-choice span { font-family: Georgia, serif; font-size: 22px; }
+.payment-choice small { color: var(--muted); font-size: 11px; }
+.payment-alternatives { margin-top: 14px; }
+.public-shell { min-height: 100vh; }
+.public-header { padding: 18px 44px; color: #edf3ee; background: var(--forest); }
+.public-header .brand { padding: 0; }
+.client-link-panel { margin-top: 25px; }
+.copy-field { display: flex; gap: 8px; }
+.copy-field input { flex: 1; min-width: 0; height: 40px; padding: 0 12px; border: 1px solid var(--line); color: var(--ink); background: #fff; font-size: 12px; }
+.status-due { color: #76591e; background: #f8f0dc; }
+.status-processing, .status-submitted { color: #2f5877; background: #e3edf5; }
+.status-succeeded { color: #285b43; background: var(--green-wash); }
+.status-failed { color: #9a4934; background: var(--red-wash); }
 .filter-row { display: flex; flex-wrap: wrap; gap: 8px; margin: -9px 0 19px; }
 .filter-link { padding: 7px 11px; border: 1px solid var(--line); color: var(--muted); background: var(--white); font-size: 11px; }
 .filter-link[aria-current="page"] { border-color: var(--forest); color: var(--white); background: var(--forest); }

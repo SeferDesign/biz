@@ -470,7 +470,27 @@ paths:
           description: Invoice not found
   /invoices/{id}/stripe:
     get:
-      summary: Confirm a Stripe invoice payment
+      summary: Confirm a Stripe Checkout Session for an invoice
+      security:
+        - ApiToken: []
+        - RecordAccessToken: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+        - name: session_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Session status (paid, processing, open, or expired)
+        '400':
+          description: Invalid Stripe session
+        '404':
+          description: Invoice not found
+  /invoices/{id}/payment-options:
+    get:
+      summary: List online payment methods and fees for an invoice
       security:
         - ApiToken: []
         - RecordAccessToken: []
@@ -478,11 +498,70 @@ paths:
         - $ref: '#/components/parameters/IdParam'
       responses:
         '200':
-          description: Payment confirmed
-        '400':
-          description: Invalid Stripe session
+          description: Payment options and amounts in cents
         '404':
           description: Invoice not found
+  /invoices/{id}/payments:
+    get:
+      summary: List Stripe payment attempts for an invoice (processing, succeeded, failed)
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Payment history, newest first
+        '404':
+          description: Invoice not found
+  /invoices/{id}/checkout:
+    post:
+      summary: Start an embedded Stripe Checkout Session for an invoice
+      security:
+        - ApiToken: []
+        - RecordAccessToken: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [method]
+              properties:
+                method:
+                  type: string
+                  enum: [card, us_bank_account]
+      responses:
+        '201':
+          description: Checkout Session client secret
+        '400':
+          description: Unsupported payment method
+        '409':
+          description: Invoice is paid or already has a payment processing
+        '502':
+          description: Stripe request failed
+        '503':
+          description: Stripe is not configured
+  /stripe/payouts:
+    get:
+      summary: List recent Stripe payouts and invoice payments
+      responses:
+        '200':
+          description: Payouts and payments with fees
+        '502':
+          description: Stripe request failed
+        '503':
+          description: Stripe is not configured
+  /stripe/webhook:
+    post:
+      summary: Receive Stripe webhook events
+      security: []
+      responses:
+        '200':
+          description: Event received
+        '400':
+          description: Invalid Stripe signature
+        '503':
+          description: Stripe webhooks are not configured
   /expenses:
     get:
       summary: List expenses

@@ -35,15 +35,17 @@ async function isValidRecordLink(request) {
   }
 }
 
-function isTokenizedApiRead(request) {
-  if (request.method !== 'GET' || !request.nextUrl.searchParams.get('access_token')) return false;
+function isTokenizedApiRequest(request) {
+  if (!request.nextUrl.searchParams.get('access_token')) return false;
   const apiPath = request.nextUrl.pathname.replace(/^\/api\/v1(?=\/|$)/, '');
-  return /^\/(?:clients\/\d+|invoices\/\d+(?:\/(?:pdf|stripe|lines))?)$/.test(apiPath);
+  if (request.method === 'POST') return /^\/invoices\/\d+\/checkout$/.test(apiPath);
+  if (request.method !== 'GET') return false;
+  return /^\/(?:clients\/\d+|invoices\/\d+(?:\/(?:pdf|stripe|lines|payment-options))?)$/.test(apiPath);
 }
 
 export async function proxy(request) {
   const { pathname } = request.nextUrl;
-  if (['/login', '/forgot-password', '/reset-password', '/payment'].includes(pathname) || pathname.startsWith('/api/auth/')) {
+  if (['/login', '/forgot-password', '/reset-password', '/payment', '/payments'].includes(pathname) || pathname.startsWith('/api/auth/')) {
     return NextResponse.next();
   }
 
@@ -53,7 +55,7 @@ export async function proxy(request) {
       return NextResponse.next();
     }
     if (sessionToken && await isValidSession(sessionToken)) return NextResponse.next();
-    if (isTokenizedApiRead(request)) return NextResponse.next();
+    if (isTokenizedApiRequest(request)) return NextResponse.next();
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

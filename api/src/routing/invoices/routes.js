@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { isDate, isFiniteNumber, parseId } from '../shared/validation.js';
+import { publicInvoice, publicLine } from '../shared/public-views.js';
 import { sendInvoiceEmail as deliverInvoiceEmail } from '../../email/invoice-mailer.js';
 import { createInvoicePdf } from '../../pdf/invoice-pdf.js';
 
@@ -52,7 +53,18 @@ export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoic
     if (!id) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
     const invoice = await store.getInvoice(id);
     if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
+    if (req.recordAccess) {
+      const client = invoice.client_id ? await store.getClient(invoice.client_id) : null;
+      return res.json(publicInvoice(invoice, client));
+    }
     return res.json(invoice);
+  });
+
+  router.post('/invoices/:id/access-token', async (req, res) => {
+    const id = parseId(req.params.id);
+    if (!id) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
+    if (!await store.getInvoice(id)) return res.status(404).json({ error: 'Invoice not found' });
+    return res.json({ access_token: await store.ensureInvoiceAccessToken(id) });
   });
 
   router.patch('/invoices/:id', async (req, res) => {
@@ -123,6 +135,7 @@ export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoic
     const client = snapshot.clients.find((item) => item.id === invoice.client_id);
     if (!client) return res.status(400).json({ error: 'Invoice client not found' });
     const lines = snapshot.lines.filter((line) => line.invoice_id === invoice.id);
+    if (!invoice.access_token) invoice.access_token = await store.ensureInvoiceAccessToken(invoice.id);
     try {
       const result = await sendInvoiceEmail({ invoice, client, lines });
       const recipient = result?.recipient || client.email || client.email_accounting;
@@ -142,7 +155,7 @@ export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoic
   router.get('/invoices/:invoice_id/lines', async (req, res) => {
     const lines = (await store.getSnapshot()).lines
       .filter((line) => line.invoice_id === Number(req.params.invoice_id));
-    res.json(lines);
+    res.json(req.recordAccess ? lines.map(publicLine) : lines);
   });
 
   router.post('/invoices/:invoice_id/lines', async (req, res) => {
@@ -188,18 +201,6 @@ export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoic
     if (!id) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
     if (!await store.getInvoice(id)) return res.status(404).json({ error: 'Invoice not found' });
     return res.json(await store.getInvoiceEmailSends(id));
-  });
-
-  router.get('/invoices/:id/stripe', async (req, res) => {
-    const invoice = await store.getInvoice(Number(req.params.id));
-    if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
-    const sessionId = req.query.session_id;
-    if (!sessionId || sessionId !== invoice.stripe_session_id) {
-      return res.status(400).json({ error: 'Invalid Stripe session' });
-    }
-    const paiddate = new Date().toISOString().slice(0, 10);
-    await store.updateInvoice(invoice.id, { status: 'paid', paid: true, paiddate, paymenttype: 'Stripe' });
-    return res.json({ invoice_id: invoice.id, status: 'paid', paiddate });
   });
 
   return router;

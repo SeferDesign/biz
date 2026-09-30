@@ -13,8 +13,11 @@ import { createAuthRouter } from './auth.js';
 import searchRouter from './search/routes.js';
 import vendorsRouter from './vendors/routes.js';
 import yearsRouter from './years/routes.js';
+import stripeRouter, { createStripeWebhookHandler } from './stripe/routes.js';
 import { timingSafeEqual } from 'node:crypto';
 import { verifySessionToken } from '../auth/session.js';
+import { createStripeClient } from '../payments/stripe.js';
+import { sendPaymentNotification as deliverPaymentNotification } from '../email/payment-notification-mailer.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,9 +44,10 @@ function createAuthenticationMiddleware(store, apiAccessToken) {
       return next();
     }
 
-    if (req.method === 'GET' && typeof req.query.access_token === 'string') {
-      const clientMatch = req.path.match(/^\/clients\/(\d+)$/);
-      const invoiceMatch = req.path.match(/^\/invoices\/(\d+)(?:\/(?:stripe|pdf))?$/);
+    const isInvoiceCheckout = req.method === 'POST' && /^\/invoices\/\d+\/checkout$/.test(req.path);
+    if ((req.method === 'GET' || isInvoiceCheckout) && typeof req.query.access_token === 'string') {
+      const clientMatch = req.method === 'GET' && req.path.match(/^\/clients\/(\d+)$/);
+      const invoiceMatch = req.path.match(/^\/invoices\/(\d+)(?:\/(?:stripe|pdf|payment-options|checkout))?$/);
       const invoiceLinesMatch = req.path.match(/^\/invoices\/(\d+)\/lines$/);
       const record = clientMatch
         ? await store.getClient(clientMatch[1])
@@ -52,7 +56,10 @@ function createAuthenticationMiddleware(store, apiAccessToken) {
           : invoiceLinesMatch
             ? await store.getInvoice(invoiceLinesMatch[1])
           : null;
-      if (record?.access_token && tokenMatches(req.query.access_token, record.access_token)) return next();
+      if (record?.access_token && tokenMatches(req.query.access_token, record.access_token)) {
+        req.recordAccess = { type: clientMatch ? 'client' : 'invoice', id: record.id };
+        return next();
+      }
     }
 
     res.set('WWW-Authenticate', 'Bearer');
@@ -65,9 +72,16 @@ export function createApp({
   sendInvoiceEmail,
   sendResetEmail,
   apiAccessToken = process.env.API_ACCESS_TOKEN,
-  otpSecretEncryptionKey = process.env.OTP_SECRET_ENCRYPTION_KEY
+  otpSecretEncryptionKey = process.env.OTP_SECRET_ENCRYPTION_KEY,
+  stripe = createStripeClient(),
+  stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET,
+  publicAppUrl = process.env.PUBLIC_APP_URL,
+  sendPaymentNotification = deliverPaymentNotification
 } = {}) {
   const app = express();
+  // Signature verification needs the raw request body.
+  app.post('/v1/stripe/webhook', express.raw({ type: 'application/json' }),
+    createStripeWebhookHandler(store, { stripe, webhookSecret: stripeWebhookSecret, notify: sendPaymentNotification }));
   app.use(express.json());
 
   // The web client is served from a different host than the API.
@@ -104,6 +118,7 @@ export function createApp({
   app.use('/v1/auth', createAuthRouter(store, { apiAccessToken, otpSecretEncryptionKey, sendResetEmail }));
   app.use('/v1', clientsRouter(store));
   app.use('/v1', invoicesRouter(store, { sendInvoiceEmail }));
+  app.use('/v1', stripeRouter(store, { stripe, appUrl: publicAppUrl, notify: sendPaymentNotification }));
   app.use('/v1', yearsRouter(store));
   app.use('/v1', expensesRouter(store));
   app.use('/v1', vendorsRouter(store));

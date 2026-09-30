@@ -12,12 +12,28 @@ const navigation = [
   { href: '/vendors', label: 'Vendors', index: '04' },
   { href: '/years', label: 'Years', index: '05' },
   { href: '/best', label: 'Best', index: '06' },
-  { href: '/payment', label: 'Payment', index: '07' }
+  { href: '/payments', label: 'Payment', index: '07' },
+  { href: '/stripe', label: 'Stripe', index: '08' }
 ];
 
 export default function AppShell({ children, accountEmail }) {
   const pathname = usePathname();
   if (['/login', '/forgot-password', '/reset-password'].includes(pathname)) return children;
+  if (pathname === '/payments') return <main className="main-content">{children}</main>;
+  // Visitors without a session only reach public pages and access-token record links.
+  if (!accountEmail) {
+    return (
+      <div className="public-shell">
+        <header className="public-header">
+          <span className="brand">
+            <span className="brand-mark">SD</span>
+            <span className="brand-name">Sefer Design Company<span>info@seferdesign.com</span></span>
+          </span>
+        </header>
+        <main className="main-content">{children}</main>
+      </div>
+    );
+  }
   const accountHref = '/settings/account/security';
   const accountActive = pathname.startsWith('/settings/account');
   const avatarInitial = accountEmail?.trim().charAt(0).toUpperCase() || '?';

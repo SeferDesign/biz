@@ -107,6 +107,9 @@ POST   /v1/auth/otp/enable
 POST   /v1/auth/otp/disable
 GET    /v1/search
 
+GET    /v1/stripe/payouts
+POST   /v1/stripe/webhook
+
 GET    /v1/clients
 POST   /v1/clients
 GET    /v1/clients/{id}
@@ -121,6 +124,10 @@ PATCH|PUT /v1/invoices/{id}
 DELETE /v1/invoices/{id}
 GET    /v1/invoices/{id}/email
 GET    /v1/invoices/{id}/stripe
+GET    /v1/invoices/{id}/payment-options
+POST   /v1/invoices/{id}/checkout
+GET    /v1/invoices/{id}/payments
+POST   /v1/invoices/{id}/access-token
 GET    /v1/invoices/{invoice_id}/lines
 POST   /v1/invoices/{invoice_id}/lines
 GET    /v1/invoices/{invoice_id}/lines/{id}

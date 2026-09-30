@@ -30,9 +30,11 @@ const initialSnapshot = {
 export function createMemoryStore() {
   const snapshot = structuredClone(initialSnapshot);
   const invoiceEmailSends = [];
+  const invoicePayments = [];
   const users = [];
   return {
     users,
+    invoicePayments,
     async getUserByEmail(email) {
       return users.find((user) => user.email.toLowerCase() === email.toLowerCase());
     },
@@ -116,6 +118,10 @@ export function createMemoryStore() {
     },
     async deleteClient(id) {
       return removeById(snapshot.clients, id);
+    },
+    async setClientStripeCustomerId(id, customerId) {
+      const client = await this.getClient(id);
+      if (client) client.stripe_customer_id = customerId;
     },
     async getVendor(id) {
       return snapshot.vendors.find((item) => item.id === Number(id));
@@ -240,6 +246,39 @@ export function createMemoryStore() {
         for (const send of sendIndexes) invoiceEmailSends.splice(invoiceEmailSends.indexOf(send), 1);
       }
       return removed;
+    },
+    async ensureInvoiceAccessToken(id) {
+      const invoice = await this.getInvoice(id);
+      if (invoice && !invoice.access_token) invoice.access_token = `invoice-token-${invoice.id}`;
+      return invoice?.access_token;
+    },
+    async setInvoiceStripeSession(id, sessionId) {
+      const invoice = await this.getInvoice(id);
+      if (invoice) invoice.stripe_session_id = sessionId;
+    },
+    async markInvoicePaid(id, { paiddate, paymenttype }) {
+      const invoice = await this.getInvoice(id);
+      if (!invoice || invoice.paid) return false;
+      Object.assign(invoice, { paid: true, status: 'paid', paiddate, paymenttype });
+      return true;
+    },
+    async getInvoicePayments(invoiceId) {
+      return invoicePayments.filter((payment) => payment.invoice_id === Number(invoiceId)).reverse();
+    },
+    async recordInvoicePayment(payment) {
+      let existing = invoicePayments.find((item) => item.stripe_checkout_session_id === payment.stripe_checkout_session_id);
+      let changed = true;
+      if (!existing) {
+        existing = { id: invoicePayments.length + 1, submitted_at: new Date().toISOString(), ...payment };
+        invoicePayments.push(existing);
+      } else if (!['succeeded', 'failed'].includes(existing.status) && existing.status !== payment.status) {
+        Object.assign(existing, payment);
+      } else {
+        changed = false;
+      }
+      const invoice = await this.getInvoice(payment.invoice_id);
+      if (invoice) invoice.payment_status = invoicePayments.filter((item) => item.invoice_id === invoice.id).at(-1).status;
+      return changed;
     }
   };
 }
