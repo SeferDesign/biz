@@ -4,7 +4,9 @@ const apiBaseUrl = (
   'https://api.biz.loc:9443'
 ).replace(/\/$/, '');
 
-export const browserApiBaseUrl = (process.env.NEXT_PUBLIC_API_URL || 'https://api.biz.loc:9443').replace(/\/$/, '');
+const defaultApiVersion = 'v1';
+
+export const browserApiBaseUrl = `${(process.env.NEXT_PUBLIC_API_URL || 'https://api.biz.loc:9443').replace(/\/$/, '')}/${defaultApiVersion}`;
 export const recordsPerPage = 12;
 
 export function parsePage(value) {
@@ -12,9 +14,11 @@ export function parsePage(value) {
   return Number.isSafeInteger(page) && page > 0 ? page : 1;
 }
 
-export async function getApiData(path) {
+export async function getApiData(path, { version = defaultApiVersion } = {}) {
   try {
-    const response = await fetch(`${apiBaseUrl}${path}`, { cache: 'no-store' });
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    const versionPrefix = version ? `/${String(version).replace(/^\/+|\/+$/g, '')}` : '';
+    const response = await fetch(`${apiBaseUrl}${versionPrefix}${normalizedPath}`, { cache: 'no-store' });
     const body = await response.json().catch(() => null);
     if (!response.ok) {
       return { error: body?.error || `API returned ${response.status}`, status: response.status };

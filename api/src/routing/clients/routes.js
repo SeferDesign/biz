@@ -4,9 +4,9 @@ import { hasText, parseId } from '../shared/validation.js';
 export default function clientsRouter(store) {
   const router = Router();
 
-  router.get('/v1/clients', async (req, res) => res.json((await store.getSnapshot()).clients));
+  router.get('/clients', async (req, res) => res.json((await store.getSnapshot()).clients));
 
-  router.get('/v1/clients/:id', async (req, res) => {
+  router.get('/clients/:id', async (req, res) => {
     const id = parseId(req.params.id);
     if (!id) return res.status(400).json({ error: 'Client id must be a positive integer' });
     const client = await store.getClient(id);
@@ -14,12 +14,12 @@ export default function clientsRouter(store) {
     return res.json(client);
   });
 
-  router.post('/v1/clients', async (req, res) => {
+  router.post('/clients', async (req, res) => {
     if (!hasText(req.body?.name)) return res.status(400).json({ error: 'Client name is required' });
     return res.status(201).json(await store.createClient(req.body));
   });
 
-  router.patch('/v1/clients/:id', async (req, res) => {
+  router.patch('/clients/:id', async (req, res) => {
     const id = parseId(req.params.id);
     if (!id) return res.status(400).json({ error: 'Client id must be a positive integer' });
     if (req.body?.name !== undefined && !hasText(req.body.name)) {
@@ -33,7 +33,7 @@ export default function clientsRouter(store) {
     return res.json(client);
   });
 
-  router.put('/v1/clients/:id', async (req, res) => {
+  router.put('/clients/:id', async (req, res) => {
     const id = parseId(req.params.id);
     if (!id) return res.status(400).json({ error: 'Client id must be a positive integer' });
     if (!hasText(req.body?.name)) return res.status(400).json({ error: 'Client name is required' });
@@ -42,7 +42,7 @@ export default function clientsRouter(store) {
     return res.json(client);
   });
 
-  router.delete('/v1/clients/:id', async (req, res) => {
+  router.delete('/clients/:id', async (req, res) => {
     const id = parseId(req.params.id);
     if (!id) return res.status(400).json({ error: 'Client id must be a positive integer' });
     if (!await store.deleteClient(id)) return res.status(404).json({ error: 'Client not found' });

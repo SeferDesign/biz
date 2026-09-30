@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: Express-based API rebuilt from the existing route map and resource list.
 servers:
-  - url: https://api.biz.loc:9443
+  - url: https://api.biz.loc:9443/v1
 paths:
   /health:
     get:
@@ -12,7 +12,7 @@ paths:
       responses:
         '200':
           description: Service is healthy
-  /v1/search:
+  /search:
     get:
       summary: Search clients, invoices, line items, vendors, expenses, and years
       parameters:
@@ -37,7 +37,7 @@ paths:
                       $ref: '#/components/schemas/SearchResult'
         '400':
           description: Invalid search query
-  /v1/invoices:
+  /invoices:
     get:
       summary: List invoices
       responses:
@@ -54,7 +54,7 @@ paths:
       responses:
         '201':
           description: Invoice created
-  /v1/invoices/{id}:
+  /invoices/{id}:
     get:
       summary: Get invoice by id
       parameters:
@@ -95,15 +95,7 @@ paths:
       responses:
         '204':
           description: Invoice deleted
-  /v1/invoices/{id}/email:
-    get:
-      summary: Send invoice email
-      parameters:
-        - $ref: '#/components/parameters/IdParam'
-      responses:
-        '200':
-          description: Email queued
-  /v1/invoices/{invoice_id}/lines:
+  /invoices/{invoice_id}/lines:
     get:
       summary: List invoice lines
       parameters:
@@ -124,7 +116,7 @@ paths:
       responses:
         '201':
           description: Invoice line created
-  /v1/invoices/{invoice_id}/lines/{id}:
+  /invoices/{invoice_id}/lines/{id}:
     get:
       summary: Get invoice line by id
       parameters:
@@ -133,7 +125,7 @@ paths:
       responses:
         '200':
           description: Invoice line
-  /v1/clients:
+  /clients:
     get:
       summary: List clients
       responses:
@@ -150,7 +142,7 @@ paths:
       responses:
         '201':
           description: Client created
-  /v1/clients/{id}:
+  /clients/{id}:
     get:
       summary: Get client by id
       parameters:

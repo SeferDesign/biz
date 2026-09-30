@@ -8,8 +8,8 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
   const { id } = await params;
   const query = await searchParams;
   const [invoiceResult, lineResult] = await Promise.all([
-    getApiData(`/v1/invoices/${encodeURIComponent(id)}`),
-    getApiData(`/v1/invoices/${encodeURIComponent(id)}/lines`)
+    getApiData(`/invoices/${encodeURIComponent(id)}`),
+    getApiData(`/invoices/${encodeURIComponent(id)}/lines`)
   ]);
   if (invoiceResult.status === 404) notFound();
   if (invoiceResult.error) {
@@ -25,7 +25,7 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
         <div><p className="eyebrow">INVOICE / {String(invoice.id).padStart(4, '0')}</p><h1>{invoice.description || 'Invoice details'}</h1><p className="page-description">Issued {formatDate(invoice.date)}</p></div>
         <div className="detail-actions">
           <StatusLabel status={invoiceStatus(invoice)} />
-          <ResourceActions editHref={`/invoices/${invoice.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/v1/invoices/${invoice.id}`} returnTo="/invoices" label="invoice" />
+          <ResourceActions editHref={`/invoices/${invoice.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/invoices/${invoice.id}`} returnTo="/invoices" label="invoice" />
         </div>
       </div>
       <DetailGrid items={[

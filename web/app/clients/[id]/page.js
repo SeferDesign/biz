@@ -8,8 +8,8 @@ export default async function ClientDetailPage({ params, searchParams }) {
   const { id } = await params;
   const query = await searchParams;
   const [clientResult, invoiceResult] = await Promise.all([
-    getApiData(`/v1/clients/${encodeURIComponent(id)}`),
-    getApiData('/v1/invoices')
+    getApiData(`/clients/${encodeURIComponent(id)}`),
+    getApiData('/invoices')
   ]);
   if (clientResult.status === 404) notFound();
   if (clientResult.error) {
@@ -25,7 +25,7 @@ export default async function ClientDetailPage({ params, searchParams }) {
       <Link className="back-link" href="/clients">&lt; All clients</Link>
       <div className="page-heading">
         <div><p className="eyebrow">CLIENT RECORD</p><h1>{client.name || 'Unnamed client'}</h1><p className="page-description">{client.contact || 'No primary contact listed'}</p></div>
-        <ResourceActions editHref={`/clients/${client.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/v1/clients/${client.id}`} returnTo="/clients" label="client" />
+        <ResourceActions editHref={`/clients/${client.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/clients/${client.id}`} returnTo="/clients" label="client" />
       </div>
       <DetailGrid items={[
         ['Contact', client.contact],

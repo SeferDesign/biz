@@ -16,7 +16,7 @@ function result(type, title, detail, href, rank) {
 export default function searchRouter(store) {
   const router = Router();
 
-  router.get('/v1/search', async (req, res) => {
+  router.get('/search', async (req, res) => {
     const query = String(req.query.q || '').trim().toLowerCase();
     if (query.length < 2) return res.status(400).json({ error: 'Search query must contain at least 2 characters' });
     if (query.length > 100) return res.status(400).json({ error: 'Search query must be at most 100 characters' });

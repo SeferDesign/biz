@@ -33,9 +33,9 @@ function validateInvoiceInput(input, { partial = false } = {}) {
 export default function invoicesRouter(store) {
   const router = Router();
 
-  router.get('/v1/invoices', async (req, res) => res.json((await store.getSnapshot()).invoices));
+  router.get('/invoices', async (req, res) => res.json((await store.getSnapshot()).invoices));
 
-  router.post('/v1/invoices', async (req, res) => {
+  router.post('/invoices', async (req, res) => {
     const input = normalizeInvoiceInput(req.body);
     const error = validateInvoiceInput(input);
     if (error) return res.status(400).json({ error });
@@ -45,7 +45,7 @@ export default function invoicesRouter(store) {
     return res.status(201).json(await store.createInvoice(invoiceInput));
   });
 
-  router.get('/v1/invoices/:id', async (req, res) => {
+  router.get('/invoices/:id', async (req, res) => {
     const id = parseId(req.params.id);
     if (!id) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
     const invoice = await store.getInvoice(id);
@@ -53,7 +53,7 @@ export default function invoicesRouter(store) {
     return res.json(invoice);
   });
 
-  router.patch('/v1/invoices/:id', async (req, res) => {
+  router.patch('/invoices/:id', async (req, res) => {
     const id = parseId(req.params.id);
     if (!id) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
     const input = normalizeInvoiceInput(req.body);
@@ -72,7 +72,7 @@ export default function invoicesRouter(store) {
     return res.json(invoice);
   });
 
-  router.put('/v1/invoices/:id', async (req, res) => {
+  router.put('/invoices/:id', async (req, res) => {
     const id = parseId(req.params.id);
     if (!id) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
     const input = normalizeInvoiceInput(req.body);
@@ -86,7 +86,7 @@ export default function invoicesRouter(store) {
     return res.json(invoice);
   });
 
-  router.delete('/v1/invoices/:id', async (req, res) => {
+  router.delete('/invoices/:id', async (req, res) => {
     const id = parseId(req.params.id);
     if (!id) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
     if (!await store.deleteInvoice(id)) return res.status(404).json({ error: 'Invoice not found' });
@@ -103,24 +103,18 @@ export default function invoicesRouter(store) {
     });
   }
 
-  router.get('/v1/invoices/:id/email', async (req, res) => {
-    const invoice = await store.getInvoice(Number(req.params.id));
-    if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
-    return queueInvoiceEmail(invoice, res);
-  });
-
-  router.get('/v1/invoices/:invoice_id/lines', async (req, res) => {
+  router.get('/invoices/:invoice_id/lines', async (req, res) => {
     const lines = (await store.getSnapshot()).lines
       .filter((line) => line.invoice_id === Number(req.params.invoice_id));
     res.json(lines);
   });
 
-  router.post('/v1/invoices/:invoice_id/lines', async (req, res) => {
+  router.post('/invoices/:invoice_id/lines', async (req, res) => {
     const line = await store.createInvoiceLine(Number(req.params.invoice_id), req.body);
     res.status(201).json(line);
   });
 
-  router.get('/v1/invoices/:invoice_id/lines/:id', async (req, res) => {
+  router.get('/invoices/:invoice_id/lines/:id', async (req, res) => {
     const snapshot = await store.getSnapshot();
     const line = snapshot.lines.find((item) =>
       item.invoice_id === Number(req.params.invoice_id) && item.id === Number(req.params.id));

@@ -5,8 +5,8 @@ import { formatDate, formatMoney, getApiData, invoiceStatus, parsePage } from '.
 export default async function InvoicesPage({ searchParams }) {
   const params = await searchParams;
   const [invoiceResult, clientResult] = await Promise.all([
-    getApiData('/v1/invoices'),
-    getApiData('/v1/clients')
+    getApiData('/invoices'),
+    getApiData('/clients')
   ]);
   const clientsById = new Map((clientResult.data || []).map((client) => [client.id, client]));
 

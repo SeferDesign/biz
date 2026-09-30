@@ -29,7 +29,7 @@ npm run local -- reset    # recreate and wipe volumes
 | --- | --- |
 | https://biz.loc:9443 | Next.js web client |
 | https://api.biz.loc:9443/v1/... | Express API |
-| https://api.biz.loc:9443/docs | Swagger UI |
+| https://api.biz.loc:9443/v1/docs | Swagger UI |
 | http://127.0.0.1:9082 | AdminNeo (MySQL) |
 | http://127.0.0.1:18026 | Mailpit |
 

@@ -45,20 +45,20 @@ export function createApp({ store = new MySqlStore() } = {}) {
     fs.readFileSync(path.join(__dirname, '../openapi/openapi.yaml'), 'utf8')
   );
 
-  app.get('/openapi.json', (req, res) => {
+  app.get('/v1/openapi.json', (req, res) => {
     res.json(openApiDocument);
   });
 
-  app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
-  app.get('/health', (req, res) => res.json({ status: 'ok', service: 'api' }));
+  app.use('/v1/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
+  app.get('/v1/health', (req, res) => res.json({ status: 'ok', service: 'api' }));
 
-  app.use(clientsRouter(store));
-  app.use(invoicesRouter(store));
-  app.use(yearsRouter(store));
-  app.use(expensesRouter(store));
-  app.use(vendorsRouter(store));
-  app.use(searchRouter(store));
-  app.use(chartsRouter(store));
+  app.use('/v1', clientsRouter(store));
+  app.use('/v1', invoicesRouter(store));
+  app.use('/v1', yearsRouter(store));
+  app.use('/v1', expensesRouter(store));
+  app.use('/v1', vendorsRouter(store));
+  app.use('/v1', searchRouter(store));
+  app.use('/v1', chartsRouter(store));
 
   app.use((req, res) => {
     res.status(404).json({ error: 'Route not found', path: req.originalUrl });

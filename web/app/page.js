@@ -14,8 +14,8 @@ function Metric({ label, value, note }) {
 
 export default async function Home() {
   const [clientResult, invoiceResult, expenseResult, vendorResult, yearResult] = await Promise.all([
-    getApiData('/v1/clients'),
-    getApiData('/v1/invoices'),
+    getApiData('/clients'),
+    getApiData('/invoices'),
     getApiData('/expenses'),
     getApiData('/vendors'),
     getApiData('/years')

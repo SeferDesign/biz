@@ -82,12 +82,54 @@ GET    /charts_controller/year_expense_category/{id}
 GET    /charts_controller/year_expense_month/{id}
 
 # API endpoints
-GET    /v1/invoices/{invoice_id}/lines
-POST   /v1/invoices/{invoice_id}/lines
-GET    /v1/invoices/{invoice_id}/lines/{id}
-GET    /v1/invoices/{id}/email
+GET    /v1/health
+GET    /v1/openapi.json
+GET    /v1/docs
+GET    /v1/search
+
+GET    /v1/clients
+POST   /v1/clients
+GET    /v1/clients/{id}
+PATCH|PUT /v1/clients/{id}
+DELETE /v1/clients/{id}
+
 GET    /v1/invoices
 POST   /v1/invoices
 GET    /v1/invoices/{id}
-GET    /v1/clients
-GET    /v1/clients/{id}
+PATCH|PUT /v1/invoices/{id}
+DELETE /v1/invoices/{id}
+GET    /v1/invoices/{id}/email
+GET    /v1/invoices/{id}/stripe
+GET    /v1/invoices/{invoice_id}/lines
+POST   /v1/invoices/{invoice_id}/lines
+GET    /v1/invoices/{invoice_id}/lines/{id}
+
+GET    /v1/years
+POST   /v1/years
+GET    /v1/years/new
+GET    /v1/years/{id}
+GET    /v1/years/{id}/edit
+GET    /v1/years/{id}/income
+GET    /v1/years/{id}/expenses
+PATCH|PUT /v1/years/{id}
+DELETE /v1/years/{id}
+
+GET    /v1/expenses
+POST   /v1/expenses
+POST|PATCH /v1/expenses/bulk
+GET    /v1/expenses/{id}
+PATCH|PUT /v1/expenses/{id}
+DELETE /v1/expenses/{id}
+
+GET    /v1/vendors
+POST   /v1/vendors
+GET    /v1/vendors/{id}
+PATCH|PUT /v1/vendors/{id}
+DELETE /v1/vendors/{id}
+
+GET    /v1/charts_controller/trailing_x_months/{number_of_months}
+GET    /v1/charts_controller/year_invoice_month/{id}
+GET    /v1/charts_controller/year_invoice_month_with_goal/{id}
+GET    /v1/charts_controller/year_all_data/{id}
+GET    /v1/charts_controller/year_expense_category/{id}
+GET    /v1/charts_controller/year_expense_month/{id}

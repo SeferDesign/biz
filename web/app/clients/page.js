@@ -4,7 +4,7 @@ import { formatMoney, getApiData, parsePage } from '../../lib/api.js';
 
 export default async function ClientsPage({ searchParams }) {
   const params = await searchParams;
-  const result = await getApiData('/v1/clients');
+  const result = await getApiData('/clients');
   return (
     <ResourcePage
       eyebrow="DIRECTORY / CLIENTS"
