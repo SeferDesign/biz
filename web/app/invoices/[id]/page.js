@@ -2,10 +2,11 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { DetailGrid, ResourcePage, StatusLabel } from '../../../components/ResourcePage.js';
 import ResourceActions from '../../../components/ResourceActions.js';
-import { browserApiBaseUrl, formatDate, formatMoney, getApiData, invoiceStatus } from '../../../lib/api.js';
+import { browserApiBaseUrl, formatDate, formatMoney, getApiData, invoiceStatus, parsePage } from '../../../lib/api.js';
 
-export default async function InvoiceDetailPage({ params }) {
+export default async function InvoiceDetailPage({ params, searchParams }) {
   const { id } = await params;
+  const query = await searchParams;
   const [invoiceResult, lineResult] = await Promise.all([
     getApiData(`/v1/invoices/${encodeURIComponent(id)}`),
     getApiData(`/v1/invoices/${encodeURIComponent(id)}/lines`)
@@ -41,6 +42,8 @@ export default async function InvoiceDetailPage({ params }) {
           <ResourcePage
             hideHeading
             data={lines}
+            pageHref={`/invoices/${invoice.id}`}
+            page={parsePage(query?.page)}
             columns={[
               { key: 'description', label: 'Description' },
               { key: 'hours', label: 'Hours', render: (line) => line.hours ?? '-' },

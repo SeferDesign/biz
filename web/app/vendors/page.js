@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { ResourcePage } from '../../components/ResourcePage.js';
-import { formatMoney, getApiData } from '../../lib/api.js';
+import { formatMoney, getApiData, parsePage } from '../../lib/api.js';
 
-export default async function VendorsPage() {
+export default async function VendorsPage({ searchParams }) {
+  const params = await searchParams;
   const [vendorResult, expenseResult] = await Promise.all([
     getApiData('/vendors'),
     getApiData('/expenses?inactive=true')
@@ -25,6 +26,8 @@ export default async function VendorsPage() {
       countLabel="vendors"
       actionHref="/vendors/new"
       actionLabel="New Vendor"
+      pageHref="/vendors"
+      page={parsePage(params?.page)}
       columns={[
         { key: 'name', label: 'Vendor', render: (vendor) => <Link className="table-link" href={`/vendors/${vendor.id}`}>{vendor.name}</Link> },
         { key: 'category', label: 'Category' },

@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { ResourcePage, StatusLabel } from '../../components/ResourcePage.js';
-import { formatDate, formatMoney, getApiData, invoiceStatus } from '../../lib/api.js';
+import { formatDate, formatMoney, getApiData, invoiceStatus, parsePage } from '../../lib/api.js';
 
-export default async function InvoicesPage() {
+export default async function InvoicesPage({ searchParams }) {
+  const params = await searchParams;
   const [invoiceResult, clientResult] = await Promise.all([
     getApiData('/v1/invoices'),
     getApiData('/v1/clients')
@@ -19,6 +20,8 @@ export default async function InvoicesPage() {
       countLabel="invoices"
       actionHref="/invoices/new"
       actionLabel="New Invoice"
+      pageHref="/invoices"
+      page={parsePage(params?.page)}
       columns={[
         { key: 'id', label: 'Invoice', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}`}>INV-{String(invoice.id).padStart(4, '0')}</Link> },
         { key: 'client', label: 'Client', render: (invoice) => {

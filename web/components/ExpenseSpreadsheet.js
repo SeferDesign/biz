@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { formatMoney } from '../lib/api.js';
 import { expenseAccountOptions } from '../lib/record-fields.js';
+import { recordsPerPage } from '../lib/api.js';
 
 const blankExpense = () => ({ name: '', vendor_id: '', date: '', cost: '', account: '', notes: '' });
 
@@ -110,12 +111,16 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
   const router = useRouter();
   const [expenses, setExpenses] = useState(() => initialExpenses.map(editableExpense));
   const [drafts, setDrafts] = useState(() => Array.from({ length: 3 }, blankExpense));
+  const [page, setPage] = useState(1);
   const [dirtyIds, setDirtyIds] = useState(() => new Set());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const changedCount = dirtyIds.size;
   const draftCount = drafts.filter((expense) => Object.values(expense).some(Boolean)).length;
+  const pageCount = Math.max(1, Math.ceil(expenses.length / recordsPerPage));
+  const currentPage = Math.min(page, pageCount);
+  const visibleExpenses = expenses.slice((currentPage - 1) * recordsPerPage, currentPage * recordsPerPage);
 
   function updateExisting(id, field, value) {
     setExpenses((current) => current.map((expense) => expense.id === id ? { ...expense, [field]: value } : expense));
@@ -164,7 +169,9 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
     setMessage('');
     try {
       const added = await requestExpenses(`${apiBaseUrl}/expenses/bulk`, 'POST', entered.map(apiExpense));
-      setExpenses((current) => [...current, ...added.map(editableExpense)].sort((left, right) => left.date.localeCompare(right.date) || left.name.localeCompare(right.name)));
+      const nextExpenses = [...expenses, ...added.map(editableExpense)].sort((left, right) => left.date.localeCompare(right.date) || left.name.localeCompare(right.name));
+      setExpenses(nextExpenses);
+      setPage(Math.max(1, Math.ceil(nextExpenses.length / recordsPerPage)));
       setDrafts(Array.from({ length: 3 }, blankExpense));
       setMessage(`Added ${added.length} expense${added.length === 1 ? '' : 's'}.`);
       router.refresh();
@@ -193,11 +200,18 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
         <div className="section-heading"><h2>Edit expenses</h2><span className="section-note">Changes are saved together.</span></div>
         {expenses.length ? (
           <SpreadsheetTable includeId>
-            {expenses.map((expense) => (
+            {visibleExpenses.map((expense) => (
               <ExpenseRow key={expense.id} expense={expense} vendors={vendors} label={`Expense ${expense.id}`} showId onChange={(field, value) => updateExisting(expense.id, field, value)} />
             ))}
           </SpreadsheetTable>
         ) : <div className="empty-state"><h2>No expenses</h2><p>Add new rows below to get started.</p></div>}
+        {pageCount > 1 && (
+          <nav className="pagination" aria-label="Spreadsheet pagination">
+            <button className="pagination-link" type="button" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>Previous</button>
+            <span className="pagination-status">Page {currentPage} of {pageCount} · Showing {(currentPage - 1) * recordsPerPage + 1}–{Math.min(currentPage * recordsPerPage, expenses.length)} of {expenses.length}</span>
+            <button className="pagination-link" type="button" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>Next</button>
+          </nav>
+        )}
       </section>
 
       <section className="sheet-section">

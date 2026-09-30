@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ResourcePage } from '../../components/ResourcePage.js';
-import { formatDate, formatMoney, getApiData } from '../../lib/api.js';
+import { formatDate, formatMoney, getApiData, parsePage } from '../../lib/api.js';
 
 export default async function ExpensesPage({ searchParams }) {
   const params = await searchParams;
@@ -29,6 +29,8 @@ export default async function ExpensesPage({ searchParams }) {
         countLabel="expenses"
         actionHref="/expenses/new"
         actionLabel="New expense"
+        pageHref={filter ? `/expenses?${filter}=true` : '/expenses'}
+        page={parsePage(params?.page)}
         columns={[
           { key: 'date', label: 'Date', render: (expense) => <Link className="table-link" href={`/expenses/${expense.id}`}>{formatDate(expense.date)}</Link> },
           { key: 'name', label: 'Expense' },

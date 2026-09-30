@@ -2,10 +2,11 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { DetailGrid, ResourcePage } from '../../../components/ResourcePage.js';
 import ResourceActions from '../../../components/ResourceActions.js';
-import { browserApiBaseUrl, formatDate, formatMoney, getApiData } from '../../../lib/api.js';
+import { browserApiBaseUrl, formatDate, formatMoney, getApiData, parsePage } from '../../../lib/api.js';
 
-export default async function YearDetailPage({ params }) {
+export default async function YearDetailPage({ params, searchParams }) {
   const { id } = await params;
+  const query = await searchParams;
   const [yearResult, incomeResult, expenseResult] = await Promise.all([
     getApiData(`/years/${encodeURIComponent(id)}`),
     getApiData(`/years/${encodeURIComponent(id)}/income`),
@@ -40,6 +41,9 @@ export default async function YearDetailPage({ params }) {
           <ResourcePage
             hideHeading
             data={invoices}
+            pageHref={`/years/${year.id}`}
+            pageParam="income_page"
+            page={parsePage(query?.income_page)}
             columns={[
               { key: 'id', label: 'Invoice', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}`}>INV-{String(invoice.id).padStart(4, '0')}</Link> },
               { key: 'date', label: 'Payment date', render: (invoice) => formatDate(invoice.paiddate || invoice.date) },
@@ -55,6 +59,9 @@ export default async function YearDetailPage({ params }) {
           <ResourcePage
             hideHeading
             data={expenses}
+            pageHref={`/years/${year.id}`}
+            pageParam="expense_page"
+            page={parsePage(query?.expense_page)}
             columns={[
               { key: 'date', label: 'Date', render: (expense) => formatDate(expense.date) },
               { key: 'name', label: 'Expense' },

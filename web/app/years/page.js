@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { ResourcePage } from '../../components/ResourcePage.js';
-import { formatMoney, getApiData } from '../../lib/api.js';
+import { formatMoney, getApiData, parsePage } from '../../lib/api.js';
 
-export default async function YearsPage() {
+export default async function YearsPage({ searchParams }) {
+  const params = await searchParams;
   const result = await getApiData('/years');
   return (
     <ResourcePage
@@ -14,6 +15,8 @@ export default async function YearsPage() {
       countLabel="years"
       actionHref="/years/new"
       actionLabel="New Year"
+      pageHref="/years"
+      page={parsePage(params?.page)}
       columns={[
         { key: 'year', label: 'Year', render: (year) => <Link className="table-link" href={`/years/${year.id}`}>{year.year}</Link> },
         { key: 'taxrate', label: 'Tax rate', render: (year) => `${(Number(year.taxrate || 0) * 100).toFixed(1)}%` },

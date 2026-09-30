@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { ResourcePage } from '../../components/ResourcePage.js';
-import { formatMoney, getApiData } from '../../lib/api.js';
+import { formatMoney, getApiData, parsePage } from '../../lib/api.js';
 
-export default async function ClientsPage() {
+export default async function ClientsPage({ searchParams }) {
+  const params = await searchParams;
   const result = await getApiData('/v1/clients');
   return (
     <ResourcePage
@@ -14,6 +15,8 @@ export default async function ClientsPage() {
       countLabel="clients"
       actionHref="/clients/new"
       actionLabel="New Client"
+      pageHref="/clients"
+      page={parsePage(params?.page)}
       columns={[
         { key: 'name', label: 'Company', render: (client) => <Link className="table-link" href={`/clients/${client.id}`}>{client.name || 'Unnamed client'}</Link> },
         { key: 'contact', label: 'Contact' },

@@ -2,10 +2,11 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { DetailGrid, ResourcePage } from '../../../components/ResourcePage.js';
 import ResourceActions from '../../../components/ResourceActions.js';
-import { browserApiBaseUrl, formatDate, formatMoney, getApiData } from '../../../lib/api.js';
+import { browserApiBaseUrl, formatDate, formatMoney, getApiData, parsePage } from '../../../lib/api.js';
 
-export default async function ClientDetailPage({ params }) {
+export default async function ClientDetailPage({ params, searchParams }) {
   const { id } = await params;
+  const query = await searchParams;
   const [clientResult, invoiceResult] = await Promise.all([
     getApiData(`/v1/clients/${encodeURIComponent(id)}`),
     getApiData('/v1/invoices')
@@ -40,6 +41,8 @@ export default async function ClientDetailPage({ params }) {
           <ResourcePage
             hideHeading
             data={invoices}
+            pageHref={`/clients/${client.id}`}
+            page={parsePage(query?.page)}
             columns={[
               { key: 'id', label: 'Invoice', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}`}>INV-{String(invoice.id).padStart(4, '0')}</Link> },
               { key: 'date', label: 'Date', render: (invoice) => formatDate(invoice.date) },

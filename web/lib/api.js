@@ -5,6 +5,12 @@ const apiBaseUrl = (
 ).replace(/\/$/, '');
 
 export const browserApiBaseUrl = (process.env.NEXT_PUBLIC_API_URL || 'https://api.biz.loc:9443').replace(/\/$/, '');
+export const recordsPerPage = 12;
+
+export function parsePage(value) {
+  const page = Number(value);
+  return Number.isSafeInteger(page) && page > 0 ? page : 1;
+}
 
 export async function getApiData(path) {
   try {
