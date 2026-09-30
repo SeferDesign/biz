@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { isDate, isFiniteNumber, parseId } from '../shared/validation.js';
 import { sendInvoiceEmail as deliverInvoiceEmail } from '../../email/invoice-mailer.js';
+import { createInvoicePdf } from '../../pdf/invoice-pdf.js';
 
 const invoiceStatuses = new Set(['draft', 'sent', 'paid']);
 
@@ -92,6 +93,25 @@ export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoic
     if (!id) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
     if (!await store.deleteInvoice(id)) return res.status(404).json({ error: 'Invoice not found' });
     return res.sendStatus(204);
+  });
+
+  router.get('/invoices/:id/pdf', async (req, res) => {
+    const id = parseId(req.params.id);
+    if (!id) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
+    const invoice = await store.getInvoice(id);
+    if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
+    const snapshot = await store.getSnapshot();
+    const client = snapshot.clients.find((item) => item.id === invoice.client_id) || {};
+    const lines = snapshot.lines.filter((line) => line.invoice_id === invoice.id);
+    try {
+      const pdf = await createInvoicePdf({ invoice, client, lines });
+      const filename = `Invoice-${String(invoice.id).padStart(4, '0')}.pdf`;
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      return res.send(pdf);
+    } catch {
+      return res.status(500).json({ error: 'Could not generate invoice PDF' });
+    }
   });
 
   async function sendInvoiceEmailRoute(req, res) {

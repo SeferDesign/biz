@@ -27,6 +27,7 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
         <div><p className="eyebrow">INVOICE / {String(invoice.id).padStart(4, '0')}</p><h1>{invoice.description || 'Invoice details'}</h1><p className="page-description">Issued {formatDate(invoice.date)}</p></div>
         <div className="detail-actions">
           <StatusLabel status={invoiceStatus(invoice)} />
+          <a className="secondary-button" href={`${browserApiBaseUrl}/invoices/${invoice.id}/pdf`}>Download PDF</a>
           <ResourceActions editHref={`/invoices/${invoice.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/invoices/${invoice.id}`} returnTo="/invoices" label="invoice" />
         </div>
       </div>

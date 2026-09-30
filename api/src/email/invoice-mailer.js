@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { createInvoicePdf } from '../pdf/invoice-pdf.js';
 
 let transporter;
 
@@ -20,7 +21,7 @@ function getTransporter() {
   return transporter;
 }
 
-export async function sendInvoiceEmail({ invoice, client, lines }) {
+export async function sendInvoiceEmail({ invoice, client, lines }, transport) {
   const recipient = client.email || client.email_accounting;
   if (!recipient) throw new Error('The client does not have a billing email address');
 
@@ -44,13 +45,19 @@ export async function sendInvoiceEmail({ invoice, client, lines }) {
     `Total: ${currency} ${total}`,
     ...(invoiceUrl ? ['', `View invoice: ${invoiceUrl}`] : [])
   ].join('\n');
+  const pdf = await createInvoicePdf({ invoice, client, lines });
 
-  await getTransporter().sendMail({
+  await (transport || getTransporter()).sendMail({
     from: process.env.SMTP_FROM || 'Sefer Design Co. <info@seferdesign.com>',
     to: recipient,
     cc: [client.email_accounting_2, client.email_accounting_3].filter(Boolean),
     subject: `${process.env.NODE_ENV === 'development' ? 'DEV - ' : ''}Invoice from Sefer Design Company`,
-    text
+    text,
+    attachments: [{
+      filename: `Invoice-${String(invoice.id).padStart(4, '0')}.pdf`,
+      content: pdf,
+      contentType: 'application/pdf'
+    }]
   });
   return { recipient };
 }

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import request from 'supertest';
 import { createApp } from '../src/routing/app.js';
+import { sendInvoiceEmail } from '../src/email/invoice-mailer.js';
 import { createMemoryStore } from '../test-support/memory-store.js';
 
 function createTestApp(options = {}) {
@@ -26,6 +27,38 @@ test('GET /v1/invoices returns an invoice list', async () => {
 
   assert.equal(response.status, 200);
   assert.ok(Array.isArray(response.body));
+});
+
+test('invoice PDF endpoint returns a downloadable PDF document', async () => {
+  const app = createTestApp();
+  const response = await request(app).get('/v1/invoices/1/pdf').buffer(true).parse((res, callback) => {
+    const chunks = [];
+    res.on('data', (chunk) => chunks.push(chunk));
+    res.on('end', () => callback(null, Buffer.concat(chunks)));
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(response.headers['content-type'], 'application/pdf');
+  assert.match(response.headers['content-disposition'], /attachment; filename="Invoice-0001\.pdf"/);
+  assert.equal(response.body.subarray(0, 5).toString(), '%PDF-');
+});
+
+test('invoice email includes the generated invoice PDF attachment', async () => {
+  let message;
+  await sendInvoiceEmail({
+    invoice: { id: 10, client_id: 1, date: '2025-04-10', cost: 125, currency: 'USD' },
+    client: { name: 'Bright Studio', email: 'billing@bright.example' },
+    lines: [{ description: 'Design', hours: 1, rate: 125, total: 125 }]
+  }, {
+    async sendMail(value) {
+      message = value;
+    }
+  });
+
+  assert.equal(message.attachments.length, 1);
+  assert.equal(message.attachments[0].filename, 'Invoice-0010.pdf');
+  assert.equal(message.attachments[0].contentType, 'application/pdf');
+  assert.equal(message.attachments[0].content.subarray(0, 5).toString(), '%PDF-');
 });
 
 test('omni-search finds clients, vendors, expenses, invoices, and line items', async () => {
