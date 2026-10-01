@@ -165,7 +165,19 @@ export class MySqlStore {
 
   async getSnapshot() {
     const [clients, invoices, lines, expenses, vendors, years] = await Promise.all([
-      this.database.query('SELECT *, email_accounting AS email FROM clients ORDER BY id'),
+      this.database.query(`SELECT c.*, c.email_accounting AS email
+        FROM clients c
+        LEFT JOIN (
+          SELECT client_id, MAX(created_at) AS last_invoice_created_at
+          FROM invoices
+          WHERE client_id IS NOT NULL
+          GROUP BY client_id
+        ) invoice_activity ON invoice_activity.client_id = c.id
+        ORDER BY GREATEST(
+          COALESCE(c.created_at, '1970-01-01 00:00:00'),
+          COALESCE(invoice_activity.last_invoice_created_at, '1970-01-01 00:00:00')
+        ) DESC,
+        c.id DESC`),
       this.database.query(`SELECT *, cost AS total, CASE WHEN paid THEN 'paid' ELSE status END AS status,
         (SELECT p.status FROM invoice_payments p WHERE p.invoice_id = invoices.id ORDER BY p.submitted_at DESC, p.id DESC LIMIT 1) AS payment_status
         FROM invoices ORDER BY id`),

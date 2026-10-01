@@ -1,12 +1,12 @@
 const initialSnapshot = {
   invoices: [
-    { id: 1, client_id: 1, status: 'draft', total: 1200, cost: 1200, currency: 'USD', date: '2025-01-10' },
-    { id: 2, client_id: 2, status: 'sent', total: 980.5, cost: 980.5, currency: 'USD', date: '2025-02-05' },
-    { id: 3, client_id: 1, status: 'paid', total: 2150, cost: 2150, currency: 'USD', date: '2025-03-01', paiddate: '2025-03-15', paid: true }
+    { id: 1, client_id: 1, status: 'draft', total: 1200, cost: 1200, currency: 'USD', date: '2025-01-10', created_at: '2025-01-10T00:00:00Z' },
+    { id: 2, client_id: 2, status: 'sent', total: 980.5, cost: 980.5, currency: 'USD', date: '2025-02-05', created_at: '2025-02-05T00:00:00Z' },
+    { id: 3, client_id: 1, status: 'paid', total: 2150, cost: 2150, currency: 'USD', date: '2025-03-01', paiddate: '2025-03-15', paid: true, created_at: '2025-03-01T00:00:00Z' }
   ],
   clients: [
-    { id: 1, name: 'Acme Inc.', email: 'billing@acme.com', payment_terms: 'Net 15' },
-    { id: 2, name: 'Northwind', email: 'finance@northwind.example', payment_terms: 'Net 15' }
+    { id: 1, name: 'Acme Inc.', email: 'billing@acme.com', payment_terms: 'Net 15', created_at: '2025-01-01T00:00:00Z' },
+    { id: 2, name: 'Northwind', email: 'finance@northwind.example', payment_terms: 'Net 15', created_at: '2025-01-02T00:00:00Z' }
   ],
   lines: [
     { id: 1, invoice_id: 1, description: 'Design retainer', amount: 600, total: 600 },
@@ -118,7 +118,10 @@ export function createMemoryStore() {
       });
     },
     async getSnapshot() {
-      return snapshot;
+      return {
+        ...snapshot,
+        clients: sortClientsByRecentActivity(snapshot.clients, snapshot.invoices)
+      };
     },
     async getClient(id) {
       return snapshot.clients.find((item) => item.id === Number(id));
@@ -127,6 +130,7 @@ export function createMemoryStore() {
       const client = {
         id: Math.max(0, ...snapshot.clients.map((item) => item.id)) + 1,
         payment_terms: 'Net 15',
+        created_at: new Date().toISOString(),
         ...input,
         email: input.email_accounting || input.email || null
       };
@@ -209,6 +213,7 @@ export function createMemoryStore() {
       const paid = input.paid ?? input.status === 'paid';
       const invoice = {
         id: Math.max(0, ...snapshot.invoices.map((item) => item.id)) + 1,
+        created_at: new Date().toISOString(),
         ...input,
         cost: input.cost ?? input.total ?? null,
         total: input.total ?? input.cost ?? null,
@@ -310,4 +315,28 @@ function removeById(records, id) {
   if (index === -1) return false;
   records.splice(index, 1);
   return true;
+}
+
+function sortClientsByRecentActivity(clients, invoices) {
+  const latestInvoiceByClientId = new Map();
+  for (const invoice of invoices) {
+    const clientId = Number(invoice.client_id);
+    if (!clientId || !invoice.created_at) continue;
+    const current = latestInvoiceByClientId.get(clientId);
+    if (!current || String(invoice.created_at) > current) {
+      latestInvoiceByClientId.set(clientId, String(invoice.created_at));
+    }
+  }
+
+  return [...clients].sort((left, right) => {
+    const leftActivity = [left.created_at, latestInvoiceByClientId.get(Number(left.id))]
+      .filter(Boolean)
+      .sort()
+      .at(-1) || '';
+    const rightActivity = [right.created_at, latestInvoiceByClientId.get(Number(right.id))]
+      .filter(Boolean)
+      .sort()
+      .at(-1) || '';
+    return rightActivity.localeCompare(leftActivity) || Number(right.id) - Number(left.id);
+  });
 }

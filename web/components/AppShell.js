@@ -2,18 +2,56 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import {
+  Building2,
+  CalendarDays,
+  CreditCard,
+  FileText,
+  House,
+  Receipt,
+  Award,
+  Users
+} from 'lucide-react';
 import OmniSearch from './OmniSearch.js';
 
-const navigation = [
-  { href: '/', label: 'Overview', index: '00' },
-  { href: '/invoices', label: 'Invoices', index: '01' },
-  { href: '/clients', label: 'Clients', index: '02' },
-  { href: '/expenses', label: 'Expenses', index: '03' },
-  { href: '/vendors', label: 'Vendors', index: '04' },
-  { href: '/years', label: 'Years', index: '05' },
-  { href: '/best', label: 'Best', index: '06' },
-  { href: '/payments', label: 'Payment', index: '07' }
+const primaryNavigation = [
+  { href: '/', label: 'Overview', icon: House },
+  { href: '/clients', label: 'Clients', icon: Users },
+  { href: '/invoices', label: 'Invoices', icon: FileText },
+  { href: '/vendors', label: 'Vendors', icon: Building2 },
+  { href: '/expenses', label: 'Expenses', icon: Receipt },
+  { href: '/years', label: 'Years', icon: CalendarDays }
 ];
+
+const secondaryNavigation = [
+  { href: '/best', label: 'Best Performances', icon: Award },
+  { href: '/payments', label: 'Payment Options', icon: CreditCard }
+];
+
+function NavIcon({ icon: Icon }) {
+  return (
+    <span className="nav-icon" aria-hidden="true">
+      <Icon size={18} strokeWidth={1.75} />
+    </span>
+  );
+}
+
+function navItem(pathname, item, secondary = false) {
+  const active = item.href === '/'
+    ? pathname === '/'
+    : pathname === item.href || pathname.startsWith(`${item.href}/`);
+  return (
+    <Link
+      className={`nav-link${secondary ? ' nav-link-secondary' : ''}${active ? ' is-active' : ''}`}
+      href={item.href}
+      key={item.href}
+      aria-current={active ? 'page' : undefined}
+    >
+      <NavIcon icon={item.icon} />
+      <span>{item.label}</span>
+    </Link>
+  );
+}
 
 export default function AppShell({ children, user }) {
   const pathname = usePathname();
@@ -46,22 +84,10 @@ export default function AppShell({ children, user }) {
           <img className="brand-logo" src="/images/sdc_white.svg" alt="" />
         </Link>
         <nav className="primary-nav" aria-label="Main navigation">
-          {navigation.map((item) => {
-            const active = item.href === '/'
-              ? pathname === '/'
-              : pathname === item.href || pathname.startsWith(`${item.href}/`);
-            return (
-              <Link
-                className={`nav-link${active ? ' is-active' : ''}`}
-                href={item.href}
-                key={item.href}
-                aria-current={active ? 'page' : undefined}
-              >
-                <span className="nav-index">{item.index}</span>
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
+          {primaryNavigation.map((item) => navItem(pathname, item))}
+        </nav>
+        <nav className="secondary-nav" aria-label="Secondary navigation">
+          {secondaryNavigation.map((item) => navItem(pathname, item, true))}
         </nav>
         <div className="sidebar-foot">
           <div className="sidebar-account">

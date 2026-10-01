@@ -22,7 +22,6 @@ export default async function ClientsPage({ searchParams }) {
         { key: 'name', label: 'Company', render: (client) => <Link className="table-link" href={`/clients/${client.id}`}>{client.name || 'Unnamed client'}</Link> },
         { key: 'contact', label: 'Contact' },
         { key: 'email', label: 'Billing email', render: (client) => client.email_accounting || client.email || '-' },
-        { key: 'location', label: 'Location', render: (client) => [client.city, client.state].filter(Boolean).join(', ') || '-' },
         { key: 'rate', label: 'Hourly rate', className: 'numeric-cell', render: (client) => client.currentrate ? formatMoney(client.currentrate) : '-' },
         {
           key: 'invoice_action',

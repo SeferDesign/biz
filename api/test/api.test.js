@@ -288,6 +288,39 @@ test('GET /v1/invoices returns an invoice list', async () => {
   assert.ok(Array.isArray(response.body));
 });
 
+test('GET /v1/clients starts with the 10 most recent clients by activity', async () => {
+  const store = createMemoryStore();
+  const app = createApp({ store, apiAccessToken: TEST_API_ACCESS_TOKEN });
+
+  const created = [];
+  for (let offset = 0; offset < 11; offset += 1) {
+    created.push(await store.createClient({ name: `Recent Client ${offset + 1}` }));
+  }
+
+  for (let offset = 0; offset < created.length; offset += 1) {
+    created[offset].created_at = `2026-01-${String(offset + 1).padStart(2, '0')}T00:00:00Z`;
+  }
+
+  const activityInvoice = await store.createInvoice({ client_id: created[0].id, total: 250, date: '2026-02-01' });
+  activityInvoice.created_at = '2026-02-01T00:00:00Z';
+
+  const response = await request(app).get('/v1/clients');
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(response.body.slice(0, 10).map((client) => client.id), [
+    created[0].id,
+    created[10].id,
+    created[9].id,
+    created[8].id,
+    created[7].id,
+    created[6].id,
+    created[5].id,
+    created[4].id,
+    created[3].id,
+    created[2].id
+  ]);
+});
+
 test('invoice PDF endpoint returns a downloadable PDF document', async () => {
   const app = createTestApp();
   const response = await request(app).get('/v1/invoices/1/pdf').buffer(true).parse((res, callback) => {
