@@ -61,11 +61,6 @@ export default function AppShell({ children, accountEmail }) {
           })}
         </nav>
         <div className="sidebar-foot">
-          <div className="sidebar-company">
-            <span className="sidebar-rule" />
-            <span>Sefer Design Company LLC</span>
-            <span className="sidebar-foot-note">BUSINESS LEDGER</span>
-          </div>
           <div className="sidebar-account">
             <Link className={`account-link${accountActive ? ' is-active' : ''}`} href={accountHref} aria-current={accountActive ? 'page' : undefined}>
               <span className="account-avatar" aria-hidden="true">{avatarInitial}</span>
