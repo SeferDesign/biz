@@ -1,7 +1,7 @@
 # Local development stack.
 #
 # nginx is bound to 127.0.0.1 on ports 9080/9443 so it never collides with other
-# local web servers (Local by Flywheel, Rails on 3000, etc.).
+# local web servers running on common local ports.
 #
 # One-time setup:
 #   npm run local -- setup   — installs the mkcert CA, generates a cert, adds /etc/hosts

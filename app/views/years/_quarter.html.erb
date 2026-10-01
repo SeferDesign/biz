@@ -1,6 +1,0 @@
-<div class="year-income-quarter">
-  <h3>Quarter <%= quarterNumber %> <small>(<%= Date::MONTHNAMES[3 * quarterNumber - 2] %> - <%= Date::MONTHNAMES[3 * quarterNumber] %>)</small></h3>
-  <p>Income: <span class="currency green"><%= number_to_currency(@year.incomeByQuarter(quarterNumber), { :negative_format => '(%n)' }) %></span></p>
-  <p>Tax Est.: <span class="currency red"><%= number_to_currency(@year.taxOwedByQuarterActualCalendar(quarterNumber), { :negative_format => '(%n)' }) %></span></p>
-  <p>Payment Est.*: <span class="currency red"><%= number_to_currency(@year.taxOwedByQuarterTaxCalendar(quarterNumber), { :negative_format => '(%n)' }) %></span></p>
-</div>

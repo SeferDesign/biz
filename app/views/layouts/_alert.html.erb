@@ -1,9 +1,0 @@
-<% if (!notice.nil? or !alert.nil?) and (user_signed_in? or controller_name == 'sessions') %>
-<dialog open class="<% if !notice.nil? %>notice<% elsif !alert.nil? %>alert<% end %>">
-	<% if !notice.nil? %>
-	<p><%= icon('fas', 'info-circle', class: 'fa-fw left') %><%= notice %></p>
-	<% elsif !alert.nil? %>
-	<p><%= icon('fas', 'exclamation-triangle', class: 'fa-fw left') %><%= alert %></p>
-	<% end %>
-</dialog>
-<% end %>

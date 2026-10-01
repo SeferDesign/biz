@@ -49,7 +49,7 @@ rerunning the seed. Production user seeding requires both
 `npm run local -- mysql` to open a MySQL client. Production `DATABASE_URL`
 values must use the `mysql://` scheme.
 
-The web office requires sign-in with an existing Rails user email and password;
+The web office requires sign-in with an existing user email and password;
 accounts with two-factor login enabled also require their current code. The web
 session is HttpOnly and expires after eight hours. The public web exceptions are
 `/payment` and matching invoice/client access-token read links.
@@ -65,12 +65,12 @@ Devise `encrypted_password` and encrypted OTP fields.
 Protected API routes accept the signed user session or
 `Authorization: Bearer <API_ACCESS_TOKEN>`. Local Compose uses
 `local-development-api-token` unless overridden; cloud Compose requires a
-secret `API_ACCESS_TOKEN`. Set `OTP_SECRET_ENCRYPTION_KEY` to the legacy Rails
+secret `API_ACCESS_TOKEN`. Set `OTP_SECRET_ENCRYPTION_KEY` to the legacy
 OTP encryption key when two-factor accounts are used. Health, OpenAPI, and docs
 routes remain public; invoice/client links grant access only to matching reads.
 
 Local Compose uses a development-only OTP encryption key by default so the web
-setup flow is available. Override it with the legacy Rails key when importing
+setup flow is available. Override it with the legacy key when importing
 users who already have two-factor authentication enabled.
 
 The API hostname mirrors production: `api.biz.seferdesign.com` maps to
