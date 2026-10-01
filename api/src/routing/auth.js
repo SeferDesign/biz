@@ -24,6 +24,11 @@ export function createAuthRouter(store, {
 } = {}) {
   const router = Router();
 
+  function normalizeProfileName(value) {
+    if (typeof value !== 'string') return '';
+    return value.trim().slice(0, 255);
+  }
+
   function requireUser(req, res) {
     if (req.authUser) return true;
     res.status(401).json({ error: 'Unauthorized' });
@@ -66,7 +71,12 @@ export function createAuthRouter(store, {
       access_token: token,
       token_type: 'Bearer',
       expires_in: SESSION_TTL_SECONDS,
-      user: { id: user.id, email: user.email }
+      user: {
+        id: user.id,
+        email: user.email,
+        first_name: user.first_name || '',
+        last_name: user.last_name || ''
+      }
     });
   });
 
@@ -103,9 +113,52 @@ export function createAuthRouter(store, {
     return res.json({ message: 'Password updated. You can now sign in.' });
   });
 
-  router.get('/session', (req, res) => {
+  router.get('/session', async (req, res) => {
     if (!requireUser(req, res)) return;
-    return res.json({ user: req.authUser });
+    const user = await store.getUserProfile(req.authUser.id);
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+    return res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        first_name: user.first_name || '',
+        last_name: user.last_name || ''
+      }
+    });
+  });
+
+  router.get('/profile', async (req, res) => {
+    if (!requireUser(req, res)) return;
+    const user = await store.getUserProfile(req.authUser.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    return res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        first_name: user.first_name || '',
+        last_name: user.last_name || ''
+      }
+    });
+  });
+
+  router.patch('/profile', async (req, res) => {
+    if (!requireUser(req, res)) return;
+    const firstName = normalizeProfileName(req.body?.first_name);
+    const lastName = normalizeProfileName(req.body?.last_name);
+    const user = await store.updateUserProfile(req.authUser.id, {
+      first_name: firstName,
+      last_name: lastName
+    });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    return res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        first_name: user.first_name || '',
+        last_name: user.last_name || ''
+      },
+      message: 'Profile updated.'
+    });
   });
 
   router.post('/password', async (req, res) => {

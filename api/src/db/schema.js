@@ -5,6 +5,8 @@ const statements = [
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL DEFAULT '',
     encrypted_password VARCHAR(255) NOT NULL DEFAULT '',
+    first_name VARCHAR(255) NOT NULL DEFAULT '',
+    last_name VARCHAR(255) NOT NULL DEFAULT '',
     reset_password_token VARCHAR(255),
     reset_password_sent_at DATETIME,
     remember_created_at DATETIME,
@@ -126,6 +128,20 @@ const statements = [
 export async function initializeSchema(database = getPool()) {
   for (const statement of statements) {
     await database.query(statement);
+  }
+  const [userFirstNameColumns] = await database.query(
+    `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'first_name'`
+  );
+  if (!userFirstNameColumns.length) {
+    await database.query("ALTER TABLE users ADD COLUMN first_name VARCHAR(255) NOT NULL DEFAULT '' AFTER encrypted_password");
+  }
+  const [userLastNameColumns] = await database.query(
+    `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'last_name'`
+  );
+  if (!userLastNameColumns.length) {
+    await database.query("ALTER TABLE users ADD COLUMN last_name VARCHAR(255) NOT NULL DEFAULT '' AFTER first_name");
   }
   const [columns] = await database.query(
     `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS

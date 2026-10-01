@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
 
 export default function AccountPage() {
-  redirect('/settings/account/security');
+  redirect('/settings/account/profile');
 }

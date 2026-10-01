@@ -8,6 +8,8 @@ export function createSessionToken(user, secret, now = Date.now()) {
   const payload = Buffer.from(JSON.stringify({
     sub: Number(user.id),
     email: user.email,
+    first_name: typeof user.first_name === 'string' ? user.first_name : '',
+    last_name: typeof user.last_name === 'string' ? user.last_name : '',
     exp: Math.floor(now / 1000) + SESSION_TTL_SECONDS
   })).toString('base64url');
   const signature = createHmac('sha256', secret).update(payload).digest('base64url');
@@ -31,7 +33,12 @@ export function verifySessionToken(token, secret, now = Date.now()) {
   try {
     const session = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
     if (!Number.isSafeInteger(session.sub) || session.sub < 1 || !Number.isInteger(session.exp) || session.exp <= Math.floor(now / 1000)) return null;
-    return { id: session.sub, email: session.email };
+    return {
+      id: session.sub,
+      email: session.email,
+      first_name: typeof session.first_name === 'string' ? session.first_name : '',
+      last_name: typeof session.last_name === 'string' ? session.last_name : ''
+    };
   } catch {
     return null;
   }

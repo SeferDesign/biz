@@ -239,6 +239,46 @@ test('signed-in users can change passwords only after verifying the current pass
   assert.equal(await bcrypt.compare('new-password', user.encrypted_password), true);
 });
 
+test('signed-in users can view and update first and last name with blank defaults', async () => {
+  const store = createMemoryStore();
+  const user = {
+    id: 11,
+    email: 'profile@example.test',
+    encrypted_password: await bcrypt.hash('example123', 4),
+    otp_required_for_login: false
+  };
+  store.users.push(user);
+  const app = createApp({ store, apiAccessToken: TEST_API_ACCESS_TOKEN });
+  const login = await supertest(app).post('/v1/auth/login').send({ email: user.email, password: 'example123' });
+  const authorization = `Bearer ${login.body.access_token}`;
+
+  const profile = await supertest(app).get('/v1/auth/profile').set('Authorization', authorization);
+  assert.equal(profile.status, 200);
+  assert.equal(profile.body.user.first_name, '');
+  assert.equal(profile.body.user.last_name, '');
+
+  const updated = await supertest(app).patch('/v1/auth/profile').set('Authorization', authorization).send({
+    first_name: '  Rob  ',
+    last_name: ' Sefer '
+  });
+  assert.equal(updated.status, 200);
+  assert.equal(updated.body.user.first_name, 'Rob');
+  assert.equal(updated.body.user.last_name, 'Sefer');
+
+  const session = await supertest(app).get('/v1/auth/session').set('Authorization', authorization);
+  assert.equal(session.status, 200);
+  assert.equal(session.body.user.first_name, 'Rob');
+  assert.equal(session.body.user.last_name, 'Sefer');
+
+  const blanked = await supertest(app).patch('/v1/auth/profile').set('Authorization', authorization).send({
+    first_name: null,
+    last_name: ''
+  });
+  assert.equal(blanked.status, 200);
+  assert.equal(blanked.body.user.first_name, '');
+  assert.equal(blanked.body.user.last_name, '');
+});
+
 test('GET /v1/invoices returns an invoice list', async () => {
   const app = createTestApp();
 

@@ -42,6 +42,27 @@ export function createMemoryStore() {
       const user = users.find((item) => item.id === Number(id));
       return user ? { id: user.id, encrypted_password: user.encrypted_password } : undefined;
     },
+    async getUserProfile(id) {
+      const user = users.find((item) => item.id === Number(id));
+      return user ? {
+        id: user.id,
+        email: user.email,
+        first_name: user.first_name || '',
+        last_name: user.last_name || ''
+      } : undefined;
+    },
+    async updateUserProfile(id, { first_name, last_name }) {
+      const user = users.find((item) => item.id === Number(id));
+      if (!user) return undefined;
+      user.first_name = first_name;
+      user.last_name = last_name;
+      return {
+        id: user.id,
+        email: user.email,
+        first_name: user.first_name || '',
+        last_name: user.last_name || ''
+      };
+    },
     async updateUserPassword(id, encryptedPassword) {
       const user = users.find((item) => item.id === Number(id));
       if (user) Object.assign(user, { encrypted_password: encryptedPassword, reset_password_token: null, reset_password_sent_at: null });

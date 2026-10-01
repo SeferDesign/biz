@@ -50,7 +50,7 @@ export class MySqlStore {
 
   async getUserByEmail(email) {
     const [rows] = await this.database.execute(
-      `SELECT id, email, encrypted_password, encrypted_otp_secret,
+      `SELECT id, email, COALESCE(first_name, '') AS first_name, COALESCE(last_name, '') AS last_name, encrypted_password, encrypted_otp_secret,
         encrypted_otp_secret_iv, encrypted_otp_secret_salt, consumed_timestep,
         otp_required_for_login
        FROM users WHERE email = ? LIMIT 1`,
@@ -65,6 +65,23 @@ export class MySqlStore {
       [id]
     );
     return rows[0];
+  }
+
+  async getUserProfile(id) {
+    const [rows] = await this.database.execute(
+      `SELECT id, email, COALESCE(first_name, '') AS first_name, COALESCE(last_name, '') AS last_name
+       FROM users WHERE id = ? LIMIT 1`,
+      [id]
+    );
+    return rows[0];
+  }
+
+  async updateUserProfile(id, { first_name, last_name }) {
+    await this.database.execute(
+      'UPDATE users SET first_name = ?, last_name = ? WHERE id = ?',
+      [first_name, last_name, id]
+    );
+    return this.getUserProfile(id);
   }
 
   async updateUserPassword(id, encryptedPassword) {

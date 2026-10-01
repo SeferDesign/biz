@@ -15,11 +15,11 @@ const navigation = [
   { href: '/payments', label: 'Payment', index: '07' }
 ];
 
-export default function AppShell({ children, accountEmail }) {
+export default function AppShell({ children, user }) {
   const pathname = usePathname();
   if (['/login', '/forgot-password', '/reset-password'].includes(pathname)) return children;
   // Visitors without a session only reach public pages and access-token record links.
-  if (!accountEmail) {
+  if (!user?.email) {
     return (
       <div className="public-shell">
         <header className="public-header">
@@ -31,9 +31,13 @@ export default function AppShell({ children, accountEmail }) {
       </div>
     );
   }
-  const accountHref = '/settings/account/security';
+  const accountHref = '/settings/account/profile';
   const accountActive = pathname.startsWith('/settings/account');
-  const avatarInitial = accountEmail?.trim().charAt(0).toUpperCase() || '?';
+  const fullName = [user?.first_name, user?.last_name]
+    .map((value) => (typeof value === 'string' ? value.trim() : ''))
+    .filter(Boolean)
+    .join(' ');
+  const avatarInitial = fullName.charAt(0).toUpperCase() || user?.email?.trim().charAt(0).toUpperCase() || '?';
 
   return (
     <div className="app-shell">
@@ -65,11 +69,11 @@ export default function AppShell({ children, accountEmail }) {
             <Link className={`account-link${accountActive ? ' is-active' : ''}`} href={accountHref} aria-current={accountActive ? 'page' : undefined}>
               <span className="account-avatar" aria-hidden="true">{avatarInitial}</span>
               <span className="account-copy">
-                <strong>Account</strong>
-                <span>{accountEmail || 'Sign in to your account'}</span>
+                <strong>{fullName || 'Account'}</strong>
+                <span>{user?.email || 'Sign in to your account'}</span>
               </span>
             </Link>
-            {accountEmail
+            {user.email
               ? <form action="/api/auth/logout" method="post"><button className="sidebar-sign-out" type="submit">Sign out</button></form>
               : <Link className="sidebar-sign-out" href="/login">Sign in</Link>}
           </div>

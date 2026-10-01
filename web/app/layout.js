@@ -11,7 +11,7 @@ export default async function RootLayout({ children }) {
   const session = await getApiData('/auth/session');
   return (
     <html lang="en">
-      <body><AppShell accountEmail={session.data?.user?.email}>{children}</AppShell></body>
+      <body><AppShell user={session.data?.user}>{children}</AppShell></body>
     </html>
   );
 }

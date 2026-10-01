@@ -34,9 +34,9 @@ export async function seedUser(database, password = process.env.SEED_USER_PASSWO
   if (typeof password !== 'string' || password.length === 0) return false;
   const encryptedPassword = await bcrypt.hash(password, 10);
   await database.execute(
-    `INSERT INTO users (email, encrypted_password, otp_required_for_login)
-     VALUES (?, ?, FALSE) ON DUPLICATE KEY UPDATE id = id`,
-    ['rob@seferdesign.com', encryptedPassword]
+    `INSERT INTO users (email, encrypted_password, first_name, last_name, otp_required_for_login)
+     VALUES (?, ?, ?, ?, FALSE) ON DUPLICATE KEY UPDATE id = id`,
+    ['rob@seferdesign.com', encryptedPassword, 'Robert', 'Sefer']
   );
   return true;
 }
