@@ -349,7 +349,6 @@ h2 { font-family: Georgia, "Times New Roman", serif; font-size: 23px; font-weigh
   .brand-mark { width: 32px; height: 32px; }
   .nav-caption { display: none; }
   .sidebar-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; padding: 10px 3px 0; border-top: 1px solid rgb(255 255 255 / 16%); }
-  .sidebar-company { display: none; }
   .sidebar-account { display: flex; min-width: 0; flex: 1; align-items: center; justify-content: space-between; gap: 8px; padding-top: 0; border-top: 0; }
   .account-link { min-width: 0; padding: 0; }
   .account-avatar { width: 30px; height: 30px; }
