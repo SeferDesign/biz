@@ -1,0 +1,13 @@
+{
+	email __ACME_EMAIL__
+}
+
+__APP_DOMAIN__ {
+	encode zstd gzip
+	reverse_proxy biz-web:3000
+}
+
+__API_DOMAIN__ {
+	encode zstd gzip
+	reverse_proxy biz-api:3000
+}

@@ -1,5 +1,6 @@
 .git
 .github
+cdk
 docker/certs
 
 # Installed/built artifacts — recreated inside the container
