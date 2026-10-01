@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ResourcePage } from '../../components/ResourcePage.js';
+import { NewIconButton } from '../../components/NewButton.js';
 import { formatMoney, parsePage } from '../../lib/api.js';
 import { getApiData } from '../../lib/api-server.js';
 
@@ -33,7 +34,13 @@ export default async function VendorsPage({ searchParams }) {
         { key: 'category', label: 'Category' },
         { key: 'expenses', label: 'Expense records', render: (vendor) => totalsByVendor.get(vendor.id)?.count || 0 },
         { key: 'amount', label: 'Recorded spend', className: 'numeric-cell', render: (vendor) => formatMoney(totalsByVendor.get(vendor.id)?.amount || 0) },
-        { key: 'notes', label: 'Notes' }
+        { key: 'notes', label: 'Notes' },
+        {
+          key: 'expense_action',
+          label: 'New expense',
+          className: 'action-cell',
+          render: (vendor) => <NewIconButton href={`/expenses/new?vendor_id=${encodeURIComponent(vendor.id)}`} label={`Create new expense for ${vendor.name || 'this vendor'}`} />
+        }
       ]}
     />
   );

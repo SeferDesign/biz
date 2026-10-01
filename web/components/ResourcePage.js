@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { recordsPerPage } from '../lib/api.js';
+import NewButton from './NewButton.js';
 
 export function ResourcePage({ title, description, data, error, columns, countLabel, count, hideHeading = false, actionHref, actionLabel, pageHref, page = 1, pageParam = 'page' }) {
   const records = Array.isArray(data) ? data : [];
@@ -25,7 +26,7 @@ export function ResourcePage({ title, description, data, error, columns, countLa
             <p className="page-description">{description}</p>
           </div>
           <div className="heading-actions">
-            {actionHref && <Link className="primary-button" href={actionHref}>{actionLabel || 'New record'}</Link>}
+            {actionHref && <NewButton href={actionHref} label={actionLabel || 'New record'} />}
             {!error && (
               <div className="heading-count">
                 <strong>{itemCount.toLocaleString('en-US')}</strong>

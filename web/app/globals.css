@@ -136,6 +136,7 @@ h2 { font-family: Georgia, "Times New Roman", serif; font-size: 23px; font-weigh
 .primary-button, .secondary-button, .danger-button { display: inline-flex; min-height: 40px; align-items: center; justify-content: center; padding: 0 15px; border: 1px solid transparent; cursor: pointer; font-size: 12px; font-weight: 600; }
 .primary-button { color: #fff; background: var(--forest); }
 .primary-button:hover { color: #fff; background: var(--forest-soft); }
+.new-button { gap: 7px; white-space: nowrap; }
 .secondary-button { border-color: var(--line); color: var(--ink); background: #fff; }
 .secondary-button:hover { color: var(--forest); border-color: var(--forest-soft); }
 .danger-button { border-color: #eac8bc; color: #9a4934; background: #fff; }
@@ -149,10 +150,13 @@ h2 { font-family: Georgia, "Times New Roman", serif; font-size: 23px; font-weigh
 .data-table tr:last-child td { border-bottom: 0; }
 .data-table tbody tr:hover { background: #f9fbf9; }
 .data-table .primary-cell { color: var(--ink); font-weight: 600; }
+.data-table .action-cell { width: 1%; text-align: center; white-space: nowrap; }
 .table-link { color: var(--forest-soft); }
 .table-link:hover { color: var(--coral); }
 .numeric-cell { text-align: right; white-space: nowrap; }
 .muted-cell { color: var(--muted); }
+.table-action-button { display: inline-grid; width: 32px; height: 32px; place-items: center; border: 1px solid transparent; color: var(--forest); background: transparent; }
+.table-action-button:hover, .table-action-button:focus-visible { border-color: var(--line); background: var(--green-wash); }
 .invoice-row-actions { display: flex; align-items: center; gap: 4px; }
 .invoice-row-actions button { display: inline-grid; width: 32px; height: 32px; place-items: center; border: 1px solid transparent; color: var(--forest); background: transparent; cursor: pointer; }
 .invoice-row-actions button:hover, .invoice-row-actions button:focus-visible { border-color: var(--line); background: var(--green-wash); }
@@ -300,9 +304,9 @@ h2 { font-family: Georgia, "Times New Roman", serif; font-size: 23px; font-weigh
 .form-actions { display: flex; grid-column: 1 / -1; flex-wrap: wrap; gap: 9px; padding-top: 4px; }
 
 .login-page { display: grid; min-height: 100vh; align-content: center; justify-items: center; gap: 26px; padding: 32px 20px; background: linear-gradient(135deg, #edf2ed, #f8f8f4 58%, #e8eee9); }
-.login-brand { display: flex; align-items: center; gap: 12px; }
+.login-brand { display: grid; justify-items: center; text-align: center; gap: 10px; }
 .login-brand .brand-mark { border-color: #b9c8bd; color: var(--forest); }
-.login-brand .brand-name { color: var(--forest); }
+.login-brand .brand-name { display: grid; gap: 2px; color: var(--forest); }
 .login-brand .brand-name span { color: var(--muted); }
 .login-panel { width: min(420px, 100%); padding: 30px; border: 1px solid var(--line); background: #fff; box-shadow: var(--shadow); }
 .login-panel h1 { margin-bottom: 22px; font-size: 32px; }

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import NewButton from '../../../components/NewButton.js';
 import { DetailGrid } from '../../../components/ResourcePage.js';
 import ResourceActions from '../../../components/ResourceActions.js';
 import { browserApiBaseUrl, formatMoney } from '../../../lib/api.js';
@@ -21,7 +22,10 @@ export default async function VendorDetailPage({ params }) {
       <Link className="back-link" href="/vendors">&lt; All vendors</Link>
       <div className="page-heading">
         <div><h1>{vendor.name}</h1><p className="page-description">{vendor.category || 'Uncategorized vendor'}</p></div>
-        <ResourceActions editHref={`/vendors/${vendor.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/vendors/${vendor.id}`} returnTo="/vendors" label="vendor" />
+        <div className="heading-actions">
+          <NewButton href={`/expenses/new?vendor_id=${encodeURIComponent(vendor.id)}`} label="New expense" />
+          <ResourceActions editHref={`/vendors/${vendor.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/vendors/${vendor.id}`} returnTo="/vendors" label="vendor" />
+        </div>
       </div>
       <DetailGrid items={[
         ['Category', vendor.category],

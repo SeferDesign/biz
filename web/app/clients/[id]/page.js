@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { DetailGrid, ResourcePage } from '../../../components/ResourcePage.js';
+import NewButton from '../../../components/NewButton.js';
 import ResourceActions from '../../../components/ResourceActions.js';
 import InvoiceActions from '../../../components/InvoiceActions.js';
 import { browserApiBaseUrl, formatDate, formatMoney, newestInvoicesFirst, parsePage } from '../../../lib/api.js';
@@ -29,7 +30,12 @@ export default async function ClientDetailPage({ params, searchParams }) {
       {!accessToken && <Link className="back-link" href="/clients">&lt; All clients</Link>}
       <div className="page-heading">
         <div><h1>{client.name || 'Unnamed client'}</h1><p className="page-description">{client.contact || 'No primary contact listed'}</p></div>
-        {!accessToken && <ResourceActions editHref={`/clients/${client.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/clients/${client.id}`} returnTo="/clients" label="client" />}
+        {!accessToken && (
+          <div className="heading-actions">
+            <NewButton href={`/invoices/new?client_id=${encodeURIComponent(client.id)}`} label="New Invoice" />
+            <ResourceActions editHref={`/clients/${client.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/clients/${client.id}`} returnTo="/clients" label="client" />
+          </div>
+        )}
       </div>
       <DetailGrid items={[
         ['Contact', client.contact],
