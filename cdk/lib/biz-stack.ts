@@ -28,7 +28,6 @@ export interface BizStackProps extends StackProps {
   hostedZoneName: string;
   acmeEmail: string;
   instanceType: string;
-  backupRetentionDays: number;
 }
 
 export class BizStack extends Stack {
@@ -58,7 +57,8 @@ export class BizStack extends Stack {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       encryption: s3.BucketEncryption.S3_MANAGED,
       enforceSSL: true,
-      lifecycleRules: [{ prefix: 'mysql/', expiration: Duration.days(props.backupRetentionDays) }],
+      objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_ENFORCED,
+      lifecycleRules: [{ prefix: 'mysql/', expiration: Duration.days(30) }],
       removalPolicy: RemovalPolicy.RETAIN,
     });
 

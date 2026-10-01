@@ -22,5 +22,4 @@ new BizStack(app, 'biz-prod', {
   hostedZoneName: context('hostedZoneName', 'HOSTED_ZONE_NAME') ?? 'seferdesign.com',
   acmeEmail: context('acmeEmail', 'ACME_EMAIL') ?? 'info@seferdesign.com',
   instanceType: context('instanceType', 'INSTANCE_TYPE') ?? 't4g.micro',
-  backupRetentionDays: Number(context('backupRetentionDays', 'BACKUP_RETENTION_DAYS') ?? 30),
 });
