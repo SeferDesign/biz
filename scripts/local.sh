@@ -21,6 +21,7 @@ Commands:
 	db:setup             Create the local MySQL tables
 	seed                 Load the legacy sample records into MySQL
 	seed-user            Create or preserve the local sign-in account
+	import-live <path>   Import a PostgreSQL Rails dump and reconcile into local MySQL
   sh <service> [cmd]   Open a shell (or run a command) in a service container
 	mysql [arguments]    Open the MySQL client against the local database
   reset                Recreate the stack and wipe volumes
@@ -95,6 +96,10 @@ case "$command_name" in
 	seed-user)
 		load_local_env
 		compose_local exec api npm run db:seed-user --workspace @seferbiz/api
+		;;
+	import-live)
+		load_local_env
+		exec bash "$REPO_ROOT/scripts/import-live-db.sh" "$@"
 		;;
 	sh)
 		load_local_env

@@ -10,6 +10,7 @@
     "db:setup": "node src/db/setup.js",
     "db:seed": "node src/db/seed.js",
     "db:seed-user": "node src/db/seed.js --user-only",
+    "db:import-live": "node src/db/import-live.js",
     "openapi:validate": "node --input-type=module -e \"import fs from 'node:fs'; import yaml from 'yaml'; yaml.parse(fs.readFileSync('./src/openapi/openapi.yaml', 'utf8')); console.log('OpenAPI YAML is valid');\""
   },
   "dependencies": {
@@ -18,6 +19,7 @@
     "mysql2": "^3.24.5",
     "nodemailer": "^10.0.12",
     "pdfkit": "^0.20.2",
+    "pg": "^8.16.3",
     "stripe": "^22.6.2",
     "swagger-ui-express": "5.0.1",
     "yaml": "2.9.1"
