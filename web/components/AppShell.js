@@ -80,7 +80,6 @@ export default function AppShell({ children, user }) {
       </aside>
       <div className="main-frame">
         <header className="topbar">
-          <span className="topbar-section">OPERATIONS</span>
           {['/payment', '/payments'].includes(pathname) ? <span className="topbar-date">SEFER DESIGN COMPANY</span> : <OmniSearch />}
         </header>
         <main className="main-content">{children}</main>
