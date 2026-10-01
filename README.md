@@ -57,6 +57,10 @@ npm run local -- import-live /absolute/path/to/dump.sql.gz
 
 This command loads the dump into a temporary PostgreSQL container and then runs
 the reconciliation importer that maps data into the current MySQL schema.
+By default, imported users have OTP disabled and legacy OTP secrets cleared so
+you can sign in locally and re-enroll two-factor authentication with your local
+`OTP_SECRET_ENCRYPTION_KEY`. To keep imported OTP data, set
+`PRESERVE_IMPORTED_OTP=true` for that import run.
 
 The web office requires sign-in with an existing user email and password;
 accounts with two-factor login enabled also require their current code. The web

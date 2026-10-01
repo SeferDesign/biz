@@ -273,6 +273,7 @@ async function insertExpenses(mysqlConnection, pgClient) {
 }
 
 async function insertUsers(mysqlConnection, pgClient) {
+  const preserveImportedOtp = process.env.PRESERVE_IMPORTED_OTP === 'true';
   const { rows } = await pgClient.query(`
     SELECT id, email, encrypted_password, reset_password_token, reset_password_sent_at,
       remember_created_at, sign_in_count, current_sign_in_at, last_sign_in_at,
@@ -295,6 +296,12 @@ async function insertUsers(mysqlConnection, pgClient) {
   `;
 
   for (const row of rows) {
+    const encryptedOtpSecret = preserveImportedOtp ? row.encrypted_otp_secret : null;
+    const encryptedOtpSecretIv = preserveImportedOtp ? row.encrypted_otp_secret_iv : null;
+    const encryptedOtpSecretSalt = preserveImportedOtp ? row.encrypted_otp_secret_salt : null;
+    const consumedTimestep = preserveImportedOtp ? row.consumed_timestep : null;
+    const otpRequiredForLogin = preserveImportedOtp ? parseBoolean(row.otp_required_for_login) : false;
+
     await mysqlConnection.execute(sql, [
       row.id,
       row.email,
@@ -311,11 +318,11 @@ async function insertUsers(mysqlConnection, pgClient) {
       row.last_sign_in_ip,
       row.created_at,
       row.updated_at,
-      row.encrypted_otp_secret,
-      row.encrypted_otp_secret_iv,
-      row.encrypted_otp_secret_salt,
-      row.consumed_timestep,
-      parseBoolean(row.otp_required_for_login),
+      encryptedOtpSecret,
+      encryptedOtpSecretIv,
+      encryptedOtpSecretSalt,
+      consumedTimestep,
+      otpRequiredForLogin,
       truncateString(row.google_token, 255)
     ]);
   }
