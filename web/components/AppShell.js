@@ -45,7 +45,6 @@ export default function AppShell({ children, user }) {
         <Link className="brand" href="/" aria-label="Sefer Design Company overview">
           <img className="brand-logo" src="/images/sdc_white.svg" alt="" />
         </Link>
-        <div className="nav-caption">WORKSPACE</div>
         <nav className="primary-nav" aria-label="Main navigation">
           {navigation.map((item) => {
             const active = item.href === '/'
