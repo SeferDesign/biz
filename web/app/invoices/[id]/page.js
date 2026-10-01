@@ -109,6 +109,7 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
           invoiceId={invoice.id}
           accessToken={accessToken}
           methods={paymentOptions.methods}
+          amount={Number(invoice.cost ?? invoice.total ?? 0)}
           currency={paymentOptions.currency}
         />
       )}
