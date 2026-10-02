@@ -61,7 +61,7 @@ export default async function ClientDetailPage({ params, searchParams }) {
             pageHref={`/clients/${client.id}`}
             page={parsePage(query?.page)}
             columns={[
-              { key: 'id', label: 'Invoice', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}`}>INV-{String(invoice.id).padStart(4, '0')}</Link> },
+              { key: 'id', label: 'Invoice', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}`}>{invoice.display_id || invoice.display_id_number || invoice.id}</Link> },
               { key: 'date', label: 'Date', render: (invoice) => formatDate(invoice.date) },
               { key: 'description', label: 'Description' },
               { key: 'cost', label: 'Amount', className: 'numeric-cell', render: (invoice) => formatMoney(invoice.cost ?? invoice.total, invoice.currency) },

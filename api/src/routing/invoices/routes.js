@@ -3,6 +3,7 @@ import { isDate, isFiniteNumber, parseId } from '../shared/validation.js';
 import { publicInvoice, publicLine } from '../shared/public-views.js';
 import { sendInvoiceEmail as deliverInvoiceEmail } from '../../email/invoice-mailer.js';
 import { createInvoicePdf } from '../../pdf/invoice-pdf.js';
+import { displayIdNumber, withInvoiceDisplayIds } from '@seferbiz/company';
 
 const invoiceStatuses = new Set(['draft', 'sent', 'paid']);
 
@@ -36,7 +37,11 @@ function validateInvoiceInput(input, { partial = false } = {}) {
 export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoiceEmail } = {}) {
   const router = Router();
 
-  router.get('/invoices', async (req, res) => res.json((await store.getSnapshot()).invoices));
+  router.get('/invoices', async (req, res) => {
+    const snapshot = await store.getSnapshot();
+    const clientsById = new Map(snapshot.clients.map((client) => [Number(client.id), client]));
+    return res.json(snapshot.invoices.map((invoice) => withInvoiceDisplayIds(invoice, clientsById.get(Number(invoice.client_id))?.name)));
+  });
 
   router.post('/invoices', async (req, res) => {
     const input = normalizeInvoiceInput(req.body);
@@ -45,7 +50,9 @@ export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoic
     if (!await store.getClient(Number(input.client_id))) return res.status(400).json({ error: 'Client not found' });
     const invoiceInput = { ...input, client_id: Number(input.client_id), cost: Number(input.cost) };
     if (invoiceInput.status) invoiceInput.paid = invoiceInput.status === 'paid';
-    return res.status(201).json(await store.createInvoice(invoiceInput));
+    const invoice = await store.createInvoice(invoiceInput);
+    const client = await store.getClient(invoice.client_id);
+    return res.status(201).json(withInvoiceDisplayIds(invoice, client?.name));
   });
 
   router.get('/invoices/:id', async (req, res) => {
@@ -53,11 +60,12 @@ export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoic
     if (!id) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
     const invoice = await store.getInvoice(id);
     if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
+    const client = invoice.client_id ? await store.getClient(invoice.client_id) : null;
+    const invoiceWithDisplayIds = withInvoiceDisplayIds(invoice, client?.name);
     if (req.recordAccess) {
-      const client = invoice.client_id ? await store.getClient(invoice.client_id) : null;
-      return res.json(publicInvoice(invoice, client));
+      return res.json(publicInvoice(invoiceWithDisplayIds, client));
     }
-    return res.json(invoice);
+    return res.json(invoiceWithDisplayIds);
   });
 
   router.post('/invoices/:id/access-token', async (req, res) => {
@@ -83,7 +91,8 @@ export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoic
     if (updates.status !== undefined) updates.paid = updates.status === 'paid';
     const invoice = await store.updateInvoice(id, updates);
     if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
-    return res.json(invoice);
+    const client = invoice.client_id ? await store.getClient(invoice.client_id) : null;
+    return res.json(withInvoiceDisplayIds(invoice, client?.name));
   });
 
   router.put('/invoices/:id', async (req, res) => {
@@ -97,7 +106,8 @@ export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoic
     updates.paid = updates.status ? updates.status === 'paid' : Boolean(updates.paid);
     const invoice = await store.updateInvoice(id, updates);
     if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
-    return res.json(invoice);
+    const client = invoice.client_id ? await store.getClient(invoice.client_id) : null;
+    return res.json(withInvoiceDisplayIds(invoice, client?.name));
   });
 
   router.delete('/invoices/:id', async (req, res) => {
@@ -117,7 +127,7 @@ export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoic
     const lines = snapshot.lines.filter((line) => line.invoice_id === invoice.id);
     try {
       const pdf = await createInvoicePdf({ invoice, client, lines });
-      const filename = `Invoice-${String(invoice.id).padStart(4, '0')}.pdf`;
+      const filename = `Invoice-${displayIdNumber(invoice.id)}.pdf`;
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       return res.send(pdf);

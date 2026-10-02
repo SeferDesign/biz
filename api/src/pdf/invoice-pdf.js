@@ -1,7 +1,8 @@
 import PDFDocument from 'pdfkit';
+import { displayId } from '@seferbiz/company';
 
-function invoiceNumber(id) {
-  return `INV-${String(id).padStart(4, '0')}`;
+function invoiceNumber(id, clientName) {
+  return displayId(clientName, id);
 }
 
 function formatMoney(value, currency) {
@@ -24,7 +25,7 @@ export function createInvoicePdf({ invoice, client, lines }) {
       document.font('Helvetica-Bold').fontSize(24).fillColor('#19372f')
         .text('INVOICE', margin, margin, { width: contentWidth, align: 'right' });
       document.font('Helvetica-Bold').fontSize(10).fillColor('#1c2b27')
-        .text(invoiceNumber(invoice.id), margin, 96);
+        .text(invoiceNumber(invoice.id, client?.name), margin, 96);
       document.font('Helvetica').fontSize(10).fillColor('#65736d')
         .text(`Issue date: ${invoice.date || '-'}`, margin, 112)
         .text(`Status: ${invoice.status || (invoice.paid ? 'paid' : 'draft')}`, margin, 128)

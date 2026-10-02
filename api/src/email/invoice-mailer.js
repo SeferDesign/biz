@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 import { createInvoicePdf } from '../pdf/invoice-pdf.js';
-import { companyEmailFrom, companyInfo } from '@seferbiz/company';
+import { companyEmailFrom, companyInfo, displayId, displayIdNumber } from '@seferbiz/company';
 
 let transporter;
 
@@ -34,11 +34,13 @@ export async function sendInvoiceEmail({ invoice, client, lines }, transport) {
     return `- ${line.description || 'Invoice item'}${quantity}: ${currency} ${amount}`;
   });
   const appUrl = process.env.PUBLIC_APP_URL?.replace(/\/$/, '');
+  const invoiceDisplayId = displayId(client?.name, invoice.id);
+  const invoiceDisplayNumber = displayIdNumber(invoice.id);
   const invoiceUrl = appUrl
     ? `${appUrl}/invoices/${invoice.id}${invoice.access_token ? `?access_token=${encodeURIComponent(invoice.access_token)}` : ''}`
     : null;
   const text = [
-    `Invoice #${String(invoice.id).padStart(4, '0')}`,
+    `Invoice ${invoiceDisplayId}`,
     `Client: ${client.name || 'Client'}`,
     `Issue date: ${invoice.date || 'Not specified'}`,
     `Payment terms: ${client.payment_terms || 'Net 15'}`,
@@ -58,7 +60,7 @@ export async function sendInvoiceEmail({ invoice, client, lines }, transport) {
     subject: `${process.env.NODE_ENV === 'development' ? 'DEV - ' : ''}Invoice from ${companyInfo.name}`,
     text,
     attachments: [{
-      filename: `Invoice-${String(invoice.id).padStart(4, '0')}.pdf`,
+      filename: `Invoice-${invoiceDisplayNumber}.pdf`,
       content: pdf,
       contentType: 'application/pdf'
     }]

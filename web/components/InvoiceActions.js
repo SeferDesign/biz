@@ -13,6 +13,7 @@ export default function InvoiceActions({ invoice, lines, linesAvailable = true, 
   const [error, setError] = useState('');
   const [duplicateId, setDuplicateId] = useState(null);
   const [status, setStatus] = useState(invoiceStatus(invoice));
+  const invoiceLabel = invoice.display_id || invoice.display_id_number || invoice.id;
   const endpoint = `${browserApiBaseUrl}/invoices/${invoice.id}`;
 
   async function request(url, options) {
@@ -84,9 +85,9 @@ export default function InvoiceActions({ invoice, lines, linesAvailable = true, 
   }
 
   if (compact) return <div className="invoice-row-actions">
-    {status === 'draft' && <button type="button" title="Send invoice" aria-label={`Send invoice ${invoice.id}`} disabled={Boolean(busy)} onClick={() => changeStatus('sent')}><Mail size={17} aria-hidden="true" /></button>}
-    {status !== 'paid' && !invoice.paid && <button type="button" title="Mark as paid" aria-label={`Mark invoice ${invoice.id} as paid`} disabled={Boolean(busy)} onClick={() => changeStatus('paid')}><CircleCheck size={17} aria-hidden="true" /></button>}
-    <button type="button" title="Duplicate invoice" aria-label={`Duplicate invoice ${invoice.id}`} disabled={Boolean(busy) || duplicateId !== null} onClick={duplicate}><Copy size={17} aria-hidden="true" /></button>
+    {status === 'draft' && <button type="button" title="Send invoice" aria-label={`Send invoice ${invoiceLabel}`} disabled={Boolean(busy)} onClick={() => changeStatus('sent')}><Mail size={17} aria-hidden="true" /></button>}
+    {status !== 'paid' && !invoice.paid && <button type="button" title="Mark as paid" aria-label={`Mark invoice ${invoiceLabel} as paid`} disabled={Boolean(busy)} onClick={() => changeStatus('paid')}><CircleCheck size={17} aria-hidden="true" /></button>}
+    <button type="button" title="Duplicate invoice" aria-label={`Duplicate invoice ${invoiceLabel}`} disabled={Boolean(busy) || duplicateId !== null} onClick={duplicate}><Copy size={17} aria-hidden="true" /></button>
     {error && <span className="action-error" role="alert">{error}{duplicateId !== null && <> <Link href={`/invoices/${duplicateId}/edit`}>Open new draft</Link></>}</span>}
   </div>;
 

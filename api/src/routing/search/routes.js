@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { displayId } from '@seferbiz/company';
 
 function matchRank(query, primaryValues, secondaryValues = []) {
   const words = query.split(/\s+/).filter(Boolean);
@@ -47,7 +48,7 @@ export default function searchRouter(store) {
 
     for (const invoice of snapshot.invoices) {
       const client = clientsById.get(Number(invoice.client_id));
-      const invoiceNumber = `INV-${String(invoice.id).padStart(4, '0')}`;
+      const invoiceNumber = displayId(client?.name, invoice.id);
       const rank = matchRank(query, [invoice.description, invoiceNumber], [client?.name, invoice.status, invoice.date, invoice.paymenttype]);
       if (rank) {
         const detail = [invoiceNumber, client?.name, invoice.status, invoice.date].filter(Boolean).join(' · ');
@@ -58,7 +59,9 @@ export default function searchRouter(store) {
     for (const line of snapshot.lines) {
       const rank = matchRank(query, [line.description]);
       if (rank) {
-        const invoiceNumber = `INV-${String(line.invoice_id).padStart(4, '0')}`;
+        const invoice = snapshot.invoices.find((record) => Number(record.id) === Number(line.invoice_id));
+        const client = invoice ? clientsById.get(Number(invoice.client_id)) : null;
+        const invoiceNumber = displayId(client?.name, line.invoice_id);
         matches.push(result('Line item', line.description || 'Invoice line', invoiceNumber, `/invoices/${line.invoice_id}`, rank));
       }
     }

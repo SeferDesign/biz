@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { ArrowRight, Check, Copy, CreditCard, Landmark } from 'lucide-react';
 import { browserApiBaseUrl, formatMoney } from '../lib/api.js';
-import { companyInfo } from '@seferbiz/company';
+import { companyInfo, displayIdNumber } from '@seferbiz/company';
 
 export default function InvoicePayment({ invoiceId, accessToken, methods = [], amount, currency }) {
   const [pendingMethod, setPendingMethod] = useState('');
@@ -11,7 +11,7 @@ export default function InvoicePayment({ invoiceId, accessToken, methods = [], a
   const [zelleCopied, setZelleCopied] = useState(false);
   const fromCents = (cents) => formatMoney(cents / 100, currency);
   const amountLabel = formatMoney(amount, currency);
-  const invoiceReference = `Invoice #${String(invoiceId).padStart(4, '0')}`;
+  const invoiceReference = `Invoice #${displayIdNumber(invoiceId)}`;
 
   async function copyZelleDetails() {
     setError('');

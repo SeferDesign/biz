@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { companyEmailFrom, companyInfo } from '@seferbiz/company';
+import { companyEmailFrom, companyInfo, displayId } from '@seferbiz/company';
 
 let transporter;
 
@@ -31,7 +31,7 @@ const statusHeadlines = {
 export async function sendPaymentNotification({ payment, invoice, client, livemode }, transport) {
   const recipient = process.env.PAYMENT_NOTIFICATION_EMAIL || companyInfo.emailContact;
   const method = methodLabels[payment.method] || 'Online';
-  const invoiceNumber = `#${String(invoice.id).padStart(4, '0')}`;
+  const invoiceNumber = displayId(client?.name, invoice.id);
   const amount = new Intl.NumberFormat('en-US', { style: 'currency', currency: payment.currency || 'USD' })
     .format(Number(payment.amount ?? invoice.cost ?? 0));
   const appUrl = process.env.PUBLIC_APP_URL?.replace(/\/$/, '');

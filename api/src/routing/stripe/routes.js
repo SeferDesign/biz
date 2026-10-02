@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { parseId } from '../shared/validation.js';
+import { displayId } from '@seferbiz/company';
 import {
   ensureStripeCustomer,
   fulfillCheckoutSession,
@@ -95,7 +96,7 @@ export default function stripeRouter(store, { stripe, appUrl, notify }) {
       const customer = await ensureStripeCustomer(stripe, store, client);
       const breakdown = paymentBreakdown(invoice, method);
       const currency = (invoice.currency || 'USD').toLowerCase();
-      const invoiceName = `Invoice #${String(invoice.id).padStart(4, '0')}`;
+      const invoiceName = `Invoice ${displayId(client?.name, invoice.id)}`;
       const metadata = { invoice_id: String(invoice.id), payment_method: method };
       const lineItem = (name, unitAmount) => ({
         quantity: 1,

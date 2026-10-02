@@ -405,7 +405,7 @@ test('invoice PDF endpoint returns a downloadable PDF document', async () => {
 
   assert.equal(response.status, 200);
   assert.equal(response.headers['content-type'], 'application/pdf');
-  assert.match(response.headers['content-disposition'], /attachment; filename="Invoice-0001\.pdf"/);
+  assert.match(response.headers['content-disposition'], /attachment; filename="Invoice-100001\.pdf"/);
   assert.equal(response.body.subarray(0, 5).toString(), '%PDF-');
 });
 
@@ -426,7 +426,7 @@ test('invoice email includes the generated invoice PDF attachment', async () => 
   });
 
   assert.equal(message.attachments.length, 1);
-  assert.equal(message.attachments[0].filename, 'Invoice-0010.pdf');
+  assert.equal(message.attachments[0].filename, 'Invoice-100010.pdf');
   assert.equal(message.attachments[0].contentType, 'application/pdf');
   assert.equal(message.attachments[0].content.subarray(0, 5).toString(), '%PDF-');
   assert.match(message.text, /Payment terms: Net 90/);
@@ -613,7 +613,7 @@ test('Stripe embedded checkout charges card fees, confirms payment, and accepts 
   assert.equal(bank.status, 201);
   assert.deepEqual(stripe.expired, ['cs_test_1']);
   assert.deepEqual(stripe.created[1].line_items.map((item) => [item.price_data.product_data.name, item.price_data.unit_amount]), [
-    ['Invoice #0001', 120000],
+    ['Invoice acmeinc-100001', 120000],
     ['ACH processing fee', 500]
   ]);
   assert.equal((await store.getInvoice(1)).stripe_session_id, 'cs_test_2');
@@ -694,7 +694,7 @@ test('ACH payments are tracked from submission through success or failure', asyn
 
   const sent = [];
   await sendPaymentNotification({ ...notifications[0], livemode: false }, { sendMail: async (mail) => sent.push(mail) });
-  assert.match(sent[0].subject, /ACH payment submitted: Invoice #0002 \(Northwind, \$980\.50\)/);
+  assert.match(sent[0].subject, /ACH payment submitted: Invoice northwind-100002 \(Northwind, \$980\.50\)/);
   assert.match(sent[0].text, /dashboard\.stripe\.com\/test\/payments\/pi_cs_ach_1/);
 });
 

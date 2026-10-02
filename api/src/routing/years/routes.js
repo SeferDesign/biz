@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { sendCsv } from '../shared/csv.js';
 import { findYear, invoiceAmount, invoiceDate, sum, yearExpenses, yearIncome } from '../shared/finance.js';
 import { isFiniteNumber, parseId } from '../shared/validation.js';
+import { withInvoiceDisplayIds } from '@seferbiz/company';
 
 function validateYearInput(input, { partial = false } = {}) {
   if (!partial || input.year !== undefined) {
@@ -57,7 +58,9 @@ export default function yearsRouter(store) {
     const snapshot = await store.getSnapshot();
     const year = findYear(req.params.id, snapshot.years);
     if (!year) return res.status(404).json({ error: 'Year not found' });
-    const records = yearIncome(year.year, snapshot.invoices);
+    const clientsById = new Map(snapshot.clients.map((client) => [Number(client.id), client]));
+    const records = yearIncome(year.year, snapshot.invoices)
+      .map((invoice) => withInvoiceDisplayIds(invoice, clientsById.get(Number(invoice.client_id))?.name));
     return res.json({ year: year.year, invoices: records, total: sum(records.map(invoiceAmount)) });
   });
 

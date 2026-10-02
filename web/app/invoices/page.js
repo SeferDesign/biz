@@ -23,7 +23,7 @@ export default async function InvoicesPage({ searchParams }) {
       pageHref="/invoices"
       page={parsePage(params?.page)}
       columns={[
-        { key: 'id', label: 'Invoice', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}`}>INV-{String(invoice.id).padStart(4, '0')}</Link> },
+        { key: 'id', label: 'Invoice', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}`}>{invoice.display_id || invoice.display_id_number || invoice.id}</Link> },
         { key: 'client', label: 'Client', render: (invoice) => {
           const client = clientsById.get(invoice.client_id);
           return client ? <Link className="table-link" href={`/clients/${client.id}`}>{client.name}</Link> : `Client ${invoice.client_id || '-'}`;
