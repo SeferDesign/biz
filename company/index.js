@@ -15,8 +15,10 @@ export const companyInfo = {
 		first_name: 'Robert',
 		last_name: 'Sefer',
 		email: 'rob@seferdesign.com'
+	},
+  logo: {
+		pathPublic: '/images/sdc_white.svg'
 	}
-  logoPath: '/images/sdc_white.svg'
 };
 
 export const companyEmailFrom = `${companyInfo.name} <${companyInfo.emailContact}>`;
