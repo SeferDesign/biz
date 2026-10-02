@@ -24,6 +24,9 @@ export default async function ClientDetailPage({ params, searchParams }) {
   const client = clientResult.data;
   const invoices = (invoiceResult.data || []).filter((invoice) => Number(invoice.client_id) === Number(client.id)).sort(newestInvoicesFirst);
   const address = [client.address1, client.address2, [client.city, client.state, client.zipcode].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+	const billingEmails = [client.email_accounting, client.email_accounting_2, client.email_accounting_3, client.email]
+	.filter((value, index, all) => value && all.indexOf(value) === index);
+  const billingEmailsDisplay = billingEmails.join(', ');
 
   return (
     <>
@@ -39,11 +42,7 @@ export default async function ClientDetailPage({ params, searchParams }) {
       </div>
       <DetailGrid items={[
         ['Contact', client.contact],
-        ['Billing email', client.email_accounting || client.email],
-        ...(!accessToken ? [
-          ['Additional accounting email 1', client.email_accounting_2],
-          ['Additional accounting email 2', client.email_accounting_3]
-        ] : []),
+        [`Billing email${billingEmails.length > 1 ? 's' : ''}`, billingEmailsDisplay],
         ['Website', client.site_url ? <a href={client.site_url} rel="noreferrer" target="_blank">{client.site_url}</a> : '-'],
         ['Address', address],
         ...(accessToken ? [] : [

@@ -15,22 +15,24 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
   const accessToken = typeof query?.access_token === 'string' ? query.access_token : '';
   const accessTokenQuery = accessToken ? `?access_token=${encodeURIComponent(accessToken)}` : '';
   const checkoutSessionId = typeof query?.checkout_session_id === 'string' ? query.checkout_session_id : '';
-  const paymentResult = checkoutSessionId
-    ? await getApiData(`/invoices/${encodeURIComponent(id)}/stripe?session_id=${encodeURIComponent(checkoutSessionId)}${accessToken ? `&access_token=${encodeURIComponent(accessToken)}` : ''}`)
-    : null;
-  const [invoiceResult, lineResult, emailSendsResult, paymentOptionsResult, paymentsResult] = await Promise.all([
-    getApiData(`/invoices/${encodeURIComponent(id)}${accessTokenQuery}`),
-    getApiData(`/invoices/${encodeURIComponent(id)}/lines${accessTokenQuery}`),
-    accessToken ? Promise.resolve({ data: [] }) : getApiData(`/invoices/${encodeURIComponent(id)}/email-sends`),
-    accessToken ? getApiData(`/invoices/${encodeURIComponent(id)}/payment-options${accessTokenQuery}`) : Promise.resolve({}),
-    accessToken ? Promise.resolve({ data: [] }) : getApiData(`/invoices/${encodeURIComponent(id)}/payments`)
-  ]);
+  const invoiceResult = await getApiData(`/invoices/${encodeURIComponent(id)}${accessTokenQuery}`);
   if (invoiceResult.status === 404) notFound();
   if (invoiceResult.error) {
     return <div className="notice" role="alert"><strong>Invoice unavailable</strong><span>{invoiceResult.error}</span></div>;
   }
 
   const invoice = invoiceResult.data;
+  const paymentResult = checkoutSessionId
+    ? await getApiData(`/invoices/${encodeURIComponent(id)}/stripe?session_id=${encodeURIComponent(checkoutSessionId)}${accessToken ? `&access_token=${encodeURIComponent(accessToken)}` : ''}`)
+    : null;
+  const [lineResult, emailSendsResult, paymentOptionsResult, paymentsResult, clientResult] = await Promise.all([
+    getApiData(`/invoices/${encodeURIComponent(id)}/lines${accessTokenQuery}`),
+    accessToken ? Promise.resolve({ data: [] }) : getApiData(`/invoices/${encodeURIComponent(id)}/email-sends`),
+    accessToken ? getApiData(`/invoices/${encodeURIComponent(id)}/payment-options${accessTokenQuery}`) : Promise.resolve({}),
+    accessToken ? Promise.resolve({ data: [] }) : getApiData(`/invoices/${encodeURIComponent(id)}/payments`),
+    accessToken ? Promise.resolve({ data: null }) : getApiData(`/clients/${encodeURIComponent(invoice.client_id)}`)
+  ]);
+  const clientName = clientResult?.data?.name || invoice.client?.name || `Client ${invoice.client_id || '-'}`;
   const lines = lineResult.data || [];
   const paymentOptions = paymentOptionsResult.data;
   const paymentStatus = paymentResult?.data?.status;
@@ -50,11 +52,10 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
     ]
     : [
       ['Amount', formatMoney(invoice.cost ?? invoice.total, invoice.currency)],
-      ['Client', <Link href={`/clients/${invoice.client_id}`} key="client">Client {invoice.client_id}</Link>],
+      ['Client', <Link href={`/clients/${invoice.client_id}`} key="client">{clientName}</Link>],
       ['Payment type', invoice.paymenttype],
       ['Issue date', formatDate(invoice.date)],
-      ['Paid date', formatDate(invoice.paiddate)],
-      ['Description', invoice.description]
+      ['Paid date', formatDate(invoice.paiddate)]
     ];
   return (
     <>
@@ -73,7 +74,7 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
       )}
       {!accessToken && <Link className="back-link" href="/invoices">&lt; All invoices</Link>}
       <div className="page-heading">
-        <div><h1>{invoice.description || 'Invoice details'}</h1><p className="page-description">Issued {formatDate(invoice.date)}</p></div>
+        <div><h1>Invoice #{invoice.id}</h1></div>
         <div className="detail-actions">
           {accessToken ? <StatusLabel status={invoiceStatus(invoice)} /> : <InvoiceActions key={`${invoice.id}-${invoiceStatus(invoice)}`} invoice={invoice} lines={lines} linesAvailable={!lineResult.error} />}
           <a className="secondary-button" href={`${browserApiBaseUrl}/invoices/${invoice.id}/pdf${accessTokenQuery}`}>Download PDF</a>
@@ -81,6 +82,7 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
         </div>
       </div>
       <DetailGrid items={detailItems} />
+			<p>{invoice.description}</p>
       {!accessToken && <ClientLinkPanel invoiceId={invoice.id} initialAccessToken={invoice.access_token} />}
       {!accessToken && payments.length > 0 && (
         <section className="detail-section">

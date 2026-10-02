@@ -23,12 +23,11 @@ export default async function InvoicesPage({ searchParams }) {
       pageHref="/invoices"
       page={parsePage(params?.page)}
       columns={[
-        { key: 'id', label: 'Invoice', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}`}>{invoice.display_id || invoice.display_id_number || invoice.id}</Link> },
+        { key: 'date', label: 'Invoice', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}`}>{formatDate(invoice.date)}<br/></Link> },
         { key: 'client', label: 'Client', render: (invoice) => {
           const client = clientsById.get(invoice.client_id);
           return client ? <Link className="table-link" href={`/clients/${client.id}`}>{client.name}</Link> : `Client ${invoice.client_id || '-'}`;
         } },
-        { key: 'date', label: 'Issue date', render: (invoice) => formatDate(invoice.date) },
         { key: 'status', label: 'Status', render: (invoice) => <StatusLabel status={invoiceStatus(invoice)} /> },
         { key: 'paiddate', label: 'Paid date', render: (invoice) => formatDate(invoice.paiddate) },
         { key: 'cost', label: 'Amount', className: 'numeric-cell', render: (invoice) => formatMoney(invoice.cost ?? invoice.total, invoice.currency) },
