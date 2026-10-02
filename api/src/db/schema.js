@@ -26,6 +26,18 @@ const statements = [
     UNIQUE INDEX users_email_unique (email),
     UNIQUE INDEX users_reset_password_token_unique (reset_password_token)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS api_keys (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    label VARCHAR(255) NOT NULL,
+    key_value VARCHAR(255) NOT NULL,
+    last_used_at DATETIME NULL,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT api_keys_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE INDEX api_keys_key_value_unique (key_value),
+    INDEX api_keys_user_idx (user_id, id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   `CREATE TABLE IF NOT EXISTS clients (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255), contact VARCHAR(255), site_url VARCHAR(255), logo VARCHAR(255),

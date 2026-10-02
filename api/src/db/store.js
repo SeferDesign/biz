@@ -163,6 +163,72 @@ export class MySqlStore {
     );
   }
 
+  async getApiKeysByUser(userId) {
+    const [rows] = await this.database.execute(
+      `SELECT id, user_id, label, key_value AS \`key\`, last_used_at, created_at, updated_at
+       FROM api_keys
+       WHERE user_id = ?
+       ORDER BY id DESC`,
+      [userId]
+    );
+    return rows;
+  }
+
+  async createApiKey(userId, { label, key }) {
+    const [result] = await this.database.execute(
+      'INSERT INTO api_keys (user_id, label, key_value) VALUES (?, ?, ?)',
+      [userId, label, key]
+    );
+    const [rows] = await this.database.execute(
+      `SELECT id, user_id, label, key_value AS \`key\`, last_used_at, created_at, updated_at
+       FROM api_keys
+       WHERE id = ? AND user_id = ? LIMIT 1`,
+      [result.insertId, userId]
+    );
+    return rows[0];
+  }
+
+  async updateApiKey(userId, id, input) {
+    const fields = [];
+    const values = [];
+    if (input.label !== undefined) {
+      fields.push('label = ?');
+      values.push(input.label);
+    }
+    if (input.key !== undefined) {
+      fields.push('key_value = ?');
+      values.push(input.key);
+    }
+    if (!fields.length) return null;
+    await this.database.execute(
+      `UPDATE api_keys SET ${fields.join(', ')} WHERE id = ? AND user_id = ?`,
+      [...values, id, userId]
+    );
+    const [rows] = await this.database.execute(
+      `SELECT id, user_id, label, key_value AS \`key\`, last_used_at, created_at, updated_at
+       FROM api_keys
+       WHERE id = ? AND user_id = ? LIMIT 1`,
+      [id, userId]
+    );
+    return rows[0];
+  }
+
+  async deleteApiKey(userId, id) {
+    const [result] = await this.database.execute(
+      'DELETE FROM api_keys WHERE id = ? AND user_id = ?',
+      [id, userId]
+    );
+    return result.affectedRows > 0;
+  }
+
+  async touchApiKeyLastUsed(key) {
+    const [result] = await this.database.execute(
+      'UPDATE api_keys SET last_used_at = CURRENT_TIMESTAMP WHERE key_value = ?',
+      [key]
+    );
+    return result.affectedRows > 0;
+  }
+
   async getSnapshot() {
     const [clients, invoices, lines, expenses, vendors, years] = await Promise.all([
       this.database.query(`SELECT c.*, c.email_accounting AS email

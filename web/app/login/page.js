@@ -1,6 +1,6 @@
 import LoginForm from '../../components/LoginForm.js';
 
-export const metadata = { title: 'Sign in | Sefer Design Company' };
+export const metadata = { title: 'Sign in' };
 
 export default async function LoginPage({ searchParams }) {
   const query = await searchParams;

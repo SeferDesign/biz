@@ -10,7 +10,6 @@ export default async function ClientsPage({ searchParams }) {
   return (
     <ResourcePage
       title="Clients"
-      description="Client contacts and billing details."
       data={result.data}
       error={result.error}
       countLabel="clients"

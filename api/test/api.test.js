@@ -103,6 +103,80 @@ test('API authentication protects resources while preserving public and access-t
   assert.equal(created.body.access_token, 'invoice-token-2');
 });
 
+test('database API keys can authenticate requests and update last_used_at', async () => {
+  const store = createMemoryStore();
+  const app = createApp({ store, apiAccessToken: TEST_API_ACCESS_TOKEN });
+  const user = {
+    id: 70,
+    email: 'apikey@example.test',
+    encrypted_password: await bcrypt.hash('example123', 4),
+    otp_required_for_login: false
+  };
+  store.users.push(user);
+  await store.createApiKey(user.id, { label: 'CLI', key: 'managed-key-1' });
+
+  const denied = await supertest(app).get('/v1/invoices').set('Authorization', 'Bearer wrong-key');
+  assert.equal(denied.status, 401);
+
+  const allowed = await supertest(app).get('/v1/invoices').set('Authorization', 'Bearer managed-key-1');
+  assert.equal(allowed.status, 200);
+
+  const [stored] = await store.getApiKeysByUser(user.id);
+  assert.equal(Boolean(stored.last_used_at), true);
+});
+
+test('signed-in users can create, update, list, and delete API keys', async () => {
+  const store = createMemoryStore();
+  const user = {
+    id: 71,
+    email: 'owner-api-keys@example.test',
+    encrypted_password: await bcrypt.hash('example123', 4),
+    otp_required_for_login: false
+  };
+  store.users.push(user);
+  const app = createApp({ store, apiAccessToken: TEST_API_ACCESS_TOKEN });
+
+  const login = await supertest(app).post('/v1/auth/login').send({ email: user.email, password: 'example123' });
+  const authorization = `Bearer ${login.body.access_token}`;
+
+  assert.equal((await supertest(app).get('/v1/auth/api-keys')).status, 401);
+  const created = await supertest(app).post('/v1/auth/api-keys').set('Authorization', authorization).send({
+    label: 'Integration Key',
+    key: 'integration-key-1'
+  });
+  assert.equal(created.status, 201);
+  assert.equal(created.body.label, 'Integration Key');
+  assert.equal(created.body.key, 'integration-key-1');
+  assert.equal(created.body.last_used_at, null);
+
+  const duplicate = await supertest(app).post('/v1/auth/api-keys').set('Authorization', authorization).send({
+    label: 'Duplicate',
+    key: 'integration-key-1'
+  });
+  assert.equal(duplicate.status, 409);
+
+  const listed = await supertest(app).get('/v1/auth/api-keys').set('Authorization', authorization);
+  assert.equal(listed.status, 200);
+  assert.equal(listed.body.length, 1);
+
+  const updated = await supertest(app)
+    .patch(`/v1/auth/api-keys/${created.body.id}`)
+    .set('Authorization', authorization)
+    .send({ label: 'Production Key', key: 'integration-key-2' });
+  assert.equal(updated.status, 200);
+  assert.equal(updated.body.label, 'Production Key');
+  assert.equal(updated.body.key, 'integration-key-2');
+
+  assert.equal((await supertest(app).get('/v1/invoices').set('Authorization', 'Bearer integration-key-1')).status, 401);
+  assert.equal((await supertest(app).get('/v1/invoices').set('Authorization', 'Bearer integration-key-2')).status, 200);
+
+  const removed = await supertest(app)
+    .delete(`/v1/auth/api-keys/${created.body.id}`)
+    .set('Authorization', authorization);
+  assert.equal(removed.status, 204);
+  assert.equal((await supertest(app).get('/v1/auth/api-keys').set('Authorization', authorization)).body.length, 0);
+});
+
 test('legacy user credentials establish expiring API sessions and enforce OTP replay protection', async () => {
   const store = createMemoryStore();
   const apiAccessToken = TEST_API_ACCESS_TOKEN;

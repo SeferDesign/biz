@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Brand from './Brand.js';
+import { companyInfo } from '@seferbiz/company';
 
 export default function LoginForm({ returnTo }) {
   const router = useRouter();
@@ -41,12 +43,8 @@ export default function LoginForm({ returnTo }) {
 
   return (
     <main className="login-page">
-      <div className="login-brand">
-        <span className="brand-mark">SD</span>
-        <span className="brand-name">Sefer Design<span>Business office</span></span>
-      </div>
-      <section className="login-panel" aria-labelledby="login-title">
-        <h1 id="login-title">Sign in</h1>
+      <Brand/>
+      <section className="login-panel">
         <form className="login-form" onSubmit={submit}>
           <label className="form-field">
             <span className="form-label">Email</span>
@@ -67,7 +65,7 @@ export default function LoginForm({ returnTo }) {
           </button>
         </form>
       </section>
-      <p className="login-foot">Sefer Design Company LLC</p>
+      <p className="login-foot">{companyInfo.legalEntity}</p>
     </main>
   );
 }

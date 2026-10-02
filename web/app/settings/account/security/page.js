@@ -1,7 +1,7 @@
 import SecuritySettings from '../../../../components/SecuritySettings.js';
 import { getApiData } from '../../../../lib/api-server.js';
 
-export const metadata = { title: 'Account Security | Sefer Design Company' };
+export const metadata = { title: 'Account Security' };
 
 export default async function SecurityPage() {
   const result = await getApiData('/auth/security');

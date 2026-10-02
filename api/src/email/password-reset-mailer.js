@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { companyEmailFrom, companyInfo } from '@seferbiz/company';
 
 let transporter;
 
@@ -27,11 +28,11 @@ export async function sendPasswordResetEmail({ email, token, expiresInHours }, t
   resetUrl.searchParams.set('token', token);
 
   await (transport || getTransporter()).sendMail({
-    from: process.env.SMTP_FROM || 'Sefer Design Co. <info@seferdesign.com>',
+    from: process.env.SMTP_FROM || companyEmailFrom,
     to: email,
-    subject: `${process.env.NODE_ENV === 'development' ? 'DEV - ' : ''}Reset your Sefer Design password`,
+    subject: `${process.env.NODE_ENV === 'development' ? 'DEV - ' : ''}Reset your ${companyInfo.name} password`,
     text: [
-      'A password reset was requested for your Sefer Design Company account.',
+      `A password reset was requested for your ${companyInfo.legalEntity} account.`,
       '',
       `Reset your password: ${resetUrl}`,
       '',

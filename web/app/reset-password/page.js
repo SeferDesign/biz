@@ -1,6 +1,6 @@
 import { ResetPasswordForm } from '../../components/PasswordRecoveryForm.js';
 
-export const metadata = { title: 'Reset password | Sefer Design Company' };
+export const metadata = { title: 'Reset password' };
 
 export default async function ResetPasswordPage({ searchParams }) {
   const query = await searchParams;

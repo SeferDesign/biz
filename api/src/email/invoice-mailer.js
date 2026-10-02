@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { createInvoicePdf } from '../pdf/invoice-pdf.js';
+import { companyEmailFrom, companyInfo } from '@seferbiz/company';
 
 let transporter;
 
@@ -51,10 +52,10 @@ export async function sendInvoiceEmail({ invoice, client, lines }, transport) {
   const pdf = await createInvoicePdf({ invoice, client, lines });
 
   await (transport || getTransporter()).sendMail({
-    from: process.env.SMTP_FROM || 'Sefer Design Co. <info@seferdesign.com>',
+    from: process.env.SMTP_FROM || companyEmailFrom,
     to: recipient,
     cc: [client.email_accounting_2, client.email_accounting_3].filter(Boolean),
-    subject: `${process.env.NODE_ENV === 'development' ? 'DEV - ' : ''}Invoice from Sefer Design Company`,
+    subject: `${process.env.NODE_ENV === 'development' ? 'DEV - ' : ''}Invoice from ${companyInfo.name}`,
     text,
     attachments: [{
       filename: `Invoice-${String(invoice.id).padStart(4, '0')}.pdf`,

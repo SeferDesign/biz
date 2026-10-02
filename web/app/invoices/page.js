@@ -15,7 +15,6 @@ export default async function InvoicesPage({ searchParams }) {
   return (
     <ResourcePage
       title="Invoices"
-      description="Issued invoices, payment status, and client billing history."
       data={invoiceResult.data?.toSorted(newestInvoicesFirst)}
       error={invoiceResult.error || clientResult.error}
       countLabel="invoices"

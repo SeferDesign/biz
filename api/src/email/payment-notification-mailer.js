@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { companyEmailFrom, companyInfo } from '@seferbiz/company';
 
 let transporter;
 
@@ -28,7 +29,7 @@ const statusHeadlines = {
 };
 
 export async function sendPaymentNotification({ payment, invoice, client, livemode }, transport) {
-  const recipient = process.env.PAYMENT_NOTIFICATION_EMAIL || 'info@seferdesign.com';
+  const recipient = process.env.PAYMENT_NOTIFICATION_EMAIL || companyInfo.emailContact;
   const method = methodLabels[payment.method] || 'Online';
   const invoiceNumber = `#${String(invoice.id).padStart(4, '0')}`;
   const amount = new Intl.NumberFormat('en-US', { style: 'currency', currency: payment.currency || 'USD' })
@@ -39,7 +40,7 @@ export async function sendPaymentNotification({ payment, invoice, client, livemo
     : null;
 
   await (transport || getTransporter()).sendMail({
-    from: process.env.SMTP_FROM || 'Sefer Design Co. <info@seferdesign.com>',
+    from: process.env.SMTP_FROM || companyEmailFrom,
     to: recipient,
     subject: `${process.env.NODE_ENV === 'development' ? 'DEV - ' : ''}${method} ${statusHeadlines[payment.status]}: Invoice ${invoiceNumber} (${client?.name || 'Client'}, ${amount})`,
     text: [

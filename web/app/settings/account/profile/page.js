@@ -1,7 +1,7 @@
 import AccountProfileForm from '../../../../components/AccountProfileForm.js';
 import { getApiData } from '../../../../lib/api-server.js';
 
-export const metadata = { title: 'Account Profile | Sefer Design Company' };
+export const metadata = { title: 'Account Profile' };
 
 export default async function AccountProfilePage() {
   const result = await getApiData('/auth/profile');

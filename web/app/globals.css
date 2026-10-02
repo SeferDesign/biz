@@ -38,6 +38,7 @@ button, input { font: inherit; }
   inset: 0 auto 0 0;
   z-index: 3;
   display: flex;
+	gap: 1rem;
   width: 248px;
   flex-direction: column;
   padding: 30px 18px 22px;
@@ -46,19 +47,7 @@ button, input { font: inherit; }
   border-right: 1px solid var(--line);
 }
 
-.brand { display: flex; align-items: center; gap: 12px; padding: 0 8px 38px; }
-.brand-mark {
-  display: grid;
-  width: 38px;
-  height: 38px;
-  place-items: center;
-  border: 1px solid #c9c9c9;
-  color: var(--ink);
-  font-family: inherit;
-  font-size: 13px;
-}
-.brand-name { font-size: 13px; font-weight: 500; line-height: 1.3; }
-.brand-name span { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; font-weight: 400; }
+.brand { display: flex; align-items: center; gap: 12px; padding: 0px; }
 .brand-logo { display: block; width: 100%; max-width: 190px; height: auto; }
 .brand-logo { filter: brightness(0); }
 .nav-caption { padding: 0 10px 11px; color: #8a8a8a; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
@@ -66,8 +55,7 @@ button, input { font: inherit; }
 .secondary-nav {
   display: grid;
   gap: 4px;
-  margin-top: 12px;
-  padding-top: 12px;
+  padding-top: 1rem;
   border-top: 1px solid var(--line);
 }
 .nav-link {
@@ -181,7 +169,7 @@ h2 { font-family: var(--font-sans), "Helvetica Neue", "Segoe UI", sans-serif; fo
 .data-table .action-cell { width: 1%; text-align: center; white-space: nowrap; }
 .table-link { color: var(--forest-soft); }
 .table-link:hover { color: var(--coral); }
-.numeric-cell { text-align: right; white-space: nowrap; }
+.numeric-cell { text-align: right; white-space: nowrap; font-family: monospace, monospace; }
 .muted-cell { color: var(--muted); }
 .table-action-button { display: inline-grid; width: 32px; height: 32px; place-items: center; border: 1px solid transparent; color: var(--forest); background: transparent; }
 .table-action-button:hover, .table-action-button:focus-visible { border-color: var(--line); background: #f2f2f2; }
@@ -342,10 +330,6 @@ h2 { font-family: var(--font-sans), "Helvetica Neue", "Segoe UI", sans-serif; fo
 .form-actions { display: flex; grid-column: 1 / -1; flex-wrap: wrap; gap: 9px; padding-top: 4px; }
 
 .login-page { display: grid; min-height: 100vh; align-content: center; justify-items: center; gap: 26px; padding: 32px 20px; background: linear-gradient(135deg, #f4f4f4, #ffffff 58%, #f0f0f0); }
-.login-brand { display: grid; justify-items: center; text-align: center; gap: 10px; }
-.login-brand .brand-mark { border-color: #c6c6c6; color: var(--forest); }
-.login-brand .brand-name { display: grid; gap: 2px; color: var(--forest); }
-.login-brand .brand-name span { color: var(--muted); }
 .login-panel { width: min(420px, 100%); padding: 30px; border: 1px solid var(--line); background: #fff; box-shadow: var(--shadow); }
 .login-panel h1 { margin-bottom: 22px; font-size: 32px; }
 .login-form { display: grid; gap: 16px; }

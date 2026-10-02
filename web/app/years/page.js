@@ -9,7 +9,6 @@ export default async function YearsPage({ searchParams }) {
   return (
     <ResourcePage
       title="Years"
-      description="Tax rates, targets, and annual summaries."
       data={result.data}
       error={result.error}
       countLabel="years"

@@ -17,6 +17,7 @@ FROM node-base AS deps
 COPY package.json package-lock.json ./
 COPY api/package.json ./api/package.json
 COPY web/package.json ./web/package.json
+COPY company/package.json ./company/package.json
 RUN --mount=type=cache,target=/root/.npm \
 	npm ci --include=dev --no-audit --no-fund
 
@@ -28,6 +29,7 @@ FROM node-base AS api-local
 ENV NODE_ENV=development
 COPY --from=deps /app/node_modules ./node_modules
 COPY package.json package-lock.json ./
+COPY company ./company
 COPY api ./api
 EXPOSE 3000
 ENTRYPOINT ["/usr/local/bin/biz-entrypoint.sh"]
@@ -37,8 +39,10 @@ FROM node-base AS api-production
 COPY package.json package-lock.json ./
 COPY api/package.json ./api/package.json
 COPY web/package.json ./web/package.json
+COPY company/package.json ./company/package.json
 RUN --mount=type=cache,target=/root/.npm \
 	npm ci --omit=dev --workspace @seferbiz/api --include-workspace-root --no-audit --no-fund
+COPY company ./company
 COPY api ./api
 USER node
 EXPOSE 3000
@@ -53,6 +57,7 @@ FROM node-base AS web-local
 ENV NODE_ENV=development
 COPY --from=deps /app/node_modules ./node_modules
 COPY package.json package-lock.json ./
+COPY company ./company
 COPY web ./web
 WORKDIR /app/web
 EXPOSE 3000
@@ -63,6 +68,7 @@ CMD ["node", "/app/node_modules/next/dist/bin/next", "dev", "--hostname", "0.0.0
 FROM deps AS web-builder
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY package.json package-lock.json ./
+COPY company ./company
 COPY web ./web
 WORKDIR /app/web
 RUN npm run build
@@ -72,8 +78,10 @@ ENV NEXT_TELEMETRY_DISABLED=1
 COPY package.json package-lock.json ./
 COPY api/package.json ./api/package.json
 COPY web/package.json ./web/package.json
+COPY company/package.json ./company/package.json
 RUN --mount=type=cache,target=/root/.npm \
 	npm ci --omit=dev --workspace @seferbiz/web --include-workspace-root --no-audit --no-fund
+COPY company ./company
 COPY web ./web
 COPY --from=web-builder /app/web/.next ./web/.next
 WORKDIR /app/web

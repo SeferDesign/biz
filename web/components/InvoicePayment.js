@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ArrowRight, Check, Copy, CreditCard, Landmark } from 'lucide-react';
 import { browserApiBaseUrl, formatMoney } from '../lib/api.js';
+import { companyInfo } from '@seferbiz/company';
 
 export default function InvoicePayment({ invoiceId, accessToken, methods = [], amount, currency }) {
   const [pendingMethod, setPendingMethod] = useState('');
@@ -16,7 +17,7 @@ export default function InvoicePayment({ invoiceId, accessToken, methods = [], a
     setError('');
     setZelleCopied(false);
     try {
-      await navigator.clipboard.writeText(`Zelle recipient: info@seferdesign.com\nAmount: ${amountLabel}\nMemo: ${invoiceReference}`);
+      await navigator.clipboard.writeText(`Zelle recipient: ${companyInfo.emailContact}\nAmount: ${amountLabel}\nMemo: ${invoiceReference}`);
       setZelleCopied(true);
     } catch {
       setError('Could not copy payment details. Please try again or use another payment method.');
@@ -73,7 +74,7 @@ export default function InvoicePayment({ invoiceId, accessToken, methods = [], a
             <strong>Zelle</strong>
           </div>
           <span>{amountLabel}</span>
-          <small>No processing fee · Send to info@seferdesign.com</small>
+          <small>No processing fee · Send to {companyInfo.emailContact}</small>
           <span className="payment-choice-action" aria-live="polite">{zelleCopied ? 'Payment details copied' : 'Copy payment details'} {zelleCopied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}</span>
         </button>
       </div>

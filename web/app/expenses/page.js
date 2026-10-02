@@ -23,7 +23,6 @@ export default async function ExpensesPage({ searchParams }) {
       </nav>
       <ResourcePage
         title="Expenses"
-        description="Business spending by date, vendor, and account."
         data={expenseResult.data}
         error={expenseResult.error || vendorResult.error}
         countLabel="expenses"

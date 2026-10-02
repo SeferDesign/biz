@@ -11,6 +11,7 @@ import {
   validOtpTimestep,
   verifyAndConsumeOtp
 } from '../auth/session.js';
+import { hasText, parseId } from './shared/validation.js';
 
 const invalidCredentials = { error: 'Invalid email, password, or two-factor code' };
 
@@ -74,6 +75,18 @@ export function createAuthRouter(store, {
     } : null;
   }
 
+  function normalizeApiKeyInput(value) {
+    return typeof value === 'string' ? value.trim() : '';
+  }
+
+  function normalizeApiKeyLabel(value) {
+    return normalizeApiKeyInput(value).slice(0, 255);
+  }
+
+  function normalizeApiKeyValue(value) {
+    return normalizeApiKeyInput(value).slice(0, 255);
+  }
+
   router.post('/login', async (req, res) => {
     const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
     const password = typeof req.body?.password === 'string' ? req.body.password : '';
@@ -100,6 +113,7 @@ export function createAuthRouter(store, {
     res.cookie('biz_session', token, cookieOptions(req, SESSION_TTL_SECONDS, sessionCookieDomain));
     await store.recordUserSignIn(user.id, req.ip);
     return res.json({
+      access_token: token,
       user: {
         id: user.id,
         email: user.email,
@@ -222,6 +236,62 @@ export function createAuthRouter(store, {
     const settings = await securitySettings(req.authUser.id);
     if (!settings) return res.status(404).json({ error: 'User not found' });
     return res.json(settings);
+  });
+
+  router.get('/api-keys', async (req, res) => {
+    if (!requireUser(req, res)) return;
+    return res.json(await store.getApiKeysByUser(req.authUser.id));
+  });
+
+  router.post('/api-keys', async (req, res) => {
+    if (!requireUser(req, res)) return;
+    const label = normalizeApiKeyLabel(req.body?.label);
+    const key = normalizeApiKeyValue(req.body?.key);
+    if (!hasText(label)) return res.status(400).json({ error: 'API key label is required' });
+    if (!hasText(key)) return res.status(400).json({ error: 'API key value is required' });
+    try {
+      const created = await store.createApiKey(req.authUser.id, { label, key });
+      return res.status(201).json(created);
+    } catch (error) {
+      if (error?.code === 'ER_DUP_ENTRY') {
+        return res.status(409).json({ error: 'That API key already exists' });
+      }
+      throw error;
+    }
+  });
+
+  router.patch('/api-keys/:id', async (req, res) => {
+    if (!requireUser(req, res)) return;
+    const id = parseId(req.params.id);
+    if (!id) return res.status(400).json({ error: 'API key id must be a positive integer' });
+    const updates = {};
+    if (Object.hasOwn(req.body || {}, 'label')) {
+      updates.label = normalizeApiKeyLabel(req.body.label);
+      if (!hasText(updates.label)) return res.status(400).json({ error: 'API key label cannot be empty' });
+    }
+    if (Object.hasOwn(req.body || {}, 'key')) {
+      updates.key = normalizeApiKeyValue(req.body.key);
+      if (!hasText(updates.key)) return res.status(400).json({ error: 'API key value cannot be empty' });
+    }
+    if (!Object.keys(updates).length) return res.status(400).json({ error: 'At least one API key field is required' });
+    try {
+      const updated = await store.updateApiKey(req.authUser.id, id, updates);
+      if (!updated) return res.status(404).json({ error: 'API key not found' });
+      return res.json(updated);
+    } catch (error) {
+      if (error?.code === 'ER_DUP_ENTRY') {
+        return res.status(409).json({ error: 'That API key already exists' });
+      }
+      throw error;
+    }
+  });
+
+  router.delete('/api-keys/:id', async (req, res) => {
+    if (!requireUser(req, res)) return;
+    const id = parseId(req.params.id);
+    if (!id) return res.status(400).json({ error: 'API key id must be a positive integer' });
+    if (!await store.deleteApiKey(req.authUser.id, id)) return res.status(404).json({ error: 'API key not found' });
+    return res.sendStatus(204);
   });
 
   router.post('/otp/setup', async (req, res) => {

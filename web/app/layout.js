@@ -2,6 +2,7 @@ import AppShell from '../components/AppShell.js';
 import { getApiData } from '../lib/api-server.js';
 import { Instrument_Sans } from 'next/font/google';
 import './globals.css';
+import { companyInfo } from '@seferbiz/company';
 
 const instrumentSans = Instrument_Sans({
   subsets: ['latin'],
@@ -11,7 +12,7 @@ const instrumentSans = Instrument_Sans({
 });
 
 export const metadata = {
-  title: 'Sefer Design Co. Biz Admin',
+  title: `${companyInfo.name} ${companyInfo.acronym} Admin`,
   description: ''
 };
 

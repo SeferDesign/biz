@@ -3,6 +3,7 @@ import { initializeSchema } from './schema.js';
 import bcrypt from 'bcryptjs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { companyInfo } from '@seferbiz/company';
 
 function dateMonthsAgo(months, now = new Date()) {
   const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - months, 1));
@@ -74,15 +75,15 @@ export async function seedDatabase(database = getPool(), now = new Date()) {
     'email_accounting', 'preferred_paymenttype', 'currentrate', 'federalein'
   ], [{
     id: 1,
-    name: 'Sefer Design Company LLC',
+    name: companyInfo.legalEntity,
     contact: 'Robert Sefer',
     site_url: 'https://seferdesign.com',
-    address1: '123 Main St.',
-    address2: 'Suite 100',
-    zipcode: '60610',
-    city: 'Chicago',
-    state: 'IL',
-    email_accounting: 'robtest@rsefer.com',
+    address1: companyInfo.address.address1,
+    address2: companyInfo.address.address2,
+    zipcode: companyInfo.address.zipcode,
+    city: companyInfo.address.city,
+    state: companyInfo.address.state,
+    email_accounting: companyInfo.emailContact,
     preferred_paymenttype: 'Zelle',
     currentrate: 85,
     federalein: '81-0123456'

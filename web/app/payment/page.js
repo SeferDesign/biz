@@ -1,15 +1,13 @@
+import { companyInfo } from '@seferbiz/company';
+
 const banks = [
   'Bank of America', 'Capital One', 'Chase', 'Citi',
   'PNC', 'TD Bank', 'U.S. Bank', 'Wells Fargo'
 ];
 
-const company = {
-  name: 'Sefer Design Company LLC',
-  email: 'info@seferdesign.com',
-  address: ['205 S Hawthorne Ave.', 'Elmhurst, IL 60126']
-};
+const companyAddressLine2 = `${companyInfo.address.city}, ${companyInfo.address.state} ${companyInfo.address.zipcode}`;
 
-export const metadata = { title: 'Payment Options | Sefer Design Company' };
+export const metadata = { title: 'Payment Options' };
 
 export default function PaymentPage() {
   return (
@@ -34,7 +32,7 @@ export default function PaymentPage() {
         <section className="payment-method">
           <h2>Zelle</h2>
           <div>
-            <p>Send your payment to <a className="inline-link" href={`mailto:${company.email}`}>{company.email}</a>.</p>
+            <p>Send your payment to <a className="inline-link" href={`mailto:${companyInfo.emailFrom}`}>{companyInfo.emailFrom}</a>.</p>
             <p>Supported banks include {banks.join(', ')}.</p>
             <a className="inline-link" href="https://www.zellepay.com/get-started" target="_blank" rel="noreferrer">See participating banks</a>
           </div>
@@ -42,14 +40,14 @@ export default function PaymentPage() {
 
         <section className="payment-method">
           <h2>ACH transfer</h2>
-          <p>Please <a className="inline-link" href={`mailto:${company.email}`}>contact us</a> for bank account information.</p>
+          <p>Please <a className="inline-link" href={`mailto:${companyInfo.emailContact}`}>contact us</a> for bank account information.</p>
         </section>
 
         <section className="payment-method">
           <h2>Paper check</h2>
           <div>
-            <p>Make the check payable to <strong>{company.name}</strong> and mail it to:</p>
-            <address>{company.name}<br />{company.address[0]}<br />{company.address[1]}</address>
+            <p>Make the check payable to <strong>{companyInfo.legalEntity}</strong> and mail it to:</p>
+            <address>{companyInfo.legalEntity}<br />{companyInfo.address.address1}<br />{companyAddressLine2}</address>
           </div>
         </section>
       </div>

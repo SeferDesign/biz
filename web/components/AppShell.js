@@ -14,6 +14,7 @@ import {
   Users
 } from 'lucide-react';
 import OmniSearch from './OmniSearch.js';
+import Brand from './Brand.js';
 
 const primaryNavigation = [
   { href: '/', label: 'Overview', icon: House },
@@ -64,9 +65,7 @@ export default function AppShell({ children, user }) {
     return (
       <div className="public-shell">
         <header className="public-header">
-          <a className="brand" href="https://seferdesign.com">
-            <img className="brand-logo" src="/images/sdc_white.svg" alt="Sefer Design Co." />
-          </a>
+          <Brand/>
         </header>
         <main className="main-content">{children}</main>
       </div>
@@ -94,9 +93,7 @@ export default function AppShell({ children, user }) {
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <Link className="brand" href="/" aria-label="Sefer Design Company overview">
-          <img className="brand-logo" src="/images/sdc_white.svg" alt="" />
-        </Link>
+        <Brand/>
         <nav className="primary-nav" aria-label="Main navigation">
           {primaryNavigation.map((item) => navItem(pathname, item))}
         </nav>

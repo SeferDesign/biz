@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Brand from './Brand.js';
+import { companyInfo } from '@seferbiz/company';
 
 async function submitJson(url, body) {
   const response = await fetch(url, {
@@ -106,15 +108,12 @@ export function ResetPasswordForm({ token }) {
 function AuthPanel({ title, children }) {
   return (
     <main className="login-page">
-      <div className="login-brand">
-        <span className="brand-mark">SD</span>
-        <span className="brand-name">Sefer Design<span>Business office</span></span>
-      </div>
+      <Brand/>
       <section className="login-panel" aria-labelledby="auth-title">
         <h1 id="auth-title">{title}</h1>
         {children}
       </section>
-      <p className="login-foot">Sefer Design Company LLC</p>
+      <p className="login-foot">{companyInfo.legalEntity}</p>
     </main>
   );
 }

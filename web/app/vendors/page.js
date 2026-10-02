@@ -21,7 +21,6 @@ export default async function VendorsPage({ searchParams }) {
   return (
     <ResourcePage
       title="Vendors"
-      description="Suppliers and service providers associated with business expenses."
       data={vendorResult.data}
       error={vendorResult.error || expenseResult.error}
       countLabel="vendors"

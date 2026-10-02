@@ -5,7 +5,8 @@
   "type": "module",
   "workspaces": [
     "api",
-    "web"
+    "web",
+    "company"
   ],
   "scripts": {
     "start": "bash ./scripts/local.sh start",
@@ -14,9 +15,9 @@
     "local": "bash ./scripts/local.sh",
     "cloud": "bash ./scripts/cloud.sh",
     "cdk": "npm --prefix cdk run",
-    "dev": "bash -c 'if [[ -f .env ]]; then set -a; source .env; set +a; fi; npm run dev --workspace @seferbiz/api'",
-    "dev:api": "bash -c 'if [[ -f .env ]]; then set -a; source .env; set +a; fi; npm run dev --workspace @seferbiz/api'",
-    "dev:web": "npm run dev --workspace @seferbiz/web",
+    "dev": "bash -c 'trap \"kill 0\" EXIT; npm run dev:api & npm run dev:web & wait'",
+    "dev:api": "bash -c 'if [[ -f .env ]]; then set -a; source .env; set +a; fi; PORT=\"${API_PORT:-3001}\" npm run dev --workspace @seferbiz/api'",
+    "dev:web": "bash -c 'if [[ -f .env ]]; then set -a; source .env; set +a; fi; PORT=\"${WEB_PORT:-3000}\" npm run dev --workspace @seferbiz/web'",
     "dev:stripe": "bash -c 'set -a; source build.env; set +a; exec stripe listen --skip-verify --events checkout.session.completed,checkout.session.async_payment_succeeded,checkout.session.async_payment_failed --forward-to \"https://${API_DOMAIN}:${HTTPS_PORT}/v1/stripe/webhook\"'",
     "build:web": "npm run build --workspace @seferbiz/web",
     "test": "npm run test --workspace @seferbiz/api",

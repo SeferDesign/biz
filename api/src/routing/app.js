@@ -55,6 +55,7 @@ function createAuthenticationMiddleware(store, apiAccessToken) {
     const bearerToken = req.get('authorization')?.match(/^Bearer\s+(.+)$/i)?.[1];
     const cookieToken = readCookie(req, 'biz_session');
     if (tokenMatches(bearerToken || req.query.access_token, apiAccessToken)) return next();
+    if (typeof bearerToken === 'string' && bearerToken && await store.touchApiKeyLastUsed?.(bearerToken)) return next();
     const sessionUser = verifySessionToken(bearerToken || cookieToken, apiAccessToken);
     if (sessionUser) {
       req.authUser = sessionUser;

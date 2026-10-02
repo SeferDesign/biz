@@ -32,6 +32,7 @@ export function createMemoryStore() {
   const invoiceEmailSends = [];
   const invoicePayments = [];
   const users = [];
+  const apiKeys = [];
   return {
     users,
     invoicePayments,
@@ -116,6 +117,59 @@ export function createMemoryStore() {
         encrypted_otp_secret_salt: null,
         consumed_timestep: null
       });
+    },
+    async getApiKeysByUser(userId) {
+      return apiKeys
+        .filter((key) => key.user_id === Number(userId))
+        .sort((left, right) => right.id - left.id);
+    },
+    async createApiKey(userId, input) {
+      if (apiKeys.some((item) => item.key === input.key)) {
+        const error = new Error('Duplicate entry');
+        error.code = 'ER_DUP_ENTRY';
+        throw error;
+      }
+      const now = new Date().toISOString();
+      const apiKey = {
+        id: Math.max(0, ...apiKeys.map((item) => item.id)) + 1,
+        user_id: Number(userId),
+        label: input.label,
+        key: input.key,
+        last_used_at: null,
+        created_at: now,
+        updated_at: now
+      };
+      apiKeys.push(apiKey);
+      return apiKey;
+    },
+    async updateApiKey(userId, id, updates) {
+      const apiKey = apiKeys.find((item) => item.id === Number(id) && item.user_id === Number(userId));
+      if (!apiKey) return undefined;
+      const nextKeyValue = updates.key === undefined ? apiKey.key : updates.key;
+      if (nextKeyValue !== apiKey.key && apiKeys.some((item) => item.key === nextKeyValue)) {
+        const error = new Error('Duplicate entry');
+        error.code = 'ER_DUP_ENTRY';
+        throw error;
+      }
+      Object.assign(apiKey, {
+        ...(updates.label === undefined ? {} : { label: updates.label }),
+        ...(updates.key === undefined ? {} : { key: updates.key }),
+        updated_at: new Date().toISOString()
+      });
+      return apiKey;
+    },
+    async deleteApiKey(userId, id) {
+      const index = apiKeys.findIndex((item) => item.id === Number(id) && item.user_id === Number(userId));
+      if (index === -1) return false;
+      apiKeys.splice(index, 1);
+      return true;
+    },
+    async touchApiKeyLastUsed(key) {
+      const apiKey = apiKeys.find((item) => item.key === key);
+      if (!apiKey) return false;
+      apiKey.last_used_at = new Date().toISOString();
+      apiKey.updated_at = new Date().toISOString();
+      return true;
     },
     async getSnapshot() {
       return {
