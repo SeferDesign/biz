@@ -5,6 +5,7 @@ import { useState } from 'react';
 async function postJson(path, body = {}) {
   const response = await fetch(path, {
     method: 'POST',
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });

@@ -15,8 +15,9 @@ export default function LoginForm({ returnTo }) {
     setSubmitting(true);
     const form = new FormData(event.currentTarget);
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/api/v1/auth/login', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: form.get('email'),

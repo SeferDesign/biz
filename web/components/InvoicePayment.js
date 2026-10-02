@@ -29,7 +29,7 @@ export default function InvoicePayment({ invoiceId, accessToken, methods = [], a
     try {
       const response = await fetch(
         `${browserApiBaseUrl}/invoices/${invoiceId}/checkout?access_token=${encodeURIComponent(accessToken)}`,
-        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ method }) }
+        { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ method }) }
       );
       const body = await response.json().catch(() => null);
       if (!response.ok || !body?.url) throw new Error(body?.error || `Checkout could not be started (${response.status})`);

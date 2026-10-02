@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState } from 'react';
 import {
   Building2,
   CalendarDays,
@@ -55,6 +56,8 @@ function navItem(pathname, item, secondary = false) {
 
 export default function AppShell({ children, user }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [signingOut, setSigningOut] = useState(false);
   if (['/login', '/forgot-password', '/reset-password'].includes(pathname)) return children;
   // Visitors without a session only reach public pages and access-token record links.
   if (!user?.email) {
@@ -76,6 +79,17 @@ export default function AppShell({ children, user }) {
     .filter(Boolean)
     .join(' ');
   const avatarInitial = fullName.charAt(0).toUpperCase() || user?.email?.trim().charAt(0).toUpperCase() || '?';
+
+  async function signOut() {
+    setSigningOut(true);
+    try {
+      await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' });
+    } catch {
+      // Session cleanup is handled by the API; continue to login screen either way.
+    }
+    router.replace('/login');
+    router.refresh();
+  }
 
   return (
     <div className="app-shell">
@@ -99,7 +113,7 @@ export default function AppShell({ children, user }) {
               </span>
             </Link>
             {user.email
-              ? <form action="/api/auth/logout" method="post"><button className="sidebar-sign-out" type="submit">Sign out</button></form>
+              ? <button className="sidebar-sign-out" type="button" disabled={signingOut} onClick={signOut}>{signingOut ? 'Signing out...' : 'Sign out'}</button>
               : <Link className="sidebar-sign-out" href="/login">Sign in</Link>}
           </div>
         </div>

@@ -34,6 +34,7 @@ function apiExpense(expense) {
 async function requestExpenses(url, method, expenses) {
   const response = await fetch(url, {
     method,
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ expenses })
   });

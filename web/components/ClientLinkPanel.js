@@ -16,7 +16,7 @@ export default function ClientLinkPanel({ invoiceId, initialAccessToken }) {
     setStatus('creating');
     setError('');
     try {
-      const response = await fetch(`${browserApiBaseUrl}/invoices/${invoiceId}/access-token`, { method: 'POST' });
+      const response = await fetch(`${browserApiBaseUrl}/invoices/${invoiceId}/access-token`, { method: 'POST', credentials: 'include' });
       const body = await response.json().catch(() => null);
       if (!response.ok || !body?.access_token) throw new Error(body?.error || `Could not create link (${response.status})`);
       setAccessToken(body.access_token);

@@ -32,7 +32,7 @@ export default function OmniSearch() {
     setError('');
     const timer = setTimeout(async () => {
       try {
-        const response = await fetch(`${browserApiBaseUrl}/search?q=${encodeURIComponent(term)}`, { signal: controller.signal });
+        const response = await fetch(`${browserApiBaseUrl}/search?q=${encodeURIComponent(term)}`, { signal: controller.signal, credentials: 'include' });
         const body = await response.json().catch(() => null);
         if (!response.ok) throw new Error(body?.error || `Search failed (${response.status})`);
         setResults(body.results || []);

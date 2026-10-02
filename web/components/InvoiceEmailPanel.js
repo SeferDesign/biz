@@ -12,7 +12,7 @@ export default function InvoiceEmailPanel({ invoiceId, initialSends = [], histor
     setSending(true);
     setError('');
     try {
-      const response = await fetch(`${browserApiBaseUrl}/invoices/${invoiceId}/email`, { method: 'POST' });
+      const response = await fetch(`${browserApiBaseUrl}/invoices/${invoiceId}/email`, { method: 'POST', credentials: 'include' });
       const body = await response.json().catch(() => null);
       if (!response.ok) {
         setError(body?.error || `Could not send invoice email (${response.status})`);

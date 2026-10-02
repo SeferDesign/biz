@@ -17,9 +17,40 @@ const invalidCredentials = { error: 'Invalid email, password, or two-factor code
 const resetRequestMessage = { message: 'If an account exists for that email, password reset instructions will be sent.' };
 const passwordResetTtlHours = 6;
 
+function normalizeCookieDomain(value) {
+  if (typeof value !== 'string') return '';
+  const trimmed = value.trim().toLowerCase();
+  if (!trimmed || trimmed === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(trimmed)) return '';
+  return trimmed.startsWith('.') ? trimmed : `.${trimmed}`;
+}
+
+function inferCookieDomain(hostname) {
+  if (typeof hostname !== 'string') return '';
+  const lower = hostname.toLowerCase();
+  if (!lower || lower === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(lower)) return '';
+  const labels = lower.split('.').filter(Boolean);
+  if (labels.length < 2) return '';
+  return `.${labels.slice(-2).join('.')}`;
+}
+
+function cookieOptions(req, maxAgeSeconds, sessionCookieDomain) {
+  const forwardedProto = req.get('x-forwarded-proto') || '';
+  const secure = forwardedProto.split(',').map((value) => value.trim()).includes('https') || req.secure;
+  const domain = normalizeCookieDomain(sessionCookieDomain) || inferCookieDomain(req.hostname);
+  return {
+    httpOnly: true,
+    secure,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: Math.max(0, Number(maxAgeSeconds) || 0) * 1000,
+    ...(domain ? { domain } : {})
+  };
+}
+
 export function createAuthRouter(store, {
   apiAccessToken,
   otpSecretEncryptionKey,
+  sessionCookieDomain,
   sendResetEmail = sendPasswordResetEmail
 } = {}) {
   const router = Router();
@@ -66,11 +97,9 @@ export function createAuthRouter(store, {
     const token = createSessionToken(user, apiAccessToken);
     if (!token) return res.status(503).json({ error: 'Authentication is not configured' });
 
+    res.cookie('biz_session', token, cookieOptions(req, SESSION_TTL_SECONDS, sessionCookieDomain));
     await store.recordUserSignIn(user.id, req.ip);
     return res.json({
-      access_token: token,
-      token_type: 'Bearer',
-      expires_in: SESSION_TTL_SECONDS,
       user: {
         id: user.id,
         email: user.email,
@@ -78,6 +107,11 @@ export function createAuthRouter(store, {
         last_name: user.last_name || ''
       }
     });
+  });
+
+  router.post('/logout', async (req, res) => {
+    res.clearCookie('biz_session', cookieOptions(req, 0, sessionCookieDomain));
+    return res.status(204).end();
   });
 
   router.post('/password-reset', async (req, res) => {

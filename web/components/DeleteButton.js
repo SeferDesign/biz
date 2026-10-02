@@ -13,7 +13,7 @@ export default function DeleteButton({ endpoint, returnTo, label = 'Delete recor
     setDeleting(true);
     setError('');
     try {
-      const response = await fetch(endpoint, { method: 'DELETE' });
+      const response = await fetch(endpoint, { method: 'DELETE', credentials: 'include' });
       if (!response.ok) {
         const body = await response.json().catch(() => null);
         setError(body?.error || `Could not delete record (${response.status})`);

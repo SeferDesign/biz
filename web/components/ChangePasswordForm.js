@@ -25,6 +25,7 @@ export default function ChangePasswordForm() {
     try {
       const response = await fetch('/api/v1/auth/password', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ current_password: currentPassword, new_password: newPassword })
       });

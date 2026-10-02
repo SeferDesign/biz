@@ -35,36 +35,15 @@ async function isValidRecordLink(request) {
   }
 }
 
-function isTokenizedApiRequest(request) {
-  if (!request.nextUrl.searchParams.get('access_token')) return false;
-  const apiPath = request.nextUrl.pathname.replace(/^\/api\/v1(?=\/|$)/, '');
-  if (request.method === 'POST') return /^\/invoices\/\d+\/checkout$/.test(apiPath);
-  if (request.method !== 'GET') return false;
-  return /^\/(?:clients\/\d+|invoices\/\d+(?:\/(?:pdf|stripe|lines|payment-options))?)$/.test(apiPath);
-}
-
 export async function proxy(request) {
   const { pathname } = request.nextUrl;
-  if (['/login', '/forgot-password', '/reset-password', '/payment', '/payments'].includes(pathname) || pathname.startsWith('/api/auth/')) {
+  if (['/login', '/forgot-password', '/reset-password', '/payment', '/payments'].includes(pathname) || pathname.startsWith('/api/')) {
     return NextResponse.next();
   }
 
   const sessionToken = request.cookies.get('biz_session')?.value;
-  if (pathname.startsWith('/api/v1/')) {
-    if (request.method === 'POST' && ['/api/v1/auth/password-reset', '/api/v1/auth/password-reset/confirm'].includes(pathname)) {
-      return NextResponse.next();
-    }
-    if (sessionToken && await isValidSession(sessionToken)) return NextResponse.next();
-    if (isTokenizedApiRequest(request)) return NextResponse.next();
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   if (sessionToken && await isValidSession(sessionToken)) return NextResponse.next();
   if (await isValidRecordLink(request)) return NextResponse.next();
-
-  if (pathname.startsWith('/api/')) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
 
   const loginUrl = request.nextUrl.clone();
   loginUrl.pathname = '/login';

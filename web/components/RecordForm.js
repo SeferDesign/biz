@@ -67,6 +67,7 @@ export default function RecordForm({ title, description, fields, initialValues =
       const lines = lineItemsEnabled ? getLinePayload() : [];
       const response = await fetch(saveEndpoint, {
         method: saveMethod,
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(getPayload(lines))
       });
@@ -84,6 +85,7 @@ export default function RecordForm({ title, description, fields, initialValues =
         }
         const linesResponse = await fetch(lineItemsEndpoint.replace(':id', encodeURIComponent(invoiceId)), {
           method: 'PUT',
+          credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(lines)
         });
@@ -97,7 +99,7 @@ export default function RecordForm({ title, description, fields, initialValues =
       if (emailEndpoint && values.status === 'sent' && initialValues.status !== 'sent') {
         let emailResponse;
         try {
-          emailResponse = await fetch(emailEndpoint.replace(':id', encodeURIComponent(invoiceId)), { method: 'POST' });
+          emailResponse = await fetch(emailEndpoint.replace(':id', encodeURIComponent(invoiceId)), { method: 'POST', credentials: 'include' });
         } catch {
           setError('Invoice saved, but email delivery could not be reached. Try saving again.');
           setSaving(false);

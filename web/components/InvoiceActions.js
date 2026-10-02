@@ -16,7 +16,7 @@ export default function InvoiceActions({ invoice, lines, linesAvailable = true, 
   const endpoint = `${browserApiBaseUrl}/invoices/${invoice.id}`;
 
   async function request(url, options) {
-    const response = await fetch(url, options);
+    const response = await fetch(url, { ...options, credentials: 'include' });
     const body = await response.json().catch(() => null);
     if (!response.ok) throw new Error(body?.error || `Request failed (${response.status})`);
     return body;

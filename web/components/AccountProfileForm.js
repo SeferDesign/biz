@@ -18,6 +18,7 @@ export default function AccountProfileForm({ initialUser }) {
     try {
       const response = await fetch('/api/v1/auth/profile', {
         method: 'PATCH',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           first_name: firstName,
