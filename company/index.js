@@ -2,6 +2,7 @@ export const companyInfo = {
   legalEntity: 'Sefer Design Company LLC',
   name: 'Sefer Design Co.',
   acronym: 'SDC',
+	website: 'https://seferdesign.com',
   emailContact: 'info@seferdesign.com',
   address: {
     address1: '205 S Hawthorne Ave.',
@@ -10,6 +11,11 @@ export const companyInfo = {
     state: 'Illinios',
     zipcode: '60126'
   },
+	personMain: {
+		first_name: 'Robert',
+		last_name: 'Sefer',
+		email: 'rob@seferdesign.com'
+	}
   logoPath: '/images/sdc_white.svg'
 };
 

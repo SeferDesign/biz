@@ -37,7 +37,7 @@ export async function seedUser(database, password = process.env.SEED_USER_PASSWO
   await database.execute(
     `INSERT INTO users (email, encrypted_password, first_name, last_name, otp_required_for_login)
      VALUES (?, ?, ?, ?, FALSE) ON DUPLICATE KEY UPDATE id = id`,
-    ['rob@seferdesign.com', encryptedPassword, 'Robert', 'Sefer']
+    [companyInfo.personMain.email, encryptedPassword, companyInfo.personMain.first_name, companyInfo.personMain.last_name]
   );
   return true;
 }
@@ -76,8 +76,8 @@ export async function seedDatabase(database = getPool(), now = new Date()) {
   ], [{
     id: 1,
     name: companyInfo.legalEntity,
-    contact: 'Robert Sefer',
-    site_url: 'https://seferdesign.com',
+    contact: `${companyInfo.personMain.first_name} ${companyInfo.personMain.last_name}`,
+    site_url: companyInfo.website,
     address1: companyInfo.address.address1,
     address2: companyInfo.address.address2,
     zipcode: companyInfo.address.zipcode,
