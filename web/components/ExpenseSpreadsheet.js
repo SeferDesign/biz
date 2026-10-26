@@ -185,7 +185,6 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
 
   return (
     <>
-      <Link className="back-link" href="/expenses">&lt; All expenses</Link>
       <div className="page-heading">
         <div><h1>Bulk expenses</h1><p className="page-description">Edit rows in place or enter several expenses, then save each batch.</p></div>
         <span className="sheet-count">{expenses.length} records</span>

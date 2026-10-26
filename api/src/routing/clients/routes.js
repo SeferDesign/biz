@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { hasText, parseId } from '../shared/validation.js';
 import { publicClient } from '../shared/public-views.js';
+import { withInvoiceDisplayIds } from '@seferbiz/company';
+import { publicInvoice } from '../shared/public-views.js';
 
 const paymentTerms = new Set(['Net 15', 'Net 30', 'Net 60', 'Net 90']);
 const preferredPaymentMethods = new Set(['Check', 'Credit Card', 'Zelle', 'PayPal', 'Stripe', 'ACH', 'Cryptocurrency', 'Cash', 'Venmo', 'Other']);
@@ -29,6 +31,28 @@ export default function clientsRouter(store) {
     const client = await store.getClient(id);
     if (!client) return res.status(404).json({ error: 'Client not found' });
     return res.json(req.recordAccess ? publicClient(client) : client);
+  });
+
+  router.post('/clients/:id/access-token', async (req, res) => {
+    const id = parseId(req.params.id);
+    if (!id) return res.status(400).json({ error: 'Client id must be a positive integer' });
+    if (!await store.getClient(id)) return res.status(404).json({ error: 'Client not found' });
+    return res.json({ access_token: await store.ensureClientAccessToken(id) });
+  });
+
+  router.get('/clients/:id/invoices', async (req, res) => {
+    const id = parseId(req.params.id);
+    if (!id) return res.status(400).json({ error: 'Client id must be a positive integer' });
+    const client = await store.getClient(id);
+    if (!client) return res.status(404).json({ error: 'Client not found' });
+    const invoices = (await store.getSnapshot()).invoices
+      .filter((invoice) => Number(invoice.client_id) === id && (invoice.paid || invoice.status !== 'draft'))
+      .sort((left, right) => String(right.date || '').localeCompare(String(left.date || '')) || Number(right.id) - Number(left.id))
+      .map((invoice) => {
+        const invoiceWithDisplayIds = withInvoiceDisplayIds(invoice, client.name);
+        return req.recordAccess ? publicInvoice(invoiceWithDisplayIds, client) : invoiceWithDisplayIds;
+      });
+    return res.json(invoices);
   });
 
   router.post('/clients', async (req, res) => {

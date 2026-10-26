@@ -19,7 +19,6 @@ export default async function VendorDetailPage({ params }) {
   const expenses = (expenseResult.data || []).filter((expense) => expense.vendor_id === vendor.id);
   return (
     <>
-      <Link className="back-link" href="/vendors">&lt; All vendors</Link>
       <div className="page-heading">
         <div><h1>{vendor.name}</h1><p className="page-description">{vendor.category || 'Uncategorized vendor'}</p></div>
         <div className="heading-actions">

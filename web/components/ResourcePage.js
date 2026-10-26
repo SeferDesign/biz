@@ -27,12 +27,6 @@ export function ResourcePage({ title, description, data, error, columns, countLa
           </div>
           <div className="heading-actions">
             {actionHref && <NewButton href={actionHref} label={actionLabel || 'New record'} />}
-            {!error && (
-              <div className="heading-count">
-                <strong>{itemCount.toLocaleString('en-US')}</strong>
-                <span>{countLabel || 'records'}</span>
-              </div>
-            )}
           </div>
         </div>
       )}

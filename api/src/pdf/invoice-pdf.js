@@ -1,5 +1,5 @@
 import PDFDocument from 'pdfkit';
-import { displayId } from '@seferbiz/company';
+import { companyInfo, displayId } from '@seferbiz/company';
 
 function invoiceNumber(id, clientName) {
   return displayId(clientName, id);
@@ -78,10 +78,16 @@ export function createInvoicePdf({ invoice, client, lines }) {
         document.y = y + rowHeight;
       }
 
-      if (document.y + 40 > document.page.height - margin) document.addPage();
+      if (document.y + 118 > document.page.height - margin) document.addPage();
       document.font('Helvetica-Bold').fontSize(11).fillColor('#19372f');
       document.text('Total', margin + contentWidth - 190, document.y + 16, { width: 90, align: 'right' });
       document.text(formatMoney(invoice.cost ?? invoice.total, invoice.currency), margin + contentWidth - 95, document.y + 16, { width: 95, align: 'right' });
+      document.font('Helvetica').fontSize(9).fillColor('#65736d')
+        .text(`This payment can be made out to '${companyInfo.legalEntity}'\nand sent to `, margin, document.y + 42, { width: contentWidth, continued: true })
+        .fillColor('#1f5083')
+        .text(companyInfo.emailContact, { link: `mailto:${companyInfo.emailContact}`, underline: true, continued: true })
+        .fillColor('#65736d')
+        .text(` or mailed to:\n${companyInfo.legalEntity}\n${companyInfo.address.address1}\n${companyInfo.address.city}, ${companyInfo.address.state} ${companyInfo.address.zipcode}`, { link: null, underline: false });
       document.end();
     } catch (error) {
       reject(error);

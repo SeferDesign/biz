@@ -75,9 +75,13 @@ test('API authentication protects resources while preserving public and access-t
   assert.equal((await supertest(app).get('/v1/invoices').set('Authorization', `Bearer ${TEST_API_ACCESS_TOKEN}`)).status, 200);
   assert.equal((await supertest(app).get('/v1/clients/1?access_token=client-link-token')).status, 200);
   assert.equal((await supertest(app).get('/v1/clients/1?access_token=wrong-token')).status, 401);
+  assert.equal((await supertest(app).get('/v1/clients/1/invoices?access_token=client-link-token')).status, 200);
   assert.equal((await supertest(app).get('/v1/clients?access_token=client-link-token')).status, 401);
   assert.equal((await supertest(app).post('/v1/clients?access_token=client-link-token').send({ name: 'Blocked' })).status, 401);
+  assert.equal((await supertest(app).post('/v1/clients/1/access-token?access_token=client-link-token')).status, 401);
   assert.equal((await supertest(app).get('/v1/invoices/1?access_token=invoice-link-token')).status, 200);
+  assert.equal((await supertest(app).get('/v1/invoices/3?access_token=client-link-token')).status, 200);
+  assert.equal((await supertest(app).get('/v1/invoices/2?access_token=client-link-token')).status, 401);
   assert.equal((await supertest(app).get('/v1/invoices/1/lines?access_token=invoice-link-token')).status, 200);
   assert.equal((await supertest(app).get('/v1/invoices/1/email?access_token=invoice-link-token')).status, 401);
   assert.equal((await supertest(app).post('/v1/invoices/1/access-token?access_token=invoice-link-token')).status, 401);
@@ -101,6 +105,11 @@ test('API authentication protects resources while preserving public and access-t
   assert.equal(adminInvoice.access_token, 'invoice-link-token');
   const created = await supertest(app).post('/v1/invoices/2/access-token').set('Authorization', `Bearer ${TEST_API_ACCESS_TOKEN}`);
   assert.equal(created.body.access_token, 'invoice-token-2');
+  const clientLink = await supertest(app).post('/v1/clients/1/access-token').set('Authorization', `Bearer ${TEST_API_ACCESS_TOKEN}`);
+  assert.equal(clientLink.body.access_token, 'client-link-token');
+  const publicInvoices = await supertest(app).get('/v1/clients/1/invoices?access_token=client-link-token');
+  assert.deepEqual(publicInvoices.body.map((invoice) => invoice.id), [3]);
+  assert.equal(publicInvoices.body[0].access_token, undefined);
 });
 
 test('database API keys can authenticate requests and update last_used_at', async () => {
@@ -431,6 +440,28 @@ test('invoice email includes the generated invoice PDF attachment', async () => 
   assert.equal(message.attachments[0].content.subarray(0, 5).toString(), '%PDF-');
   assert.match(message.text, /Payment terms: Net 90/);
   assert.deepEqual(message.cc, ['ap@bright.example', 'owner@bright.example']);
+});
+
+test('invoice email includes the tokenized client portal link', async () => {
+  let message;
+  const previousPublicAppUrl = process.env.PUBLIC_APP_URL;
+  process.env.PUBLIC_APP_URL = 'https://biz.example';
+  try {
+    await sendInvoiceEmail({
+      invoice: { id: 10, client_id: 1, date: '2025-04-10', cost: 125, currency: 'USD' },
+      client: { id: 1, name: 'Bright Studio', email: 'billing@bright.example', access_token: 'client-link-token' },
+      lines: []
+    }, {
+      async sendMail(value) {
+        message = value;
+      }
+    });
+  } finally {
+    if (previousPublicAppUrl === undefined) delete process.env.PUBLIC_APP_URL;
+    else process.env.PUBLIC_APP_URL = previousPublicAppUrl;
+  }
+
+  assert.match(message.text, /View all Bright Studio invoices: https:\/\/biz\.example\/clients\/1\?access_token=client-link-token/);
 });
 
 test('omni-search finds clients, vendors, expenses, invoices, and line items', async () => {

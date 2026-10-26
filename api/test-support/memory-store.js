@@ -199,6 +199,11 @@ export function createMemoryStore() {
     async deleteClient(id) {
       return removeById(snapshot.clients, id);
     },
+    async ensureClientAccessToken(id) {
+      const client = await this.getClient(id);
+      if (client && !client.access_token) client.access_token = `client-token-${client.id}`;
+      return client?.access_token;
+    },
     async setClientStripeCustomerId(id, customerId) {
       const client = await this.getClient(id);
       if (client) client.stripe_customer_id = customerId;

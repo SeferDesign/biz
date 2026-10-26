@@ -122,7 +122,6 @@ export default async function Home() {
       <section className="chart-section">
         <div className="section-heading">
           <h2>Trailing 5 months</h2>
-          <span className="section-note">Revenue and expenses against monthly goals</span>
         </div>
         <ColumnChart
           label="Revenue, expenses, and goals for the trailing 5 months"

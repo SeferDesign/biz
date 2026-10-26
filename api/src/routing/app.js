@@ -64,7 +64,7 @@ function createAuthenticationMiddleware(store, apiAccessToken) {
 
     const isInvoiceCheckout = req.method === 'POST' && /^\/invoices\/\d+\/checkout$/.test(req.path);
     if ((req.method === 'GET' || isInvoiceCheckout) && typeof req.query.access_token === 'string') {
-      const clientMatch = req.method === 'GET' && req.path.match(/^\/clients\/(\d+)$/);
+      const clientMatch = req.method === 'GET' && req.path.match(/^\/clients\/(\d+)(?:\/invoices)?$/);
       const invoiceMatch = req.path.match(/^\/invoices\/(\d+)(?:\/(?:stripe|pdf|payment-options|checkout))?$/);
       const invoiceLinesMatch = req.path.match(/^\/invoices\/(\d+)\/lines$/);
       const record = clientMatch
@@ -77,6 +77,13 @@ function createAuthenticationMiddleware(store, apiAccessToken) {
       if (record?.access_token && tokenMatches(req.query.access_token, record.access_token)) {
         req.recordAccess = { type: clientMatch ? 'client' : 'invoice', id: record.id };
         return next();
+      }
+      if ((invoiceMatch || invoiceLinesMatch) && record?.client_id) {
+        const client = await store.getClient(record.client_id);
+        if (client?.access_token && tokenMatches(req.query.access_token, client.access_token)) {
+          req.recordAccess = { type: 'client', id: client.id };
+          return next();
+        }
       }
     }
 

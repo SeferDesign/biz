@@ -146,6 +146,7 @@ export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoic
     if (!client) return res.status(400).json({ error: 'Invoice client not found' });
     const lines = snapshot.lines.filter((line) => line.invoice_id === invoice.id);
     if (!invoice.access_token) invoice.access_token = await store.ensureInvoiceAccessToken(invoice.id);
+    if (!client.access_token) client.access_token = await store.ensureClientAccessToken(client.id);
     try {
       const result = await sendInvoiceEmail({ invoice, client, lines });
       const recipient = result?.recipient || client.email || client.email_accounting;

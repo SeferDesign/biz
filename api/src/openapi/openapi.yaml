@@ -341,6 +341,25 @@ paths:
       responses:
         '204':
           description: Client deleted
+  /clients/{id}/access-token:
+    post:
+      summary: Create or retrieve a client portal access token
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Client portal access token
+  /clients/{id}/invoices:
+    get:
+      summary: List issued invoices for a client
+      security:
+        - ApiToken: []
+        - RecordAccessToken: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Client invoice list
   /years:
     get:
       summary: List Years
@@ -752,7 +771,7 @@ components:
       type: apiKey
       in: query
       name: access_token
-      description: A matching invoice or client access token; allowed only on that record's read routes.
+      description: A matching invoice or client access token; client tokens also allow reads of that client's invoices.
   parameters:
     IdParam:
       name: id

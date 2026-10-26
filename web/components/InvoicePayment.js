@@ -44,7 +44,7 @@ export default function InvoicePayment({ invoiceId, accessToken, methods = [], a
 
   return (
     <section className="detail-section invoice-payment">
-      <div className="section-heading"><h2>Choose a payment method</h2><span className="section-note">Card and ACH payments open Stripe&apos;s secure checkout</span></div>
+      <div className="section-heading"><h2>Choose a payment method</h2></div>
       <div className="payment-choices">
         {methods.map((option) => (
           <button
@@ -62,7 +62,7 @@ export default function InvoicePayment({ invoiceId, accessToken, methods = [], a
               <strong>{option.label}</strong>
             </div>
             <span>{fromCents(option.total_cents)}</span>
-            <small>{option.fee_cents ? `Estimated processing fee: ${fromCents(option.fee_cents)}` : 'No estimated processing fee'}</small>
+            <small>{option.fee_cents ? `Inlcudes an estimated processing of fee ${fromCents(option.fee_cents)}` : 'No estimated processing fee'}</small>
             <span className="payment-choice-action">{pendingMethod === option.method ? 'Opening checkout...' : 'Pay Now'} <ArrowRight size={16} aria-hidden="true" /></span>
           </button>
         ))}
@@ -74,7 +74,7 @@ export default function InvoicePayment({ invoiceId, accessToken, methods = [], a
             <strong>Zelle</strong>
           </div>
           <span>{amountLabel}</span>
-          <small>No processing fee · Send to {companyInfo.emailContact}</small>
+          <small>Send to {companyInfo.emailContact}.</small>
           <span className="payment-choice-action" aria-live="polite">{zelleCopied ? 'Payment details copied' : 'Copy Details'} {zelleCopied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}</span>
         </button>
       </div>

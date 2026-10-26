@@ -18,7 +18,6 @@ export default async function ExpenseDetailPage({ params }) {
   const vendor = (vendorResult.data || []).find((item) => item.id === expense.vendor_id);
   return (
     <>
-      <Link className="back-link" href="/expenses">&lt; All expenses</Link>
       <div className="page-heading">
         <div><h1>{expense.name}</h1><p className="page-description">{formatDate(expense.date)}</p></div>
         <ResourceActions editHref={`/expenses/${expense.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/expenses/${expense.id}`} returnTo="/expenses" label="expense" />

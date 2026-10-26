@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { DetailGrid, ResourcePage } from '../../../components/ResourcePage.js';
+import { DetailGrid, ResourcePage, StatusLabel } from '../../../components/ResourcePage.js';
 import NewButton from '../../../components/NewButton.js';
 import ResourceActions from '../../../components/ResourceActions.js';
-import InvoiceActions from '../../../components/InvoiceActions.js';
-import { browserApiBaseUrl, formatDate, formatMoney, newestInvoicesFirst, parsePage } from '../../../lib/api.js';
+import ClientPortalLinkPanel from '../../../components/ClientPortalLinkPanel.js';
+import { browserApiBaseUrl, formatDate, formatMoney, invoiceStatus, newestInvoicesFirst, parsePage } from '../../../lib/api.js';
 import { getApiData } from '../../../lib/api-server.js';
 
 export default async function ClientDetailPage({ params, searchParams }) {
@@ -14,7 +14,7 @@ export default async function ClientDetailPage({ params, searchParams }) {
   const accessTokenQuery = accessToken ? `?access_token=${encodeURIComponent(accessToken)}` : '';
   const [clientResult, invoiceResult] = await Promise.all([
     getApiData(`/clients/${encodeURIComponent(id)}${accessTokenQuery}`),
-    accessToken ? Promise.resolve({ data: [] }) : getApiData('/invoices')
+    getApiData(accessToken ? `/clients/${encodeURIComponent(id)}/invoices${accessTokenQuery}` : '/invoices')
   ]);
   if (clientResult.status === 404) notFound();
   if (clientResult.error) {
@@ -22,15 +22,25 @@ export default async function ClientDetailPage({ params, searchParams }) {
   }
 
   const client = clientResult.data;
-  const invoices = (invoiceResult.data || []).filter((invoice) => Number(invoice.client_id) === Number(client.id)).sort(newestInvoicesFirst);
-  const address = [client.address1, client.address2, [client.city, client.state, client.zipcode].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+  const invoices = (invoiceResult.data || [])
+    .filter((invoice) => accessToken || Number(invoice.client_id) === Number(client.id))
+    .sort(newestInvoicesFirst);
+  const outstandingByCurrency = new Map();
+  for (const invoice of invoices) {
+    if (invoice.status === 'draft' || invoice.paid || invoice.status === 'paid') continue;
+    const currency = invoice.currency || 'USD';
+    outstandingByCurrency.set(currency, (outstandingByCurrency.get(currency) || 0) + Number(invoice.cost ?? invoice.total ?? 0));
+  }
+  const outstandingBalance = [...outstandingByCurrency]
+    .map(([currency, amount]) => formatMoney(amount, currency))
+    .join(' · ') || formatMoney(0);
+  const address = [client.address1, client.address2, [client.city, client.state, client.zipcode].filter(Boolean).join(' ')].filter(Boolean).join('\n');
 	const billingEmails = [client.email_accounting, client.email_accounting_2, client.email_accounting_3, client.email]
 	.filter((value, index, all) => value && all.indexOf(value) === index);
   const billingEmailsDisplay = billingEmails.join(', ');
 
   return (
     <>
-      {!accessToken && <Link className="back-link" href="/clients">&lt; All clients</Link>}
       <div className="page-heading">
         <div><h1>{client.name || 'Unnamed client'}</h1><p className="page-description">{client.contact || 'No primary contact listed'}</p></div>
         {!accessToken && (
@@ -44,31 +54,33 @@ export default async function ClientDetailPage({ params, searchParams }) {
         ['Contact', client.contact],
         [`Billing email${billingEmails.length > 1 ? 's' : ''}`, billingEmailsDisplay],
         ['Website', client.site_url ? <a href={client.site_url} rel="noreferrer" target="_blank">{client.site_url}</a> : '-'],
-        ['Address', address],
+        ['Address', address ? <address className="detail-address">{address}</address> : null],
+        ['Outstanding balance', outstandingBalance],
         ...(accessToken ? [] : [
           ['Preferred payment', client.preferred_paymenttype],
           ['Payment terms', client.payment_terms || 'Net 15'],
           ['Current rate', client.currentrate ? formatMoney(client.currentrate) : '-']
         ])
       ]} />
-      {!accessToken && <section className="detail-section">
-        <div className="section-heading"><h2>Invoices</h2><span className="section-note">{invoices.length} for this client</span></div>
+      {!accessToken && <ClientPortalLinkPanel clientId={client.id} initialAccessToken={client.access_token} />}
+      <section className="detail-section">
+        <div className="section-heading"><h2>Invoices</h2></div>
         {invoiceResult.error ? <div className="notice" role="alert"><span>{invoiceResult.error}</span></div> : (
           <ResourcePage
             hideHeading
             data={invoices}
-            pageHref={`/clients/${client.id}`}
+            pageHref={`/clients/${client.id}${accessTokenQuery}`}
             page={parsePage(query?.page)}
             columns={[
-              { key: 'id', label: 'Invoice', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}`}>{invoice.display_id || invoice.display_id_number || invoice.id}</Link> },
+              { key: 'id', label: 'Invoice', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}${accessTokenQuery}`}>{invoice.display_id || invoice.display_id_number || invoice.id}</Link> },
               { key: 'date', label: 'Date', render: (invoice) => formatDate(invoice.date) },
               { key: 'description', label: 'Description' },
-              { key: 'cost', label: 'Amount', className: 'numeric-cell', render: (invoice) => formatMoney(invoice.cost ?? invoice.total, invoice.currency) },
-              { key: 'actions', label: 'Actions', render: (invoice) => <InvoiceActions invoice={invoice} compact /> }
+              { key: 'status', label: 'Status', render: (invoice) => <StatusLabel status={invoiceStatus(invoice)} /> },
+              { key: 'cost', label: 'Amount', className: 'numeric-cell', render: (invoice) => formatMoney(invoice.cost ?? invoice.total, invoice.currency) }
             ]}
           />
         )}
-      </section>}
+      </section>
     </>
   );
 }

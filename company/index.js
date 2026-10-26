@@ -8,7 +8,7 @@ export const companyInfo = {
     address1: '205 S Hawthorne Ave.',
     address2: null,
     city: 'Elmhurst',
-    state: 'Illinios',
+    state: 'IL',
     zipcode: '60126'
   },
   personMain: {

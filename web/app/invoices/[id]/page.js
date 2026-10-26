@@ -40,14 +40,14 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
   const isPaid = invoice.paid === true || invoice.paid === 1 || invoice.status === 'paid';
   const billedTo = invoice.client;
   const billedToAddress = billedTo && [billedTo.address1, billedTo.address2, [billedTo.city, billedTo.state, billedTo.zipcode].filter(Boolean).join(' ')]
-    .filter(Boolean).join(', ');
+    .filter(Boolean).join('\n');
   const detailItems = accessToken
     ? [
       [isPaid ? 'Amount' : 'Amount due', formatMoney(invoice.cost ?? invoice.total, invoice.currency)],
       ['Billed to', billedTo?.name],
       ['Issue date', formatDate(invoice.date)],
       ['Payment terms', billedTo?.payment_terms || 'Net 15'],
-      ...(billedToAddress ? [['Address', billedToAddress]] : []),
+      ...(billedToAddress ? [['Address', <address className="detail-address">{billedToAddress}</address>]] : []),
       ...(isPaid ? [['Paid date', formatDate(invoice.paiddate)], ['Payment method', invoice.paymenttype]] : [])
     ]
     : [
@@ -72,7 +72,6 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
       {query?.checkout === 'canceled' && !isPaid && (
         <div className="notice" role="status"><strong>Payment canceled</strong><span>You were not charged. You can choose a payment method below to try again.</span></div>
       )}
-      {!accessToken && <Link className="back-link" href="/invoices">&lt; All invoices</Link>}
       <div className="page-heading">
         <div><h1>Invoice #{invoice.id}</h1></div>
         <div className="detail-actions">
@@ -119,7 +118,6 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
         <p className="section-note payment-alternatives">Prefer to pay another way? See <Link className="inline-link" href="/payments">all payment options</Link>.</p>
       )}
       <section className="detail-section">
-        <div className="section-heading"><h2>Line items</h2><span className="section-note">{lines.length} items</span></div>
         {lineResult.error ? <div className="notice" role="alert"><span>{lineResult.error}</span></div> : (
           <ResourcePage
             hideHeading

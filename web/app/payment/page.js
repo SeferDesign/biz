@@ -32,9 +32,8 @@ export default function PaymentPage() {
         <section className="payment-method">
           <h2>Zelle</h2>
           <div>
-            <p>Send your payment to <a className="inline-link" href={`mailto:${companyInfo.emailFrom}`}>{companyInfo.emailFrom}</a>.</p>
-            <p>Supported banks include {banks.join(', ')}.</p>
-            <a className="inline-link" href="https://www.zellepay.com/get-started" target="_blank" rel="noreferrer">See participating banks</a>
+            <p>Send your payment to <a className="inline-link" href={`mailto:${companyInfo.emailContact}`}>{companyInfo.emailContact}</a>.</p>
+            <p>Supported banks include {banks.join(', ')}. <a className="inline-link" href="https://www.zellepay.com/get-started" target="_blank" rel="noreferrer">See full list of participating banks</a>.</p>
           </div>
         </section>
 

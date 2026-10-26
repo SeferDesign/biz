@@ -282,6 +282,14 @@ export class MySqlStore {
     return result.affectedRows > 0;
   }
 
+  async ensureClientAccessToken(id) {
+    await this.database.execute(
+      "UPDATE clients SET access_token = ? WHERE id = ? AND (access_token IS NULL OR access_token = '')",
+      [createAccessToken(), id]
+    );
+    return (await this.getClient(id))?.access_token;
+  }
+
   async setClientStripeCustomerId(id, customerId) {
     await this.database.execute('UPDATE clients SET stripe_customer_id = ? WHERE id = ?', [customerId, id]);
   }
