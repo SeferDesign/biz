@@ -84,6 +84,7 @@ jq -r \
 		PUBLIC_API_URL: $api_url,
 		CORS_ALLOWED_ORIGINS: $app_url,
 		SMTP_FROM: (.SMTP_FROM // "Sefer Design Co. <info@seferdesign.com>"),
+				ACTIVITY_SUMMARY_EMAIL: (.ACTIVITY_SUMMARY_EMAIL // "rob@seferdesign.com"),
 		STRIPE_SECRET_KEY: .STRIPE_SECRET_KEY,
 		STRIPE_WEBHOOK_SECRET: .STRIPE_WEBHOOK_SECRET,
 		PAYMENT_NOTIFICATION_EMAIL: (.PAYMENT_NOTIFICATION_EMAIL // "info@seferdesign.com")
@@ -174,6 +175,53 @@ WantedBy=timers.target
 EOF
 systemctl daemon-reload
 systemctl enable --now biz-backup.timer >/dev/null
+
+cat >/etc/systemd/system/biz-summary-weekly.service <<EOF
+[Unit]
+Description=Send the weekly biz activity summary
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=${host_dir}/activity-summary.sh weekly
+EOF
+cat >/etc/systemd/system/biz-summary-weekly.timer <<'EOF'
+[Unit]
+Description=Weekly biz activity summary
+
+[Timer]
+OnCalendar=Sun *-*-* 08:00:00 UTC
+RandomizedDelaySec=15m
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
+cat >/etc/systemd/system/biz-summary-monthly.service <<EOF
+[Unit]
+Description=Send the monthly biz activity summary
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=${host_dir}/activity-summary.sh monthly
+EOF
+cat >/etc/systemd/system/biz-summary-monthly.timer <<'EOF'
+[Unit]
+Description=Monthly biz activity summary
+
+[Timer]
+OnCalendar=*-*-01 08:00:00 UTC
+RandomizedDelaySec=15m
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
+systemctl daemon-reload
+systemctl enable --now biz-summary-weekly.timer biz-summary-monthly.timer >/dev/null
 
 docker image prune -af >/dev/null
 echo "Deployed ${api_image##*/} and ${web_image##*/}"

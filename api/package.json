@@ -11,6 +11,8 @@
     "db:seed": "node src/db/seed.js",
     "db:seed-user": "node src/db/seed.js --user-only",
     "db:import-live": "node src/db/import-live.js",
+    "summary:weekly": "node src/jobs/activity-summary.js weekly",
+    "summary:monthly": "node src/jobs/activity-summary.js monthly",
     "openapi:validate": "node --input-type=module -e \"import fs from 'node:fs'; import yaml from 'yaml'; yaml.parse(fs.readFileSync('./src/openapi/openapi.yaml', 'utf8')); console.log('OpenAPI YAML is valid');\""
   },
   "dependencies": {

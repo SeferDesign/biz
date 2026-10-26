@@ -27,6 +27,7 @@ services:
       SMTP_PASSWORD: ${AWS_SES_SMTP_PASSWORD:-}
       SMTP_SECURE: 'false'
       SMTP_FROM: '${SMTP_FROM:-Sefer Design Co. <info@seferdesign.com>}'
+      ACTIVITY_SUMMARY_EMAIL: ${ACTIVITY_SUMMARY_EMAIL:-rob@seferdesign.com}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
