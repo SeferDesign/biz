@@ -82,7 +82,7 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
         </div>
       </div>
       <DetailGrid items={detailItems} />
-			<p>{invoice.description}</p>
+		<p className="invoice-description">{invoice.description}</p>
       {!accessToken && <ClientLinkPanel invoiceId={invoice.id} initialAccessToken={invoice.access_token} />}
       {!accessToken && payments.length > 0 && (
         <section className="detail-section">

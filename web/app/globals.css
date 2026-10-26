@@ -203,6 +203,7 @@ h2 { font-family: var(--font-sans), "Helvetica Neue", "Segoe UI", sans-serif; fo
 .section-heading h2 { margin-bottom: 0; }
 .section-note { color: var(--muted); font-size: 11px; }
 .detail-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; border: 1px solid var(--line); background: var(--white); box-shadow: var(--shadow); }
+.invoice-description { margin: 8px 0 0; }
 .detail-item { min-width: 0; padding: 18px 20px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .detail-item dt { margin-bottom: 7px; color: var(--muted); font-size: 10px; font-weight: 600; letter-spacing: 0; text-transform: uppercase; }
 .detail-item dd { margin: 0; overflow-wrap: anywhere; font-size: 14px; font-weight: 500; }
