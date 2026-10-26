@@ -1,7 +1,0 @@
-<% provide(:title, "Invoice ##{@invoice.id}") %>
-<div class="page-heading">
-	<h1><%= icon('far', 'envelope', class: 'fa-fw left') %>Email Sent</h1>
-</div>
-<div class="panel">
-	<p>An invoice email has been sent to <%= link_to @invoice.client.name, @invoice.client %> for <%= link_to "Invoice ##{@invoice.id}", @invoice %>.</p>
-</div>

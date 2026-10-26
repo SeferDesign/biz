@@ -1,0 +1,32 @@
+{
+  "name": "@seferbiz/api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test",
+    "db:setup": "node src/db/setup.js",
+    "db:seed": "node src/db/seed.js",
+    "db:seed-user": "node src/db/seed.js --user-only",
+    "db:import-live": "node src/db/import-live.js",
+    "summary:weekly": "node src/jobs/activity-summary.js weekly",
+    "summary:monthly": "node src/jobs/activity-summary.js monthly",
+    "openapi:validate": "node --input-type=module -e \"import fs from 'node:fs'; import yaml from 'yaml'; yaml.parse(fs.readFileSync('./src/openapi/openapi.yaml', 'utf8')); console.log('OpenAPI YAML is valid');\""
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "express": "5.2.1",
+    "mysql2": "^3.24.5",
+    "nodemailer": "^10.0.12",
+    "pdfkit": "^0.20.2",
+    "pg": "^8.16.3",
+    "stripe": "^22.6.2",
+    "swagger-ui-express": "5.0.1",
+    "yaml": "2.9.1"
+  },
+  "devDependencies": {
+    "supertest": "7.3.0"
+  }
+}

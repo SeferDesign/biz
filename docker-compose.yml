@@ -1,0 +1,18 @@
+# Shared build definitions. Local and cloud compose files extend these so both
+# environments are produced from the same Dockerfile and build arguments.
+services:
+  api-build-base:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_VERSION_MAJOR: ${NODE_VERSION_MAJOR}
+      target: api-production
+
+  web-build-base:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_VERSION_MAJOR: ${NODE_VERSION_MAJOR}
+      target: web-production

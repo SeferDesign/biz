@@ -1,0 +1,218 @@
+import { Router } from 'express';
+import { isDate, isFiniteNumber, parseId } from '../shared/validation.js';
+import { publicInvoice, publicLine } from '../shared/public-views.js';
+import { sendInvoiceEmail as deliverInvoiceEmail } from '../../email/invoice-mailer.js';
+import { createInvoicePdf } from '../../pdf/invoice-pdf.js';
+import { displayIdNumber, withInvoiceDisplayIds } from '@seferbiz/company';
+
+const invoiceStatuses = new Set(['draft', 'sent', 'paid']);
+
+function normalizeInvoiceInput(input = {}) {
+  const normalized = { ...input };
+  if (normalized.cost === undefined && normalized.total !== undefined) normalized.cost = normalized.total;
+  delete normalized.total;
+  return normalized;
+}
+
+function validateInvoiceInput(input, { partial = false } = {}) {
+  if (!partial || input.client_id !== undefined) {
+    if (!parseId(input.client_id)) return 'A valid client id is required';
+  }
+  if ((!partial || input.date !== undefined) && !isDate(input.date)) return 'Invoice date must use YYYY-MM-DD';
+  if (input.paiddate !== undefined && input.paiddate !== null && input.paiddate !== '' && !isDate(input.paiddate)) {
+    return 'Paid date must use YYYY-MM-DD';
+  }
+  if ((!partial || input.cost !== undefined) && !isFiniteNumber(input.cost)) return 'Invoice amount must be numeric';
+  if (input.cost !== undefined && Number(input.cost) < 0) return 'Invoice amount cannot be negative';
+  if (input.status !== undefined && !invoiceStatuses.has(input.status)) return 'Status must be draft, sent, or paid';
+  if (input.paid !== undefined && typeof input.paid !== 'boolean' && ![0, 1].includes(input.paid)) {
+    return 'Paid must be a boolean';
+  }
+  if (input.currency !== undefined && (typeof input.currency !== 'string' || input.currency.length !== 3)) {
+    return 'Currency must be a three-letter code';
+  }
+  return null;
+}
+
+export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoiceEmail } = {}) {
+  const router = Router();
+
+  router.get('/invoices', async (req, res) => {
+    const snapshot = await store.getSnapshot();
+    const clientsById = new Map(snapshot.clients.map((client) => [Number(client.id), client]));
+    return res.json(snapshot.invoices.map((invoice) => withInvoiceDisplayIds(invoice, clientsById.get(Number(invoice.client_id))?.name)));
+  });
+
+  router.post('/invoices', async (req, res) => {
+    const input = normalizeInvoiceInput(req.body);
+    const error = validateInvoiceInput(input);
+    if (error) return res.status(400).json({ error });
+    if (!await store.getClient(Number(input.client_id))) return res.status(400).json({ error: 'Client not found' });
+    const invoiceInput = { ...input, client_id: Number(input.client_id), cost: Number(input.cost) };
+    if (invoiceInput.status) invoiceInput.paid = invoiceInput.status === 'paid';
+    const invoice = await store.createInvoice(invoiceInput);
+    const client = await store.getClient(invoice.client_id);
+    return res.status(201).json(withInvoiceDisplayIds(invoice, client?.name));
+  });
+
+  router.get('/invoices/:id', async (req, res) => {
+    const id = parseId(req.params.id);
+    if (!id) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
+    const invoice = await store.getInvoice(id);
+    if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
+    const client = invoice.client_id ? await store.getClient(invoice.client_id) : null;
+    const invoiceWithDisplayIds = withInvoiceDisplayIds(invoice, client?.name);
+    if (req.recordAccess) {
+      return res.json(publicInvoice(invoiceWithDisplayIds, client));
+    }
+    return res.json(invoiceWithDisplayIds);
+  });
+
+  router.post('/invoices/:id/access-token', async (req, res) => {
+    const id = parseId(req.params.id);
+    if (!id) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
+    if (!await store.getInvoice(id)) return res.status(404).json({ error: 'Invoice not found' });
+    return res.json({ access_token: await store.ensureInvoiceAccessToken(id) });
+  });
+
+  router.patch('/invoices/:id', async (req, res) => {
+    const id = parseId(req.params.id);
+    if (!id) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
+    const input = normalizeInvoiceInput(req.body);
+    if (!Object.keys(input).length) return res.status(400).json({ error: 'At least one invoice field is required' });
+    const error = validateInvoiceInput(input, { partial: true });
+    if (error) return res.status(400).json({ error });
+    if (input.client_id !== undefined && !await store.getClient(Number(input.client_id))) {
+      return res.status(400).json({ error: 'Client not found' });
+    }
+    const updates = { ...input };
+    if (updates.client_id !== undefined) updates.client_id = Number(updates.client_id);
+    if (updates.cost !== undefined) updates.cost = Number(updates.cost);
+    if (updates.status !== undefined) updates.paid = updates.status === 'paid';
+    const invoice = await store.updateInvoice(id, updates);
+    if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
+    const client = invoice.client_id ? await store.getClient(invoice.client_id) : null;
+    return res.json(withInvoiceDisplayIds(invoice, client?.name));
+  });
+
+  router.put('/invoices/:id', async (req, res) => {
+    const id = parseId(req.params.id);
+    if (!id) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
+    const input = normalizeInvoiceInput(req.body);
+    const error = validateInvoiceInput(input);
+    if (error) return res.status(400).json({ error });
+    if (!await store.getClient(Number(input.client_id))) return res.status(400).json({ error: 'Client not found' });
+    const updates = { ...input, client_id: Number(input.client_id), cost: Number(input.cost) };
+    updates.paid = updates.status ? updates.status === 'paid' : Boolean(updates.paid);
+    const invoice = await store.updateInvoice(id, updates);
+    if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
+    const client = invoice.client_id ? await store.getClient(invoice.client_id) : null;
+    return res.json(withInvoiceDisplayIds(invoice, client?.name));
+  });
+
+  router.delete('/invoices/:id', async (req, res) => {
+    const id = parseId(req.params.id);
+    if (!id) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
+    if (!await store.deleteInvoice(id)) return res.status(404).json({ error: 'Invoice not found' });
+    return res.sendStatus(204);
+  });
+
+  router.get('/invoices/:id/pdf', async (req, res) => {
+    const id = parseId(req.params.id);
+    if (!id) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
+    const invoice = await store.getInvoice(id);
+    if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
+    const snapshot = await store.getSnapshot();
+    const client = snapshot.clients.find((item) => item.id === invoice.client_id) || {};
+    const lines = snapshot.lines.filter((line) => line.invoice_id === invoice.id);
+    try {
+      const pdf = await createInvoicePdf({ invoice, client, lines });
+      const filename = `Invoice-${displayIdNumber(invoice.id)}.pdf`;
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      return res.send(pdf);
+    } catch {
+      return res.status(500).json({ error: 'Could not generate invoice PDF' });
+    }
+  });
+
+  async function sendInvoiceEmailRoute(req, res) {
+    const id = parseId(req.params.id);
+    if (!id) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
+    const invoice = await store.getInvoice(id);
+    if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
+    const snapshot = await store.getSnapshot();
+    const client = snapshot.clients.find((item) => item.id === invoice.client_id);
+    if (!client) return res.status(400).json({ error: 'Invoice client not found' });
+    const lines = snapshot.lines.filter((line) => line.invoice_id === invoice.id);
+    if (!invoice.access_token) invoice.access_token = await store.ensureInvoiceAccessToken(invoice.id);
+    if (!client.access_token) client.access_token = await store.ensureClientAccessToken(client.id);
+    try {
+      const result = await sendInvoiceEmail({ invoice, client, lines });
+      const recipient = result?.recipient || client.email || client.email_accounting;
+      const emailSend = await store.recordInvoiceEmailSend(invoice.id, recipient);
+      return res.json({
+        invoice_id: invoice.id,
+        status: 'sent',
+        recipient,
+        email_send: emailSend,
+        message: 'Invoice email sent.'
+      });
+    } catch (error) {
+      return res.status(502).json({ error: error.message || 'Invoice email could not be sent' });
+    }
+  }
+
+  router.get('/invoices/:invoice_id/lines', async (req, res) => {
+    const lines = (await store.getSnapshot()).lines
+      .filter((line) => line.invoice_id === Number(req.params.invoice_id));
+    res.json(req.recordAccess ? lines.map(publicLine) : lines);
+  });
+
+  router.post('/invoices/:invoice_id/lines', async (req, res) => {
+    const line = await store.createInvoiceLine(Number(req.params.invoice_id), req.body);
+    res.status(201).json(line);
+  });
+
+  router.put('/invoices/:invoice_id/lines', async (req, res) => {
+    const invoiceId = parseId(req.params.invoice_id);
+    if (!invoiceId) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
+    if (!Array.isArray(req.body)) return res.status(400).json({ error: 'Invoice lines must be an array' });
+    const invalidLine = req.body.some((line) => !line || typeof line !== 'object' || Array.isArray(line) ||
+      (line.description !== undefined && line.description !== null && typeof line.description !== 'string') ||
+      ['hours', 'rate', 'total', 'amount'].some((field) => line[field] !== undefined && line[field] !== null &&
+        line[field] !== '' && !isFiniteNumber(line[field])));
+    if (invalidLine) return res.status(400).json({ error: 'Invoice lines contain invalid values' });
+    const lines = req.body.map((line) => ({
+      description: line.description?.trim() || null,
+      hours: line.hours === '' ? null : line.hours,
+      rate: line.rate === '' ? null : line.rate,
+      total: line.total ?? line.amount ?? null,
+      hourly: line.hourly ?? null,
+      discount: Boolean(line.discount)
+    }));
+    const updatedLines = await store.replaceInvoiceLines(invoiceId, lines);
+    if (!updatedLines) return res.status(404).json({ error: 'Invoice not found' });
+    return res.json(updatedLines);
+  });
+
+  router.get('/invoices/:invoice_id/lines/:id', async (req, res) => {
+    const snapshot = await store.getSnapshot();
+    const line = snapshot.lines.find((item) =>
+      item.invoice_id === Number(req.params.invoice_id) && item.id === Number(req.params.id));
+    if (!line) return res.status(404).json({ error: 'Invoice line not found' });
+    return res.json(line);
+  });
+
+  router.get('/invoices/:id/email', sendInvoiceEmailRoute);
+  router.post('/invoices/:id/email', sendInvoiceEmailRoute);
+
+  router.get('/invoices/:id/email-sends', async (req, res) => {
+    const id = parseId(req.params.id);
+    if (!id) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
+    if (!await store.getInvoice(id)) return res.status(404).json({ error: 'Invoice not found' });
+    return res.json(await store.getInvoiceEmailSends(id));
+  });
+
+  return router;
+}

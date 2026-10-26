@@ -1,0 +1,1004 @@
+openapi: 3.0.3
+info:
+  title: SeferBiz API
+  version: 1.0.0
+  description: Protected routes accept a user session or the configured API bearer token; login, health, and record-tokenized invoice/client reads are public exceptions.
+servers:
+  - url: https://api.biz.loc:9443/v1
+security:
+  - ApiToken: []
+paths:
+  /auth/login:
+    post:
+      summary: Sign in with a legacy user account
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginInput'
+      responses:
+        '200':
+          description: Signed bearer session
+        '401':
+          description: Invalid email, password, or two-factor code
+  /auth/session:
+    get:
+      summary: Validate the current user session
+      responses:
+        '200':
+          description: Authenticated user identity
+        '401':
+          description: Session is missing or expired
+  /auth/password-reset:
+    post:
+      summary: Request a password reset email
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '202':
+          description: Generic response that does not reveal whether the account exists
+  /auth/password-reset/confirm:
+    post:
+      summary: Set a password using a single-use reset token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, password]
+              properties:
+                token:
+                  type: string
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Password updated
+        '400':
+          description: Reset token is invalid or expired
+  /auth/password:
+    post:
+      summary: Change the signed-in user's password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [current_password, new_password]
+              properties:
+                current_password:
+                  type: string
+                  format: password
+                new_password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Password updated
+        '401':
+          description: Current password is incorrect or session is missing
+  /auth/security:
+    get:
+      summary: Get the current user's two-factor settings
+      responses:
+        '200':
+          description: Authenticator status without exposing the secret
+  /auth/otp/setup:
+    post:
+      summary: Generate an authenticator secret for the current user
+      responses:
+        '200':
+          description: One-time secret and authenticator provisioning URI
+  /auth/otp/enable:
+    post:
+      summary: Enable two-factor login after verifying a code
+      responses:
+        '200':
+          description: Two-factor authentication enabled
+        '401':
+          description: Invalid authenticator code
+  /auth/otp/disable:
+    post:
+      summary: Disable two-factor login after verifying a code
+      responses:
+        '200':
+          description: Two-factor authentication disabled
+        '401':
+          description: Invalid authenticator code
+  /health:
+    get:
+      summary: Health check
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+  /search:
+    get:
+      summary: Search clients, invoices, line items, vendors, expenses, and years
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 100
+      responses:
+        '200':
+          description: Ranked search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SearchResult'
+        '400':
+          description: Invalid search query
+  /invoices:
+    get:
+      summary: List invoices
+      responses:
+        '200':
+          description: Invoice list
+    post:
+      summary: Create invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvoiceInput'
+      responses:
+        '201':
+          description: Invoice created
+  /invoices/{id}:
+    get:
+      summary: Get invoice by id
+      security:
+        - ApiToken: []
+        - RecordAccessToken: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Invoice record
+    put:
+      summary: Replace invoice fields
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvoiceInput'
+      responses:
+        '200':
+          description: Invoice updated
+    patch:
+      summary: Update invoice fields
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvoiceInput'
+      responses:
+        '200':
+          description: Invoice updated
+    delete:
+      summary: Delete invoice and its line items
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Invoice deleted
+  /invoices/{id}/pdf:
+    get:
+      summary: Download an invoice PDF
+      security:
+        - ApiToken: []
+        - RecordAccessToken: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Invoice PDF
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Invoice not found
+  /invoices/{invoice_id}/lines:
+    get:
+      summary: List invoice lines
+      security:
+        - ApiToken: []
+        - RecordAccessToken: []
+      parameters:
+        - $ref: '#/components/parameters/InvoiceIdParam'
+      responses:
+        '200':
+          description: Invoice lines
+    post:
+      summary: Create invoice line
+      parameters:
+        - $ref: '#/components/parameters/InvoiceIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvoiceLineInput'
+      responses:
+        '201':
+          description: Invoice line created
+    put:
+      summary: Replace all invoice lines
+      parameters:
+        - $ref: '#/components/parameters/InvoiceIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/InvoiceLineInput'
+      responses:
+        '200':
+          description: Invoice lines replaced
+  /invoices/{invoice_id}/lines/{id}:
+    get:
+      summary: Get invoice line by id
+      parameters:
+        - $ref: '#/components/parameters/InvoiceIdParam'
+        - $ref: '#/components/parameters/LineIdParam'
+      responses:
+        '200':
+          description: Invoice line
+  /clients:
+    get:
+      summary: List clients
+      responses:
+        '200':
+          description: Client list
+    post:
+      summary: Create client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientInput'
+      responses:
+        '201':
+          description: Client created
+  /clients/{id}:
+    get:
+      summary: Get client by id
+      security:
+        - ApiToken: []
+        - RecordAccessToken: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Client record
+    put:
+      summary: Replace client fields
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientInput'
+      responses:
+        '200':
+          description: Client updated
+    patch:
+      summary: Update client fields
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientInput'
+      responses:
+        '200':
+          description: Client updated
+    delete:
+      summary: Delete Client
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Client deleted
+  /clients/{id}/access-token:
+    post:
+      summary: Create or retrieve a client portal access token
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Client portal access token
+  /clients/{id}/invoices:
+    get:
+      summary: List issued invoices for a client
+      security:
+        - ApiToken: []
+        - RecordAccessToken: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Client invoice list
+  /years:
+    get:
+      summary: List Years
+      responses:
+        '200':
+          description: Years ordered newest first
+    post:
+      summary: Create Year
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/YearInput'
+      responses:
+        '201':
+          description: Year created
+  /years/new:
+    get:
+      summary: Get defaults for a new year
+      responses:
+        '200':
+          description: New year form values
+  /years/{id}:
+    get:
+      summary: Get year totals
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Year and totals
+        '404':
+          description: Year not found
+    put:
+      summary: Replace year fields
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/YearInput'
+      responses:
+        '200':
+          description: Year updated
+    patch:
+      summary: Update year fields
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/YearInput'
+      responses:
+        '200':
+          description: Year updated
+    delete:
+      summary: Delete year
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Year deleted
+  /years/{id}/edit:
+    get:
+      summary: Get a year for editing
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Year record
+        '404':
+          description: Year not found
+  /years/{id}/income:
+    get:
+      summary: Get paid invoice income for a year
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Income report
+        '404':
+          description: Year not found
+  /years/{id}/expenses:
+    get:
+      summary: Get expenses for a year
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Expense report
+        '404':
+          description: Year not found
+  /years/{id}/income/csv:
+    get:
+      summary: Download paid invoices for a year as CSV
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Paid invoices CSV
+          content:
+            text/csv:
+              schema:
+                type: string
+        '404':
+          description: Year not found
+  /years/{id}/expenses/csv:
+    get:
+      summary: Download expenses to date for a year as CSV
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Expenses CSV
+          content:
+            text/csv:
+              schema:
+                type: string
+        '404':
+          description: Year not found
+  /invoices/{id}/email:
+    get:
+      summary: Send an invoice email
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Email sent
+        '404':
+          description: Invoice not found
+    post:
+      summary: Send an invoice email
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Email sent
+        '404':
+          description: Invoice not found
+        '502':
+          description: Email delivery failed
+  /invoices/{id}/email-sends:
+    get:
+      summary: List successful invoice email sends
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Invoice email send history
+        '404':
+          description: Invoice not found
+  /invoices/{id}/stripe:
+    get:
+      summary: Confirm a Stripe Checkout Session for an invoice
+      security:
+        - ApiToken: []
+        - RecordAccessToken: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+        - name: session_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Session status (paid, processing, open, or expired)
+        '400':
+          description: Invalid Stripe session
+        '404':
+          description: Invoice not found
+  /invoices/{id}/payment-options:
+    get:
+      summary: List online payment methods and fees for an invoice
+      security:
+        - ApiToken: []
+        - RecordAccessToken: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Payment options and amounts in cents
+        '404':
+          description: Invoice not found
+  /invoices/{id}/payments:
+    get:
+      summary: List Stripe payment attempts for an invoice (processing, succeeded, failed)
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Payment history, newest first
+        '404':
+          description: Invoice not found
+  /invoices/{id}/checkout:
+    post:
+      summary: Start an embedded Stripe Checkout Session for an invoice
+      security:
+        - ApiToken: []
+        - RecordAccessToken: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [method]
+              properties:
+                method:
+                  type: string
+                  enum: [card, us_bank_account]
+      responses:
+        '201':
+          description: Checkout Session client secret
+        '400':
+          description: Unsupported payment method
+        '409':
+          description: Invoice is paid or already has a payment processing
+        '502':
+          description: Stripe request failed
+        '503':
+          description: Stripe is not configured
+  /stripe/payouts:
+    get:
+      summary: List recent Stripe payouts and invoice payments
+      responses:
+        '200':
+          description: Payouts and payments with fees
+        '502':
+          description: Stripe request failed
+        '503':
+          description: Stripe is not configured
+  /stripe/webhook:
+    post:
+      summary: Receive Stripe webhook events
+      security: []
+      responses:
+        '200':
+          description: Event received
+        '400':
+          description: Invalid Stripe signature
+        '503':
+          description: Stripe webhooks are not configured
+  /expenses:
+    get:
+      summary: List expenses
+      parameters:
+        - name: all
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Return all expenses for spreadsheet editing.
+      responses:
+        '200':
+          description: Expense list
+    post:
+      summary: Create expense
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseInput'
+      responses:
+        '201':
+          description: Expense created
+  /expenses/bulk:
+    post:
+      summary: Create multiple expenses atomically
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseBatchInput'
+      responses:
+        '201':
+          description: Expenses created
+    patch:
+      summary: Update multiple expenses atomically
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseBatchUpdateInput'
+      responses:
+        '200':
+          description: Expenses updated
+        '404':
+          description: One or more expenses were not found; no changes were saved
+  /expenses/{id}:
+    get:
+      summary: Get expense by id
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Expense record
+        '404':
+          description: Expense not found
+    put:
+      summary: Replace expense fields
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseInput'
+      responses:
+        '200':
+          description: Expense updated
+    patch:
+      summary: Update expense fields
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseInput'
+      responses:
+        '200':
+          description: Expense updated
+    delete:
+      summary: Delete expense
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Expense deleted
+  /vendors:
+    get:
+      summary: List vendors
+      responses:
+        '200':
+          description: Vendor list
+    post:
+      summary: Create vendor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VendorInput'
+      responses:
+        '201':
+          description: Vendor created
+  /vendors/{id}:
+    get:
+      summary: Get vendor by id
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Vendor record
+        '404':
+          description: Vendor not found
+    put:
+      summary: Replace vendor fields
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VendorInput'
+      responses:
+        '200':
+          description: Vendor updated
+    patch:
+      summary: Update vendor fields
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VendorInput'
+      responses:
+        '200':
+          description: Vendor updated
+    delete:
+      summary: Delete vendor
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Vendor deleted
+components:
+  securitySchemes:
+    ApiToken:
+      type: http
+      scheme: bearer
+      description: The API_ACCESS_TOKEN configured for the API service.
+    RecordAccessToken:
+      type: apiKey
+      in: query
+      name: access_token
+      description: A matching invoice or client access token; client tokens also allow reads of that client's invoices.
+  parameters:
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    InvoiceIdParam:
+      name: invoice_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    LineIdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+  schemas:
+    LoginInput:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        otp_attempt:
+          type: string
+          description: Required when two-factor authentication is enabled for the user.
+    InvoiceInput:
+      type: object
+      required:
+        - client_id
+      properties:
+        client_id:
+          type: integer
+        status:
+          type: string
+        date:
+          type: string
+          format: date
+        cost:
+          type: number
+        total:
+          type: number
+          description: Accepted as an alias for cost.
+        currency:
+          type: string
+        description:
+          type: string
+    ClientInput:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        contact:
+          type: string
+        email_accounting:
+          type: string
+          format: email
+        site_url:
+          type: string
+          format: uri
+        currentrate:
+          type: number
+        city:
+          type: string
+        state:
+          type: string
+        payment_terms:
+          type: string
+          enum: [Net 15, Net 30, Net 60, Net 90]
+          default: Net 15
+        preferred_paymenttype:
+          type: string
+          nullable: true
+          enum: [Check, Credit Card, Zelle, PayPal, Stripe, ACH, Cryptocurrency, Cash, Venmo, Other]
+    VendorInput:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        category:
+          type: string
+        notes:
+          type: string
+    YearInput:
+      type: object
+      required:
+        - year
+      properties:
+        year:
+          type: integer
+        taxrate:
+          type: number
+        goal_year:
+          type: number
+        goals_months:
+          type: array
+          minItems: 12
+          maxItems: 12
+          items:
+            type: number
+    ExpenseInput:
+      type: object
+      required:
+        - name
+        - date
+        - cost
+      properties:
+        name:
+          type: string
+        vendor_id:
+          type: integer
+          nullable: true
+        date:
+          type: string
+          format: date
+        cost:
+          type: number
+        account:
+          type: string
+          enum:
+            - Business
+            - Personal
+          nullable: true
+        notes:
+          type: string
+    ExpenseBatchInput:
+      type: object
+      required:
+        - expenses
+      properties:
+        expenses:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/ExpenseInput'
+    ExpenseBatchUpdateInput:
+      type: object
+      required:
+        - expenses
+      properties:
+        expenses:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            allOf:
+              - $ref: '#/components/schemas/ExpenseInput'
+              - type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    type: integer
+    SearchResult:
+      type: object
+      required:
+        - type
+        - title
+        - href
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        detail:
+          type: string
+        href:
+          type: string
+    InvoiceLineInput:
+      type: object
+      properties:
+        description:
+          type: string
+          nullable: true
+        hours:
+          type: number
+          nullable: true
+        rate:
+          type: number
+          nullable: true
+        total:
+          type: number
+          nullable: true
+        amount:
+          type: number
+          nullable: true
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: integer
+        client_id:
+          type: integer
+        status:
+          type: string
+        total:
+          type: number
+        currency:
+          type: string
+    Client:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        payment_terms:
+          type: string
+          enum: [Net 15, Net 30, Net 60, Net 90]
+          default: Net 15
+        preferred_paymenttype:
+          type: string
+          nullable: true
+          enum: [Check, Credit Card, Zelle, PayPal, Stripe, ACH, Cryptocurrency, Cash, Venmo, Other]

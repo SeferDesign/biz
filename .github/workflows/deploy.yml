@@ -1,0 +1,73 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-biz-prod
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # Native arm64 so the t4g images build without QEMU emulation.
+    runs-on: ubuntu-26.04-arm
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+
+      - id: versions
+        run: echo "node=$(sed -n 's/^NODE_VERSION_MAJOR=//p' build.env)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ steps.versions.outputs.node }}
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            cdk/package-lock.json
+
+      - name: Install
+        run: |
+          npm ci --no-audit --no-fund
+          npm ci --prefix cdk --no-audit --no-fund
+
+      - name: Test
+        run: npm test
+
+      # default-load keeps CDK's plain `docker build` + `docker push` flow working with the container builder.
+      - uses: docker/setup-buildx-action@v4
+        id: buildx
+        with:
+          driver-opts: default-load=true
+
+      # Exposes the cache service credentials BuildKit needs for `type=gha` layer caching (see cdk/lib/biz-stack.ts).
+      - uses: crazy-max/ghaction-github-runtime@v4
+
+      # Persists the Dockerfile's RUN --mount=type=cache dirs (npm, Next.js), which the layer cache does not cover.
+      - uses: actions/cache@v6
+        with:
+          path: buildkit-mounts
+          key: buildkit-mounts-${{ hashFiles('Dockerfile', 'package-lock.json') }}-${{ github.sha }}
+          restore-keys: |
+            buildkit-mounts-${{ hashFiles('Dockerfile', 'package-lock.json') }}-
+            buildkit-mounts-
+
+      - uses: reproducible-containers/buildkit-cache-dance@v3
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          dockerfile: Dockerfile
+          cache-dir: buildkit-mounts
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::319412199095:role/biz-prod-github-deploy
+          aws-region: us-east-1
+
+      - name: Deploy
+        run: npm --prefix cdk run deploy

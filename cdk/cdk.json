@@ -1,0 +1,15 @@
+{
+  "app": "npx ts-node --prefer-ts-exts bin/app.ts",
+  "context": {
+    "account": "319412199095",
+    "region": "us-east-1",
+    "appDomainName": "biz.seferdesign.com",
+    "apiDomainName": "api.biz.seferdesign.com",
+    "hostedZoneId": "Z2T6JVL0LPP9YB",
+    "hostedZoneName": "seferdesign.com",
+    "acmeEmail": "info@seferdesign.com",
+    "githubRepository": "SeferDesign/biz",
+    "aws-cdk:enableDiffNoFail": "true",
+    "@aws-cdk/core:stackRelativeExports": true
+  }
+}
