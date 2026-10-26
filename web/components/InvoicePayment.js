@@ -63,7 +63,7 @@ export default function InvoicePayment({ invoiceId, accessToken, methods = [], a
             </div>
             <span>{fromCents(option.total_cents)}</span>
             <small>{option.fee_cents ? `Estimated processing fee: ${fromCents(option.fee_cents)}` : 'No estimated processing fee'}</small>
-            <span className="payment-choice-action">{pendingMethod === option.method ? 'Opening checkout...' : 'Continue to Stripe'} <ArrowRight size={16} aria-hidden="true" /></span>
+            <span className="payment-choice-action">{pendingMethod === option.method ? 'Opening checkout...' : 'Pay Now'} <ArrowRight size={16} aria-hidden="true" /></span>
           </button>
         ))}
         <button className="payment-choice" disabled={Boolean(pendingMethod)} onClick={copyZelleDetails} type="button">
@@ -75,7 +75,7 @@ export default function InvoicePayment({ invoiceId, accessToken, methods = [], a
           </div>
           <span>{amountLabel}</span>
           <small>No processing fee · Send to {companyInfo.emailContact}</small>
-          <span className="payment-choice-action" aria-live="polite">{zelleCopied ? 'Payment details copied' : 'Copy payment details'} {zelleCopied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}</span>
+          <span className="payment-choice-action" aria-live="polite">{zelleCopied ? 'Payment details copied' : 'Copy Details'} {zelleCopied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}</span>
         </button>
       </div>
       {error && <p className="action-error" role="alert">{error}</p>}
