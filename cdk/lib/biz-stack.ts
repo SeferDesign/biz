@@ -1,6 +1,6 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { CfnOutput, Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
+import { Annotations, CfnOutput, Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as ecrAssets from 'aws-cdk-lib/aws-ecr-assets';
 import * as iam from 'aws-cdk-lib/aws-iam';
@@ -28,6 +28,7 @@ export interface BizStackProps extends StackProps {
   hostedZoneName: string;
   acmeEmail: string;
   instanceType: string;
+  githubRepository?: string;
 }
 
 export class BizStack extends Stack {
@@ -63,6 +64,8 @@ export class BizStack extends Stack {
     });
 
     const platform = isArm ? ecrAssets.Platform.LINUX_ARM64 : ecrAssets.Platform.LINUX_AMD64;
+    // GitHub Actions only: the local docker driver can't export gha caches. Cache options don't affect asset hashes.
+    const ciCache = process.env.GITHUB_ACTIONS === 'true';
     const image = (target: string) =>
       new ecrAssets.DockerImageAsset(this, `${target}Image`, {
         directory: repoRoot,
@@ -73,6 +76,10 @@ export class BizStack extends Stack {
           NODE_VERSION_MAJOR: process.env.NODE_VERSION_MAJOR ?? buildEnv.NODE_VERSION_MAJOR,
           BUILD_ENV: 'prod',
         },
+        ...(ciCache && {
+          cacheFrom: [{ type: 'gha', params: { scope: target } }],
+          cacheTo: { type: 'gha', params: { scope: target, mode: 'max' } },
+        }),
       });
     const apiImage = image('api-production');
     const webImage = image('web-production');
@@ -83,6 +90,16 @@ export class BizStack extends Stack {
       retention: logs.RetentionDays.ONE_MONTH,
       removalPolicy: RemovalPolicy.DESTROY,
     });
+
+    // SES SMTP needs long-lived IAM keys; the host creates the key and derives the SMTP password itself.
+    const sesSmtpUser = new iam.User(this, 'SesSmtpUser');
+    sesSmtpUser.addToPolicy(
+      new iam.PolicyStatement({
+        actions: ['ses:SendRawEmail'],
+        resources: [`arn:${this.partition}:ses:${this.region}:${this.account}:identity/*`],
+        conditions: { StringLike: { 'ses:FromAddress': `*@${props.hostedZoneName}` } },
+      }),
+    );
 
     const deployParameter = new ssm.StringParameter(this, 'DeployParameter', {
       parameterName: `/${this.stackName}/deploy`,
@@ -97,6 +114,7 @@ export class BizStack extends Stack {
         logGroup: logGroup.logGroupName,
         backupBucket: backupBucket.bucketName,
         secretsParameter: secretsParameterName,
+        sesSmtpUser: sesSmtpUser.userName,
       }),
     });
 
@@ -117,6 +135,7 @@ export class BizStack extends Stack {
         resources: [`arn:${this.partition}:ssm:${this.region}:${this.account}:parameter${secretsParameterName}`],
       }),
     );
+    role.addToPolicy(new iam.PolicyStatement({ actions: ['iam:CreateAccessKey'], resources: [sesSmtpUser.userArn] }));
 
     // Kept stable on purpose: all deploy logic ships in the host bundle so user data never changes.
     const userData = ec2.UserData.forLinux();
@@ -212,13 +231,44 @@ export class BizStack extends Stack {
         ['AppRecord', props.appDomainName],
         ['ApiRecord', props.apiDomainName],
       ]) {
-        new route53.ARecord(this, recordId, {
+        const record = new route53.ARecord(this, recordId, {
           zone,
           recordName,
           target: route53.RecordTarget.fromIpAddresses(eip.attrPublicIp),
           ttl: Duration.minutes(5),
+          // Takes over records that predate this stack (the legacy biz.seferdesign.com host).
+          deleteExisting: true,
         });
+        // Only remove the legacy record once the new host is up, keeping the cutover window short.
+        record.node.addDependency(deployCommand);
+        Annotations.of(record).acknowledgeWarning('@aws-cdk/aws-route53:deleteExisting');
       }
+    }
+
+    if (props.githubRepository) {
+      const githubOidc = new iam.OidcProviderNative(this, 'GitHubOidc', {
+        url: 'https://token.actions.githubusercontent.com',
+        clientIds: ['sts.amazonaws.com'],
+      });
+      const githubDeployRole = new iam.Role(this, 'GitHubDeployRole', {
+        roleName: `${this.stackName}-github-deploy`,
+        assumedBy: new iam.WebIdentityPrincipal(githubOidc.oidcProviderArn, {
+          StringEquals: {
+            'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com',
+            'token.actions.githubusercontent.com:sub': ['main', 'master'].map(
+              (branch) => `repo:${props.githubRepository}:ref:refs/heads/${branch}`,
+            ),
+          },
+        }),
+      });
+      // cdk deploy does all its work through the bootstrap roles.
+      githubDeployRole.addToPolicy(
+        new iam.PolicyStatement({
+          actions: ['sts:AssumeRole'],
+          resources: [`arn:${this.partition}:iam::${this.account}:role/cdk-hnb659fds-*-${this.account}-${this.region}`],
+        }),
+      );
+      new CfnOutput(this, 'GitHubDeployRoleArn', { value: githubDeployRole.roleArn });
     }
 
     new CfnOutput(this, 'InstanceId', { value: host.instanceId });

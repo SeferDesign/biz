@@ -22,4 +22,5 @@ new BizStack(app, 'biz-prod', {
   hostedZoneName: context('hostedZoneName', 'HOSTED_ZONE_NAME') ?? 'company.com',
   acmeEmail: context('acmeEmail', 'ACME_EMAIL') ?? 'info@company.com',
   instanceType: context('instanceType', 'INSTANCE_TYPE') ?? 't4g.micro',
+  githubRepository: context('githubRepository', 'GITHUB_REPOSITORY'),
 });

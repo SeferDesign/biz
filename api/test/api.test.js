@@ -438,7 +438,7 @@ test('invoice email includes the generated invoice PDF attachment', async () => 
   assert.equal(message.attachments[0].filename, 'Invoice-100010.pdf');
   assert.equal(message.attachments[0].contentType, 'application/pdf');
   assert.equal(message.attachments[0].content.subarray(0, 5).toString(), '%PDF-');
-  assert.match(message.text, /Payment terms: Net 90/);
+  assert.match(message.text, /Payment Terms: Net 90/);
   assert.deepEqual(message.cc, ['ap@bright.example', 'owner@bright.example']);
 });
 

@@ -71,7 +71,8 @@ COPY package.json package-lock.json ./
 COPY company ./company
 COPY web ./web
 WORKDIR /app/web
-RUN npm run build
+RUN --mount=type=cache,target=/app/web/.next/cache \
+	npm run build
 
 FROM node-base AS web-production
 ENV NEXT_TELEMETRY_DISABLED=1

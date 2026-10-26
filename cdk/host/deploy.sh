@@ -37,19 +37,41 @@ if ! secrets="$(aws ssm get-parameter --name "$secrets_parameter" --with-decrypt
 fi
 rm -f "$error_file"
 
+# SES SMTP password = base64(0x04 || HMAC chain of the IAM secret), per the SES SMTP credentials docs.
+ses_smtp_password() {
+	local key message
+	key="$(printf 'AWS4%s' "$1" | od -An -v -tx1 | tr -d ' \n')"
+	for message in 11111111 "$region" ses aws4_request; do
+		key="$(printf '%s' "$message" | openssl dgst -sha256 -mac HMAC -macopt "hexkey:$key" -binary | od -An -v -tx1 | tr -d ' \n')"
+	done
+	{ printf '\004'; printf 'SendRawEmail' | openssl dgst -sha256 -mac HMAC -macopt "hexkey:$key" -binary; } | base64 | tr -d '\n'
+}
+
+smtp_username=""
+smtp_password=""
+if [[ -z "$(jq -r '.AWS_SES_SMTP_USERNAME // ""' <<<"$secrets")" ]]; then
+	access_key="$(aws iam create-access-key --user-name "$(cfg sesSmtpUser)" --query AccessKey --output json)"
+	smtp_username="$(jq -r .AccessKeyId <<<"$access_key")"
+	smtp_password="$(ses_smtp_password "$(jq -r .SecretAccessKey <<<"$access_key")")"
+	unset access_key
+fi
+
 completed="$(jq -c \
 	--arg token "$(openssl rand -hex 32)" \
 	--arg otp "$(openssl rand -hex 32)" \
 	--arg mysql "$(openssl rand -hex 24)" \
-	--arg root "$(openssl rand -hex 24)" '
+	--arg root "$(openssl rand -hex 24)" \
+	--arg smtp_username "$smtp_username" \
+	--arg smtp_password "$smtp_password" '
 	.API_ACCESS_TOKEN //= $token
 	| .OTP_SECRET_ENCRYPTION_KEY //= $otp
 	| .MYSQL_PASSWORD //= $mysql
 	| .MYSQL_ROOT_PASSWORD //= $root
 	| .STRIPE_SECRET_KEY //= ""
 	| .STRIPE_WEBHOOK_SECRET //= ""
-	| .AWS_SES_SMTP_USERNAME //= ""
-	| .AWS_SES_SMTP_PASSWORD //= ""' <<<"$secrets")"
+	| if (.AWS_SES_SMTP_USERNAME // "") == "" then
+		.AWS_SES_SMTP_USERNAME = $smtp_username | .AWS_SES_SMTP_PASSWORD = $smtp_password
+	else . end' <<<"$secrets")"
 if [[ "$completed" != "$(jq -c . <<<"$secrets")" ]]; then
 	value_file="$(mktemp)"
 	printf '%s' "$completed" >"$value_file"

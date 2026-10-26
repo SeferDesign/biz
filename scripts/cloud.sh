@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Uses the AWS profile from your shell (AWS_PROFILE); nothing here selects one for you.
+# Uses AWS_PROFILE or AWS_* credentials if set, otherwise the repo's 1Password AWS shell plugin credential.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -35,6 +35,13 @@ fi
 
 command_name="$1"
 shift
+
+# The zsh `aws` alias (op plugin) doesn't apply inside scripts or the CDK, so export its credentials once.
+if [[ -z "${AWS_PROFILE:-}${AWS_ACCESS_KEY_ID:-}" ]] && command -v op >/dev/null; then
+	eval "$(cd "$REPO_ROOT" && op plugin run -- aws configure export-credentials --format env)"
+fi
+export AWS_REGION="${AWS_REGION:-us-east-1}"
+export AWS_DEFAULT_REGION="$AWS_REGION"
 
 output() {
 	aws cloudformation describe-stacks --stack-name "$STACK_NAME" \
