@@ -56,7 +56,7 @@ export async function sendInvoiceEmail({ invoice, client, lines }, transport) {
 		`${companyInfo.address.address1 || 'N/A'}${companyInfo.address.address2 ? ` ${companyInfo.address.address2}` : ''}`,
 		`${companyInfo.address.city || 'N/A'}, ${companyInfo.address.state || 'N/A'} ${companyInfo.address.zipcode || 'N/A'}`,
 		``,
-		`${invoice.description}`,
+		`${invoice.description || ''}`,
 		``,
 		`Attached is an invoice PDF with cost breakdowns and payment information for your records. This payment can be made out to '${companyInfo.legalEntity}'.`,
 		``,
