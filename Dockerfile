@@ -41,7 +41,7 @@ COPY api/package.json ./api/package.json
 COPY web/package.json ./web/package.json
 COPY company/package.json ./company/package.json
 RUN --mount=type=cache,target=/root/.npm \
-	npm ci --omit=dev --workspace @seferbiz/api --include-workspace-root --no-audit --no-fund
+	npm ci --omit=dev --workspace @seferbiz/api --workspace @seferbiz/company --include-workspace-root --no-audit --no-fund
 COPY company ./company
 COPY api ./api
 USER node
@@ -81,7 +81,7 @@ COPY api/package.json ./api/package.json
 COPY web/package.json ./web/package.json
 COPY company/package.json ./company/package.json
 RUN --mount=type=cache,target=/root/.npm \
-	npm ci --omit=dev --workspace @seferbiz/web --include-workspace-root --no-audit --no-fund
+	npm ci --omit=dev --workspace @seferbiz/web --workspace @seferbiz/company --include-workspace-root --no-audit --no-fund
 COPY company ./company
 COPY web ./web
 COPY --from=web-builder /app/web/.next ./web/.next
