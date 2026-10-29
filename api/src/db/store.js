@@ -1,4 +1,4 @@
-import { randomBytes } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { getPool } from './pool.js';
 
 const createAccessToken = () => randomBytes(24).toString('base64url');
@@ -161,6 +161,95 @@ export class MySqlStore {
         consumed_timestep = NULL WHERE id = ?`,
       [id]
     );
+  }
+
+  async getPasskeysByUser(userId) {
+    const [rows] = await this.database.execute(
+      `SELECT id, name, created_at FROM passkeys WHERE user_id = ? ORDER BY id`,
+      [userId]
+    );
+    return rows;
+  }
+
+  async getPasskeyCredentialsByUser(userId) {
+    const [rows] = await this.database.execute(
+      'SELECT credential_id, transports FROM passkeys WHERE user_id = ? ORDER BY id',
+      [userId]
+    );
+    return rows.map((row) => ({
+      ...row,
+      transports: typeof row.transports === 'string' ? JSON.parse(row.transports) : row.transports
+    }));
+  }
+
+  async getPasskeyByCredentialId(credentialId) {
+    const credentialHash = createHash('sha256').update(credentialId).digest();
+    const [rows] = await this.database.execute(
+      `SELECT user_id, credential_id, public_key, counter, transports
+       FROM passkeys WHERE credential_id_hash = ? LIMIT 1`,
+      [credentialHash]
+    );
+    const credential = rows[0];
+    if (!credential) return undefined;
+    return {
+      ...credential,
+      public_key: Buffer.from(credential.public_key),
+      counter: Number(credential.counter),
+      transports: typeof credential.transports === 'string' ? JSON.parse(credential.transports) : credential.transports
+    };
+  }
+
+  async createPasskeyChallenge({ challenge_id, challenge, purpose, user_id = null }) {
+    await this.database.execute('DELETE FROM webauthn_challenges WHERE expires_at <= CURRENT_TIMESTAMP');
+    await this.database.execute(
+      `INSERT INTO webauthn_challenges (challenge_id, challenge, purpose, user_id, expires_at)
+       VALUES (?, ?, ?, ?, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 5 MINUTE))`,
+      [challenge_id, challenge, purpose, user_id]
+    );
+  }
+
+  async consumePasskeyChallenge(challengeId, purpose, userId = null) {
+    const [rows] = await this.database.execute(
+      `SELECT challenge_id, challenge, purpose, user_id FROM webauthn_challenges
+       WHERE challenge_id = ? AND purpose = ? AND user_id <=> ? AND expires_at > CURRENT_TIMESTAMP LIMIT 1`,
+      [challengeId, purpose, userId]
+    );
+    if (!rows[0]) return undefined;
+    const [result] = await this.database.execute(
+      'DELETE FROM webauthn_challenges WHERE challenge_id = ? AND purpose = ? AND user_id <=> ? AND expires_at > CURRENT_TIMESTAMP',
+      [challengeId, purpose, userId]
+    );
+    return result.affectedRows === 1 ? rows[0] : undefined;
+  }
+
+  async createPasskey(userId, { credential_id, public_key, counter, transports, name }) {
+    const credentialHash = createHash('sha256').update(credential_id).digest();
+    const [result] = await this.database.execute(
+      `INSERT INTO passkeys (user_id, credential_id, credential_id_hash, public_key, counter, transports, name)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [userId, credential_id, credentialHash, public_key, counter, JSON.stringify(transports || []), name]
+    );
+    const [rows] = await this.database.execute(
+      'SELECT id, name, created_at FROM passkeys WHERE id = ? AND user_id = ? LIMIT 1',
+      [result.insertId, userId]
+    );
+    return rows[0];
+  }
+
+  async updatePasskeyCounter(credentialId, counter) {
+    const credentialHash = createHash('sha256').update(credentialId).digest();
+    await this.database.execute(
+      'UPDATE passkeys SET counter = ? WHERE credential_id_hash = ?',
+      [counter, credentialHash]
+    );
+  }
+
+  async deletePasskey(userId, id) {
+    const [result] = await this.database.execute(
+      'DELETE FROM passkeys WHERE id = ? AND user_id = ?',
+      [id, userId]
+    );
+    return result.affectedRows > 0;
   }
 
   async getApiKeysByUser(userId) {

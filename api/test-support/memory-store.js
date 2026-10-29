@@ -33,6 +33,8 @@ export function createMemoryStore() {
   const invoicePayments = [];
   const users = [];
   const apiKeys = [];
+  const passkeys = [];
+  const passkeyChallenges = new Map();
   return {
     users,
     invoicePayments,
@@ -117,6 +119,53 @@ export function createMemoryStore() {
         encrypted_otp_secret_salt: null,
         consumed_timestep: null
       });
+    },
+    async getPasskeysByUser(userId) {
+      return passkeys.filter((passkey) => passkey.user_id === Number(userId)).map(({ id, name, created_at }) => ({ id, name, created_at }));
+    },
+    async getPasskeyCredentialsByUser(userId) {
+      return passkeys.filter((passkey) => passkey.user_id === Number(userId));
+    },
+    async getPasskeyByCredentialId(credentialId) {
+      return passkeys.find((passkey) => passkey.credential_id === credentialId);
+    },
+    async createPasskeyChallenge(challenge) {
+      passkeyChallenges.set(challenge.challenge_id, {
+        ...challenge,
+        user_id: challenge.user_id ?? null,
+        expires_at: Date.now() + 5 * 60 * 1000
+      });
+    },
+    async consumePasskeyChallenge(challengeId, purpose, userId = null) {
+      const challenge = passkeyChallenges.get(challengeId);
+      if (!challenge || challenge.purpose !== purpose || challenge.user_id !== userId || challenge.expires_at <= Date.now()) return undefined;
+      passkeyChallenges.delete(challengeId);
+      return challenge;
+    },
+    async createPasskey(userId, passkey) {
+      if (passkeys.some((item) => item.credential_id === passkey.credential_id)) {
+        const error = new Error('Duplicate passkey');
+        error.code = 'ER_DUP_ENTRY';
+        throw error;
+      }
+      const created = {
+        id: Math.max(0, ...passkeys.map((item) => item.id)) + 1,
+        user_id: Number(userId),
+        ...passkey,
+        created_at: new Date().toISOString()
+      };
+      passkeys.push(created);
+      return { id: created.id, name: created.name, created_at: created.created_at };
+    },
+    async updatePasskeyCounter(credentialId, counter) {
+      const passkey = passkeys.find((item) => item.credential_id === credentialId);
+      if (passkey) passkey.counter = counter;
+    },
+    async deletePasskey(userId, id) {
+      const index = passkeys.findIndex((passkey) => passkey.id === Number(id) && passkey.user_id === Number(userId));
+      if (index < 0) return false;
+      passkeys.splice(index, 1);
+      return true;
     },
     async getApiKeysByUser(userId) {
       return apiKeys

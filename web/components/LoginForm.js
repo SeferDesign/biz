@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { browserApiBaseUrl } from '../lib/api.js';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { startAuthentication } from '@simplewebauthn/browser';
+import { KeyRound } from 'lucide-react';
 import Brand from './Brand.js';
 import { companyInfo } from '@seferbiz/company';
 import { Button } from './ui/button.js';
@@ -45,6 +47,36 @@ export default function LoginForm({ returnTo }) {
     }
   }
 
+  async function signInWithPasskey() {
+    setError('');
+    setSubmitting(true);
+    try {
+      const optionsResponse = await fetch(`${browserApiBaseUrl}/auth/passkeys/authentication/options`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+      const optionsResult = await optionsResponse.json().catch(() => null);
+      if (!optionsResponse.ok) throw new Error(optionsResult?.error || 'Passkey sign-in is unavailable.');
+      const credential = await startAuthentication({ optionsJSON: optionsResult.publicKey });
+      const response = await fetch(`${browserApiBaseUrl}/auth/passkeys/authentication/verify`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ challenge_id: optionsResult.challenge_id, credential })
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(result?.error || 'Passkey sign-in failed. Try again.');
+      router.replace(returnTo);
+      router.refresh();
+    } catch (cause) {
+      setError(cause.message || 'Passkey sign-in was cancelled or failed. Try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <main className="login-page">
       <Brand/>
@@ -66,6 +98,11 @@ export default function LoginForm({ returnTo }) {
           {error && <p className="form-error" role="alert">{error}</p>}
           <Button className="login-submit" disabled={submitting} type="submit">
             {submitting ? 'Signing in...' : 'Sign in'}
+          </Button>
+          <div className="auth-divider" aria-hidden="true"><span>or</span></div>
+          <Button className="login-submit passkey-submit" variant="outline" disabled={submitting} onClick={signInWithPasskey} type="button">
+            <KeyRound aria-hidden="true" size={16} />
+            {submitting ? 'Waiting for passkey...' : 'Sign in with a passkey'}
           </Button>
         </form>
       </Card>

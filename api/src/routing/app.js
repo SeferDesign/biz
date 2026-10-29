@@ -99,6 +99,7 @@ export function createApp({
   apiAccessToken = process.env.API_ACCESS_TOKEN,
   otpSecretEncryptionKey = process.env.OTP_SECRET_ENCRYPTION_KEY,
   sessionCookieDomain = process.env.SESSION_COOKIE_DOMAIN,
+  webAuthn,
   stripe = createStripeClient(),
   stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET,
   publicAppUrl = process.env.PUBLIC_APP_URL,
@@ -141,10 +142,20 @@ export function createApp({
   app.get('/v1/health', (req, res) => res.json({ status: 'ok', service: 'api' }));
   const authenticationMiddleware = createAuthenticationMiddleware(store, apiAccessToken);
   app.use('/v1', (req, res, next) => {
-    if (req.method === 'POST' && ['/auth/login', '/auth/logout', '/auth/password-reset', '/auth/password-reset/confirm'].includes(req.path)) return next();
+    if (req.method === 'POST' && [
+      '/auth/login', '/auth/logout', '/auth/password-reset', '/auth/password-reset/confirm',
+      '/auth/passkeys/authentication/options', '/auth/passkeys/authentication/verify'
+    ].includes(req.path)) return next();
     return authenticationMiddleware(req, res, next);
   });
-  app.use('/v1/auth', createAuthRouter(store, { apiAccessToken, otpSecretEncryptionKey, sessionCookieDomain, sendResetEmail }));
+  app.use('/v1/auth', createAuthRouter(store, {
+    apiAccessToken,
+    otpSecretEncryptionKey,
+    sessionCookieDomain,
+    sendResetEmail,
+    publicAppUrl,
+    webAuthn
+  }));
   app.use('/v1', clientsRouter(store));
   app.use('/v1', invoicesRouter(store, { sendInvoiceEmail }));
   app.use('/v1', stripeRouter(store, { stripe, appUrl: publicAppUrl, notify: sendPaymentNotification }));

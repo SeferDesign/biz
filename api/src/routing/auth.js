@@ -1,6 +1,12 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { createHash, randomBytes } from 'node:crypto';
+import {
+  generateAuthenticationOptions,
+  generateRegistrationOptions,
+  verifyAuthenticationResponse,
+  verifyRegistrationResponse
+} from '@simplewebauthn/server';
 import { sendPasswordResetEmail } from '../email/password-reset-mailer.js';
 import {
   createSessionToken,
@@ -52,9 +58,52 @@ export function createAuthRouter(store, {
   apiAccessToken,
   otpSecretEncryptionKey,
   sessionCookieDomain,
-  sendResetEmail = sendPasswordResetEmail
+  sendResetEmail = sendPasswordResetEmail,
+  publicAppUrl,
+  webAuthn = {}
 } = {}) {
   const router = Router();
+  const webAuthnApi = {
+    generateAuthenticationOptions,
+    generateRegistrationOptions,
+    verifyAuthenticationResponse,
+    verifyRegistrationResponse,
+    ...webAuthn
+  };
+
+  function relyingParty() {
+    if (!publicAppUrl) return null;
+    try {
+      const appUrl = new URL(publicAppUrl);
+      const isLocal = ['localhost', '127.0.0.1'].includes(appUrl.hostname);
+      if ((appUrl.protocol !== 'https:' && !(isLocal && appUrl.protocol === 'http:')) || appUrl.username || appUrl.password) return null;
+      return { id: appUrl.hostname, origin: appUrl.origin };
+    } catch {
+      return null;
+    }
+  }
+
+  function passkeyName(value) {
+    return typeof value === 'string' && value.trim()
+      ? value.trim().slice(0, 255)
+      : 'Passkey';
+  }
+
+  async function establishSession(req, res, user) {
+    const token = createSessionToken(user, apiAccessToken);
+    if (!token) return res.status(503).json({ error: 'Authentication is not configured' });
+    res.cookie('biz_session', token, cookieOptions(req, SESSION_TTL_SECONDS, sessionCookieDomain));
+    await store.recordUserSignIn(user.id, req.ip);
+    return res.json({
+      access_token: token,
+      user: {
+        id: user.id,
+        email: user.email,
+        first_name: user.first_name || '',
+        last_name: user.last_name || ''
+      }
+    });
+  }
 
   function normalizeProfileName(value) {
     if (typeof value !== 'string') return '';
@@ -69,10 +118,13 @@ export function createAuthRouter(store, {
 
   async function securitySettings(userId) {
     const settings = await store.getUserOtpSettings(userId);
-    return settings ? {
+    if (!settings) return null;
+    const passkeys = await store.getPasskeysByUser(userId);
+    return {
       otp_enabled: isOtpEnabled(settings),
-      otp_configured: Boolean(settings.encrypted_otp_secret)
-    } : null;
+      otp_configured: Boolean(settings.encrypted_otp_secret),
+      passkeys
+    };
   }
 
   function normalizeApiKeyInput(value) {
@@ -107,20 +159,138 @@ export function createAuthRouter(store, {
       return res.status(401).json(invalidCredentials);
     }
 
-    const token = createSessionToken(user, apiAccessToken);
-    if (!token) return res.status(503).json({ error: 'Authentication is not configured' });
+    return establishSession(req, res, user);
+  });
 
-    res.cookie('biz_session', token, cookieOptions(req, SESSION_TTL_SECONDS, sessionCookieDomain));
-    await store.recordUserSignIn(user.id, req.ip);
-    return res.json({
-      access_token: token,
-      user: {
-        id: user.id,
-        email: user.email,
-        first_name: user.first_name || '',
-        last_name: user.last_name || ''
+  router.post('/passkeys/authentication/options', async (req, res) => {
+    const rp = relyingParty();
+    if (!rp) return res.status(503).json({ error: 'Passkey sign-in is not configured' });
+    const options = await webAuthnApi.generateAuthenticationOptions({
+      rpID: rp.id,
+      userVerification: 'required'
+    });
+    const challengeId = randomBytes(32).toString('base64url');
+    await store.createPasskeyChallenge({
+      challenge_id: challengeId,
+      challenge: options.challenge,
+      purpose: 'authentication'
+    });
+    return res.json({ challenge_id: challengeId, publicKey: options });
+  });
+
+  router.post('/passkeys/authentication/verify', async (req, res) => {
+    const rp = relyingParty();
+    const challengeId = req.body?.challenge_id;
+    const response = req.body?.credential;
+    if (!rp || typeof challengeId !== 'string' || typeof response?.id !== 'string') {
+      return res.status(401).json(invalidCredentials);
+    }
+    const challenge = await store.consumePasskeyChallenge(challengeId, 'authentication');
+    const credential = await store.getPasskeyByCredentialId(response.id);
+    if (!challenge || !credential) return res.status(401).json(invalidCredentials);
+    let verification;
+    try {
+      verification = await webAuthnApi.verifyAuthenticationResponse({
+        response,
+        expectedChallenge: challenge.challenge,
+        expectedOrigin: rp.origin,
+        expectedRPID: rp.id,
+        credential: {
+          id: credential.credential_id,
+          publicKey: credential.public_key,
+          counter: credential.counter,
+          transports: credential.transports || []
+        },
+        requireUserVerification: true
+      });
+    } catch {
+      return res.status(401).json(invalidCredentials);
+    }
+    if (!verification.verified) return res.status(401).json(invalidCredentials);
+    await store.updatePasskeyCounter(response.id, verification.authenticationInfo.newCounter);
+    const user = await store.getUserProfile(credential.user_id);
+    if (!user) return res.status(401).json(invalidCredentials);
+    return establishSession(req, res, user);
+  });
+
+  router.post('/passkeys/registration/options', async (req, res) => {
+    if (!requireUser(req, res)) return;
+    const rp = relyingParty();
+    if (!rp) return res.status(503).json({ error: 'Passkey enrollment is not configured' });
+    const user = await store.getUserProfile(req.authUser.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    const existing = await store.getPasskeyCredentialsByUser(user.id);
+    const options = await webAuthnApi.generateRegistrationOptions({
+      rpName: 'SeferBiz',
+      rpID: rp.id,
+      userID: Buffer.from(String(user.id)),
+      userName: user.email,
+      userDisplayName: `${user.first_name} ${user.last_name}`.trim() || user.email,
+      attestationType: 'none',
+      excludeCredentials: existing.map((credential) => ({
+        id: credential.credential_id,
+        ...(credential.transports?.length ? { transports: credential.transports } : {})
+      })),
+      authenticatorSelection: {
+        residentKey: 'required',
+        userVerification: 'required'
       }
     });
+    const challengeId = randomBytes(32).toString('base64url');
+    await store.createPasskeyChallenge({
+      challenge_id: challengeId,
+      challenge: options.challenge,
+      purpose: 'registration',
+      user_id: user.id
+    });
+    return res.json({ challenge_id: challengeId, publicKey: options });
+  });
+
+  router.post('/passkeys/registration/verify', async (req, res) => {
+    if (!requireUser(req, res)) return;
+    const rp = relyingParty();
+    const challengeId = req.body?.challenge_id;
+    const response = req.body?.credential;
+    if (!rp || typeof challengeId !== 'string' || !response || typeof response !== 'object') {
+      return res.status(400).json({ error: 'Passkey registration response is invalid' });
+    }
+    const challenge = await store.consumePasskeyChallenge(challengeId, 'registration', req.authUser.id);
+    if (!challenge) return res.status(400).json({ error: 'Passkey registration expired. Please try again.' });
+    let verification;
+    try {
+      verification = await webAuthnApi.verifyRegistrationResponse({
+        response,
+        expectedChallenge: challenge.challenge,
+        expectedOrigin: rp.origin,
+        expectedRPID: rp.id,
+        requireUserVerification: true
+      });
+    } catch {
+      return res.status(400).json({ error: 'Passkey could not be verified' });
+    }
+    if (!verification.verified) return res.status(400).json({ error: 'Passkey could not be verified' });
+    const credential = verification.registrationInfo.credential;
+    try {
+      const created = await store.createPasskey(req.authUser.id, {
+        credential_id: credential.id,
+        public_key: Buffer.from(credential.publicKey),
+        counter: credential.counter,
+        transports: response.response?.transports || [],
+        name: passkeyName(req.body?.name)
+      });
+      return res.status(201).json(created);
+    } catch (error) {
+      if (error?.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'This passkey is already registered' });
+      throw error;
+    }
+  });
+
+  router.delete('/passkeys/:id', async (req, res) => {
+    if (!requireUser(req, res)) return;
+    const id = parseId(req.params.id);
+    if (!id) return res.status(400).json({ error: 'Passkey id must be a positive integer' });
+    if (!await store.deletePasskey(req.authUser.id, id)) return res.status(404).json({ error: 'Passkey not found' });
+    return res.sendStatus(204);
   });
 
   router.post('/logout', async (req, res) => {

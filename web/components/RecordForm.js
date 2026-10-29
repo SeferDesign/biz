@@ -7,6 +7,7 @@ import { Button } from './ui/button.js';
 import { Input } from './ui/input.js';
 import { Textarea } from './ui/textarea.js';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select.js';
+import { DatePicker } from './ui/date-picker.js';
 
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -31,6 +32,20 @@ export default function RecordForm({ title, description, fields, initialValues =
 
   function setField(name, value) {
     setValues((current) => ({ ...current, [name]: value }));
+  }
+
+  function updateLineItem(index, field, value) {
+    setLineItems((current) => current.map((item, itemIndex) => {
+      if (itemIndex !== index) return item;
+      const updated = { ...item, [field]: value };
+      const hasHours = String(updated.hours ?? '').trim() !== '';
+      const hasRate = String(updated.rate ?? '').trim() !== '';
+      if (['hours', 'rate', 'total'].includes(field) && hasHours && hasRate) {
+        const total = Number(updated.hours) * Number(updated.rate);
+        updated.total = Number.isFinite(total) ? String(total) : '';
+      }
+      return updated;
+    }));
   }
 
   function getLinePayload() {
@@ -156,6 +171,16 @@ export default function RecordForm({ title, description, fields, initialValues =
                   {(field.options || []).map((option) => <SelectItem key={option.value} value={String(option.value)}>{option.label}</SelectItem>)}
                 </SelectContent>
               </Select>
+            ) : field.type === 'date' ? (
+              <DatePicker
+                name={field.name}
+                label={field.label}
+                required={field.required}
+                min={field.min}
+                max={field.max}
+                value={values[field.name] || ''}
+                onChange={(value) => setField(field.name, value)}
+              />
             ) : field.type === 'months' ? (
               <div className="month-goal-grid">
                 {monthNames.map((month, index) => (
@@ -202,10 +227,10 @@ export default function RecordForm({ title, description, fields, initialValues =
             </div>
             {lineItems.map((line, index) => (
               <div className="invoice-line-row" key={index}>
-                <label><span>Description</span><Input value={line.description} onChange={(event) => setLineItems((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, description: event.target.value } : item))} /></label>
-                <label><span>Hours</span><Input type="number" min="0" step="0.01" value={line.hours} onChange={(event) => setLineItems((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, hours: event.target.value } : item))} /></label>
-                <label><span>Rate</span><Input type="number" min="0" step="0.01" placeholder={selectedClientRate == null ? '' : String(selectedClientRate)} value={line.rate} onChange={(event) => setLineItems((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, rate: event.target.value } : item))} /></label>
-                <label><span>Amount</span><Input type="number" min="0" step="0.01" value={line.total === '' && line.hours !== '' && line.rate !== '' ? Number(line.hours) * Number(line.rate) : line.total} onChange={(event) => setLineItems((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, total: event.target.value } : item))} /></label>
+                <label><span>Description</span><Input value={line.description} onChange={(event) => updateLineItem(index, 'description', event.target.value)} /></label>
+                <label><span>Hours</span><Input type="number" min="0" step="0.01" value={line.hours} onChange={(event) => updateLineItem(index, 'hours', event.target.value)} /></label>
+                <label><span>Rate</span><Input type="number" min="0" step="0.01" placeholder={selectedClientRate == null ? '' : String(selectedClientRate)} value={line.rate} onChange={(event) => updateLineItem(index, 'rate', event.target.value)} /></label>
+                <label><span>Amount</span><Input type="number" min="0" step="0.01" value={line.total === '' && line.hours !== '' && line.rate !== '' ? Number(line.hours) * Number(line.rate) : line.total} readOnly={line.hours !== '' && line.rate !== ''} onChange={(event) => updateLineItem(index, 'total', event.target.value)} /></label>
                 <Button className="invoice-line-remove" variant="outline" size="sm" type="button" aria-label={`Remove line item ${index + 1}`} onClick={() => setLineItems((current) => current.filter((_, itemIndex) => itemIndex !== index))}>Remove</Button>
               </div>
             ))}

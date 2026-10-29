@@ -50,6 +50,7 @@ export default function InvoicePayment({ invoiceId, accessToken, methods = [], a
         {methods.map((option) => (
           <Button
             className="payment-choice"
+            variant="outline"
             disabled={Boolean(pendingMethod)}
             aria-busy={pendingMethod === option.method}
             key={option.method}
@@ -63,7 +64,7 @@ export default function InvoicePayment({ invoiceId, accessToken, methods = [], a
               <strong>{option.label}</strong>
             </div>
             <span>{fromCents(option.total_cents)}</span>
-            <small>{option.fee_cents ? `Inlcudes an estimated processing of fee ${fromCents(option.fee_cents)}` : 'No estimated processing fee'}</small>
+            <small>{option.fee_cents ? `Includes an estimated processing fee of ${fromCents(option.fee_cents)}` : 'No estimated processing fee'}</small>
             <span className="payment-choice-action">{pendingMethod === option.method ? 'Opening checkout...' : 'Pay Now'} <ArrowRight size={16} aria-hidden="true" /></span>
           </Button>
         ))}

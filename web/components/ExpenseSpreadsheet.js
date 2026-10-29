@@ -8,6 +8,7 @@ import { formatMoney } from '../lib/api.js';
 import { expenseAccountOptions } from '../lib/record-fields.js';
 import { recordsPerPage } from '../lib/api.js';
 import Notice from './Notice.js';
+import { DatePicker } from './ui/date-picker.js';
 
 const blankExpense = () => ({ name: '', vendor_id: '', date: '', cost: '', account: '', notes: '' });
 
@@ -46,6 +47,9 @@ async function requestExpenses(url, method, expenses) {
 }
 
 function SheetCell({ label, type = 'text', value, onChange, vendors, step }) {
+  if (type === 'date') {
+    return <DatePicker aria-label={label} label={label} value={value} onChange={onChange} compact className="spreadsheet-date-picker" />;
+  }
   if (type === 'vendor') {
     return (
       <select aria-label={label} value={value} onChange={(event) => onChange(event.target.value)}>

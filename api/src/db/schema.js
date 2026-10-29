@@ -38,6 +38,28 @@ const statements = [
     UNIQUE INDEX api_keys_key_value_unique (key_value),
     INDEX api_keys_user_idx (user_id, id)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS passkeys (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    credential_id TEXT NOT NULL,
+    credential_id_hash BINARY(32) NOT NULL,
+    public_key BLOB NOT NULL,
+    counter BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    transports JSON NULL,
+    name VARCHAR(255) NOT NULL DEFAULT 'Passkey',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT passkeys_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE INDEX passkeys_credential_hash_unique (credential_id_hash),
+    INDEX passkeys_user_idx (user_id, id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS webauthn_challenges (
+    challenge_id CHAR(43) NOT NULL PRIMARY KEY,
+    challenge VARCHAR(255) NOT NULL,
+    purpose VARCHAR(32) NOT NULL,
+    user_id INT NULL,
+    expires_at DATETIME NOT NULL,
+    INDEX webauthn_challenge_expiry_idx (expires_at)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   `CREATE TABLE IF NOT EXISTS clients (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255), contact VARCHAR(255), site_url VARCHAR(255), logo VARCHAR(255),

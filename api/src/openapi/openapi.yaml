@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: SeferBiz API
   version: 1.0.0
-  description: Protected routes accept a user session or the configured API bearer token; login, health, and record-tokenized invoice/client reads are public exceptions.
+  description: Protected routes accept a user session or the configured API bearer token; login, passkey sign-in, health, and record-tokenized invoice/client reads are public exceptions.
 servers:
   - url: https://api.biz.loc:9443/v1
 security:
@@ -10,7 +10,7 @@ security:
 paths:
   /auth/login:
     post:
-      summary: Sign in with a legacy user account
+      summary: Sign in with an email and password
       security: []
       requestBody:
         required: true
@@ -23,6 +23,36 @@ paths:
           description: Signed bearer session
         '401':
           description: Invalid email, password, or two-factor code
+  /auth/passkeys/authentication/options:
+    post:
+      summary: Create public options for passkey sign-in
+      security: []
+      responses:
+        '200':
+          description: Discoverable passkey request options and a single-use ceremony ID
+        '503':
+          description: Passkey sign-in is not configured
+  /auth/passkeys/authentication/verify:
+    post:
+      summary: Verify a passkey assertion and create a user session
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [challenge_id, credential]
+              properties:
+                challenge_id:
+                  type: string
+                credential:
+                  type: object
+      responses:
+        '200':
+          description: Signed bearer session
+        '401':
+          description: Passkey assertion is invalid or expired
   /auth/session:
     get:
       summary: Validate the current user session
@@ -95,10 +125,50 @@ paths:
           description: Current password is incorrect or session is missing
   /auth/security:
     get:
-      summary: Get the current user's two-factor settings
+      summary: Get the current user's two-factor and passkey settings
       responses:
         '200':
-          description: Authenticator status without exposing the secret
+          description: Authenticator status and registered passkeys without exposing credential secrets
+  /auth/passkeys/registration/options:
+    post:
+      summary: Create passkey enrollment options for the signed-in user
+      responses:
+        '200':
+          description: Registration options and a single-use ceremony ID
+        '503':
+          description: Passkey enrollment is not configured
+  /auth/passkeys/registration/verify:
+    post:
+      summary: Verify and save a passkey for the signed-in user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [challenge_id, credential]
+              properties:
+                challenge_id:
+                  type: string
+                credential:
+                  type: object
+                name:
+                  type: string
+      responses:
+        '201':
+          description: Passkey registered
+        '400':
+          description: Registration response is invalid or expired
+  /auth/passkeys/{id}:
+    delete:
+      summary: Remove a passkey belonging to the signed-in user
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Passkey removed
+        '404':
+          description: Passkey not found
   /auth/otp/setup:
     post:
       summary: Generate an authenticator secret for the current user

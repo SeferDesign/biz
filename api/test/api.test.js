@@ -263,7 +263,7 @@ test('web-managed OTP can be set up, enabled, required at login, and disabled', 
   const session = `Bearer ${login.body.access_token}`;
 
   const initial = await supertest(app).get('/v1/auth/security').set('Authorization', session);
-  assert.deepEqual(initial.body, { otp_enabled: false, otp_configured: false });
+  assert.deepEqual(initial.body, { otp_enabled: false, otp_configured: false, passkeys: [] });
   const setup = await supertest(app).post('/v1/auth/otp/setup').set('Authorization', session);
   assert.equal(setup.status, 200);
   assert.match(setup.body.secret, /^[A-Z2-7]{32}$/);
@@ -271,7 +271,7 @@ test('web-managed OTP can be set up, enabled, required at login, and disabled', 
 
   const code = generateTotpCode(setup.body.secret);
   const enabled = await supertest(app).post('/v1/auth/otp/enable').set('Authorization', session).send({ otp_attempt: code });
-  assert.deepEqual(enabled.body, { otp_enabled: true, otp_configured: true });
+  assert.deepEqual(enabled.body, { otp_enabled: true, otp_configured: true, passkeys: [] });
   assert.equal((await supertest(app).post('/v1/auth/login').send({ email: user.email, password: 'example123' })).status, 401);
   assert.equal((await supertest(app).post('/v1/auth/otp/disable').set('Authorization', session).send({ otp_attempt: '000000' })).status, 401);
 
@@ -279,7 +279,103 @@ test('web-managed OTP can be set up, enabled, required at login, and disabled', 
   assert.notEqual(validOtpTimestep(await store.getUserOtpSettings(user.id), generateTotpCode(setup.body.secret), otpKey), null);
   const disabled = await supertest(app).post('/v1/auth/otp/disable').set('Authorization', session)
     .send({ otp_attempt: generateTotpCode(setup.body.secret) });
-  assert.deepEqual(disabled.body, { otp_enabled: false, otp_configured: false });
+  assert.deepEqual(disabled.body, { otp_enabled: false, otp_configured: false, passkeys: [] });
+});
+
+test('passkeys can be registered, used for passwordless sign-in, and removed', async () => {
+  const store = createMemoryStore();
+  const user = {
+    id: 81,
+    email: 'passkey@example.test',
+    first_name: 'Passkey',
+    last_name: 'Owner',
+    encrypted_password: await bcrypt.hash('example123', 4),
+    otp_required_for_login: false
+  };
+  store.users.push(user);
+  let registrationOptions;
+  const webAuthn = {
+    async generateRegistrationOptions(options) {
+      registrationOptions = options;
+      return { challenge: 'registration-challenge', rpID: options.rpID };
+    },
+    async generateAuthenticationOptions(options) {
+      assert.deepEqual(options, { rpID: 'biz.example', userVerification: 'required' });
+      return { challenge: 'authentication-challenge', rpID: options.rpID };
+    },
+    async verifyRegistrationResponse(options) {
+      assert.equal(options.expectedOrigin, 'https://biz.example');
+      assert.equal(options.expectedRPID, 'biz.example');
+      return options.response.challenge === options.expectedChallenge
+        ? {
+          verified: true,
+          registrationInfo: {
+            credential: { id: options.response.id, publicKey: Buffer.from('public-key'), counter: 0 }
+          }
+        }
+        : { verified: false };
+    },
+    async verifyAuthenticationResponse(options) {
+      assert.equal(options.expectedOrigin, 'https://biz.example');
+      assert.equal(options.expectedRPID, 'biz.example');
+      assert.equal(options.credential.counter, 0);
+      return {
+        verified: options.response.challenge === options.expectedChallenge,
+        authenticationInfo: { newCounter: 1 }
+      };
+    }
+  };
+  const app = createApp({
+    store,
+    apiAccessToken: TEST_API_ACCESS_TOKEN,
+    publicAppUrl: 'https://biz.example',
+    webAuthn
+  });
+  assert.equal((await supertest(app).post('/v1/auth/passkeys/registration/options')).status, 401);
+
+  const passwordLogin = await supertest(app).post('/v1/auth/login').send({ email: user.email, password: 'example123' });
+  const authorization = `Bearer ${passwordLogin.body.access_token}`;
+  const registration = await supertest(app).post('/v1/auth/passkeys/registration/options').set('Authorization', authorization);
+  assert.equal(registration.status, 200);
+  assert.equal(registration.body.publicKey.challenge, 'registration-challenge');
+  assert.equal(registrationOptions.rpID, 'biz.example');
+  assert.equal(registrationOptions.userName, user.email);
+  assert.deepEqual(registrationOptions.authenticatorSelection, { residentKey: 'required', userVerification: 'required' });
+
+  const registered = await supertest(app).post('/v1/auth/passkeys/registration/verify')
+    .set('Authorization', authorization)
+    .send({
+      challenge_id: registration.body.challenge_id,
+      name: 'MacBook',
+      credential: { id: 'passkey-credential', challenge: 'registration-challenge', response: { transports: ['internal'] } }
+    });
+  assert.equal(registered.status, 201);
+  assert.equal(registered.body.name, 'MacBook');
+
+  const settings = await supertest(app).get('/v1/auth/security').set('Authorization', authorization);
+  assert.equal(settings.body.passkeys.length, 1);
+  assert.equal(settings.body.passkeys[0].name, 'MacBook');
+  const nextRegistration = await supertest(app).post('/v1/auth/passkeys/registration/options').set('Authorization', authorization);
+  assert.deepEqual(registrationOptions.excludeCredentials, [{ id: 'passkey-credential', transports: ['internal'] }]);
+  assert.equal(nextRegistration.status, 200);
+
+  const authentication = await supertest(app).post('/v1/auth/passkeys/authentication/options');
+  assert.equal(authentication.status, 200);
+  const passkeyLogin = await supertest(app).post('/v1/auth/passkeys/authentication/verify').send({
+    challenge_id: authentication.body.challenge_id,
+    credential: { id: 'passkey-credential', challenge: 'authentication-challenge' }
+  });
+  assert.equal(passkeyLogin.status, 200);
+  assert.equal(passkeyLogin.body.user.id, user.id);
+  const replay = await supertest(app).post('/v1/auth/passkeys/authentication/verify').send({
+    challenge_id: authentication.body.challenge_id,
+    credential: { id: 'passkey-credential', challenge: 'authentication-challenge' }
+  });
+  assert.equal(replay.status, 401);
+
+  const passkeyId = settings.body.passkeys[0].id;
+  assert.equal((await supertest(app).delete(`/v1/auth/passkeys/${passkeyId}`).set('Authorization', authorization)).status, 204);
+  assert.deepEqual((await supertest(app).get('/v1/auth/security').set('Authorization', authorization)).body.passkeys, []);
 });
 
 test('password reset is non-enumerating, single-use, and changes the Devise-compatible password', async () => {
