@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { browserApiBaseUrl } from '../lib/api.js';
 import { Button } from './ui/button.js';
 import { Input } from './ui/input.js';
 import { Badge } from './ui/badge.js';
@@ -31,7 +32,7 @@ export default function SecuritySettings({ initialSettings }) {
     setError('');
     setMessage('');
     try {
-      setSetup(await postJson('/api/v1/auth/otp/setup'));
+      setSetup(await postJson(`${browserApiBaseUrl}/auth/otp/setup`));
     } catch (cause) {
       setError(cause.message);
     } finally {
@@ -45,7 +46,7 @@ export default function SecuritySettings({ initialSettings }) {
     setError('');
     setMessage('');
     try {
-      setSettings(await postJson('/api/v1/auth/otp/enable', { otp_attempt: code }));
+      setSettings(await postJson(`${browserApiBaseUrl}/auth/otp/enable`, { otp_attempt: code }));
       setSetup(null);
       setCode('');
       setMessage('Two-factor authentication is enabled.');
@@ -62,7 +63,7 @@ export default function SecuritySettings({ initialSettings }) {
     setError('');
     setMessage('');
     try {
-      setSettings(await postJson('/api/v1/auth/otp/disable', { otp_attempt: code }));
+      setSettings(await postJson(`${browserApiBaseUrl}/auth/otp/disable`, { otp_attempt: code }));
       setCode('');
       setSetup(null);
       setMessage('Two-factor authentication is disabled.');

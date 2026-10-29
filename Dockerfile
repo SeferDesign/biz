@@ -66,6 +66,7 @@ ENTRYPOINT ["/usr/local/bin/biz-entrypoint.sh"]
 CMD ["node", "/app/node_modules/next/dist/bin/next", "dev", "--hostname", "0.0.0.0"]
 
 FROM deps AS web-builder
+ARG NEXT_PUBLIC_API_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY package.json package-lock.json ./
 COPY company ./company

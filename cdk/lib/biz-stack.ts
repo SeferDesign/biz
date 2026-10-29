@@ -75,6 +75,7 @@ export class BizStack extends Stack {
         buildArgs: {
           NODE_VERSION_MAJOR: process.env.NODE_VERSION_MAJOR ?? buildEnv.NODE_VERSION_MAJOR,
           BUILD_ENV: 'prod',
+          ...(target === 'web-production' && { NEXT_PUBLIC_API_URL: `https://${props.apiDomainName}` }),
         },
         ...(ciCache && {
           cacheFrom: [{ type: 'gha', params: { scope: target } }],

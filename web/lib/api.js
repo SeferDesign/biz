@@ -1,12 +1,14 @@
-const apiBaseUrl = (
-  process.env.API_INTERNAL_URL ||
-  process.env.NEXT_PUBLIC_API_URL ||
-  'https://api.biz.loc:9443'
-).replace(/\/$/, '');
+const publicApiBaseUrl = process.env.NEXT_PUBLIC_API_URL?.trim().replace(/\/+$/, '');
+
+if (!publicApiBaseUrl) {
+  throw new Error('NEXT_PUBLIC_API_URL must be configured when building or running the web app.');
+}
+
+const apiBaseUrl = (process.env.API_INTERNAL_URL || publicApiBaseUrl).replace(/\/$/, '');
 
 const defaultApiVersion = 'v1';
 
-export const browserApiBaseUrl = `/api/${defaultApiVersion}`;
+export const browserApiBaseUrl = `${publicApiBaseUrl}/${defaultApiVersion}`;
 export const recordsPerPage = 12;
 
 export function parsePage(value) {

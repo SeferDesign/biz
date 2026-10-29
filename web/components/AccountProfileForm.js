@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { browserApiBaseUrl } from '../lib/api.js';
 import { Button } from './ui/button.js';
 import { Input } from './ui/input.js';
 
@@ -18,7 +19,7 @@ export default function AccountProfileForm({ initialUser }) {
     setMessage('');
 
     try {
-      const response = await fetch('/api/v1/auth/profile', {
+      const response = await fetch(`${browserApiBaseUrl}/auth/profile`, {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

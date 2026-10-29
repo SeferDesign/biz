@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { browserApiBaseUrl } from '../lib/api.js';
 import {
   Building2,
   CalendarDays,
@@ -95,7 +96,7 @@ export default function AppShell({ children, user }) {
   async function signOut() {
     setSigningOut(true);
     try {
-      await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' });
+      await fetch(`${browserApiBaseUrl}/auth/logout`, { method: 'POST', credentials: 'include' });
     } catch {
       // Session cleanup is handled by the API; continue to login screen either way.
     }

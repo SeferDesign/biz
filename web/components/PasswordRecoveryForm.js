@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { browserApiBaseUrl } from '../lib/api.js';
 import { useRouter } from 'next/navigation';
 import Brand from './Brand.js';
 import { companyInfo } from '@seferbiz/company';
@@ -33,7 +34,7 @@ export function ForgotPasswordForm() {
     setMessage('');
     const email = new FormData(event.currentTarget).get('email');
     try {
-      const result = await submitJson('/api/v1/auth/password-reset', { email });
+      const result = await submitJson(`${browserApiBaseUrl}/auth/password-reset`, { email });
       setMessage(result.message);
     } catch (cause) {
       setError(cause.message);
@@ -77,7 +78,7 @@ export function ResetPasswordForm({ token }) {
       return;
     }
     try {
-      const result = await submitJson('/api/v1/auth/password-reset/confirm', { token, password });
+      const result = await submitJson(`${browserApiBaseUrl}/auth/password-reset/confirm`, { token, password });
       setMessage(result.message);
       router.replace('/login');
       router.refresh();

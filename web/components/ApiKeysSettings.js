@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { browserApiBaseUrl } from '../lib/api.js';
 import { Button } from './ui/button.js';
 import { Input } from './ui/input.js';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table.js';
@@ -65,7 +66,7 @@ export default function ApiKeysSettings({ initialKeys }) {
     setError('');
     setMessage('');
     try {
-      const created = await requestJson('/api/v1/auth/api-keys', {
+      const created = await requestJson(`${browserApiBaseUrl}/auth/api-keys`, {
         method: 'POST',
         body: JSON.stringify({ label: newLabel, key: newKey })
       });
@@ -85,7 +86,7 @@ export default function ApiKeysSettings({ initialKeys }) {
     setError('');
     setMessage('');
     try {
-      const updated = await requestJson(`/api/v1/auth/api-keys/${id}`, {
+      const updated = await requestJson(`${browserApiBaseUrl}/auth/api-keys/${id}`, {
         method: 'PATCH',
         body: JSON.stringify({ label, key })
       });
@@ -103,7 +104,7 @@ export default function ApiKeysSettings({ initialKeys }) {
     setError('');
     setMessage('');
     try {
-      const response = await fetch(`/api/v1/auth/api-keys/${id}`, { method: 'DELETE', credentials: 'include' });
+      const response = await fetch(`${browserApiBaseUrl}/auth/api-keys/${id}`, { method: 'DELETE', credentials: 'include' });
       if (!response.ok) {
         const body = await response.json().catch(() => null);
         throw new Error(body?.error || `Request failed (${response.status})`);
