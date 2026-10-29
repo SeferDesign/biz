@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import NewButton from '../../../components/NewButton.js';
 import { DetailGrid } from '../../../components/ResourcePage.js';
+import Notice from '../../../components/Notice.js';
 import ResourceActions from '../../../components/ResourceActions.js';
 import { browserApiBaseUrl, formatMoney } from '../../../lib/api.js';
 import { getApiData } from '../../../lib/api-server.js';
@@ -13,7 +14,7 @@ export default async function VendorDetailPage({ params }) {
     getApiData('/expenses?inactive=true')
   ]);
   if (vendorResult.status === 404) notFound();
-  if (vendorResult.error) return <div className="notice" role="alert"><strong>Vendor unavailable</strong><span>{vendorResult.error}</span></div>;
+  if (vendorResult.error) return <Notice title="Vendor unavailable">{vendorResult.error}</Notice>;
 
   const vendor = vendorResult.data;
   const expenses = (expenseResult.data || []).filter((expense) => expense.vendor_id === vendor.id);
@@ -32,7 +33,7 @@ export default async function VendorDetailPage({ params }) {
         ['Expense records', expenses.length],
         ['Recorded spend', formatMoney(expenses.reduce((total, expense) => total + Number(expense.cost || 0), 0))]
       ]} />
-      {expenseResult.error && <div className="notice detail-section" role="alert"><span>{expenseResult.error}</span></div>}
+      {expenseResult.error && <Notice className="detail-section">{expenseResult.error}</Notice>}
     </>
   );
 }

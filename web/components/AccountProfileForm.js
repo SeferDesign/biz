@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { Button } from './ui/button.js';
+import { Input } from './ui/input.js';
 
 export default function AccountProfileForm({ initialUser }) {
   const [firstName, setFirstName] = useState(initialUser?.first_name || '');
@@ -49,7 +51,7 @@ export default function AccountProfileForm({ initialUser }) {
       <form className="record-form password-change-form" onSubmit={submit}>
         <label className="form-field">
           <span className="form-label">First name</span>
-          <input
+          <Input
             name="first_name"
             type="text"
             autoComplete="given-name"
@@ -60,7 +62,7 @@ export default function AccountProfileForm({ initialUser }) {
         </label>
         <label className="form-field">
           <span className="form-label">Last name</span>
-          <input
+          <Input
             name="last_name"
             type="text"
             autoComplete="family-name"
@@ -72,7 +74,7 @@ export default function AccountProfileForm({ initialUser }) {
         {error && <p className="form-error" role="alert">{error}</p>}
         {message && <p className="security-message" role="status">{message}</p>}
         <div className="form-actions">
-          <button className="primary-button" type="submit" disabled={busy}>{busy ? 'Saving...' : 'Save profile'}</button>
+          <Button type="submit" disabled={busy}>{busy ? 'Saving...' : 'Save profile'}</Button>
         </div>
       </form>
     </section>

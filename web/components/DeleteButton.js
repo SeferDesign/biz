@@ -2,6 +2,18 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Button } from './ui/button.js';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from './ui/alert-dialog.js';
 
 export default function DeleteButton({ endpoint, returnTo, label = 'Delete record' }) {
   const router = useRouter();
@@ -9,7 +21,6 @@ export default function DeleteButton({ endpoint, returnTo, label = 'Delete recor
   const [deleting, setDeleting] = useState(false);
 
   async function remove() {
-    if (!window.confirm(`Delete this ${label.toLowerCase().replace('delete ', '')}? This cannot be undone.`)) return;
     setDeleting(true);
     setError('');
     try {
@@ -30,7 +41,21 @@ export default function DeleteButton({ endpoint, returnTo, label = 'Delete recor
 
   return (
     <div className="delete-action">
-      <button className="danger-button" type="button" disabled={deleting} onClick={remove}>{deleting ? 'Deleting...' : label}</button>
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="destructive" type="button" disabled={deleting}>{label}</Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{label}?</AlertDialogTitle>
+            <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel asChild><Button variant="outline">Cancel</Button></AlertDialogCancel>
+            <AlertDialogAction asChild><Button variant="destructive" disabled={deleting} onClick={remove}>{deleting ? 'Deleting...' : label}</Button></AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       {error && <span className="action-error" role="alert">{error}</span>}
     </div>
   );

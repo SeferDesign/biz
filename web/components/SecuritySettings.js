@@ -1,6 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { Button } from './ui/button.js';
+import { Input } from './ui/input.js';
+import { Badge } from './ui/badge.js';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card.js';
 
 async function postJson(path, body = {}) {
   const response = await fetch(path, {
@@ -76,9 +80,9 @@ export default function SecuritySettings({ initialSettings }) {
           <h1>Two-factor authentication</h1>
           <p className="page-description">Require an authenticator code whenever this account signs in.</p>
         </div>
-        <span className={`status-label${settings.otp_enabled ? ' status-paid' : ''}`}>
+        <Badge variant={settings.otp_enabled ? 'success' : 'secondary'}>
           {settings.otp_enabled ? 'Enabled' : 'Disabled'}
-        </span>
+        </Badge>
       </div>
 
       <div className="security-content">
@@ -93,33 +97,37 @@ export default function SecuritySettings({ initialSettings }) {
         </div>
 
         {!settings.otp_enabled && !setup && (
-          <button className="primary-button" type="button" disabled={busy} onClick={startSetup}>
+          <Button type="button" disabled={busy} onClick={startSetup}>
             {busy ? 'Preparing...' : settings.otp_configured ? 'Replace authenticator setup' : 'Set up authenticator'}
-          </button>
+          </Button>
         )}
 
         {setup && (
-          <div className="otp-setup">
-            <h2>Connect an authenticator</h2>
-            <p>Enter this key in your authenticator app. The key is shown only during setup.</p>
-            <code className="otp-secret">{setup.secret}</code>
-            <form className="otp-confirm-form" onSubmit={enable}>
-              <label className="form-field">
-                <span className="form-label">Current authenticator code</span>
-                <input value={code} onChange={(event) => setCode(event.target.value)} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9 ]{6,12}" required />
-              </label>
-              <button className="primary-button" type="submit" disabled={busy}>{busy ? 'Verifying...' : 'Verify and enable'}</button>
-            </form>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Connect an authenticator</CardTitle>
+              <CardDescription>Enter this key in your authenticator app. The key is shown only during setup.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid justify-items-start gap-4">
+              <code className="otp-secret">{setup.secret}</code>
+              <form className="otp-confirm-form" onSubmit={enable}>
+                <label className="form-field">
+                  <span className="form-label">Current authenticator code</span>
+                  <Input value={code} onChange={(event) => setCode(event.target.value)} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9 ]{6,12}" required />
+                </label>
+                <Button type="submit" disabled={busy}>{busy ? 'Verifying...' : 'Verify and enable'}</Button>
+              </form>
+            </CardContent>
+          </Card>
         )}
 
         {settings.otp_enabled && (
           <form className="otp-confirm-form" onSubmit={disable}>
             <label className="form-field">
               <span className="form-label">Current authenticator code</span>
-              <input value={code} onChange={(event) => setCode(event.target.value)} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9 ]{6,12}" required />
+              <Input value={code} onChange={(event) => setCode(event.target.value)} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9 ]{6,12}" required />
             </label>
-            <button className="danger-button" type="submit" disabled={busy}>{busy ? 'Verifying...' : 'Disable two-factor authentication'}</button>
+            <Button variant="destructive" type="submit" disabled={busy}>{busy ? 'Verifying...' : 'Disable two-factor authentication'}</Button>
           </form>
         )}
 

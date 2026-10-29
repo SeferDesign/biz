@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { browserApiBaseUrl } from '../lib/api.js';
+import { Badge } from './ui/badge.js';
 
 export default function OmniSearch() {
   const router = useRouter();
@@ -146,7 +147,7 @@ export default function OmniSearch() {
                     <strong>{item.title}</strong>
                     {item.detail && <span>{item.detail}</span>}
                   </span>
-                  <span className="omni-result-type">{item.type}</span>
+                  <Badge className="px-2 py-1 text-[9px] uppercase" variant="secondary">{item.type}</Badge>
                 </Link>
               ))}
             </>

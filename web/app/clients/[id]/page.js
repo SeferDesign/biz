@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { DetailGrid, ResourcePage, StatusLabel } from '../../../components/ResourcePage.js';
+import { DetailGrid, ResourcePage, StatusBadge } from '../../../components/ResourcePage.js';
 import NewButton from '../../../components/NewButton.js';
 import ResourceActions from '../../../components/ResourceActions.js';
 import ClientPortalLinkPanel from '../../../components/ClientPortalLinkPanel.js';
+import Notice from '../../../components/Notice.js';
 import { browserApiBaseUrl, formatDate, formatMoney, invoiceStatus, newestInvoicesFirst, parsePage } from '../../../lib/api.js';
 import { getApiData } from '../../../lib/api-server.js';
 
@@ -18,7 +19,7 @@ export default async function ClientDetailPage({ params, searchParams }) {
   ]);
   if (clientResult.status === 404) notFound();
   if (clientResult.error) {
-    return <div className="notice" role="alert"><strong>Client unavailable</strong><span>{clientResult.error}</span></div>;
+    return <Notice title="Client unavailable">{clientResult.error}</Notice>;
   }
 
   const client = clientResult.data;
@@ -65,7 +66,7 @@ export default async function ClientDetailPage({ params, searchParams }) {
       {!accessToken && <ClientPortalLinkPanel clientId={client.id} initialAccessToken={client.access_token} />}
       <section className="detail-section">
         <div className="section-heading"><h2>Invoices</h2></div>
-        {invoiceResult.error ? <div className="notice" role="alert"><span>{invoiceResult.error}</span></div> : (
+        {invoiceResult.error ? <Notice>{invoiceResult.error}</Notice> : (
           <ResourcePage
             hideHeading
             data={invoices}
@@ -75,7 +76,7 @@ export default async function ClientDetailPage({ params, searchParams }) {
               { key: 'id', label: 'Invoice', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}${accessTokenQuery}`}>{invoice.display_id || invoice.display_id_number || invoice.id}</Link> },
               { key: 'date', label: 'Date', render: (invoice) => formatDate(invoice.date) },
               { key: 'description', label: 'Description' },
-              { key: 'status', label: 'Status', render: (invoice) => <StatusLabel status={invoiceStatus(invoice)} /> },
+              { key: 'status', label: 'Status', render: (invoice) => <StatusBadge status={invoiceStatus(invoice)} /> },
               { key: 'cost', label: 'Amount', className: 'numeric-cell', render: (invoice) => formatMoney(invoice.cost ?? invoice.total, invoice.currency) }
             ]}
           />

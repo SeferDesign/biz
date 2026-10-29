@@ -5,6 +5,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Brand from './Brand.js';
 import { companyInfo } from '@seferbiz/company';
+import { Button } from './ui/button.js';
+import { Input } from './ui/input.js';
+import { Card, CardContent, CardHeader } from './ui/card.js';
 
 async function submitJson(url, body) {
   const response = await fetch(url, {
@@ -45,11 +48,11 @@ export function ForgotPasswordForm() {
       <form className="login-form" onSubmit={submit}>
         <label className="form-field">
           <span className="form-label">Email</span>
-          <input name="email" type="email" autoComplete="email" autoFocus required />
+          <Input name="email" type="email" autoComplete="email" autoFocus required />
         </label>
         {message && <p className="security-message" role="status">{message}</p>}
         {error && <p className="form-error" role="alert">{error}</p>}
-        <button className="primary-button login-submit" type="submit" disabled={busy}>{busy ? 'Sending...' : 'Send reset link'}</button>
+        <Button className="login-submit" type="submit" disabled={busy}>{busy ? 'Sending...' : 'Send reset link'}</Button>
         <Link className="auth-inline-link" href="/login">Back to sign in</Link>
       </form>
     </AuthPanel>
@@ -90,15 +93,15 @@ export function ResetPasswordForm({ token }) {
       <form className="login-form" onSubmit={submit}>
         <label className="form-field">
           <span className="form-label">New password</span>
-          <input name="password" type="password" autoComplete="new-password" minLength={8} required />
+          <Input name="password" type="password" autoComplete="new-password" minLength={8} required />
         </label>
         <label className="form-field">
           <span className="form-label">Confirm new password</span>
-          <input name="password_confirmation" type="password" autoComplete="new-password" minLength={8} required />
+          <Input name="password_confirmation" type="password" autoComplete="new-password" minLength={8} required />
         </label>
         {message && <p className="security-message" role="status">{message}</p>}
         {error && <p className="form-error" role="alert">{error}</p>}
-        <button className="primary-button login-submit" type="submit" disabled={busy || !token}>{busy ? 'Updating...' : 'Update password'}</button>
+        <Button className="login-submit" type="submit" disabled={busy || !token}>{busy ? 'Updating...' : 'Update password'}</Button>
         {!token && <p className="form-error" role="alert">This reset link is missing its token. Request a new link.</p>}
       </form>
     </AuthPanel>
@@ -109,10 +112,12 @@ function AuthPanel({ title, children }) {
   return (
     <main className="login-page">
       <Brand/>
-      <section className="login-panel" aria-labelledby="auth-title">
-        <h1 id="auth-title">{title}</h1>
-        {children}
-      </section>
+      <Card className="w-full max-w-[420px] p-8" aria-labelledby="auth-title">
+        <CardHeader className="p-0 pb-6">
+          <h1 id="auth-title" className="auth-card-title">{title}</h1>
+        </CardHeader>
+        <CardContent className="p-0">{children}</CardContent>
+      </Card>
       <p className="login-foot">{companyInfo.legalEntity}</p>
     </main>
   );

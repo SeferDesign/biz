@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { browserApiBaseUrl, formatDateTime } from '../lib/api.js';
+import { Button } from './ui/button.js';
 
 export default function InvoiceEmailPanel({ invoiceId, initialSends = [], historyError = '' }) {
   const [sends, setSends] = useState(initialSends);
@@ -31,9 +32,9 @@ export default function InvoiceEmailPanel({ invoiceId, initialSends = [], histor
     <section className="detail-section invoice-email-panel">
       <div className="section-heading">
         <h2>Email history</h2>
-        <button className="secondary-button" type="button" disabled={sending} aria-busy={sending} onClick={sendEmail}>
+        <Button variant="outline" type="button" disabled={sending} aria-busy={sending} onClick={sendEmail}>
           {sending ? 'Sending...' : sends.length ? 'Resend invoice email' : 'Send invoice email'}
-        </button>
+        </Button>
       </div>
       {error && <p className="action-error" role="alert">{error}</p>}
       {sends.length ? (

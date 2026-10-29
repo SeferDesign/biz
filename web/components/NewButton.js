@@ -1,21 +1,22 @@
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
+import { Button } from './ui/button.js';
 
 export default function NewButton({ href, label = 'New record', className = '' }) {
-  const classes = ['primary-button', 'new-button', className].filter(Boolean).join(' ');
   return (
-    <Link className={classes} href={href}>
-      <Plus size={14} aria-hidden="true" />
-      <span>{label}</span>
-    </Link>
+    <Button asChild className={`new-button ${className}`}>
+      <Link href={href}>
+        <Plus size={14} aria-hidden="true" />
+        <span>{label}</span>
+      </Link>
+    </Button>
   );
 }
 
 export function NewIconButton({ href, label, className = '' }) {
-  const classes = ['table-action-button', className].filter(Boolean).join(' ');
   return (
-    <Link aria-label={label} className={classes} href={href} title={label}>
-      <Plus size={16} aria-hidden="true" />
-    </Link>
+    <Button asChild aria-label={label} className={className} size="icon" title={label} variant="ghost">
+      <Link href={href}><Plus size={16} aria-hidden="true" /></Link>
+    </Button>
   );
 }

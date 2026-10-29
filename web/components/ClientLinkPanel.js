@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { browserApiBaseUrl } from '../lib/api.js';
+import { Button } from './ui/button.js';
+import { Input } from './ui/input.js';
 
 export default function ClientLinkPanel({ invoiceId, initialAccessToken }) {
   const [accessToken, setAccessToken] = useState(initialAccessToken || '');
@@ -42,13 +44,13 @@ export default function ClientLinkPanel({ invoiceId, initialAccessToken }) {
       <div className="section-heading"><h2>Client link</h2><span className="section-note">Anyone with this link can view and pay this invoice</span></div>
       {accessToken ? (
         <div className="copy-field">
-          <input aria-label="Client invoice link" readOnly value={link} onFocus={(event) => event.target.select()} />
-          <button className="secondary-button" type="button" disabled={!link} onClick={copyLink}>{status === 'copied' ? 'Copied' : 'Copy link'}</button>
+          <Input aria-label="Client invoice link" readOnly value={link} onFocus={(event) => event.target.select()} />
+          <Button variant="outline" type="button" disabled={!link} onClick={copyLink}>{status === 'copied' ? 'Copied' : 'Copy link'}</Button>
         </div>
       ) : (
-        <button className="secondary-button" type="button" disabled={status === 'creating'} onClick={createLink}>
+        <Button variant="outline" type="button" disabled={status === 'creating'} onClick={createLink}>
           {status === 'creating' ? 'Creating...' : 'Create client link'}
-        </button>
+        </Button>
       )}
       {error && <p className="action-error" role="alert">{error}</p>}
     </section>

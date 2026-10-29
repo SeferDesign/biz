@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { DetailGrid, ResourcePage } from '../../../components/ResourcePage.js';
+import Notice from '../../../components/Notice.js';
 import ResourceActions from '../../../components/ResourceActions.js';
 import ColumnChart from '../../../components/charts/ColumnChart.js';
 import DonutChart from '../../../components/charts/DonutChart.js';
@@ -22,7 +23,7 @@ export default async function YearDetailPage({ params, searchParams }) {
   ]);
   if (yearResult.status === 404) notFound();
   if (yearResult.error) {
-    return <div className="notice" role="alert"><strong>Year unavailable</strong><span>{yearResult.error}</span></div>;
+    return <Notice title="Year unavailable">{yearResult.error}</Notice>;
   }
 
   const year = yearResult.data;
@@ -118,7 +119,7 @@ export default async function YearDetailPage({ params, searchParams }) {
             {' · '}<a className="inline-link" href={`${browserApiBaseUrl}/years/${year.id}/income/csv`} download>Download CSV</a>
           </span>
         </div>
-        {incomeResult.error ? <div className="notice" role="alert"><span>{incomeResult.error}</span></div> : (
+        {incomeResult.error ? <Notice>{incomeResult.error}</Notice> : (
           <ResourcePage
             hideHeading
             data={invoices}
@@ -142,7 +143,7 @@ export default async function YearDetailPage({ params, searchParams }) {
             {' · '}<a className="inline-link" href={`${browserApiBaseUrl}/years/${year.id}/expenses/csv`} download>Download CSV</a>
           </span>
         </div>
-        {expenseResult.error ? <div className="notice" role="alert"><span>{expenseResult.error}</span></div> : (
+        {expenseResult.error ? <Notice>{expenseResult.error}</Notice> : (
           <ResourcePage
             hideHeading
             data={expenses}

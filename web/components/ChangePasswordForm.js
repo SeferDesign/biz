@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { Button } from './ui/button.js';
+import { Input } from './ui/input.js';
 
 export default function ChangePasswordForm() {
   const [error, setError] = useState('');
@@ -48,19 +50,19 @@ export default function ChangePasswordForm() {
       <form className="record-form password-change-form" onSubmit={submit}>
         <label className="form-field form-field-wide">
           <span className="form-label">Current password</span>
-          <input name="current_password" type="password" autoComplete="current-password" required />
+          <Input name="current_password" type="password" autoComplete="current-password" required />
         </label>
         <label className="form-field">
           <span className="form-label">New password</span>
-          <input name="new_password" type="password" autoComplete="new-password" minLength={8} required />
+          <Input name="new_password" type="password" autoComplete="new-password" minLength={8} required />
         </label>
         <label className="form-field">
           <span className="form-label">Confirm new password</span>
-          <input name="new_password_confirmation" type="password" autoComplete="new-password" minLength={8} required />
+          <Input name="new_password_confirmation" type="password" autoComplete="new-password" minLength={8} required />
         </label>
         {error && <p className="form-error" role="alert">{error}</p>}
         {message && <p className="security-message" role="status">{message}</p>}
-        <div className="form-actions"><button className="primary-button" type="submit" disabled={busy}>{busy ? 'Updating...' : 'Update password'}</button></div>
+        <div className="form-actions"><Button type="submit" disabled={busy}>{busy ? 'Updating...' : 'Update password'}</Button></div>
       </form>
     </section>
   );

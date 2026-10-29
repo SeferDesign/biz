@@ -5,6 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Brand from './Brand.js';
 import { companyInfo } from '@seferbiz/company';
+import { Button } from './ui/button.js';
+import { Input } from './ui/input.js';
+import { Card } from './ui/card.js';
 
 export default function LoginForm({ returnTo }) {
   const router = useRouter();
@@ -44,27 +47,27 @@ export default function LoginForm({ returnTo }) {
   return (
     <main className="login-page">
       <Brand/>
-      <section className="login-panel">
+      <Card className="w-full max-w-[420px] p-8">
         <form className="login-form" onSubmit={submit}>
           <label className="form-field">
             <span className="form-label">Email</span>
-            <input name="email" type="email" autoComplete="username" autoFocus required />
+            <Input name="email" type="email" autoComplete="username" autoFocus required />
           </label>
           <label className="form-field">
             <span className="form-label">Password</span>
-            <input name="password" type="password" autoComplete="current-password" required />
+            <Input name="password" type="password" autoComplete="current-password" required />
           </label>
           <label className="form-field">
             <span className="form-label">Two-factor code</span>
-            <input name="otp_attempt" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={12} />
+            <Input name="otp_attempt" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={12} />
           </label>
           <Link className="auth-inline-link" href="/forgot-password">Forgot your password?</Link>
           {error && <p className="form-error" role="alert">{error}</p>}
-          <button className="primary-button login-submit" disabled={submitting} type="submit">
+          <Button className="login-submit" disabled={submitting} type="submit">
             {submitting ? 'Signing in...' : 'Sign in'}
-          </button>
+          </Button>
         </form>
-      </section>
+      </Card>
       <p className="login-foot">{companyInfo.legalEntity}</p>
     </main>
   );

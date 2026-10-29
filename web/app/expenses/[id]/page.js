@@ -4,6 +4,7 @@ import { DetailGrid } from '../../../components/ResourcePage.js';
 import ResourceActions from '../../../components/ResourceActions.js';
 import { browserApiBaseUrl, formatDate, formatMoney } from '../../../lib/api.js';
 import { getApiData } from '../../../lib/api-server.js';
+import Notice from '../../../components/Notice.js';
 
 export default async function ExpenseDetailPage({ params }) {
   const { id } = await params;
@@ -12,7 +13,7 @@ export default async function ExpenseDetailPage({ params }) {
     getApiData('/vendors')
   ]);
   if (expenseResult.status === 404) notFound();
-  if (expenseResult.error) return <div className="notice" role="alert"><strong>Expense unavailable</strong><span>{expenseResult.error}</span></div>;
+  if (expenseResult.error) return <Notice title="Expense unavailable">{expenseResult.error}</Notice>;
 
   const expense = expenseResult.data;
   const vendor = (vendorResult.data || []).find((item) => item.id === expense.vendor_id);

@@ -1,11 +1,14 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { DetailGrid, ResourcePage, StatusLabel } from '../../../components/ResourcePage.js';
+import { DetailGrid, ResourcePage, StatusBadge } from '../../../components/ResourcePage.js';
 import ResourceActions from '../../../components/ResourceActions.js';
 import InvoiceActions from '../../../components/InvoiceActions.js';
 import InvoiceEmailPanel from '../../../components/InvoiceEmailPanel.js';
 import InvoicePayment from '../../../components/InvoicePayment.js';
 import ClientLinkPanel from '../../../components/ClientLinkPanel.js';
+import Notice from '../../../components/Notice.js';
+import { Button } from '../../../components/ui/button.js';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../components/ui/table.js';
 import { browserApiBaseUrl, formatDate, formatDateTime, formatMoney, invoiceStatus, parsePage } from '../../../lib/api.js';
 import { getApiData } from '../../../lib/api-server.js';
 
@@ -18,7 +21,7 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
   const invoiceResult = await getApiData(`/invoices/${encodeURIComponent(id)}${accessTokenQuery}`);
   if (invoiceResult.status === 404) notFound();
   if (invoiceResult.error) {
-    return <div className="notice" role="alert"><strong>Invoice unavailable</strong><span>{invoiceResult.error}</span></div>;
+    return <Notice title="Invoice unavailable">{invoiceResult.error}</Notice>;
   }
 
   const invoice = invoiceResult.data;
@@ -60,23 +63,26 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
   return (
     <>
       {paymentResult && (
-        <div className={`notice${paymentStatus === 'paid' || paymentStatus === 'processing' ? ' notice-success' : ''}`} role="status">
-          {paymentStatus === 'paid' && <><strong>Payment received</strong><span>Thank you. This invoice has been paid.</span></>}
-          {paymentStatus === 'processing' && <><strong>Payment processing</strong><span>Your bank payment was submitted and usually clears within a few business days.</span></>}
-          {paymentStatus !== 'paid' && paymentStatus !== 'processing' && <><strong>Payment not completed</strong><span>{paymentResult.error || 'The payment was not completed. You can try again below.'}</span></>}
-        </div>
+        <Notice
+          className="mb-6"
+          role="status"
+          title={paymentStatus === 'paid' ? 'Payment received' : paymentStatus === 'processing' ? 'Payment processing' : 'Payment not completed'}
+          variant={paymentStatus === 'paid' || paymentStatus === 'processing' ? 'success' : 'destructive'}
+        >
+          {paymentStatus === 'paid' ? 'Thank you. This invoice has been paid.' : paymentStatus === 'processing' ? 'Your bank payment was submitted and usually clears within a few business days.' : paymentResult.error || 'The payment was not completed. You can try again below.'}
+        </Notice>
       )}
       {!paymentResult && accessToken && paymentOptions?.processing && (
-        <div className="notice notice-success" role="status"><strong>Payment processing</strong><span>Your bank payment was submitted and usually clears within a few business days.</span></div>
+        <Notice className="mb-6" role="status" title="Payment processing" variant="success">Your bank payment was submitted and usually clears within a few business days.</Notice>
       )}
       {query?.checkout === 'canceled' && !isPaid && (
-        <div className="notice" role="status"><strong>Payment canceled</strong><span>You were not charged. You can choose a payment method below to try again.</span></div>
+        <Notice role="status" title="Payment canceled" variant="info">You were not charged. You can choose a payment method below to try again.</Notice>
       )}
       <div className="page-heading">
         <div><h1>Invoice #{invoice.id}</h1></div>
         <div className="detail-actions">
-          {accessToken ? <StatusLabel status={invoiceStatus(invoice)} /> : <InvoiceActions key={`${invoice.id}-${invoiceStatus(invoice)}`} invoice={invoice} lines={lines} linesAvailable={!lineResult.error} />}
-          <a className="secondary-button" href={`${browserApiBaseUrl}/invoices/${invoice.id}/pdf${accessTokenQuery}`}>Download PDF</a>
+          {accessToken ? <StatusBadge status={invoiceStatus(invoice)} /> : <InvoiceActions key={`${invoice.id}-${invoiceStatus(invoice)}`} invoice={invoice} lines={lines} linesAvailable={!lineResult.error} />}
+          <Button asChild variant="outline"><a href={`${browserApiBaseUrl}/invoices/${invoice.id}/pdf${accessTokenQuery}`}>Download PDF</a></Button>
           {!accessToken && <ResourceActions editHref={`/invoices/${invoice.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/invoices/${invoice.id}`} returnTo="/invoices" label="invoice" />}
         </div>
       </div>
@@ -87,20 +93,20 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
         <section className="detail-section">
           <div className="section-heading"><h2>Online payments</h2><span className="section-note">{payments.length} via Stripe</span></div>
           <div className="table-wrap">
-            <table className="data-table">
-              <thead><tr><th>Submitted</th><th>Method</th><th>Status</th><th>Completed</th><th className="numeric-cell">Amount</th></tr></thead>
-              <tbody>
+            <Table className="data-table">
+              <TableHeader><TableRow><TableHead>Submitted</TableHead><TableHead>Method</TableHead><TableHead>Status</TableHead><TableHead>Completed</TableHead><TableHead className="numeric-cell">Amount</TableHead></TableRow></TableHeader>
+              <TableBody>
                 {payments.map((payment) => (
-                  <tr key={payment.id}>
-                    <td className="primary-cell">{formatDateTime(payment.submitted_at)}</td>
-                    <td>{payment.method === 'us_bank_account' ? 'ACH' : payment.method === 'card' ? 'Card' : payment.method || '-'}</td>
-                    <td><StatusLabel status={payment.status} />{payment.failure_message && <span className="section-note"> {payment.failure_message}</span>}</td>
-                    <td>{formatDateTime(payment.completed_at)}</td>
-                    <td className="numeric-cell">{formatMoney(payment.amount, payment.currency)}</td>
-                  </tr>
+                  <TableRow key={payment.id}>
+                    <TableCell className="primary-cell">{formatDateTime(payment.submitted_at)}</TableCell>
+                    <TableCell>{payment.method === 'us_bank_account' ? 'ACH' : payment.method === 'card' ? 'Card' : payment.method || '-'}</TableCell>
+                    <TableCell><StatusBadge status={payment.status} />{payment.failure_message && <span className="section-note"> {payment.failure_message}</span>}</TableCell>
+                    <TableCell>{formatDateTime(payment.completed_at)}</TableCell>
+                    <TableCell className="numeric-cell">{formatMoney(payment.amount, payment.currency)}</TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </section>
       )}
@@ -118,7 +124,7 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
         <p className="section-note payment-alternatives">Prefer to pay another way? See <Link className="inline-link" href="/payments">all payment options</Link>.</p>
       )}
       <section className="detail-section">
-        {lineResult.error ? <div className="notice" role="alert"><span>{lineResult.error}</span></div> : (
+        {lineResult.error ? <Notice>{lineResult.error}</Notice> : (
           <ResourcePage
             hideHeading
             data={lines}

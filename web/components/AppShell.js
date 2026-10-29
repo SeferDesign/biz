@@ -15,9 +15,13 @@ import {
 } from 'lucide-react';
 import OmniSearch from './OmniSearch.js';
 import Brand from './Brand.js';
+import { Button } from './ui/button.js';
 
-const primaryNavigation = [
+const overviewNavigation = [
   { href: '/', label: 'Overview', icon: House },
+];
+
+const recordsNavigation = [
   { href: '/clients', label: 'Clients', icon: Users },
   { href: '/invoices', label: 'Invoices', icon: FileText },
   { href: '/vendors', label: 'Vendors', icon: Building2 },
@@ -25,7 +29,7 @@ const primaryNavigation = [
   { href: '/years', label: 'Years', icon: CalendarDays }
 ];
 
-const secondaryNavigation = [
+const insightsNavigation = [
   { href: '/best', label: 'Best Performances', icon: Award },
   { href: '/payments', label: 'Payment Options', icon: CreditCard }
 ];
@@ -38,13 +42,13 @@ function NavIcon({ icon: Icon }) {
   );
 }
 
-function navItem(pathname, item, secondary = false) {
+function navItem(pathname, item) {
   const active = item.href === '/'
     ? pathname === '/'
     : pathname === item.href || pathname.startsWith(`${item.href}/`);
   return (
     <Link
-      className={`nav-link${secondary ? ' nav-link-secondary' : ''}${active ? ' is-active' : ''}`}
+      className={`nav-link${active ? ' is-active' : ''}`}
       href={item.href}
       key={item.href}
       aria-current={active ? 'page' : undefined}
@@ -52,6 +56,15 @@ function navItem(pathname, item, secondary = false) {
       <NavIcon icon={item.icon} />
       <span>{item.label}</span>
     </Link>
+  );
+}
+
+function navGroup(pathname, label, items) {
+  return (
+    <section className="sidebar-nav-group" key={label}>
+      <h2 className="sidebar-group-label">{label}</h2>
+      <div className="primary-nav">{items.map((item) => navItem(pathname, item))}</div>
+    </section>
   );
 }
 
@@ -93,12 +106,13 @@ export default function AppShell({ children, user }) {
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <Brand/>
-        <nav className="primary-nav" aria-label="Main navigation">
-          {primaryNavigation.map((item) => navItem(pathname, item))}
-        </nav>
-        <nav className="secondary-nav" aria-label="Secondary navigation">
-          {secondaryNavigation.map((item) => navItem(pathname, item, true))}
+        <div className="sidebar-header">
+          <Brand />
+        </div>
+        <nav className="sidebar-navigation" aria-label="Main navigation">
+          {navGroup(pathname, 'Workspace', overviewNavigation)}
+          {navGroup(pathname, 'Records', recordsNavigation)}
+          {navGroup(pathname, 'Insights', insightsNavigation)}
         </nav>
         <div className="sidebar-foot">
           <div className="sidebar-account">
@@ -109,9 +123,7 @@ export default function AppShell({ children, user }) {
                 <span>{user?.email || 'Sign in to your account'}</span>
               </span>
             </Link>
-            {user.email
-              ? <button className="sidebar-sign-out" type="button" disabled={signingOut} onClick={signOut}>{signingOut ? 'Signing out...' : 'Sign out'}</button>
-              : <Link className="sidebar-sign-out" href="/login">Sign in</Link>}
+            <Button className="sidebar-sign-out" variant="ghost" type="button" disabled={signingOut} onClick={signOut}>{signingOut ? 'Signing out...' : 'Sign out'}</Button>
           </div>
         </div>
       </aside>

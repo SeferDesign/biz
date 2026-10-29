@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { formatMoney } from '../../lib/api.js';
 import { getApiData } from '../../lib/api-server.js';
+import Notice from '../../components/Notice.js';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table.js';
 
 const monthNames = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -13,18 +15,18 @@ function PerformanceTable({ title, columns, rows, emptyMessage }) {
       <div className="section-heading"><h2>{title}</h2></div>
       {rows.length ? (
         <div className="table-wrap">
-          <table className="data-table">
-            <thead><tr>{columns.map((column) => <th className={column.numeric ? 'numeric-cell' : ''} key={column.label}>{column.label}</th>)}</tr></thead>
-            <tbody>
+          <Table className="data-table">
+            <TableHeader><TableRow>{columns.map((column) => <TableHead className={column.numeric ? 'numeric-cell' : ''} key={column.label}>{column.label}</TableHead>)}</TableRow></TableHeader>
+            <TableBody>
               {rows.map((row) => (
-                <tr key={row.key}>
+                <TableRow key={row.key}>
                   {row.cells.map((cell, index) => (
-                    <td className={columns[index].numeric ? 'numeric-cell' : index === 0 ? 'primary-cell' : ''} key={columns[index].label}>{cell}</td>
+                    <TableCell className={columns[index].numeric ? 'numeric-cell' : index === 0 ? 'primary-cell' : ''} key={columns[index].label}>{cell}</TableCell>
                   ))}
-                </tr>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       ) : <p className="section-note">{emptyMessage}</p>}
     </section>
@@ -39,7 +41,7 @@ export default async function BestPage() {
   const error = invoiceResult.error || yearResult.error;
 
   if (error) {
-    return <div className="notice" role="alert"><strong>Performance data unavailable</strong><span>{error}</span></div>;
+    return <Notice title="Performance data unavailable">{error}</Notice>;
   }
 
   const years = Array.isArray(yearResult.data) ? yearResult.data : [];

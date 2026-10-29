@@ -3,6 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Button } from './ui/button.js';
+import { Input } from './ui/input.js';
+import { Textarea } from './ui/textarea.js';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select.js';
 
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -136,12 +140,22 @@ export default function RecordForm({ title, description, fields, initialValues =
           <label className={`form-field${field.wide ? ' form-field-wide' : ''}`} key={field.name}>
             <span className="form-label">{field.label}{field.required && <span className="required-mark"> *</span>}</span>
             {field.type === 'textarea' ? (
-              <textarea name={field.name} rows={field.rows || 3} value={values[field.name]} required={field.required} onChange={(event) => setField(field.name, event.target.value)} />
+              <Textarea name={field.name} rows={field.rows || 3} value={values[field.name]} required={field.required} onChange={(event) => setField(field.name, event.target.value)} />
             ) : field.type === 'select' || field.type === 'relation' ? (
-              <select name={field.name} value={values[field.name]} required={field.required} onChange={(event) => setField(field.name, event.target.value)}>
-                {!field.required && <option value="">None</option>}
-                {(field.options || []).map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-              </select>
+              <Select
+                name={field.name}
+                required={field.required}
+                value={values[field.name] === '' ? '__unset__' : String(values[field.name])}
+                onValueChange={(value) => setField(field.name, value === '__unset__' ? '' : value)}
+              >
+                <SelectTrigger aria-label={field.label}>
+                  <SelectValue placeholder="None" />
+                </SelectTrigger>
+                <SelectContent>
+                  {!field.required && <SelectItem value="__unset__">None</SelectItem>}
+                  {(field.options || []).map((option) => <SelectItem key={option.value} value={String(option.value)}>{option.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
             ) : field.type === 'months' ? (
               <div className="month-goal-grid">
                 {monthNames.map((month, index) => (
@@ -165,7 +179,7 @@ export default function RecordForm({ title, description, fields, initialValues =
             ) : field.type === 'checkbox' ? (
               <span className="checkbox-control"><input name={field.name} type="checkbox" checked={Boolean(values[field.name])} onChange={(event) => setField(field.name, event.target.checked)} /><span>{field.helpText || 'Enabled'}</span></span>
             ) : (
-              <input
+              <Input
                 name={field.name}
                 type={field.type || 'text'}
                 min={field.min}
@@ -188,20 +202,20 @@ export default function RecordForm({ title, description, fields, initialValues =
             </div>
             {lineItems.map((line, index) => (
               <div className="invoice-line-row" key={index}>
-                <label><span>Description</span><input value={line.description} onChange={(event) => setLineItems((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, description: event.target.value } : item))} /></label>
-                <label><span>Hours</span><input type="number" min="0" step="0.01" value={line.hours} onChange={(event) => setLineItems((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, hours: event.target.value } : item))} /></label>
-                <label><span>Rate</span><input type="number" min="0" step="0.01" placeholder={selectedClientRate == null ? '' : String(selectedClientRate)} value={line.rate} onChange={(event) => setLineItems((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, rate: event.target.value } : item))} /></label>
-                <label><span>Amount</span><input type="number" min="0" step="0.01" value={line.total === '' && line.hours !== '' && line.rate !== '' ? Number(line.hours) * Number(line.rate) : line.total} onChange={(event) => setLineItems((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, total: event.target.value } : item))} /></label>
-                <button className="secondary-button invoice-line-remove" type="button" aria-label={`Remove line item ${index + 1}`} onClick={() => setLineItems((current) => current.filter((_, itemIndex) => itemIndex !== index))}>Remove</button>
+                <label><span>Description</span><Input value={line.description} onChange={(event) => setLineItems((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, description: event.target.value } : item))} /></label>
+                <label><span>Hours</span><Input type="number" min="0" step="0.01" value={line.hours} onChange={(event) => setLineItems((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, hours: event.target.value } : item))} /></label>
+                <label><span>Rate</span><Input type="number" min="0" step="0.01" placeholder={selectedClientRate == null ? '' : String(selectedClientRate)} value={line.rate} onChange={(event) => setLineItems((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, rate: event.target.value } : item))} /></label>
+                <label><span>Amount</span><Input type="number" min="0" step="0.01" value={line.total === '' && line.hours !== '' && line.rate !== '' ? Number(line.hours) * Number(line.rate) : line.total} onChange={(event) => setLineItems((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, total: event.target.value } : item))} /></label>
+                <Button className="invoice-line-remove" variant="outline" size="sm" type="button" aria-label={`Remove line item ${index + 1}`} onClick={() => setLineItems((current) => current.filter((_, itemIndex) => itemIndex !== index))}>Remove</Button>
               </div>
             ))}
-            <button className="secondary-button invoice-line-add" type="button" onClick={() => setLineItems((current) => [...current, { description: '', hours: '', rate: '', total: '' }])}>+ Add line item</button>
+            <Button className="invoice-line-add" variant="outline" type="button" onClick={() => setLineItems((current) => [...current, { description: '', hours: '', rate: '', total: '' }])}>+ Add line item</Button>
           </section>
         )}
         {error && <p className="form-error" role="alert">{error}</p>}
         <div className="form-actions">
-          <button className="primary-button" disabled={saving} type="submit">{saving ? 'Saving...' : submitLabel || 'Save record'}</button>
-          <Link className="secondary-button" href={returnTo}>Cancel</Link>
+          <Button disabled={saving} type="submit">{saving ? 'Saving...' : submitLabel || 'Save record'}</Button>
+          <Button asChild variant="outline"><Link href={returnTo}>Cancel</Link></Button>
         </div>
       </form>
     </section>

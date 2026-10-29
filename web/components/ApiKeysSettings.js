@@ -1,6 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { Button } from './ui/button.js';
+import { Input } from './ui/input.js';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table.js';
 
 function formatDateTime(value) {
   if (!value) return 'Never';
@@ -126,7 +129,7 @@ export default function ApiKeysSettings({ initialKeys }) {
       <form className="record-form password-change-form" onSubmit={createKey}>
         <label className="form-field">
           <span className="form-label">Label</span>
-          <input
+          <Input
             name="label"
             type="text"
             maxLength={255}
@@ -137,7 +140,7 @@ export default function ApiKeysSettings({ initialKeys }) {
         </label>
         <label className="form-field form-field-wide">
           <span className="form-label">Key</span>
-          <input
+          <Input
             name="key"
             type="text"
             maxLength={255}
@@ -147,8 +150,8 @@ export default function ApiKeysSettings({ initialKeys }) {
           />
         </label>
         <div className="form-actions">
-          <button className="secondary-button" type="button" disabled={busy} onClick={populateGeneratedKey}>Generate key</button>
-          <button className="primary-button" type="submit" disabled={busy}>{busy ? 'Saving...' : 'Create key'}</button>
+          <Button variant="outline" type="button" disabled={busy} onClick={populateGeneratedKey}>Generate key</Button>
+          <Button type="submit" disabled={busy}>{busy ? 'Saving...' : 'Create key'}</Button>
         </div>
       </form>
 
@@ -160,16 +163,16 @@ export default function ApiKeysSettings({ initialKeys }) {
         </div>
       ) : (
         <div className="table-wrap">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Label</th>
-                <th>Key</th>
-                <th>Last used</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table className="data-table">
+            <TableHeader>
+              <TableRow>
+                <TableHead>Label</TableHead>
+                <TableHead>Key</TableHead>
+                <TableHead>Last used</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {keys.map((entry) => (
                 <ApiKeyRow
                   busy={busy}
@@ -179,8 +182,8 @@ export default function ApiKeysSettings({ initialKeys }) {
                   onSave={updateKey}
                 />
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
 
@@ -195,20 +198,20 @@ function ApiKeyRow({ entry, onSave, onDelete, busy }) {
   const [key, setKey] = useState(entry.key || '');
 
   return (
-    <tr>
-      <td className="primary-cell">
-        <input value={label} maxLength={255} onChange={(event) => setLabel(event.target.value)} aria-label={`Label for API key ${entry.id}`} />
-      </td>
-      <td>
-        <input value={key} maxLength={255} onChange={(event) => setKey(event.target.value)} aria-label={`Key value for API key ${entry.id}`} />
-      </td>
-      <td>{formatDateTime(entry.last_used_at)}</td>
-      <td>
+    <TableRow>
+      <TableCell className="primary-cell">
+        <Input value={label} maxLength={255} onChange={(event) => setLabel(event.target.value)} aria-label={`Label for API key ${entry.id}`} />
+      </TableCell>
+      <TableCell>
+        <Input value={key} maxLength={255} onChange={(event) => setKey(event.target.value)} aria-label={`Key value for API key ${entry.id}`} />
+      </TableCell>
+      <TableCell>{formatDateTime(entry.last_used_at)}</TableCell>
+      <TableCell>
         <div className="resource-actions">
-          <button className="primary-button" type="button" disabled={busy} onClick={() => onSave(entry.id, label, key)}>Save</button>
-          <button className="danger-button" type="button" disabled={busy} onClick={() => onDelete(entry.id)}>Delete</button>
+          <Button size="sm" type="button" disabled={busy} onClick={() => onSave(entry.id, label, key)}>Save</Button>
+          <Button size="sm" variant="destructive" type="button" disabled={busy} onClick={() => onDelete(entry.id)}>Delete</Button>
         </div>
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 }

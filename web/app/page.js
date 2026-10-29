@@ -1,11 +1,13 @@
 import Link from 'next/link';
-import { ResourcePage, StatusLabel } from '../components/ResourcePage.js';
+import { ResourcePage, StatusBadge } from '../components/ResourcePage.js';
 import InvoiceActions from '../components/InvoiceActions.js';
+import Notice from '../components/Notice.js';
 import ColumnChart from '../components/charts/ColumnChart.js';
 import { financeBars, goalOutlines } from '../components/charts/theme.js';
 import { formatDate, formatMoney, invoiceStatus, newestInvoicesFirst } from '../lib/api.js';
 import { getApiData } from '../lib/api-server.js';
 import { monthlyFinances, trailingMonths } from '../lib/chart-data.js';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table.js';
 
 const monthFormatter = new Intl.DateTimeFormat('en-US', { month: 'long', timeZone: 'UTC' });
 
@@ -87,35 +89,35 @@ export default async function Home() {
         </div>
       </div>
 
-      {error && <div className="notice" role="alert"><strong>Some data is unavailable</strong><span>{error}</span></div>}
+      {error && <Notice title="Some data is unavailable">{error}</Notice>}
 
       <section className="overview-finance" aria-label="Current receivables and goals">
         <p className="overview-receivable">Total Receivable: <strong>{formatMoney(totalOpen)}</strong> ({openInvoices.length} invoices)</p>
         <div className="table-wrap">
-          <table className="data-table overview-table">
-            <thead>
-              <tr>
-                <th scope="col" />
-                <th scope="col">Goal</th>
-                <th scope="col">Revenue</th>
-                <th scope="col">Expenses</th>
-                <th scope="col">Net</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table className="data-table overview-table">
+            <TableHeader>
+              <TableRow>
+                <TableHead scope="col" />
+                <TableHead scope="col">Goal</TableHead>
+                <TableHead scope="col">Revenue</TableHead>
+                <TableHead scope="col">Expenses</TableHead>
+                <TableHead scope="col">Net</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {financialRows.map((row) => (
-                <tr key={row.label}>
-                  <td className="primary-cell">
+                <TableRow key={row.label}>
+                  <TableCell className="primary-cell">
                     {row.href ? <Link className="inline-link" href={row.href}>{row.label}</Link> : row.label}
-                  </td>
-                  <td className="numeric-cell">{formatMoney(row.goal)}</td>
-                  <td className="numeric-cell amount-positive">{formatMoney(row.revenue)}</td>
-                  <td className="numeric-cell amount-negative">{formatMoney(row.expenses)}</td>
-                  <td className="numeric-cell">{formatMoney(row.net)}</td>
-                </tr>
+                  </TableCell>
+                  <TableCell className="numeric-cell">{formatMoney(row.goal)}</TableCell>
+                  <TableCell className="numeric-cell amount-positive">{formatMoney(row.revenue)}</TableCell>
+                  <TableCell className="numeric-cell amount-negative">{formatMoney(row.expenses)}</TableCell>
+                  <TableCell className="numeric-cell">{formatMoney(row.net)}</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </section>
 
@@ -147,7 +149,7 @@ export default async function Home() {
             { key: 'id', label: 'Invoice', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}`}>{invoice.display_id || invoice.display_id_number || invoice.id}</Link> },
             { key: 'client', label: 'Client', render: (invoice) => clientsById.get(invoice.client_id)?.name || `Client ${invoice.client_id || '-'}` },
             { key: 'date', label: 'Date', render: (invoice) => formatDate(invoice.date) },
-            { key: 'status', label: 'Status', render: (invoice) => <StatusLabel status={invoiceStatus(invoice)} /> },
+            { key: 'status', label: 'Status', render: (invoice) => <StatusBadge status={invoiceStatus(invoice)} /> },
             { key: 'cost', label: 'Amount', className: 'numeric-cell', render: (invoice) => formatMoney(invoice.cost ?? invoice.total, invoice.currency) },
             { key: 'actions', label: 'Actions', render: (invoice) => <InvoiceActions invoice={invoice} compact /> }
           ]}

@@ -1,6 +1,10 @@
 import Link from 'next/link';
 import { recordsPerPage } from '../lib/api.js';
 import NewButton from './NewButton.js';
+import { Button } from './ui/button.js';
+import { Badge } from './ui/badge.js';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert.js';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table.js';
 
 export function ResourcePage({ title, description, data, error, columns, countLabel, count, hideHeading = false, actionHref, actionLabel, pageHref, page = 1, pageParam = 'page' }) {
   const records = Array.isArray(data) ? data : [];
@@ -31,10 +35,10 @@ export function ResourcePage({ title, description, data, error, columns, countLa
         </div>
       )}
       {error ? (
-        <div className="notice" role="alert">
-          <strong>Data unavailable</strong>
-          <span>{error}</span>
-        </div>
+        <Alert variant="destructive">
+          <AlertTitle>Data unavailable</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       ) : records.length === 0 ? (
         <div className="empty-state">
           <span className="empty-mark">--</span>
@@ -43,42 +47,51 @@ export function ResourcePage({ title, description, data, error, columns, countLa
         </div>
       ) : (
         <div className="table-wrap">
-          <table className="data-table">
-            <thead>
-              <tr>{columns.map((column) => <th key={column.key}>{column.label}</th>)}</tr>
-            </thead>
-            <tbody>
+          <Table className="data-table">
+            <TableHeader>
+              <TableRow>{columns.map((column) => <TableHead key={column.key}>{column.label}</TableHead>)}</TableRow>
+            </TableHeader>
+            <TableBody>
               {visibleRecords.map((record) => (
-                <tr key={record.id}>
+                <TableRow key={record.id}>
                   {columns.map((column, index) => (
-                    <td className={column.className || (index === 0 ? 'primary-cell' : '')} key={column.key}>
+                    <TableCell className={column.className || (index === 0 ? 'primary-cell' : '')} key={column.key}>
                       {column.render ? column.render(record) : (record[column.key] ?? '-')}
-                    </td>
+                    </TableCell>
                   ))}
-                </tr>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
       {pageHref && pageCount > 1 && !error && (
         <nav className="pagination" aria-label="Record pagination">
           {currentPage > 1
-            ? <Link className="pagination-link" href={hrefForPage(currentPage - 1)}>Previous</Link>
-            : <span className="pagination-link is-disabled" aria-disabled="true">Previous</span>}
+            ? <Button asChild size="sm" variant="outline"><Link href={hrefForPage(currentPage - 1)}>Previous</Link></Button>
+            : <Button disabled size="sm" variant="outline">Previous</Button>}
           <span className="pagination-status">Page {currentPage} of {pageCount} · Showing {(currentPage - 1) * recordsPerPage + 1}–{Math.min(currentPage * recordsPerPage, records.length)} of {records.length}</span>
           {currentPage < pageCount
-            ? <Link className="pagination-link" href={hrefForPage(currentPage + 1)}>Next</Link>
-            : <span className="pagination-link is-disabled" aria-disabled="true">Next</span>}
+            ? <Button asChild size="sm" variant="outline"><Link href={hrefForPage(currentPage + 1)}>Next</Link></Button>
+            : <Button disabled size="sm" variant="outline">Next</Button>}
         </nav>
       )}
     </>
   );
 }
 
-export function StatusLabel({ status }) {
+export function StatusBadge({ status }) {
   const value = String(status || 'draft').toLowerCase();
-  return <span className={`status-label status-${value}`}>{value}</span>;
+  const variant = {
+    paid: 'success',
+    succeeded: 'success',
+    sent: 'warning',
+    due: 'warning',
+    processing: 'info',
+    submitted: 'info',
+    failed: 'destructive'
+  }[value] || 'secondary';
+  return <Badge className="uppercase" variant={variant}>{value}</Badge>;
 }
 
 export function DetailGrid({ items }) {

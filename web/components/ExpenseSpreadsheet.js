@@ -3,9 +3,11 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { Button } from './ui/button.js';
 import { formatMoney } from '../lib/api.js';
 import { expenseAccountOptions } from '../lib/record-fields.js';
 import { recordsPerPage } from '../lib/api.js';
+import Notice from './Notice.js';
 
 const blankExpense = () => ({ name: '', vendor_id: '', date: '', cost: '', account: '', notes: '' });
 
@@ -192,9 +194,9 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
 
       <div className="sheet-toolbar">
         <span className="sheet-state">{changedCount ? `${changedCount} unsaved change${changedCount === 1 ? '' : 's'}` : message || 'All changes saved'}</span>
-        <button className="primary-button" type="button" disabled={busy || !changedCount} onClick={saveChanges}>{busy ? 'Saving...' : `Save changes${changedCount ? ` (${changedCount})` : ''}`}</button>
+        <Button type="button" disabled={busy || !changedCount} onClick={saveChanges}>{busy ? 'Saving...' : `Save changes${changedCount ? ` (${changedCount})` : ''}`}</Button>
       </div>
-      {error && <div className="notice sheet-notice" role="alert"><strong>Could not save batch</strong><span>{error}</span></div>}
+      {error && <Notice className="sheet-notice" title="Could not save batch">{error}</Notice>}
 
       <section className="sheet-section">
         <div className="section-heading"><h2>Edit expenses</h2><span className="section-note">Changes are saved together.</span></div>
@@ -207,9 +209,9 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
         ) : <div className="empty-state"><h2>No expenses</h2><p>Add new rows below to get started.</p></div>}
         {pageCount > 1 && (
           <nav className="pagination" aria-label="Spreadsheet pagination">
-            <button className="pagination-link" type="button" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>Previous</button>
+            <Button size="sm" variant="outline" type="button" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>Previous</Button>
             <span className="pagination-status">Page {currentPage} of {pageCount} · Showing {(currentPage - 1) * recordsPerPage + 1}–{Math.min(currentPage * recordsPerPage, expenses.length)} of {expenses.length}</span>
-            <button className="pagination-link" type="button" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>Next</button>
+            <Button size="sm" variant="outline" type="button" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>Next</Button>
           </nav>
         )}
       </section>
@@ -217,7 +219,7 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
       <section className="sheet-section">
         <div className="section-heading">
           <h2>Add expenses</h2>
-          <button className="secondary-button" type="button" disabled={busy} onClick={() => setDrafts((current) => [...current, ...Array.from({ length: 5 }, blankExpense)])}>Add 5 rows</button>
+          <Button variant="outline" type="button" disabled={busy} onClick={() => setDrafts((current) => [...current, ...Array.from({ length: 5 }, blankExpense)])}>Add 5 rows</Button>
         </div>
         <SpreadsheetTable>
           {drafts.map((expense, index) => (
@@ -226,7 +228,7 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
         </SpreadsheetTable>
         <div className="sheet-add-action">
           <span className="section-note">{draftCount} filled row{draftCount === 1 ? '' : 's'}</span>
-          <button className="primary-button" type="button" disabled={busy || !draftCount} onClick={addExpenses}>{busy ? 'Saving...' : `Add expenses${draftCount ? ` (${draftCount})` : ''}`}</button>
+          <Button type="button" disabled={busy || !draftCount} onClick={addExpenses}>{busy ? 'Saving...' : `Add expenses${draftCount ? ` (${draftCount})` : ''}`}</Button>
         </div>
       </section>
     </>
