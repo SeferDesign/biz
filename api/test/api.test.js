@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs';
 import Stripe from 'stripe';
 import { createCipheriv, pbkdf2Sync, randomBytes } from 'node:crypto';
 import { companyInfo } from '@seferbiz/company';
-import { generateOtpSecret, generateTotpCode, validOtpTimestep } from '../src/auth/session.js';
+import { createSessionToken, generateOtpSecret, generateTotpCode, validOtpTimestep, verifySessionToken } from '../src/auth/session.js';
 import { seedUser } from '../src/db/seed.js';
 import { createApp } from '../src/routing/app.js';
 import { toCsv } from '../src/routing/shared/csv.js';
@@ -187,6 +187,18 @@ test('signed-in users can create, update, list, and delete API keys', async () =
   assert.equal((await supertest(app).get('/v1/auth/api-keys').set('Authorization', authorization)).body.length, 0);
 });
 
+test('session tokens remain valid for 30 days and reject expired or differently signed tokens', () => {
+  const now = Date.UTC(2026, 9, 29);
+  const user = { id: 7, email: 'owner@example.test' };
+  const token = createSessionToken(user, TEST_API_ACCESS_TOKEN, now);
+  const expiresAt = now + 30 * 24 * 60 * 60 * 1000;
+
+  assert.equal(verifySessionToken(token, TEST_API_ACCESS_TOKEN, now + 9 * 60 * 60 * 1000).id, user.id);
+  assert.equal(verifySessionToken(token, TEST_API_ACCESS_TOKEN, expiresAt - 1000).id, user.id);
+  assert.equal(verifySessionToken(token, TEST_API_ACCESS_TOKEN, expiresAt), null);
+  assert.equal(verifySessionToken(token, 'different-signing-secret', now), null);
+});
+
 test('legacy user credentials establish expiring API sessions and enforce OTP replay protection', async () => {
   const store = createMemoryStore();
   const apiAccessToken = TEST_API_ACCESS_TOKEN;
@@ -209,6 +221,11 @@ test('legacy user credentials establish expiring API sessions and enforce OTP re
   const login = await supertest(app).post('/v1/auth/login').send({ email: user.email, password: 'correct horse', otp_attempt: otp });
   assert.equal(login.status, 200);
   assert.equal(login.body.user.id, user.id);
+  const sessionCookie = login.headers['set-cookie'].find((cookie) => cookie.startsWith('biz_session='));
+  assert.match(sessionCookie, /Max-Age=2592000;/);
+  assert.match(sessionCookie, /HttpOnly/);
+  const restartedApp = createApp({ store, apiAccessToken, otpSecretEncryptionKey: otpKey });
+  assert.equal((await supertest(restartedApp).get('/v1/auth/session').set('Cookie', sessionCookie.split(';')[0])).status, 200);
   assert.equal((await supertest(app).get('/v1/auth/session').set('Authorization', `Bearer ${login.body.access_token}`)).status, 200);
   assert.equal((await supertest(app).post('/v1/auth/login').send({ email: user.email, password: 'correct horse', otp_attempt: otp })).status, 401);
 });

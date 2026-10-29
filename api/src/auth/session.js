@@ -1,6 +1,6 @@
 import { createCipheriv, createDecipheriv, createHmac, pbkdf2Sync, randomBytes, timingSafeEqual } from 'node:crypto';
 
-export const SESSION_TTL_SECONDS = 60 * 60 * 8;
+export const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30;
 const base32Alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 
 export function createSessionToken(user, secret, now = Date.now()) {

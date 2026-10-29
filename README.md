@@ -64,7 +64,11 @@ you can sign in locally and re-enroll two-factor authentication with your local
 
 The web office requires sign-in with an existing user email and password;
 accounts with two-factor login enabled also require their current code. The web
-session is HttpOnly and expires after eight hours. The public web exceptions are
+session is HttpOnly and expires 30 days after sign-in. Sessions survive deploys
+as long as `API_ACCESS_TOKEN` remains unchanged; the cloud deploy script preserves
+it in SSM. Temporary API outages return a non-cacheable 503 response instead of
+redirecting signed-in users to login. Existing sessions keep their original expiry
+until the next sign-in. The public web exceptions are
 `/payment` and matching invoice/client access-token read links.
 Use “Forgot your password?” on the sign-in page to request a six-hour, single-use
 reset link by email. Signed-in users can change their password under

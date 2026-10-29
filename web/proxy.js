@@ -10,11 +10,14 @@ async function isValidSession(token) {
   try {
     const response = await fetch(`${apiBaseUrl}/v1/auth/session`, {
       headers: { Authorization: `Bearer ${token}` },
-      cache: 'no-store'
+      cache: 'no-store',
+      signal: AbortSignal.timeout(5000)
     });
-    return response.ok;
+    if (response.ok) return true;
+    if (response.status === 401 || response.status === 403) return false;
+    return null;
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -42,7 +45,20 @@ export async function proxy(request) {
   }
 
   const sessionToken = request.cookies.get('biz_session')?.value;
-  if (sessionToken && await isValidSession(sessionToken)) return NextResponse.next();
+  if (sessionToken) {
+    const validSession = await isValidSession(sessionToken);
+    if (validSession) return NextResponse.next();
+    if (validSession === null) {
+      return new NextResponse('Service temporarily unavailable. Please try again shortly.', {
+        status: 503,
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'no-store',
+          'Retry-After': '5'
+        }
+      });
+    }
+  }
   if (await isValidRecordLink(request)) return NextResponse.next();
 
   const loginUrl = request.nextUrl.clone();
