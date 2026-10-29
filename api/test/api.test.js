@@ -4,6 +4,7 @@ import supertest from 'supertest';
 import bcrypt from 'bcryptjs';
 import Stripe from 'stripe';
 import { createCipheriv, pbkdf2Sync, randomBytes } from 'node:crypto';
+import { companyInfo } from '@seferbiz/company';
 import { generateOtpSecret, generateTotpCode, validOtpTimestep } from '../src/auth/session.js';
 import { seedUser } from '../src/db/seed.js';
 import { createApp } from '../src/routing/app.js';
@@ -439,7 +440,10 @@ test('invoice email includes the generated invoice PDF attachment', async () => 
   assert.equal(message.attachments[0].contentType, 'application/pdf');
   assert.equal(message.attachments[0].content.subarray(0, 5).toString(), '%PDF-');
   assert.match(message.text, /Payment Terms: Net 90/);
+  const ownerContact = `${companyInfo.personMain.first_name} ${companyInfo.personMain.last_name} <${companyInfo.personMain.email}>`;
+  assert.equal(message.replyTo, ownerContact);
   assert.deepEqual(message.cc, ['ap@bright.example', 'owner@bright.example']);
+  assert.deepEqual(message.bcc, [ownerContact]);
 });
 
 test('invoice email includes the tokenized client portal link', async () => {

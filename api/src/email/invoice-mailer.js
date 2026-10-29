@@ -25,6 +25,7 @@ function getTransporter() {
 export async function sendInvoiceEmail({ invoice, client, lines }, transport) {
   const recipient = client.email || client.email_accounting;
   if (!recipient) throw new Error('The client does not have a billing email address');
+  const ownerContact = `${companyInfo.personMain.first_name} ${companyInfo.personMain.last_name} <${companyInfo.personMain.email}>`;
 
   const currency = invoice.currency || 'USD';
   const total = Number(invoice.cost ?? invoice.total ?? 0).toFixed(2);
@@ -75,7 +76,9 @@ export async function sendInvoiceEmail({ invoice, client, lines }, transport) {
   await (transport || getTransporter()).sendMail({
     from: process.env.SMTP_FROM || companyEmailFrom,
     to: recipient,
+    replyTo: ownerContact,
     cc: [client.email_accounting_2, client.email_accounting_3].filter(Boolean),
+    bcc: [ownerContact],
     subject: `${process.env.NODE_ENV === 'development' ? 'DEV - ' : ''}Invoice from ${companyInfo.name}`,
     text,
     attachments: [{
