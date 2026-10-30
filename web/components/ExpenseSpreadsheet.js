@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from './ui/button.js';
@@ -10,6 +9,8 @@ import { recordsPerPage } from '../lib/api.js';
 import Notice from './Notice.js';
 import { DatePicker } from './ui/date-picker.js';
 import { Combobox } from './ui/combobox.js';
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from './ui/empty.js';
+import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from './ui/pagination.js';
 
 const blankExpense = () => ({ name: '', vendor_id: '', date: '', cost: '', account: '', notes: '' });
 
@@ -220,13 +221,44 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
               <ExpenseRow key={expense.id} expense={expense} vendors={vendors} label={`Expense ${expense.id}`} showId onChange={(field, value) => updateExisting(expense.id, field, value)} />
             ))}
           </SpreadsheetTable>
-        ) : <div className="empty-state"><h2>No expenses</h2><p>Add new rows below to get started.</p></div>}
+        ) : (
+          <Empty>
+            <EmptyHeader>
+              <EmptyTitle>No expenses</EmptyTitle>
+              <EmptyDescription>Add new rows below to get started.</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        )}
         {pageCount > 1 && (
-          <nav className="pagination" aria-label="Spreadsheet pagination">
-            <Button size="sm" variant="outline" type="button" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>Previous</Button>
-            <span className="pagination-status">Page {currentPage} of {pageCount} · Showing {(currentPage - 1) * recordsPerPage + 1}–{Math.min(currentPage * recordsPerPage, expenses.length)} of {expenses.length}</span>
-            <Button size="sm" variant="outline" type="button" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>Next</Button>
-          </nav>
+          <Pagination aria-label="Spreadsheet pagination">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  aria-disabled={currentPage === 1}
+                  tabIndex={currentPage === 1 ? -1 : undefined}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    if (currentPage > 1) setPage(currentPage - 1);
+                  }}
+                />
+              </PaginationItem>
+              <PaginationItem>
+                <span>Page {currentPage} of {pageCount} · Showing {(currentPage - 1) * recordsPerPage + 1}–{Math.min(currentPage * recordsPerPage, expenses.length)} of {expenses.length}</span>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  aria-disabled={currentPage === pageCount}
+                  tabIndex={currentPage === pageCount ? -1 : undefined}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    if (currentPage < pageCount) setPage(currentPage + 1);
+                  }}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         )}
       </section>
 

@@ -184,13 +184,6 @@ h2 { font-family: var(--font-sans), "Helvetica Neue", "Segoe UI", sans-serif; fo
 .invoice-row-actions { display: flex; align-items: center; gap: 4px; }
 .invoice-row-actions .action-error { min-width: 150px; }
 
-.empty-state { border: 1px solid var(--line); background: var(--white); box-shadow: var(--shadow); }
-.empty-state p { color: var(--muted); }
-.empty-state { display: grid; justify-items: center; padding: 58px 22px; text-align: center; }
-.empty-state h2 { margin: 8px 0; }
-.empty-state p { margin-bottom: 0; }
-.empty-mark { color: var(--gold); font-family: inherit; font-size: 22px; }
-
 .detail-section { margin-top: 37px; }
 .invoice-email-panel { margin-top: 25px; }
 .invoice-email-history { margin: 0; padding: 0; border-top: 1px solid var(--line); list-style: none; }
@@ -259,8 +252,6 @@ h2 { font-family: var(--font-sans), "Helvetica Neue", "Segoe UI", sans-serif; fo
 .copy-field { display: flex; gap: 8px; }
 .copy-field [data-slot="input"] { flex: 1; min-width: 0; }
 .filter-row { margin: -9px 0 19px; }
-.pagination { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; }
-.pagination-status { color: var(--muted); font-size: 11px; text-align: center; }
 .inline-link { color: var(--forest-soft); text-decoration: underline; text-decoration-color: #a9a9a9; text-underline-offset: 3px; }
 .inline-link:hover { color: var(--coral); }
 .sheet-count { color: var(--muted); font-size: 12px; }
@@ -346,7 +337,7 @@ h2 { font-family: var(--font-sans), "Helvetica Neue", "Segoe UI", sans-serif; fo
 .passkey-settings { display: grid; gap: 14px; padding-top: 20px; border-top: 1px solid var(--line); }
 .passkey-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; }
 .passkey-heading h2 { margin: 0 0 5px; font-size: 18px; }
-.passkey-heading p, .passkey-empty { margin: 0; color: var(--muted); }
+.passkey-heading p { margin: 0; color: var(--muted); }
 .passkey-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; }
 .passkey-controls .form-field { min-width: min(220px, 100%); }
 .passkey-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
@@ -389,7 +380,6 @@ h2 { font-family: var(--font-sans), "Helvetica Neue", "Segoe UI", sans-serif; fo
   .chart-columns { grid-template-columns: 1fr; }
   .payment-method { grid-template-columns: 1fr; gap: 8px; }
   .sheet-toolbar { align-items: flex-start; flex-wrap: wrap; }
-  .pagination { flex-wrap: wrap; }
   .heading-actions { gap: 10px; }
   .heading-actions .heading-count { min-width: 60px; }
   .record-form { padding: 18px; }

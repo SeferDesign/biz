@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { browserApiBaseUrl } from '../lib/api.js';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandShortcut } from './ui/command.js';
+import { Kbd } from './ui/kbd.js';
 
 export default function OmniSearch() {
   const router = useRouter();
@@ -99,7 +100,7 @@ export default function OmniSearch() {
             setOpen(true);
           }}
         >
-          <CommandShortcut><kbd aria-hidden="true">⌘K</kbd></CommandShortcut>
+          <CommandShortcut><Kbd aria-hidden="true">⌘K</Kbd></CommandShortcut>
         </CommandInput>
         <CommandList hidden={!showResults} label="Search results">
           {showResults && (loading || error ? (

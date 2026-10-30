@@ -3,6 +3,7 @@ import { formatMoney } from '../../lib/api.js';
 import { getApiData } from '../../lib/api-server.js';
 import Notice from '../../components/Notice.js';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table.js';
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '../../components/ui/empty.js';
 
 const monthNames = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -28,7 +29,14 @@ function PerformanceTable({ title, columns, rows, emptyMessage }) {
             </TableBody>
           </Table>
         </div>
-      ) : <p className="section-note">{emptyMessage}</p>}
+      ) : (
+        <Empty>
+          <EmptyHeader>
+            <EmptyTitle>No performance data</EmptyTitle>
+            <EmptyDescription>{emptyMessage}</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      )}
     </section>
   );
 }
@@ -98,7 +106,14 @@ export default async function BestPage() {
         </div>
       </div>
 
-      {!years.length && <div className="empty-state"><h2>No year records yet</h2><p>Performance rankings appear once years are added to the ledger.</p></div>}
+      {!years.length && (
+        <Empty>
+          <EmptyHeader>
+            <EmptyTitle>No year records yet</EmptyTitle>
+            <EmptyDescription>Performance rankings appear once years are added to the ledger.</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      )}
       {Boolean(years.length) && <>
         <PerformanceTable
           title="Months"

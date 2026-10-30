@@ -8,6 +8,7 @@ import { Button } from './ui/button.js';
 import { Input } from './ui/input.js';
 import { Badge } from './ui/badge.js';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card.js';
+import { Empty, EmptyHeader, EmptyTitle } from './ui/empty.js';
 
 async function postJson(path, body = {}) {
   const response = await fetch(path, {
@@ -215,7 +216,13 @@ export default function SecuritySettings({ initialSettings }) {
                 </li>
               ))}
             </ul>
-          ) : <p className="passkey-empty">No passkeys registered.</p>}
+          ) : (
+            <Empty>
+              <EmptyHeader>
+                <EmptyTitle>No passkeys registered.</EmptyTitle>
+              </EmptyHeader>
+            </Empty>
+          )}
         </section>
 
         {error && <p className="form-error" role="alert">{error}</p>}

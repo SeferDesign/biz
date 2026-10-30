@@ -5,6 +5,7 @@ import { browserApiBaseUrl } from '../lib/api.js';
 import { Button } from './ui/button.js';
 import { Input } from './ui/input.js';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table.js';
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from './ui/empty.js';
 
 function formatDateTime(value) {
   if (!value) return 'Never';
@@ -157,11 +158,12 @@ export default function ApiKeysSettings({ initialKeys }) {
       </form>
 
       {keys.length === 0 ? (
-        <div className="empty-state">
-          <span className="empty-mark">--</span>
-          <h2>No API keys yet</h2>
-          <p>Create a key above to authorize scripts with bearer auth.</p>
-        </div>
+        <Empty>
+          <EmptyHeader>
+            <EmptyTitle>No API keys yet</EmptyTitle>
+            <EmptyDescription>Create a key above to authorize scripts with bearer auth.</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <div className="table-wrap">
           <Table className="data-table">
