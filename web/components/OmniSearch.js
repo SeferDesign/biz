@@ -1,10 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { browserApiBaseUrl } from '../lib/api.js';
-import { Badge } from './ui/badge.js';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandShortcut } from './ui/command.js';
 
 export default function OmniSearch() {
   const router = useRouter();
@@ -15,7 +14,6 @@ export default function OmniSearch() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [open, setOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(-1);
   const canSearch = query.trim().length >= 2;
 
   useEffect(() => {
@@ -24,7 +22,6 @@ export default function OmniSearch() {
       setResults([]);
       setLoading(false);
       setError('');
-      setActiveIndex(-1);
       return undefined;
     }
 
@@ -37,12 +34,10 @@ export default function OmniSearch() {
         const body = await response.json().catch(() => null);
         if (!response.ok) throw new Error(body?.error || `Search failed (${response.status})`);
         setResults(body.results || []);
-        setOpen(true);
       } catch (cause) {
         if (cause.name !== 'AbortError') {
           setResults([]);
           setError('Search is temporarily unavailable.');
-          setOpen(true);
         }
       } finally {
         if (!controller.signal.aborted) setLoading(false);
@@ -71,7 +66,6 @@ export default function OmniSearch() {
       if (document.activeElement === input) {
         input.blur();
         setOpen(false);
-        setActiveIndex(-1);
       } else {
         input?.focus();
         input?.select();
@@ -81,81 +75,59 @@ export default function OmniSearch() {
     return () => document.removeEventListener('keydown', toggleShortcut);
   }, []);
 
-  function onKeyDown(event) {
-    if (event.key === 'Escape') {
-      setOpen(false);
-      setActiveIndex(-1);
-    } else if (event.key === 'ArrowDown' && results.length) {
-      event.preventDefault();
-      setOpen(true);
-      setActiveIndex((index) => (index + 1) % results.length);
-    } else if (event.key === 'ArrowUp' && results.length) {
-      event.preventDefault();
-      setOpen(true);
-      setActiveIndex((index) => (index <= 0 ? results.length - 1 : index - 1));
-    } else if (event.key === 'Enter' && activeIndex >= 0 && results[activeIndex]) {
-      event.preventDefault();
-      router.push(results[activeIndex].href);
-      setOpen(false);
-    }
-  }
-
   const showResults = open && canSearch;
 
   return (
-    <div className="omni-search" ref={rootRef}>
-      <label className="omni-search-field">
-        <span className="search-mark" aria-hidden="true">⌕</span>
-        <input
+    <div className="relative mx-auto h-11 w-full min-w-0 max-w-lg" ref={rootRef}>
+      <Command className="absolute inset-x-0 top-0 z-50 h-auto border border-border pb-2 shadow-sm" shouldFilter={false} loop onKeyDown={(event) => {
+        if (event.key === 'Escape') setOpen(false);
+        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') setOpen(true);
+      }}>
+        <CommandInput
           ref={inputRef}
-          type="search"
-          role="combobox"
           aria-label="Search records"
-          aria-autocomplete="list"
           aria-expanded={showResults}
-          aria-controls="omni-search-results"
-          aria-activedescendant={activeIndex >= 0 ? `omni-result-${activeIndex}` : undefined}
           aria-keyshortcuts="Meta+K"
           placeholder="Search records..."
           value={query}
           onFocus={() => { if (canSearch) setOpen(true); }}
-          onChange={(event) => { setQuery(event.target.value); setOpen(true); }}
-          onKeyDown={onKeyDown}
-        />
-        {loading ? <span className="search-loading" aria-label="Searching" /> : <kbd className="search-shortcut" aria-hidden="true">⌘K</kbd>}
-      </label>
-      {showResults && (
-        <div className="omni-results" id="omni-search-results" role="listbox" aria-label="Search results">
-          {loading ? (
-            <div className="omni-message">Searching records...</div>
-          ) : error ? (
-            <div className="omni-message omni-error" role="status">{error}</div>
+          onValueChange={(value) => {
+            setQuery(value);
+            setResults([]);
+            setLoading(value.trim().length >= 2);
+            setError('');
+            setOpen(true);
+          }}
+        >
+          <CommandShortcut><kbd aria-hidden="true">⌘K</kbd></CommandShortcut>
+        </CommandInput>
+        <CommandList hidden={!showResults} label="Search results">
+          {showResults && (loading || error ? (
+            <div className="py-6 text-center text-sm" role="status">{loading ? 'Searching records...' : error}</div>
           ) : results.length ? (
-            <>
-              <div className="omni-results-heading">{results.length} matching records</div>
-              {results.map((item, index) => (
-                <Link
-                  className={`omni-result${index === activeIndex ? ' is-active' : ''}`}
-                  href={item.href}
-                  id={`omni-result-${index}`}
+            <CommandGroup heading={`${results.length} matching records`}>
+              {results.map((item) => (
+                <CommandItem
                   key={`${item.type}-${item.href}-${item.title}`}
-                  role="option"
-                  aria-selected={index === activeIndex}
-                  onClick={() => setOpen(false)}
+                  value={`${item.type}-${item.href}-${item.title}`}
+                  onSelect={() => {
+                    setOpen(false);
+                    router.push(item.href);
+                  }}
                 >
-                  <span className="omni-result-copy">
-                    <strong>{item.title}</strong>
-                    {item.detail && <span>{item.detail}</span>}
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate">{item.title}</span>
+                    {item.detail && <span className="block truncate text-muted-foreground">{item.detail}</span>}
                   </span>
-                  <Badge className="px-2 py-1 text-[9px] uppercase" variant="secondary">{item.type}</Badge>
-                </Link>
+                  <CommandShortcut>{item.type}</CommandShortcut>
+                </CommandItem>
               ))}
-            </>
+            </CommandGroup>
           ) : (
-            <div className="omni-message">No matching records.</div>
-          )}
-        </div>
-      )}
+            <CommandEmpty>No matching records.</CommandEmpty>
+          ))}
+        </CommandList>
+      </Command>
     </div>
   );
 }
