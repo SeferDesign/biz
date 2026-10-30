@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { browserApiBaseUrl, formatDateTime } from '../lib/api.js';
 import { Button } from './ui/button.js';
 
 export default function InvoiceEmailPanel({ invoiceId, initialSends = [], historyError = '' }) {
+  const router = useRouter();
   const [sends, setSends] = useState(initialSends);
   const [error, setError] = useState(historyError);
   const [sending, setSending] = useState(false);
@@ -22,6 +24,7 @@ export default function InvoiceEmailPanel({ invoiceId, initialSends = [], histor
       }
       if (body?.email_send) setSends((current) => [body.email_send, ...current]);
       setSending(false);
+      router.refresh();
     } catch {
       setError('Could not reach the API. Check the API URL, CORS_ALLOWED_ORIGINS, and browser TLS trust.');
       setSending(false);

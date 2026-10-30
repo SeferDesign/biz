@@ -669,12 +669,36 @@ test('invoice, expense, and vendor endpoints return useful responses', async () 
   assert.equal((await request(app).get('/v1/invoices/999/email')).status, 404);
 });
 
+test('invoice emails mark drafts sent without changing sent or paid invoices', async () => {
+  for (const status of ['draft', 'sent', 'paid']) {
+    const store = createMemoryStore();
+    await store.updateInvoice(1, { status, paid: status === 'paid' });
+    let deliveries = 0;
+    const app = createTestApp({ store, sendInvoiceEmail: async () => {
+      deliveries += 1;
+      return { recipient: 'billing@acme.com' };
+    } });
+
+    const response = await request(app).post('/v1/invoices/1/email');
+    const invoice = await request(app).get('/v1/invoices/1');
+
+    assert.equal(response.status, 200);
+    assert.equal(invoice.body.status, status === 'draft' ? 'sent' : status);
+    assert.equal(Boolean(invoice.body.paid), status === 'paid');
+    assert.equal(deliveries, 1);
+    assert.equal((await request(app).get('/v1/invoices/1/email-sends')).body.length, 1);
+  }
+});
+
 test('invoice email failures are reported instead of claiming delivery', async () => {
-  const app = createTestApp({ sendInvoiceEmail: async () => { throw new Error('SMTP unavailable'); } });
+  const store = createMemoryStore();
+  await store.updateInvoice(1, { status: 'draft', paid: false });
+  const app = createTestApp({ store, sendInvoiceEmail: async () => { throw new Error('SMTP unavailable'); } });
   const response = await request(app).post('/v1/invoices/1/email');
 
   assert.equal(response.status, 502);
   assert.deepEqual(response.body, { error: 'SMTP unavailable' });
+  assert.equal((await request(app).get('/v1/invoices/1')).body.status, 'draft');
   assert.deepEqual((await request(app).get('/v1/invoices/1/email-sends')).body, []);
 });
 

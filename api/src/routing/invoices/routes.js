@@ -151,6 +151,7 @@ export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoic
       const result = await sendInvoiceEmail({ invoice, client, lines });
       const recipient = result?.recipient || client.email || client.email_accounting;
       const emailSend = await store.recordInvoiceEmailSend(invoice.id, recipient);
+      if (invoice.status === 'draft') await store.updateInvoice(invoice.id, { status: 'sent' });
       return res.json({
         invoice_id: invoice.id,
         status: 'sent',
