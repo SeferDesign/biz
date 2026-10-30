@@ -38,3 +38,23 @@ for (const [label, value] of [['missing', undefined], ['empty', ''], ['blank', '
     await assert.rejects(import(`../lib/api.js?${label}`), /NEXT_PUBLIC_API_URL must be configured/);
   });
 }
+
+test('expense and invoice sorting is newest first, with invoice status as a secondary sort', async (context) => {
+  configureEnvironment(context, { NEXT_PUBLIC_API_URL: 'https://example.test' });
+  const { newestExpensesFirst, newestInvoicesFirst } = await import('../lib/api.js?sorting');
+
+  const expenses = [
+    { id: 1, date: '2026-01-01' },
+    { id: 2, date: '2026-01-03' },
+    { id: 3, date: '2026-01-02' }
+  ];
+  assert.deepEqual(expenses.toSorted(newestExpensesFirst).map((expense) => expense.id), [2, 3, 1]);
+
+  const invoices = [
+    { id: 1, date: '2026-01-03', status: 'paid' },
+    { id: 2, date: '2026-01-03', status: 'sent' },
+    { id: 3, date: '2026-01-03', status: 'draft' },
+    { id: 4, date: '2026-01-04', status: 'paid' }
+  ];
+  assert.deepEqual(invoices.toSorted(newestInvoicesFirst).map((invoice) => invoice.id), [4, 3, 2, 1]);
+});

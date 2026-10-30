@@ -9,6 +9,7 @@ import { expenseAccountOptions } from '../lib/record-fields.js';
 import { recordsPerPage } from '../lib/api.js';
 import Notice from './Notice.js';
 import { DatePicker } from './ui/date-picker.js';
+import { Combobox } from './ui/combobox.js';
 
 const blankExpense = () => ({ name: '', vendor_id: '', date: '', cost: '', account: '', notes: '' });
 
@@ -52,18 +53,27 @@ function SheetCell({ label, type = 'text', value, onChange, vendors, step }) {
   }
   if (type === 'vendor') {
     return (
-      <select aria-label={label} value={value} onChange={(event) => onChange(event.target.value)}>
-        <option value="">No vendor</option>
-        {vendors.map((vendor) => <option key={vendor.id} value={vendor.id}>{vendor.name}</option>)}
-      </select>
+      <Combobox
+        aria-label={label}
+        size="sm"
+        value={value}
+        onValueChange={onChange}
+        placeholder="No vendor"
+        searchPlaceholder="Search vendors..."
+        options={[{ value: '', label: 'No vendor' }, ...vendors.map((vendor) => ({ value: vendor.id, label: vendor.name }))]}
+      />
     );
   }
   if (type === 'account') {
     return (
-      <select aria-label={label} value={value} onChange={(event) => onChange(event.target.value)}>
-        <option value="">No account</option>
-        {expenseAccountOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-      </select>
+      <Combobox
+        aria-label={label}
+        size="sm"
+        value={value}
+        onValueChange={onChange}
+        placeholder="No account"
+        options={[{ value: '', label: 'No account' }, ...expenseAccountOptions]}
+      />
     );
   }
   return <input aria-label={label} type={type} step={step} min={type === 'number' ? '0' : undefined} value={value} onChange={(event) => onChange(event.target.value)} />;

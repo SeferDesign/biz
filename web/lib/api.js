@@ -57,6 +57,16 @@ export function invoiceStatus(invoice) {
   return status !== 'paid' && invoice.payment_status === 'processing' ? 'processing' : status;
 }
 
-export function newestInvoicesFirst(left, right) {
+export function newestExpensesFirst(left, right) {
   return String(right.date || '').localeCompare(String(left.date || '')) || Number(right.id) - Number(left.id);
+}
+
+export function newestInvoicesFirst(left, right) {
+  const dateOrder = String(right.date || '').localeCompare(String(left.date || ''));
+  if (dateOrder) return dateOrder;
+
+  const statusOrder = { draft: 0, sent: 1, paid: 2 };
+  const leftStatus = String(left.status || (left.paid ? 'paid' : 'draft')).toLowerCase();
+  const rightStatus = String(right.status || (right.paid ? 'paid' : 'draft')).toLowerCase();
+  return (statusOrder[leftStatus] ?? 3) - (statusOrder[rightStatus] ?? 3) || Number(right.id) - Number(left.id);
 }

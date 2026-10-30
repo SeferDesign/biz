@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { ResourcePage } from '../../components/ResourcePage.js';
-import { formatDate, formatMoney, parsePage } from '../../lib/api.js';
+import { formatDate, formatMoney, newestExpensesFirst, parsePage } from '../../lib/api.js';
 import { getApiData } from '../../lib/api-server.js';
+import { Button } from '../../components/ui/button.js';
+import { ButtonGroup } from '../../components/ui/button-group.js';
 
 export default async function ExpensesPage({ searchParams }) {
   const params = await searchParams;
@@ -16,14 +18,16 @@ export default async function ExpensesPage({ searchParams }) {
   return (
     <>
       <nav className="filter-row" aria-label="Expense date filter">
-        <Link className="filter-link" href="/expenses" aria-current={!filter ? 'page' : undefined}>Recent</Link>
-        <Link className="filter-link" href="/expenses?inactive=true" aria-current={filter === 'inactive' ? 'page' : undefined}>Past</Link>
-        <Link className="filter-link" href="/expenses?future=true" aria-current={filter === 'future' ? 'page' : undefined}>Upcoming</Link>
-        <Link className="filter-link" href="/expenses/bulk">Spreadsheet</Link>
+        <ButtonGroup aria-label="Expense filters">
+          <Button asChild size="sm" variant={!filter ? 'default' : 'outline'}><Link href="/expenses" aria-current={!filter ? 'page' : undefined}>Recent</Link></Button>
+          <Button asChild size="sm" variant={filter === 'inactive' ? 'default' : 'outline'}><Link href="/expenses?inactive=true" aria-current={filter === 'inactive' ? 'page' : undefined}>Past</Link></Button>
+          <Button asChild size="sm" variant={filter === 'future' ? 'default' : 'outline'}><Link href="/expenses?future=true" aria-current={filter === 'future' ? 'page' : undefined}>Upcoming</Link></Button>
+          <Button asChild size="sm" variant="outline"><Link href="/expenses/bulk">Spreadsheet</Link></Button>
+        </ButtonGroup>
       </nav>
       <ResourcePage
         title="Expenses"
-        data={expenseResult.data}
+        data={expenseResult.data?.toSorted(newestExpensesFirst)}
         error={expenseResult.error || vendorResult.error}
         countLabel="expenses"
         actionHref="/expenses/new"

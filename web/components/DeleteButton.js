@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from './ui/button.js';
+import { ButtonGroupText } from './ui/button-group.js';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,7 +41,7 @@ export default function DeleteButton({ endpoint, returnTo, label = 'Delete recor
   }
 
   return (
-    <div className="delete-action">
+    <>
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <Button variant="destructive" type="button" disabled={deleting}>{label}</Button>
@@ -56,7 +57,7 @@ export default function DeleteButton({ endpoint, returnTo, label = 'Delete recor
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      {error && <span className="action-error" role="alert">{error}</span>}
-    </div>
+      {error && <ButtonGroupText className="action-error whitespace-normal" role="alert">{error}</ButtonGroupText>}
+    </>
   );
 }

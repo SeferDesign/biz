@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from './ui/button.js';
 import { Input } from './ui/input.js';
 import { Textarea } from './ui/textarea.js';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select.js';
+import { Combobox } from './ui/combobox.js';
 import { DatePicker } from './ui/date-picker.js';
 
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -81,6 +81,15 @@ export default function RecordForm({ title, description, fields, initialValues =
   async function submit(event) {
     event.preventDefault();
     setError('');
+    const missingOption = fields.find((field) => (
+      field.required
+      && ['select', 'relation'].includes(field.type)
+      && String(values[field.name] ?? '').trim() === ''
+    ));
+    if (missingOption) {
+      setError(`${missingOption.label} is required.`);
+      return;
+    }
     setSaving(true);
     try {
       const lines = lineItemsEnabled ? getLinePayload() : [];
@@ -157,20 +166,18 @@ export default function RecordForm({ title, description, fields, initialValues =
             {field.type === 'textarea' ? (
               <Textarea name={field.name} rows={field.rows || 3} value={values[field.name]} required={field.required} onChange={(event) => setField(field.name, event.target.value)} />
             ) : field.type === 'select' || field.type === 'relation' ? (
-              <Select
+              <Combobox
                 name={field.name}
                 required={field.required}
-                value={values[field.name] === '' ? '__unset__' : String(values[field.name])}
-                onValueChange={(value) => setField(field.name, value === '__unset__' ? '' : value)}
-              >
-                <SelectTrigger aria-label={field.label}>
-                  <SelectValue placeholder="None" />
-                </SelectTrigger>
-                <SelectContent>
-                  {!field.required && <SelectItem value="__unset__">None</SelectItem>}
-                  {(field.options || []).map((option) => <SelectItem key={option.value} value={String(option.value)}>{option.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
+                aria-label={field.label}
+                value={String(values[field.name] ?? '')}
+                onValueChange={(value) => setField(field.name, value)}
+                placeholder="None"
+                options={[
+                  ...(!field.required ? [{ value: '', label: 'None' }] : []),
+                  ...(field.options || [])
+                ]}
+              />
             ) : field.type === 'date' ? (
               <DatePicker
                 name={field.name}

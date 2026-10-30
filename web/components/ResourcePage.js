@@ -49,7 +49,7 @@ export function ResourcePage({ title, description, data, error, columns, countLa
         <div className="table-wrap">
           <Table className="data-table">
             <TableHeader>
-              <TableRow>{columns.map((column) => <TableHead key={column.key}>{column.label}</TableHead>)}</TableRow>
+              <TableRow>{columns.map((column) => <TableHead className={column.className?.split(/\s+/).includes('numeric-cell') ? 'numeric-cell' : undefined} key={column.key}>{column.label}</TableHead>)}</TableRow>
             </TableHeader>
             <TableBody>
               {visibleRecords.map((record) => (

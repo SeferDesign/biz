@@ -83,11 +83,6 @@ export default async function Home() {
 
   return (
     <>
-      <div className="page-heading">
-        <div>
-          <h1>Overview</h1>
-        </div>
-      </div>
 
       {error && <Notice title="Some data is unavailable">{error}</Notice>}
 
@@ -98,10 +93,10 @@ export default async function Home() {
             <TableHeader>
               <TableRow>
                 <TableHead scope="col" />
-                <TableHead scope="col">Goal</TableHead>
-                <TableHead scope="col">Revenue</TableHead>
-                <TableHead scope="col">Expenses</TableHead>
-                <TableHead scope="col">Net</TableHead>
+                <TableHead className="numeric-cell" scope="col">Goal</TableHead>
+                <TableHead className="numeric-cell" scope="col">Revenue</TableHead>
+                <TableHead className="numeric-cell" scope="col">Expenses</TableHead>
+                <TableHead className="numeric-cell" scope="col">Net</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

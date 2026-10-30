@@ -7,6 +7,7 @@ import { CircleCheck, Copy, Mail } from 'lucide-react';
 import { browserApiBaseUrl, invoiceStatus } from '../lib/api.js';
 import { StatusBadge } from './ResourcePage.js';
 import { Button } from './ui/button.js';
+import { ButtonGroup } from './ui/button-group.js';
 
 export default function InvoiceActions({ invoice, lines, linesAvailable = true, compact = false }) {
   const router = useRouter();
@@ -94,9 +95,11 @@ export default function InvoiceActions({ invoice, lines, linesAvailable = true, 
 
   return <>
     <StatusBadge status={status} />
-    {status === 'draft' && <Button type="button" disabled={Boolean(busy)} onClick={() => changeStatus('sent')}>{busy === 'sent' ? 'Sending...' : 'Send'}</Button>}
-    {status !== 'paid' && !invoice.paid && <Button variant="outline" type="button" disabled={Boolean(busy)} onClick={() => changeStatus('paid')}>{busy === 'paid' ? 'Updating...' : 'Mark as paid'}</Button>}
-    <Button variant="outline" type="button" disabled={Boolean(busy) || !linesAvailable || duplicateId !== null} onClick={duplicate}>{busy === 'duplicate' ? 'Duplicating...' : 'Duplicate'}</Button>
+    <ButtonGroup aria-label="Invoice actions">
+      {status === 'draft' && <Button type="button" disabled={Boolean(busy)} onClick={() => changeStatus('sent')}>{busy === 'sent' ? 'Sending...' : 'Send'}</Button>}
+      {status !== 'paid' && !invoice.paid && <Button variant="outline" type="button" disabled={Boolean(busy)} onClick={() => changeStatus('paid')}>{busy === 'paid' ? 'Updating...' : 'Mark as paid'}</Button>}
+      <Button variant="outline" type="button" disabled={Boolean(busy) || !linesAvailable || duplicateId !== null} onClick={duplicate}>{busy === 'duplicate' ? 'Duplicating...' : 'Duplicate'}</Button>
+    </ButtonGroup>
     {error && <span className="action-error" role="alert">{error}{duplicateId !== null && <> <Link href={`/invoices/${duplicateId}/edit`}>Open new draft</Link></>}</span>}
   </>;
 }

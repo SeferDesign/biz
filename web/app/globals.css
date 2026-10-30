@@ -151,7 +151,6 @@ button, input { font-family: inherit; }
   justify-content: space-between;
   gap: 22px;
   padding: 0 44px;
-  border-bottom: 1px solid var(--line);
   background: #fff;
 }
 .topbar-section { color: var(--forest-soft); font-size: 10px; font-weight: 600; letter-spacing: 0; }
@@ -180,6 +179,7 @@ h2 { font-family: var(--font-sans), "Helvetica Neue", "Segoe UI", sans-serif; fo
 .table-link { color: var(--forest-soft); }
 .table-link:hover { color: var(--coral); }
 .numeric-cell { text-align: right; white-space: nowrap; font-family: monospace, monospace; }
+.data-table th.numeric-cell { font-family: inherit; }
 .muted-cell { color: var(--muted); }
 .invoice-row-actions { display: flex; align-items: center; gap: 4px; }
 .invoice-row-actions .action-error { min-width: 150px; }
@@ -258,9 +258,7 @@ h2 { font-family: var(--font-sans), "Helvetica Neue", "Segoe UI", sans-serif; fo
 .client-link-panel { margin-top: 25px; }
 .copy-field { display: flex; gap: 8px; }
 .copy-field [data-slot="input"] { flex: 1; min-width: 0; }
-.filter-row { display: flex; flex-wrap: wrap; gap: 8px; margin: -9px 0 19px; }
-.filter-link { padding: 7px 11px; border: 1px solid var(--line); color: var(--muted); background: var(--white); font-size: 11px; }
-.filter-link[aria-current="page"] { border-color: var(--forest); color: var(--white); background: var(--forest); }
+.filter-row { margin: -9px 0 19px; }
 .pagination { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; }
 .pagination-status { color: var(--muted); font-size: 11px; text-align: center; }
 .inline-link { color: var(--forest-soft); text-decoration: underline; text-decoration-color: #a9a9a9; text-underline-offset: 3px; }
@@ -283,13 +281,12 @@ h2 { font-family: var(--font-sans), "Helvetica Neue", "Segoe UI", sans-serif; fo
 .spreadsheet-table th:first-child:nth-last-child(7) { width: 66px; }
 .spreadsheet-table td { padding: 5px; }
 .spreadsheet-table .sheet-id { color: var(--muted); text-align: center; font-size: 11px; }
-.spreadsheet-table input:not([data-slot="input"]), .spreadsheet-table select { display: block; width: 100%; min-width: 0; height: 35px; padding: 6px 8px; border: 1px solid transparent; color: var(--ink); background: transparent; font: inherit; font-size: 12px; }
-.spreadsheet-table input:focus:not([data-slot="input"]), .spreadsheet-table select:focus { outline: 2px solid #8f8f8f; outline-offset: -1px; border-color: #8f8f8f; background: #fff; }
+.spreadsheet-table input:not([data-slot="input"]) { display: block; width: 100%; min-width: 0; height: 35px; padding: 6px 8px; border: 1px solid transparent; color: var(--ink); background: transparent; font: inherit; font-size: 12px; }
+.spreadsheet-table input:focus:not([data-slot="input"]) { outline: 2px solid #8f8f8f; outline-offset: -1px; border-color: #8f8f8f; background: #fff; }
 .spreadsheet-table input[type="number"] { text-align: right; }
 .sheet-add-action { justify-content: end; margin-top: 13px; }
 .sheet-notice { margin-bottom: 18px; }
 .detail-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; }
-.delete-action { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; }
 .action-error, .form-error { color: #a94833; font-size: 12px; }
 .editor-section { max-width: 840px; }
 .record-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; padding: 24px; border: 1px solid var(--line); background: var(--white); box-shadow: var(--shadow); }
