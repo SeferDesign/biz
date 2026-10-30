@@ -13,7 +13,10 @@ const instrumentSans = Instrument_Sans({
 
 export const metadata = {
   title: `${companyInfo.name} ${companyInfo.acronym} Admin`,
-  description: ''
+  description: '',
+  icons: {
+    icon: '/images/favicon.png'
+  }
 };
 
 export default async function RootLayout({ children }) {
