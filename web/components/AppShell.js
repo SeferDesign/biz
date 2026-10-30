@@ -17,6 +17,7 @@ import {
 import OmniSearch from './OmniSearch.js';
 import Brand from './Brand.js';
 import { Button } from './ui/button.js';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar.js';
 
 const overviewNavigation = [
   { href: '/', label: 'Overview', icon: House },
@@ -69,7 +70,7 @@ function navGroup(pathname, label, items) {
   );
 }
 
-export default function AppShell({ children, user }) {
+export default function AppShell({ children, user, avatarUrl }) {
   const pathname = usePathname();
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
@@ -91,7 +92,10 @@ export default function AppShell({ children, user }) {
     .map((value) => (typeof value === 'string' ? value.trim() : ''))
     .filter(Boolean)
     .join(' ');
-  const avatarInitial = fullName.charAt(0).toUpperCase() || user?.email?.trim().charAt(0).toUpperCase() || '?';
+  const avatarInitials = [user.first_name, user.last_name]
+    .map((value) => (typeof value === 'string' ? value.trim().charAt(0) : ''))
+    .join('')
+    .toUpperCase() || user.email.trim().charAt(0).toUpperCase() || '?';
 
   async function signOut() {
     setSigningOut(true);
@@ -118,7 +122,10 @@ export default function AppShell({ children, user }) {
         <div className="sidebar-foot">
           <div className="sidebar-account">
             <Link className={`account-link${accountActive ? ' is-active' : ''}`} href={accountHref} aria-current={accountActive ? 'page' : undefined}>
-              <span className="account-avatar" aria-hidden="true">{avatarInitial}</span>
+              <Avatar aria-hidden="true">
+                <AvatarImage src={avatarUrl} alt="" />
+                <AvatarFallback>{avatarInitials}</AvatarFallback>
+              </Avatar>
               <span className="account-copy">
                 <strong>{fullName || 'Account'}</strong>
                 <span>{user?.email || 'Sign in to your account'}</span>

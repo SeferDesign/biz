@@ -7,6 +7,7 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--secondary);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
@@ -137,7 +138,6 @@ button, input { font-family: inherit; }
 .sidebar-account { display: grid; gap: 5px; }
 .account-link { display: flex; min-width: 0; align-items: center; gap: 10px; padding: 6px; border-radius: 6px; color: var(--ink); }
 .account-link:hover, .account-link.is-active { background: #f0f0f1; }
-.account-avatar { display: grid; width: 34px; height: 34px; flex: 0 0 auto; place-items: center; border-radius: 6px; color: #3f3f46; background: #e4e4e7; font-family: inherit; font-size: 14px; font-weight: 500; }
 .account-copy { display: grid; min-width: 0; gap: 2px; }
 .account-copy strong { font-size: 12px; font-weight: 500; }
 .account-copy > span { overflow: hidden; color: var(--muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
@@ -399,7 +399,6 @@ h2 { font-family: var(--font-sans), "Helvetica Neue", "Segoe UI", sans-serif; fo
   .sidebar-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 0; padding: 10px 3px 0; }
   .sidebar-account { display: flex; min-width: 0; flex: 1; align-items: center; justify-content: space-between; gap: 8px; }
   .account-link { min-width: 0; padding: 0; }
-  .account-avatar { width: 30px; height: 30px; }
   .sidebar-sign-out { min-height: 32px; padding: 0 8px; }
   .primary-nav { display: flex; gap: 3px; }
   .nav-link { min-height: 34px; flex: 0 0 auto; gap: 6px; padding: 0 8px; font-size: 11px; }
