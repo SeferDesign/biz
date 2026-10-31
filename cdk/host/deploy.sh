@@ -21,6 +21,9 @@ cd /opt/biz
 umask 077
 mkdir -p /opt/biz/backup-status
 chmod 755 /opt/biz/backup-status
+mkdir -p /opt/biz/backup-trigger
+chown 1000:1000 /opt/biz/backup-trigger
+chmod 700 /opt/biz/backup-trigger
 if [[ ! -f /opt/biz/backup-status/status.json ]]; then
 	printf '%s\n' '{"state":"never","last_attempt_at":null,"last_successful_at":null,"last_successful_key":null,"last_error":null}' > /opt/biz/backup-status/status.json
 fi
@@ -104,6 +107,7 @@ jq -r \
 		BUILD_ENV: "prod",
 		PORT: "3000",
 		BACKUP_STATUS_FILE: "/var/lib/biz-backup/status.json",
+		BACKUP_TRIGGER_FILE: "/var/lib/biz-backup-trigger/request",
 		WAIT_FOR: "biz-mysql:3306",
 		WAIT_FOR_TIMEOUT: "180",
 		DATABASE_URL: "mysql://biz:\(.MYSQL_PASSWORD | @uri)@biz-mysql:3306/biz_production",
@@ -175,7 +179,8 @@ ensure_container biz-mysql "$mysql_image" /opt/biz/mysql.env \
 	--character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci \
 	--innodb-buffer-pool-size=64M --performance-schema=OFF --max-connections=30 --skip-name-resolve
 ensure_container biz-api "$api_image" /opt/biz/api.env --env-file api.env \
-	-v /opt/biz/backup-status:/var/lib/biz-backup:ro "$api_image"
+	-v /opt/biz/backup-status:/var/lib/biz-backup:ro \
+	-v /opt/biz/backup-trigger:/var/lib/biz-backup-trigger:rw "$api_image"
 ensure_container biz-web "$web_image" /opt/biz/web.env --env-file web.env --init "$web_image"
 ensure_container biz-caddy caddy:2-alpine /opt/biz/Caddyfile \
 	-p 80:80 -p 443:443 -p 443:443/udp \
@@ -203,8 +208,30 @@ Persistent=true
 [Install]
 WantedBy=timers.target
 EOF
+cat >/etc/systemd/system/biz-backup-trigger.service <<'EOF'
+[Unit]
+Description=Run a requested biz MySQL backup
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/systemctl start biz-backup.service
+ExecStopPost=/usr/bin/rm -f /opt/biz/backup-trigger/request
+EOF
+cat >/etc/systemd/system/biz-backup-trigger.path <<'EOF'
+[Unit]
+Description=Watch for a manually requested biz backup
+
+[Path]
+PathExists=/opt/biz/backup-trigger/request
+Unit=biz-backup-trigger.service
+
+[Install]
+WantedBy=multi-user.target
+EOF
 systemctl daemon-reload
-systemctl enable --now biz-backup.timer >/dev/null
+systemctl enable --now biz-backup.timer biz-backup-trigger.path >/dev/null
 
 cat >/etc/systemd/system/biz-summary-weekly.service <<EOF
 [Unit]

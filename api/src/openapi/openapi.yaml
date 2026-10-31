@@ -16,6 +16,18 @@ paths:
           description: Backup attempt and last successful backup metadata
         '500':
           description: Backup status could not be read
+  /system/backup:
+    post:
+      summary: Queue a manual host database backup
+      responses:
+        '202':
+          description: Backup request queued
+        '401':
+          description: Authentication required
+        '409':
+          description: A backup is already queued or running
+        '503':
+          description: Manual backup trigger is not configured or unavailable
   /invoice-templates:
     get:
       summary: List invoice templates, optionally including global and selected-client templates

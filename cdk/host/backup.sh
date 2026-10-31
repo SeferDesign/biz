@@ -36,6 +36,7 @@ record_failure() {
 }
 
 trap 'record_failure "$?"' ERR
+write_status running "$attempt_at" "$last_successful_at" "$last_successful_key" ''
 key="mysql/biz-$(date -u +%Y-%m-%dT%H%M%SZ).sql.gz"
 docker exec biz-mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysqldump -uroot --single-transaction --routines --triggers --set-gtid-purged=OFF --databases "$MYSQL_DATABASE"' |
 	gzip -9 |

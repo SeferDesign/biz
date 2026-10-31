@@ -124,6 +124,31 @@ test('backup status distinguishes local unconfigured and first-deploy pending st
   assert.deepEqual(pending.body, { configured: true, state: 'pending' });
 });
 
+test('manual backup requests are authenticated, queued once, and rejected while running', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'biz-backup-trigger-'));
+  const statusFile = join(directory, 'status.json');
+  const triggerFile = join(directory, 'request');
+  try {
+    await writeFile(statusFile, JSON.stringify({ state: 'running' }));
+    const app = createTestApp({ backupStatusFile: statusFile, backupTriggerFile: triggerFile });
+
+    assert.equal((await supertest(app).post('/v1/system/backup')).status, 401);
+    assert.equal((await request(app).post('/v1/system/backup')).status, 409);
+
+    await writeFile(statusFile, JSON.stringify({ state: 'success' }));
+    const queued = await request(app).post('/v1/system/backup');
+    assert.equal(queued.status, 202);
+    assert.deepEqual(queued.body, { state: 'queued' });
+    assert.match(await readFile(triggerFile, 'utf8'), /^\d{4}-\d{2}-\d{2}T/);
+    assert.equal((await request(app).post('/v1/system/backup')).status, 409);
+
+    const unconfigured = await request(createTestApp()).post('/v1/system/backup');
+    assert.equal(unconfigured.status, 503);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
 test('Swagger is unavailable outside local builds while API routes remain authenticated', async () => {
   const app = createTestApp({ buildEnv: 'prod' });
 

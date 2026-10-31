@@ -1,16 +1,18 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { RefreshCw } from 'lucide-react';
+import { Play, RefreshCw } from 'lucide-react';
 import { Button } from './ui/button.js';
 import { Badge } from './ui/badge.js';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card.js';
 import { Alert, AlertDescription } from './ui/alert.js';
 import { Separator } from './ui/separator.js';
+import { browserApiBaseUrl } from '../lib/api.js';
 
 const stateLabels = {
   success: 'Successful',
   failed: 'Failed',
+  running: 'Running',
   never: 'Not run yet',
   pending: 'Waiting for first backup',
   unavailable: 'Unavailable'
@@ -19,6 +21,7 @@ const stateLabels = {
 const stateVariants = {
   success: 'default',
   failed: 'destructive',
+  running: 'secondary',
   never: 'outline',
   pending: 'secondary',
   unavailable: 'secondary'
@@ -36,7 +39,36 @@ function formatDateTime(value) {
 
 export default function BackupStatus({ status }) {
   const router = useRouter();
+  const [requesting, setRequesting] = useState(false);
+  const [requestQueued, setRequestQueued] = useState(false);
+  const [requestMessage, setRequestMessage] = useState('');
+  const [requestError, setRequestError] = useState('');
   const state = stateLabels[status?.state] ? status.state : 'unavailable';
+
+  async function triggerBackup() {
+    setRequesting(true);
+    setRequestMessage('');
+    setRequestError('');
+    try {
+      const response = await fetch(`${browserApiBaseUrl}/system/backup`, { method: 'POST', credentials: 'include' });
+      const body = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(body?.error || `Could not queue backup (${response.status})`);
+      setRequestQueued(true);
+      setRequestMessage('Backup request queued. Refresh status to check progress.');
+      router.refresh();
+    } catch (cause) {
+      setRequestError(cause.message || 'Could not queue backup. Try refreshing the status.');
+    } finally {
+      setRequesting(false);
+    }
+  }
+
+  function refreshStatus() {
+    setRequestQueued(false);
+    setRequestMessage('');
+    setRequestError('');
+    router.refresh();
+  }
 
   return (
     <section className="mx-auto w-full max-w-4xl space-y-6">
@@ -45,9 +77,15 @@ export default function BackupStatus({ status }) {
           <h1 className="text-2xl font-semibold">Backup status</h1>
           <p className="text-sm text-muted-foreground">Nightly MySQL backup uploads to encrypted S3 storage.</p>
         </div>
-        <Button type="button" variant="outline" size="icon" aria-label="Refresh backup status" title="Refresh backup status" onClick={() => router.refresh()}>
-          <RefreshCw className="size-4" aria-hidden="true" />
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button type="button" variant="outline" size="icon" aria-label="Refresh backup status" title="Refresh backup status" onClick={refreshStatus}>
+            <RefreshCw className="size-4" aria-hidden="true" />
+          </Button>
+          <Button type="button" disabled={!status?.configured || state === 'running' || requesting || requestQueued} onClick={triggerBackup}>
+            <Play className="size-4" aria-hidden="true" />
+            {requesting ? 'Queueing backup...' : state === 'running' ? 'Backup running' : requestQueued ? 'Backup queued' : 'Run backup now'}
+          </Button>
+        </div>
       </header>
       <Card>
         <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
@@ -77,6 +115,16 @@ export default function BackupStatus({ status }) {
               </dd>
             </div>
           </dl>
+          {requestMessage && (
+            <Alert className="mt-6">
+              <AlertDescription role="status">{requestMessage}</AlertDescription>
+            </Alert>
+          )}
+          {requestError && (
+            <Alert className="mt-6" variant="destructive">
+              <AlertDescription role="alert">{requestError}</AlertDescription>
+            </Alert>
+          )}
           {!status?.configured && (
             <Alert className="mt-6">
               <AlertDescription>Backup status is not configured in this environment.</AlertDescription>

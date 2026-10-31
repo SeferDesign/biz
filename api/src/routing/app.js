@@ -106,6 +106,7 @@ export function createApp({
   stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET,
   publicAppUrl = process.env.PUBLIC_APP_URL,
   backupStatusFile = process.env.BACKUP_STATUS_FILE,
+  backupTriggerFile = process.env.BACKUP_TRIGGER_FILE,
   sendPaymentNotification = deliverPaymentNotification,
   buildEnv = process.env.BUILD_ENV
 } = {}) {
@@ -161,7 +162,7 @@ export function createApp({
   }));
   app.use('/v1', clientsRouter(store));
   app.use('/v1', invoiceTemplatesRouter(store));
-  app.use('/v1', backupStatusRouter({ statusFile: backupStatusFile }));
+  app.use('/v1', backupStatusRouter({ statusFile: backupStatusFile, triggerFile: backupTriggerFile }));
   app.use('/v1', invoicesRouter(store, { sendInvoiceEmail }));
   app.use('/v1', stripeRouter(store, { stripe, appUrl: publicAppUrl, notify: sendPaymentNotification }));
   app.use('/v1', yearsRouter(store));
