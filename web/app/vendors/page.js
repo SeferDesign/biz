@@ -31,7 +31,7 @@ export default async function VendorsPage({ searchParams }) {
       columns={[
         { key: 'name', label: 'Vendor', render: (vendor) => <Link className="table-link" href={`/vendors/${vendor.id}`}>{vendor.name}</Link> },
         { key: 'category', label: 'Category' },
-        { key: 'expenses', label: 'Expense records', render: (vendor) => totalsByVendor.get(vendor.id)?.count || 0 },
+        { key: 'expenses', label: 'Expense records', className: 'numeric-cell', render: (vendor) => totalsByVendor.get(vendor.id)?.count || 0 },
         { key: 'amount', label: 'Recorded spend', className: 'numeric-cell', render: (vendor) => formatMoney(totalsByVendor.get(vendor.id)?.amount || 0) },
         {
           key: 'expense_action',

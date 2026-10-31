@@ -35,7 +35,7 @@ export default async function ExpensesPage({ searchParams }) {
         pageHref={filter ? `/expenses?${filter}=true` : '/expenses'}
         page={parsePage(params?.page)}
         columns={[
-          { key: 'date', label: 'Date', render: (expense) => <Link className="table-link" href={`/expenses/${expense.id}`}>{formatTableDate(expense.date)}</Link> },
+          { key: 'date', label: 'Date', className: 'date-cell', render: (expense) => <Link className="table-link" href={`/expenses/${expense.id}`}>{formatTableDate(expense.date)}</Link> },
           { key: 'name', label: 'Expense' },
           { key: 'vendor', label: 'Vendor', render: (expense) => vendorsById.get(expense.vendor_id)?.name || '-' },
           { key: 'account', label: 'Account' },

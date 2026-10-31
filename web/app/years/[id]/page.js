@@ -145,7 +145,7 @@ export default async function YearDetailPage({ params, searchParams }) {
             page={parsePage(query?.income_page)}
             columns={[
               { key: 'id', label: 'Invoice', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}`}>{invoice.display_id || invoice.display_id_number || invoice.id}</Link> },
-              { key: 'date', label: 'Payment date', render: (invoice) => formatTableDate(invoice.paiddate || invoice.date) },
+              { key: 'date', label: 'Payment date', className: 'date-cell', render: (invoice) => formatTableDate(invoice.paiddate || invoice.date) },
               { key: 'description', label: 'Description' },
               { key: 'cost', label: 'Amount', className: 'numeric-cell', render: (invoice) => formatMoney(invoice.cost ?? invoice.total, invoice.currency) }
             ]}
@@ -168,7 +168,7 @@ export default async function YearDetailPage({ params, searchParams }) {
             pageParam="expense_page"
             page={parsePage(query?.expense_page)}
             columns={[
-              { key: 'date', label: 'Date', render: (expense) => formatTableDate(expense.date) },
+              { key: 'date', label: 'Date', className: 'date-cell', render: (expense) => formatTableDate(expense.date) },
               { key: 'name', label: 'Expense' },
               { key: 'account', label: 'Account' },
               { key: 'cost', label: 'Cost', className: 'numeric-cell', render: (expense) => formatMoney(expense.cost) }

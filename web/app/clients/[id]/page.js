@@ -75,7 +75,7 @@ export default async function ClientDetailPage({ params, searchParams }) {
             page={parsePage(query?.page)}
             columns={[
               { key: 'id', label: 'Invoice', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}${accessTokenQuery}`}>{invoice.display_id || invoice.display_id_number || invoice.id}</Link> },
-              { key: 'date', label: 'Date', render: (invoice) => formatTableDate(invoice.date) },
+              { key: 'date', label: 'Date', className: 'date-cell', render: (invoice) => formatTableDate(invoice.date) },
               { key: 'description', label: 'Description' },
               { key: 'status', label: 'Status', render: (invoice) => <StatusBadge status={invoiceStatus(invoice)} /> },
               { key: 'cost', label: 'Amount', className: 'numeric-cell', render: (invoice) => formatMoney(invoice.cost ?? invoice.total, invoice.currency) }

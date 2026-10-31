@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+@media (width < 48rem) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+  textarea,
+  select,
+  [data-slot="select-trigger"] {
+    font-size: 1rem;
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -188,6 +197,15 @@
 
   .section-note {
     @apply text-sm text-muted-foreground;
+  }
+
+  .table-wrap {
+    @apply min-w-0 max-w-full overflow-x-auto;
+  }
+
+  .date-cell,
+  .numeric-cell {
+    @apply whitespace-nowrap;
   }
 
   .numeric-cell {

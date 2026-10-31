@@ -76,7 +76,7 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
       page={parsePage(query?.page)}
       columns={[
         { key: 'description', label: 'Description' },
-        { key: 'hours', label: 'Hours', render: (line) => line.hours ?? '-' },
+        { key: 'hours', label: 'Hours', className: 'numeric-cell', render: (line) => line.hours ?? '-' },
         { key: 'rate', label: 'Rate', className: 'numeric-cell', render: (line) => line.rate ? formatMoney(line.rate) : '-' },
         { key: 'total', label: 'Line total', className: 'numeric-cell', render: (line) => formatMoney(line.total ?? line.amount, invoice.currency) }
       ]}
@@ -160,14 +160,14 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
           <div className="section-heading"><h2>Online payments</h2><span className="section-note">{payments.length} via Stripe</span></div>
           <div className="table-wrap">
             <Table className="data-table">
-              <TableHeader><TableRow><TableHead>Submitted</TableHead><TableHead>Method</TableHead><TableHead>Status</TableHead><TableHead>Completed</TableHead><TableHead className="numeric-cell">Amount</TableHead></TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead className="date-cell">Submitted</TableHead><TableHead>Method</TableHead><TableHead>Status</TableHead><TableHead className="date-cell">Completed</TableHead><TableHead className="numeric-cell">Amount</TableHead></TableRow></TableHeader>
               <TableBody>
                 {payments.map((payment) => (
                   <TableRow key={payment.id}>
-                    <TableCell className="primary-cell">{formatDateTime(payment.submitted_at)}</TableCell>
+                    <TableCell className="primary-cell date-cell">{formatDateTime(payment.submitted_at)}</TableCell>
                     <TableCell>{payment.method === 'us_bank_account' ? 'ACH' : payment.method === 'card' ? 'Card' : payment.method || '-'}</TableCell>
                     <TableCell><StatusBadge status={payment.status} />{payment.failure_message && <span className="section-note"> {payment.failure_message}</span>}</TableCell>
-                    <TableCell>{formatDateTime(payment.completed_at)}</TableCell>
+                    <TableCell className="date-cell">{formatDateTime(payment.completed_at)}</TableCell>
                     <TableCell className="numeric-cell">{formatMoney(payment.amount, payment.currency)}</TableCell>
                   </TableRow>
                 ))}
