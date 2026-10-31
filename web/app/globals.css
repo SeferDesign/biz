@@ -201,4 +201,156 @@
   .detail-section {
     @apply mt-8 space-y-4;
   }
+
+  .sheet-hero {
+    @apply rounded-xl border border-border bg-gradient-to-r from-card via-card to-muted/40 p-4 shadow-sm sm:p-5;
+  }
+
+  .sheet-count {
+    @apply inline-flex items-center rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground;
+  }
+
+  .sheet-toolbar,
+  .sheet-add-action {
+    @apply mt-4 flex flex-col gap-3 rounded-xl border border-border bg-card p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between;
+  }
+
+  .sheet-state {
+    @apply text-sm text-muted-foreground;
+  }
+
+  .sheet-state.is-dirty {
+    @apply font-medium text-foreground;
+  }
+
+  .sheet-notice {
+    @apply mt-4;
+  }
+
+  .sheet-section {
+    @apply mt-8 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5;
+  }
+
+  .sheet-section .section-heading {
+    @apply mb-4;
+  }
+
+  .spreadsheet-wrap {
+    @apply overflow-x-auto rounded-lg border border-border bg-card shadow-sm;
+  }
+
+  .spreadsheet-table {
+    @apply min-w-[1040px] w-full min-w-full table-fixed border-collapse text-sm;
+  }
+
+  .spreadsheet-table th {
+    @apply border-b border-border bg-muted/60 px-4 py-3 text-left text-xs font-semibold tracking-wide text-muted-foreground uppercase;
+  }
+
+  .spreadsheet-table th.numeric-cell {
+    @apply text-end;
+  }
+
+  .spreadsheet-table td {
+    @apply border-b border-border/70 px-4 py-3 align-middle text-foreground;
+  }
+
+  .spreadsheet-table tbody tr:last-child td {
+    @apply border-b-0;
+  }
+
+  .spreadsheet-table tbody tr:hover {
+    @apply bg-muted/40;
+  }
+
+  .spreadsheet-table th:first-child {
+    @apply w-[7.5rem];
+  }
+
+  .spreadsheet-table th:nth-child(2) {
+    @apply w-[12.5rem];
+  }
+
+  .spreadsheet-table th:nth-child(3) {
+    @apply w-[12rem];
+  }
+
+  .spreadsheet-table th:nth-child(4) {
+    @apply w-[11rem];
+  }
+
+  .spreadsheet-table th:nth-child(5),
+  .spreadsheet-table th:nth-child(6) {
+    @apply w-[9rem];
+  }
+
+  .spreadsheet-table th:nth-child(7) {
+    @apply w-[14rem];
+  }
+
+  .spreadsheet-table th:first-child:nth-last-child(7) {
+    @apply w-16;
+  }
+
+  .spreadsheet-table td {
+    @apply p-1.5;
+  }
+
+  .spreadsheet-table .sheet-id {
+    @apply text-center text-xs text-muted-foreground;
+  }
+
+  .spreadsheet-table tr.is-dirty td {
+    @apply bg-amber-50;
+  }
+
+  .spreadsheet-table tr.is-filled td {
+    @apply bg-emerald-50/70;
+  }
+
+  .spreadsheet-table input {
+    @apply h-9 w-full min-w-0 rounded-md border border-transparent bg-background px-2.5 text-sm text-foreground transition-colors;
+  }
+
+  .spreadsheet-table input::placeholder {
+    @apply text-muted-foreground;
+  }
+
+  .spreadsheet-table input:focus-visible {
+    @apply border-ring ring-2 ring-ring/40 outline-none;
+  }
+
+  .spreadsheet-table input[type="number"] {
+    @apply text-right;
+  }
+
+  .spreadsheet-table td.numeric-cell input[type="number"] {
+    @apply font-mono tabular-nums;
+  }
+
+  .spreadsheet-table input[type="date"] {
+    @apply min-w-[8.5rem];
+  }
+
+  .spreadsheet-date-picker [data-slot="button"] {
+    @apply h-9;
+  }
+
+  .sheet-add-action {
+    @apply mt-4;
+  }
+
+  @media (max-width: 640px) {
+    .sheet-hero {
+      @apply rounded-lg p-4;
+    }
+
+    .sheet-section {
+      @apply rounded-lg p-3;
+    }
+
+    .spreadsheet-table {
+      @apply min-w-[980px];
+    }
+  }
 }

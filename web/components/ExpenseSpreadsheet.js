@@ -81,7 +81,7 @@ function SheetCell({ label, type = 'text', value, onChange, vendors, step }) {
   return <input aria-label={label} type={type} step={step} min={type === 'number' ? '0' : undefined} value={value} onChange={(event) => onChange(event.target.value)} />;
 }
 
-function ExpenseRow({ expense, vendors, label, onChange, showId = false }) {
+function ExpenseRow({ expense, vendors, label, onChange, showId = false, rowClassName = '' }) {
   const fields = [
     ['date', 'Date', 'date'],
     ['name', 'Expense', 'text'],
@@ -92,10 +92,10 @@ function ExpenseRow({ expense, vendors, label, onChange, showId = false }) {
   ];
 
   return (
-    <tr>
+    <tr className={rowClassName}>
       {showId && <td className="sheet-id">{expense.id}</td>}
       {fields.map(([field, title, type]) => (
-        <td key={field}>
+        <td key={field} className={field === 'cost' ? 'numeric-cell' : undefined}>
           <SheetCell
             label={`${label} ${title}`}
             type={type}
@@ -110,9 +110,9 @@ function ExpenseRow({ expense, vendors, label, onChange, showId = false }) {
   );
 }
 
-function SpreadsheetTable({ children, includeId = false }) {
+function SpreadsheetTable({ children, includeId = false, variant = 'existing' }) {
   return (
-    <div className="table-wrap spreadsheet-wrap">
+    <div className={`table-wrap spreadsheet-wrap spreadsheet-wrap-${variant}`}>
       <table className="data-table spreadsheet-table">
         <thead>
           <tr>
@@ -203,13 +203,16 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
 
   return (
     <>
-      <div className="page-heading">
-        <div><h1>Bulk expenses</h1><p className="page-description">Edit rows in place or enter several expenses, then save each batch.</p></div>
+      <div className="page-heading sheet-hero">
+        <div>
+          <h1>Bulk expenses</h1>
+          <p className="page-description">Edit existing rows and add new expenses in one workspace. Save updates as a batch when you are ready.</p>
+        </div>
         <span className="sheet-count">{expenses.length} records</span>
       </div>
 
       <div className="sheet-toolbar">
-        <span className="sheet-state">{changedCount ? `${changedCount} unsaved change${changedCount === 1 ? '' : 's'}` : message || 'All changes saved'}</span>
+        <span className={`sheet-state${changedCount ? ' is-dirty' : ''}`}>{changedCount ? `${changedCount} unsaved change${changedCount === 1 ? '' : 's'}` : message || 'All changes saved'}</span>
         <Button type="button" disabled={busy || !changedCount} onClick={saveChanges}><Save className="size-4" aria-hidden="true" />{busy ? 'Saving...' : `Save changes${changedCount ? ` (${changedCount})` : ''}`}</Button>
       </div>
       {error && <Notice className="sheet-notice" title="Could not save batch">{error}</Notice>}
@@ -217,9 +220,17 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
       <section className="sheet-section">
         <div className="section-heading"><h2>Edit expenses</h2><span className="section-note">Changes are saved together.</span></div>
         {expenses.length ? (
-          <SpreadsheetTable includeId>
+          <SpreadsheetTable includeId variant="existing">
             {visibleExpenses.map((expense) => (
-              <ExpenseRow key={expense.id} expense={expense} vendors={vendors} label={`Expense ${expense.id}`} showId onChange={(field, value) => updateExisting(expense.id, field, value)} />
+              <ExpenseRow
+                key={expense.id}
+                expense={expense}
+                vendors={vendors}
+                label={`Expense ${expense.id}`}
+                showId
+                rowClassName={dirtyIds.has(expense.id) ? 'is-dirty' : ''}
+                onChange={(field, value) => updateExisting(expense.id, field, value)}
+              />
             ))}
           </SpreadsheetTable>
         ) : (
@@ -283,9 +294,16 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
           <h2>Add expenses</h2>
           <Button variant="outline" type="button" disabled={busy} onClick={() => setDrafts((current) => [...current, ...Array.from({ length: 5 }, blankExpense)])}><Plus className="size-4" aria-hidden="true" />Add 5 rows</Button>
         </div>
-        <SpreadsheetTable>
+        <SpreadsheetTable variant="draft">
           {drafts.map((expense, index) => (
-            <ExpenseRow key={index} expense={expense} vendors={vendors} label={`New expense row ${index + 1}`} onChange={(field, value) => updateDraft(index, field, value)} />
+            <ExpenseRow
+              key={index}
+              expense={expense}
+              vendors={vendors}
+              label={`New expense row ${index + 1}`}
+              rowClassName={Object.values(expense).some(Boolean) ? 'is-filled' : ''}
+              onChange={(field, value) => updateDraft(index, field, value)}
+            />
           ))}
         </SpreadsheetTable>
         <div className="sheet-add-action">
