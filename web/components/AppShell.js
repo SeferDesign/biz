@@ -42,7 +42,13 @@ import {
   SidebarTrigger,
   useSidebar
 } from './ui/sidebar.js';
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from './ui/dropdown-menu.js';
 import { companyInfo } from '@seferbiz/company';
 import {
   Breadcrumb,
@@ -292,8 +298,8 @@ export default function AppShell({ children, user, avatarUrl }) {
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-              <DropdownMenu.Root>
-                <DropdownMenu.Trigger asChild>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
                   <SidebarMenuButton
                     size="lg"
                     isActive={accountActive}
@@ -309,38 +315,32 @@ export default function AppShell({ children, user, avatarUrl }) {
                     </span>
                     <ChevronDown className="ml-auto" />
                   </SidebarMenuButton>
-                </DropdownMenu.Trigger>
-                <DropdownMenu.Portal>
-                  <DropdownMenu.Content
-                    side="right"
-                    align="end"
-                    sideOffset={4}
-                    className="z-50 min-w-48 rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
-                  >
-                    <DropdownMenu.Item asChild>
-                      <Link
-                        href={accountHref}
-                        aria-current={accountActive ? 'page' : undefined}
-                        className="flex cursor-default items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent"
-                      >
-                        Account settings
-                      </Link>
-                    </DropdownMenu.Item>
-                    <DropdownMenu.Separator className="-mx-1 my-1 h-px bg-border" />
-                    <DropdownMenu.Item
-                      disabled={signingOut}
-                      onSelect={(event) => {
-                        event.preventDefault();
-                        signOut();
-                      }}
-                      className="flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent data-[disabled]:opacity-50"
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  side="right"
+                  align="end"
+                >
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href={accountHref}
+                      aria-current={accountActive ? 'page' : undefined}
                     >
-                      <LogOut className="size-4" />
-                      {signingOut ? 'Signing out...' : 'Sign out'}
-                    </DropdownMenu.Item>
-                  </DropdownMenu.Content>
-                </DropdownMenu.Portal>
-              </DropdownMenu.Root>
+                      Account settings
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    disabled={signingOut}
+                    onSelect={(event) => {
+                      event.preventDefault();
+                      signOut();
+                    }}
+                  >
+                    <LogOut className="size-4" />
+                    {signingOut ? 'Signing out...' : 'Sign out'}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
