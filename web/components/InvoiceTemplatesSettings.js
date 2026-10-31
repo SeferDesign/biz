@@ -105,6 +105,7 @@ export default function InvoiceTemplatesSettings({ initialTemplates, clients }) 
         <label className="form-field form-field-wide">
           <span className="form-label">Description</span>
           <Textarea rows={4} maxLength={10000} value={description} onChange={(event) => setDescription(event.target.value)} required />
+          <span className="form-help">Use {'{today}'} or {'{yesterday}'} to insert the local date as YYYY-MM-DD when applied.</span>
         </label>
         <div className="form-actions">
           <Button type="submit" disabled={busy}>{busy ? 'Saving...' : 'Create template'}</Button>

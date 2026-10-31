@@ -9,6 +9,7 @@ import { Textarea } from './ui/textarea.js';
 import { Combobox } from './ui/combobox.js';
 import { DatePicker } from './ui/date-picker.js';
 import { browserApiBaseUrl } from '../lib/api.js';
+import { expandInvoiceTemplate } from '../lib/invoice-template.js';
 
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -72,10 +73,11 @@ export default function RecordForm({ title, description, fields, initialValues =
     const end = hasFocus ? textarea.selectionEnd : current.length;
     const before = current.slice(0, start);
     const after = current.slice(end);
+    const description = expandInvoiceTemplate(template.description);
     const prefix = before && !before.endsWith('\n') ? '\n' : '';
-    const suffix = after && !template.description.endsWith('\n') ? '\n' : '';
-    const next = `${before}${prefix}${template.description}${suffix}${after}`;
-    const cursor = before.length + prefix.length + template.description.length + suffix.length;
+    const suffix = after && !description.endsWith('\n') ? '\n' : '';
+    const next = `${before}${prefix}${description}${suffix}${after}`;
+    const cursor = before.length + prefix.length + description.length + suffix.length;
     setField('description', next);
     requestAnimationFrame(() => {
       textarea?.focus();
