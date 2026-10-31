@@ -59,7 +59,7 @@ export function expenseFields(vendors) {
     { name: 'vendor_id', label: 'Vendor', type: 'relation', options: vendors.map((vendor) => ({ value: vendor.id, label: vendor.name })) },
     { name: 'date', label: 'Date', type: 'date', required: true },
     { name: 'cost', label: 'Cost', type: 'number', min: 0, step: '0.01', required: true },
-    { name: 'account', label: 'Account', type: 'select', options: expenseAccountOptions },
+    { name: 'account', label: 'Account', type: 'select', required: true, defaultValue: 'Business', options: expenseAccountOptions },
     { name: 'notes', label: 'Notes', type: 'textarea', wide: true }
   ];
 }

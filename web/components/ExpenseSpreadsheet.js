@@ -14,7 +14,7 @@ import { Combobox } from './ui/combobox.js';
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from './ui/empty.js';
 import { getPaginationItems, Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './ui/pagination.js';
 
-const blankExpense = () => ({ name: '', vendor_id: '', date: '', cost: '', account: '', notes: '' });
+const blankExpense = () => ({ name: '', vendor_id: '', date: '', cost: '', account: 'Business', notes: '' });
 
 function editableExpense(expense) {
   return {
@@ -179,9 +179,9 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
       setError('Enter at least one new expense row.');
       return;
     }
-    const invalid = entered.find((expense) => !expense.name.trim() || !expense.date || expense.cost === '' || !Number.isFinite(Number(expense.cost)));
+    const invalid = entered.find((expense) => !expense.name.trim() || !expense.date || expense.cost === '' || !Number.isFinite(Number(expense.cost)) || !expense.account);
     if (invalid) {
-      setError('Each new row needs a date, expense name, and numeric cost.');
+      setError('Each new row needs a date, expense name, account, and numeric cost.');
       return;
     }
     setBusy(true);

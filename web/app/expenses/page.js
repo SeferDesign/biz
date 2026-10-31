@@ -37,7 +37,10 @@ export default async function ExpensesPage({ searchParams }) {
         columns={[
           { key: 'date', label: 'Date', className: 'date-cell', render: (expense) => <Link className="table-link" href={`/expenses/${expense.id}`}>{formatTableDate(expense.date)}</Link> },
           { key: 'name', label: 'Expense' },
-          { key: 'vendor', label: 'Vendor', render: (expense) => vendorsById.get(expense.vendor_id)?.name || '-' },
+          { key: 'vendor', label: 'Vendor', render: (expense) => {
+            const vendor = vendorsById.get(expense.vendor_id);
+            return vendor ? <Link className="table-link" href={`/vendors/${vendor.id}`}>{vendor.name}</Link> : '-';
+          } },
           { key: 'account', label: 'Account' },
           { key: 'cost', label: 'Cost', className: 'numeric-cell', render: (expense) => formatMoney(expense.cost) }
         ]}
