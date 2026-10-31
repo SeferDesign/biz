@@ -356,6 +356,45 @@ export class MySqlStore {
     return rows[0];
   }
 
+  async listInvoiceTemplates(clientId) {
+    const [rows] = clientId == null
+      ? await this.database.query('SELECT * FROM invoice_templates ORDER BY client_id IS NOT NULL, name, id')
+      : await this.database.execute(
+        'SELECT * FROM invoice_templates WHERE client_id IS NULL OR client_id = ? ORDER BY client_id IS NOT NULL, name, id',
+        [clientId]
+      );
+    return rows;
+  }
+
+  async getInvoiceTemplate(id) {
+    const [rows] = await this.database.execute('SELECT * FROM invoice_templates WHERE id = ? LIMIT 1', [id]);
+    return rows[0];
+  }
+
+  async createInvoiceTemplate(input) {
+    const [result] = await this.database.execute(
+      'INSERT INTO invoice_templates (client_id, name, description) VALUES (?, ?, ?)',
+      [input.client_id ?? null, input.name, input.description]
+    );
+    return this.getInvoiceTemplate(result.insertId);
+  }
+
+  async updateInvoiceTemplate(id, input) {
+    const fields = presentFields(input, ['client_id', 'name', 'description']);
+    if (fields.length) {
+      await this.database.execute(
+        `UPDATE invoice_templates SET ${fields.map((field) => `\`${field}\` = ?`).join(', ')} WHERE id = ?`,
+        [...fields.map((field) => input[field]), id]
+      );
+    }
+    return this.getInvoiceTemplate(id);
+  }
+
+  async deleteInvoiceTemplate(id) {
+    const [result] = await this.database.execute('DELETE FROM invoice_templates WHERE id = ?', [id]);
+    return result.affectedRows > 0;
+  }
+
   async createClient(input) {
     const id = await insertRecord(this.database, 'clients', clientFields, { payment_terms: 'Net 15', ...input });
     return this.getClient(id);

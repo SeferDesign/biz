@@ -8,6 +8,7 @@ import { MySqlStore } from '../db/store.js';
 import clientsRouter from './clients/routes.js';
 import expensesRouter from './expenses/routes.js';
 import invoicesRouter from './invoices/routes.js';
+import invoiceTemplatesRouter from './invoice-templates/routes.js';
 import { createAuthRouter } from './auth.js';
 import searchRouter from './search/routes.js';
 import vendorsRouter from './vendors/routes.js';
@@ -157,6 +158,7 @@ export function createApp({
     webAuthn
   }));
   app.use('/v1', clientsRouter(store));
+  app.use('/v1', invoiceTemplatesRouter(store));
   app.use('/v1', invoicesRouter(store, { sendInvoiceEmail }));
   app.use('/v1', stripeRouter(store, { stripe, appUrl: publicAppUrl, notify: sendPaymentNotification }));
   app.use('/v1', yearsRouter(store));

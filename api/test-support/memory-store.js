@@ -30,6 +30,7 @@ const initialSnapshot = {
 export function createMemoryStore() {
   const snapshot = structuredClone(initialSnapshot);
   const invoiceEmailSends = [];
+  const invoiceTemplates = [];
   const invoicePayments = [];
   const users = [];
   const apiKeys = [];
@@ -228,6 +229,27 @@ export function createMemoryStore() {
     },
     async getClient(id) {
       return snapshot.clients.find((item) => item.id === Number(id));
+    },
+    async listInvoiceTemplates(clientId) {
+      return invoiceTemplates
+        .filter((template) => clientId == null || template.client_id == null || template.client_id === Number(clientId))
+        .sort((left, right) => Number(left.client_id != null) - Number(right.client_id != null) || left.name.localeCompare(right.name));
+    },
+    async getInvoiceTemplate(id) {
+      return invoiceTemplates.find((item) => item.id === Number(id));
+    },
+    async createInvoiceTemplate(input) {
+      const template = { id: Math.max(0, ...invoiceTemplates.map((item) => item.id)) + 1, ...input };
+      invoiceTemplates.push(template);
+      return template;
+    },
+    async updateInvoiceTemplate(id, input) {
+      const template = await this.getInvoiceTemplate(id);
+      if (template) Object.assign(template, input);
+      return template;
+    },
+    async deleteInvoiceTemplate(id) {
+      return removeById(invoiceTemplates, id);
     },
     async createClient(input) {
       const client = {

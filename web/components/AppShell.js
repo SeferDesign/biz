@@ -26,6 +26,7 @@ const overviewNavigation = [
 const recordsNavigation = [
   { href: '/clients', label: 'Clients', icon: Users },
   { href: '/invoices', label: 'Invoices', icon: FileText },
+  { href: '/settings/templates', label: 'Invoice Templates', icon: FileText },
   { href: '/vendors', label: 'Vendors', icon: Building2 },
   { href: '/expenses', label: 'Expenses', icon: Receipt },
   { href: '/years', label: 'Years', icon: CalendarDays }

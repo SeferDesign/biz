@@ -52,6 +52,36 @@ test('all API endpoints are exposed under /v1', async () => {
   assert.equal((await request(app).get('/expenses')).status, 404);
 });
 
+test('invoice templates support global and per-client CRUD and scoped listing', async () => {
+  const app = createTestApp();
+  const clientTemplate = await request(app).post('/v1/invoice-templates').send({
+    name: 'Acme monthly',
+    description: 'Monthly work for Acme',
+    client_id: 1
+  });
+  const globalTemplate = await request(app).post('/v1/invoice-templates').send({
+    name: 'General',
+    description: 'General work'
+  });
+
+  assert.equal(clientTemplate.status, 201);
+  assert.equal(globalTemplate.status, 201);
+  assert.deepEqual((await request(app).get('/v1/invoice-templates?client_id=1')).body.map((item) => item.name), ['General', 'Acme monthly']);
+  assert.deepEqual((await request(app).get('/v1/invoice-templates?client_id=2')).body.map((item) => item.name), ['General']);
+  assert.equal((await request(app).get('/v1/invoice-templates?client_id=0')).status, 400);
+  assert.equal((await request(app).post('/v1/invoice-templates').send({ name: '', description: 'Missing name' })).status, 400);
+  assert.equal((await request(app).post('/v1/invoice-templates').send({ name: 'Bad client', description: 'Text', client_id: 99 })).status, 400);
+
+  const updated = await request(app).patch(`/v1/invoice-templates/${clientTemplate.body.id}`).send({
+    name: 'Shared now',
+    client_id: null
+  });
+  assert.equal(updated.status, 200);
+  assert.equal(updated.body.client_id, null);
+  assert.equal((await request(app).delete(`/v1/invoice-templates/${globalTemplate.body.id}`)).status, 204);
+  assert.equal((await request(app).delete('/v1/invoice-templates/999')).status, 404);
+});
+
 test('Swagger is unavailable outside local builds while API routes remain authenticated', async () => {
   const app = createTestApp({ buildEnv: 'prod' });
 

@@ -8,6 +8,62 @@ servers:
 security:
   - ApiToken: []
 paths:
+  /invoice-templates:
+    get:
+      summary: List invoice templates, optionally including global and selected-client templates
+      parameters:
+        - in: query
+          name: client_id
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Invoice templates
+    post:
+      summary: Create a global or client-specific invoice template
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, description]
+              properties:
+                name:
+                  type: string
+                  maxLength: 120
+                description:
+                  type: string
+                  maxLength: 10000
+                client_id:
+                  type: integer
+                  nullable: true
+      responses:
+        '201':
+          description: Created template
+        '400':
+          description: Invalid template
+  /invoice-templates/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+    patch:
+      summary: Update an invoice template
+      responses:
+        '200':
+          description: Updated template
+        '404':
+          description: Template not found
+    delete:
+      summary: Delete an invoice template
+      responses:
+        '204':
+          description: Template deleted
+        '404':
+          description: Template not found
   /auth/login:
     post:
       summary: Sign in with an email and password

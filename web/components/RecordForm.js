@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from './ui/button.js';
@@ -8,6 +8,7 @@ import { Input } from './ui/input.js';
 import { Textarea } from './ui/textarea.js';
 import { Combobox } from './ui/combobox.js';
 import { DatePicker } from './ui/date-picker.js';
+import { browserApiBaseUrl } from '../lib/api.js';
 
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -29,9 +30,57 @@ export default function RecordForm({ title, description, fields, initialValues =
   const [saveMethod, setSaveMethod] = useState(method);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [invoiceTemplates, setInvoiceTemplates] = useState([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState('');
+  const [templateLoading, setTemplateLoading] = useState(false);
+  const [templateError, setTemplateError] = useState('');
+  const descriptionRef = useRef(null);
+
+  useEffect(() => {
+    setSelectedTemplateId('');
+    setInvoiceTemplates([]);
+    setTemplateError('');
+    if (!lineItemsEnabled || !values.client_id) return undefined;
+    let active = true;
+    setTemplateLoading(true);
+    fetch(`${browserApiBaseUrl}/invoice-templates?client_id=${encodeURIComponent(values.client_id)}`, { credentials: 'include' })
+      .then(async (response) => {
+        const body = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(body?.error || `Could not load templates (${response.status})`);
+        if (active) setInvoiceTemplates(body);
+      })
+      .catch((cause) => {
+        if (active) setTemplateError(cause.message);
+      })
+      .finally(() => {
+        if (active) setTemplateLoading(false);
+      });
+    return () => { active = false; };
+  }, [lineItemsEnabled, values.client_id]);
 
   function setField(name, value) {
     setValues((current) => ({ ...current, [name]: value }));
+  }
+
+  function insertInvoiceTemplate() {
+    const template = invoiceTemplates.find((item) => String(item.id) === selectedTemplateId);
+    if (!template) return;
+    const textarea = descriptionRef.current;
+    const current = String(values.description || '');
+    const hasFocus = textarea && document.activeElement === textarea;
+    const start = hasFocus ? textarea.selectionStart : current.length;
+    const end = hasFocus ? textarea.selectionEnd : current.length;
+    const before = current.slice(0, start);
+    const after = current.slice(end);
+    const prefix = before && !before.endsWith('\n') ? '\n' : '';
+    const suffix = after && !template.description.endsWith('\n') ? '\n' : '';
+    const next = `${before}${prefix}${template.description}${suffix}${after}`;
+    const cursor = before.length + prefix.length + template.description.length + suffix.length;
+    setField('description', next);
+    requestAnimationFrame(() => {
+      textarea?.focus();
+      textarea?.setSelectionRange(cursor, cursor);
+    });
   }
 
   function updateLineItem(index, field, value) {
@@ -160,7 +209,39 @@ export default function RecordForm({ title, description, fields, initialValues =
         <div><h1>{title}</h1><p className="page-description">{description}</p></div>
       </div>
       <form className="record-form" onSubmit={submit}>
-        {fields.map((field) => (
+        {fields.map((field) => lineItemsEnabled && field.name === 'description' ? (
+          <div className="form-field form-field-wide" key={field.name}>
+            <span className="form-label" id="invoice-description-label">{field.label}</span>
+            <div className="invoice-template-toolbar">
+              <div className="invoice-template-insert">
+                <select
+                  aria-label="Invoice description template"
+                  className="invoice-template-select"
+                  value={selectedTemplateId}
+                  onChange={(event) => setSelectedTemplateId(event.target.value)}
+                >
+                  <option value="">{templateLoading ? 'Loading templates...' : 'Choose a template'}</option>
+                  {invoiceTemplates.map((template) => (
+                    <option key={template.id} value={template.id}>{template.name}</option>
+                  ))}
+                </select>
+                <Button type="button" variant="outline" disabled={!selectedTemplateId} onClick={insertInvoiceTemplate}>Insert</Button>
+              </div>
+              <Link href="/settings/templates">Manage templates</Link>
+            </div>
+            {templateError && <span className="form-help" role="status">{templateError}</span>}
+            <Textarea
+              ref={descriptionRef}
+              id="invoice-description"
+              name={field.name}
+              aria-labelledby="invoice-description-label"
+              rows={field.rows || 3}
+              value={values[field.name]}
+              required={field.required}
+              onChange={(event) => setField(field.name, event.target.value)}
+            />
+          </div>
+        ) : (
           <label className={`form-field${field.wide ? ' form-field-wide' : ''}`} key={field.name}>
             <span className="form-label">{field.label}{field.required && <span className="required-mark"> *</span>}</span>
             {field.type === 'textarea' ? (
