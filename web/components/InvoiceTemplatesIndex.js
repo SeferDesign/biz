@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 export default function InvoiceTemplatesIndex({ initialTemplates, clients }) {
   const templates = Array.isArray(initialTemplates) ? initialTemplates : [];
   const clientNames = new Map((clients || []).map((client) => [String(client.id), client.name]));
-  const universalTemplates = templates
+  const globalTemplates = templates
     .filter((template) => template.client_id == null)
     .sort((left, right) => left.name.localeCompare(right.name));
   const clientGroups = new Map();
@@ -50,13 +50,13 @@ export default function InvoiceTemplatesIndex({ initialTemplates, clients }) {
         <div className="space-y-8">
           <section className="space-y-3">
             <div className="section-heading">
-              <h2>Universal templates</h2>
+              <h2>Global templates</h2>
               <span className="section-note">Available to every client</span>
             </div>
-            {universalTemplates.length ? (
-              <TemplateTable templates={universalTemplates} />
+            {globalTemplates.length ? (
+              <TemplateTable templates={globalTemplates} />
             ) : (
-              <p className="text-sm text-muted-foreground">No universal templates.</p>
+              <p className="text-sm text-muted-foreground">No global templates.</p>
             )}
           </section>
 

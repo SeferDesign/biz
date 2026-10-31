@@ -120,7 +120,7 @@
   }
 
   .invoice-template-select {
-    @apply h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50;
+    @apply h-10 min-w-0 flex-1 truncate rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50;
   }
 
   .month-goal-grid {
@@ -164,11 +164,19 @@
   }
 
   .invoice-template-toolbar {
-    @apply flex flex-wrap items-center justify-between gap-2;
+    @apply grid min-w-0 grid-cols-1 items-center gap-2 sm:grid-cols-[minmax(0,1fr)_auto];
   }
 
   .invoice-template-insert {
-    @apply flex flex-wrap items-center gap-2;
+    @apply grid min-w-0 grid-cols-1 gap-2;
+  }
+
+  .invoice-template-insert-split {
+    @apply grid-cols-2;
+  }
+
+  .invoice-template-choice {
+    @apply flex min-w-0 items-center gap-2;
   }
 
   .page-heading {

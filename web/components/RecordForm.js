@@ -205,6 +205,13 @@ export default function RecordForm({ title, description, fields, initialValues =
   const selectedClientRate = fields
     .find((field) => field.name === 'client_id')?.options
     ?.find((option) => String(option.value) === String(values.client_id))?.rate;
+  const selectedClientName = fields
+    .find((field) => field.name === 'client_id')?.options
+    ?.find((option) => String(option.value) === String(values.client_id))?.label;
+  const globalInvoiceTemplates = invoiceTemplates.filter((template) => template.client_id == null);
+  const clientInvoiceTemplates = invoiceTemplates.filter((template) => template.client_id != null);
+  const globalTemplateSelected = globalInvoiceTemplates.some((template) => String(template.id) === selectedTemplateId);
+  const clientTemplateSelected = clientInvoiceTemplates.some((template) => String(template.id) === selectedTemplateId);
 
   return (
     <section className="mx-auto w-full max-w-4xl space-y-6">
@@ -217,19 +224,44 @@ export default function RecordForm({ title, description, fields, initialValues =
           <div className="form-field form-field-wide" key={field.name}>
             <span className="form-label" id="invoice-description-label">{field.label}</span>
             <div className="invoice-template-toolbar">
-              <div className="invoice-template-insert">
-                <select
-                  aria-label="Invoice description template"
-                  className="invoice-template-select"
-                  value={selectedTemplateId}
-                  onChange={(event) => setSelectedTemplateId(event.target.value)}
-                >
-                  <option value="">{templateLoading ? 'Loading templates...' : 'Choose a template'}</option>
-                  {invoiceTemplates.map((template) => (
-                    <option key={template.id} value={template.id}>{template.name}</option>
-                  ))}
-                </select>
-                <Button type="button" variant="outline" disabled={!selectedTemplateId} onClick={insertInvoiceTemplate}>Insert</Button>
+              <div className={`invoice-template-insert${globalInvoiceTemplates.length && clientInvoiceTemplates.length ? ' invoice-template-insert-split' : ''}`}>
+                {globalInvoiceTemplates.length > 0 && (
+                  <div className="invoice-template-choice">
+                    <select
+                      aria-label="Global invoice description template"
+                      className="invoice-template-select"
+                      value={globalTemplateSelected ? selectedTemplateId : ''}
+                      onChange={(event) => setSelectedTemplateId(event.target.value)}
+                    >
+                      <option value="">Global templates</option>
+                      {globalInvoiceTemplates.map((template) => (
+                        <option key={template.id} value={template.id}>{template.name}</option>
+                      ))}
+                    </select>
+                    <Button type="button" variant="outline" size="icon" aria-label="Insert global template" title="Insert global template" disabled={!globalTemplateSelected} onClick={insertInvoiceTemplate}>
+                      <Plus aria-hidden="true" />
+                    </Button>
+                  </div>
+                )}
+                {clientInvoiceTemplates.length > 0 && (
+                  <div className="invoice-template-choice">
+                    <select
+                      aria-label={`${selectedClientName || 'Client'} invoice description template`}
+                      className="invoice-template-select"
+                      value={clientTemplateSelected ? selectedTemplateId : ''}
+                      onChange={(event) => setSelectedTemplateId(event.target.value)}
+                    >
+                      <option value="">{selectedClientName || 'Client'} templates</option>
+                      {clientInvoiceTemplates.map((template) => (
+                        <option key={template.id} value={template.id}>{template.name}</option>
+                      ))}
+                    </select>
+                    <Button type="button" variant="outline" size="icon" aria-label={`Insert ${selectedClientName || 'client'} template`} title={`Insert ${selectedClientName || 'client'} template`} disabled={!clientTemplateSelected} onClick={insertInvoiceTemplate}>
+                      <Plus aria-hidden="true" />
+                    </Button>
+                  </div>
+                )}
+                {templateLoading && <span className="form-help" role="status">Loading templates...</span>}
               </div>
               <Link href="/settings/templates">Manage templates</Link>
             </div>
