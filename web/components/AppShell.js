@@ -8,6 +8,7 @@ import {
   Building2,
   CalendarDays,
   CreditCard,
+  HardDrive,
   FileText,
   House,
   Receipt,
@@ -34,7 +35,8 @@ const recordsNavigation = [
 
 const insightsNavigation = [
   { href: '/best', label: 'Best Performances', icon: Award },
-  { href: '/payments', label: 'Payment Options', icon: CreditCard }
+  { href: '/payments', label: 'Payment Options', icon: CreditCard },
+  { href: '/settings/backups', label: 'Backup Status', icon: HardDrive }
 ];
 
 function NavIcon({ icon: Icon }) {

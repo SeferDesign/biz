@@ -303,6 +303,17 @@ h2 { font-family: var(--font-sans), "Helvetica Neue", "Segoe UI", sans-serif; fo
 .invoice-template-toolbar a { color: var(--muted); font-size: 12px; }
 .invoice-template-insert { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .invoice-template-select { min-width: 190px; min-height: 38px; padding: 7px 10px; border: 1px solid #d2d2d2; border-radius: 6px; color: var(--ink); background: var(--white); }
+.backup-status-page { max-width: 900px; }
+.backup-status-card { border-radius: 6px; }
+.backup-status-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin: 0; }
+.backup-status-details > div { min-width: 0; }
+.backup-status-details dt { margin-bottom: 5px; color: var(--muted); font-size: 12px; }
+.backup-status-details dd { margin: 0; overflow-wrap: anywhere; font-size: 14px; }
+.backup-state { display: inline-flex; padding: 3px 8px; border-radius: 4px; background: #ededed; font-size: 12px; }
+.backup-state-success { color: #17653a; background: #e6f4eb; }
+.backup-state-failed { color: #982c24; background: #fae9e7; }
+.backup-status-note, .backup-status-error { margin: 18px 0 0; font-size: 13px; }
+.backup-status-error { color: #982c24; }
 .checkbox-control { display: flex; min-height: 40px; align-items: center; gap: 9px; color: var(--muted); }
 .checkbox-control input { width: 16px; height: 16px; accent-color: var(--forest); }
 .month-goal-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
@@ -390,6 +401,7 @@ h2 { font-family: var(--font-sans), "Helvetica Neue", "Segoe UI", sans-serif; fo
   .invoice-line-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .invoice-line-row label:first-child { grid-column: 1 / -1; }
   .invoice-line-remove { justify-self: start; }
+  .backup-status-details { grid-template-columns: 1fr; gap: 14px; }
   .detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .detail-item { padding: 15px; }
   .data-table th, .data-table td { padding: 12px 13px; }

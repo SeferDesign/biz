@@ -19,6 +19,12 @@ mysql_image="mysql:$(cfg mysqlVersion)"
 
 cd /opt/biz
 umask 077
+mkdir -p /opt/biz/backup-status
+chmod 755 /opt/biz/backup-status
+if [[ ! -f /opt/biz/backup-status/status.json ]]; then
+	printf '%s\n' '{"state":"never","last_attempt_at":null,"last_successful_at":null,"last_successful_key":null,"last_error":null}' > /opt/biz/backup-status/status.json
+fi
+chmod 644 /opt/biz/backup-status/status.json
 
 cat >/opt/biz/host.env <<EOF
 AWS_REGION=${region}
@@ -97,6 +103,7 @@ jq -r \
 		NODE_ENV: "production",
 		BUILD_ENV: "prod",
 		PORT: "3000",
+		BACKUP_STATUS_FILE: "/var/lib/biz-backup/status.json",
 		WAIT_FOR: "biz-mysql:3306",
 		WAIT_FOR_TIMEOUT: "180",
 		DATABASE_URL: "mysql://biz:\(.MYSQL_PASSWORD | @uri)@biz-mysql:3306/biz_production",
@@ -167,7 +174,8 @@ ensure_container biz-mysql "$mysql_image" /opt/biz/mysql.env \
 	"$mysql_image" \
 	--character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci \
 	--innodb-buffer-pool-size=64M --performance-schema=OFF --max-connections=30 --skip-name-resolve
-ensure_container biz-api "$api_image" /opt/biz/api.env --env-file api.env "$api_image"
+ensure_container biz-api "$api_image" /opt/biz/api.env --env-file api.env \
+	-v /opt/biz/backup-status:/var/lib/biz-backup:ro "$api_image"
 ensure_container biz-web "$web_image" /opt/biz/web.env --env-file web.env --init "$web_image"
 ensure_container biz-caddy caddy:2-alpine /opt/biz/Caddyfile \
 	-p 80:80 -p 443:443 -p 443:443/udp \

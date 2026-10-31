@@ -8,6 +8,14 @@ servers:
 security:
   - ApiToken: []
 paths:
+  /system/backup-status:
+    get:
+      summary: Read the latest host database backup status
+      responses:
+        '200':
+          description: Backup attempt and last successful backup metadata
+        '500':
+          description: Backup status could not be read
   /invoice-templates:
     get:
       summary: List invoice templates, optionally including global and selected-client templates

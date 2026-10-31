@@ -1,5 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import supertest from 'supertest';
 import bcrypt from 'bcryptjs';
 import Stripe from 'stripe';
@@ -80,6 +83,45 @@ test('invoice templates support global and per-client CRUD and scoped listing', 
   assert.equal(updated.body.client_id, null);
   assert.equal((await request(app).delete(`/v1/invoice-templates/${globalTemplate.body.id}`)).status, 204);
   assert.equal((await request(app).delete('/v1/invoice-templates/999')).status, 404);
+});
+
+test('backup status reports persisted host backup metadata without exposing its file path', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'biz-backup-status-'));
+  const statusFile = join(directory, 'status.json');
+  try {
+    await writeFile(statusFile, JSON.stringify({
+      state: 'failed',
+      last_attempt_at: '2026-10-30T08:03:00Z',
+      last_successful_at: '2026-10-29T08:04:00Z',
+      last_successful_key: 'mysql/biz-2026-10-29T080400Z.sql.gz',
+      last_error: 'Backup command failed (exit status 2)',
+      private_field: '/private/host/path'
+    }));
+    const app = createTestApp({ backupStatusFile: statusFile });
+    const result = await request(app).get('/v1/system/backup-status');
+
+    assert.equal(result.status, 200);
+    assert.deepEqual(result.body, {
+      configured: true,
+      state: 'failed',
+      last_attempt_at: '2026-10-30T08:03:00Z',
+      last_successful_at: '2026-10-29T08:04:00Z',
+      last_successful_key: 'mysql/biz-2026-10-29T080400Z.sql.gz',
+      last_error: 'Backup command failed (exit status 2)'
+    });
+    assert.equal((await readFile(statusFile, 'utf8')).includes('/private/host/path'), true);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('backup status distinguishes local unconfigured and first-deploy pending states', async () => {
+  const unconfigured = await request(createTestApp()).get('/v1/system/backup-status');
+  assert.deepEqual(unconfigured.body, { configured: false, state: 'unavailable' });
+
+  const pending = await request(createTestApp({ backupStatusFile: '/missing/biz-backup-status.json' }))
+    .get('/v1/system/backup-status');
+  assert.deepEqual(pending.body, { configured: true, state: 'pending' });
 });
 
 test('Swagger is unavailable outside local builds while API routes remain authenticated', async () => {
