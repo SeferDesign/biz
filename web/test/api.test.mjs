@@ -58,3 +58,20 @@ test('expense and invoice sorting is newest first, with invoice status as a seco
   ];
   assert.deepEqual(invoices.toSorted(newestInvoicesFirst).map((invoice) => invoice.id), [4, 3, 2, 1]);
 });
+
+test('invoice list groups drafts, sent, and paid before sorting newest first within each group', async (context) => {
+  configureEnvironment(context, { NEXT_PUBLIC_API_URL: 'https://example.test' });
+  const { invoicesByStatusFirst } = await import('../lib/api.js?status-sorting');
+
+  const invoices = [
+    { id: 1, date: '2026-01-03', status: 'paid' },
+    { id: 2, date: '2026-01-03', status: 'sent' },
+    { id: 3, date: '2026-01-01', status: 'draft' },
+    { id: 4, date: '2026-01-04', paid: true },
+    { id: 5, date: '2026-01-02' },
+    { id: 6, date: '2026-01-03', status: 'SENT', payment_status: 'processing' },
+    { id: 7, date: '2026-01-04', status: 'sent' },
+    { id: 8, date: '2026-01-05', status: 'canceled' }
+  ];
+  assert.deepEqual(invoices.toSorted(invoicesByStatusFirst).map((invoice) => invoice.id), [5, 3, 7, 6, 2, 4, 1, 8]);
+});

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ResourcePage, StatusBadge } from '../../components/ResourcePage.js';
 import InvoiceActions from '../../components/InvoiceActions.js';
-import { formatDate, formatMoney, invoiceStatus, newestInvoicesFirst, parsePage } from '../../lib/api.js';
+import { formatDate, formatMoney, invoiceStatus, invoicesByStatusFirst, parsePage } from '../../lib/api.js';
 import { getApiData } from '../../lib/api-server.js';
 
 export default async function InvoicesPage({ searchParams }) {
@@ -15,7 +15,7 @@ export default async function InvoicesPage({ searchParams }) {
   return (
     <ResourcePage
       title="Invoices"
-      data={invoiceResult.data?.toSorted(newestInvoicesFirst)}
+      data={invoiceResult.data?.toSorted(invoicesByStatusFirst)}
       error={invoiceResult.error || clientResult.error}
       countLabel="invoices"
       actionHref="/invoices/new"

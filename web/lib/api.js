@@ -70,3 +70,10 @@ export function newestInvoicesFirst(left, right) {
   const rightStatus = String(right.status || (right.paid ? 'paid' : 'draft')).toLowerCase();
   return (statusOrder[leftStatus] ?? 3) - (statusOrder[rightStatus] ?? 3) || Number(right.id) - Number(left.id);
 }
+
+export function invoicesByStatusFirst(left, right) {
+  const statusOrder = { draft: 0, sent: 1, paid: 2 };
+  const leftStatus = String(left.status || (left.paid ? 'paid' : 'draft')).toLowerCase();
+  const rightStatus = String(right.status || (right.paid ? 'paid' : 'draft')).toLowerCase();
+  return (statusOrder[leftStatus] ?? 3) - (statusOrder[rightStatus] ?? 3) || newestInvoicesFirst(left, right);
+}
