@@ -16,8 +16,7 @@ import {
   Users,
   ChevronDown,
   LogOut,
-  GalleryVerticalEnd,
-  Search
+  GalleryVerticalEnd
 } from 'lucide-react';
 import OmniSearch from './OmniSearch.js';
 import Brand from './Brand.js';
@@ -200,16 +199,13 @@ function TeamSwitcher() {
 }
 
 function SidebarSearch() {
-  const { isMobile, state, toggleSidebar } = useSidebar();
+  const { isMobile, state } = useSidebar();
 
   if (state === 'collapsed' && !isMobile) {
     return (
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton tooltip="Search records" onClick={toggleSidebar}>
-            <Search />
-            <span>Search records</span>
-          </SidebarMenuButton>
+          <OmniSearch compact />
         </SidebarMenuItem>
       </SidebarMenu>
     );
