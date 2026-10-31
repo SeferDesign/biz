@@ -4,7 +4,7 @@ import InvoiceActions from '../components/InvoiceActions.js';
 import Notice from '../components/Notice.js';
 import ColumnChart from '../components/charts/ColumnChart.js';
 import { financeBars, goalOutlines } from '../components/charts/theme.js';
-import { formatDate, formatMoney, invoiceStatus, newestInvoicesFirst } from '../lib/api.js';
+import { formatMoney, formatTableDate, invoiceStatus, newestInvoicesFirst } from '../lib/api.js';
 import { getApiData } from '../lib/api-server.js';
 import { monthlyFinances, trailingMonths } from '../lib/chart-data.js';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table.js';
@@ -143,7 +143,7 @@ export default async function Home() {
           columns={[
             { key: 'id', label: 'Invoice', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}`}>{invoice.display_id || invoice.display_id_number || invoice.id}</Link> },
             { key: 'client', label: 'Client', render: (invoice) => clientsById.get(invoice.client_id)?.name || `Client ${invoice.client_id || '-'}` },
-            { key: 'date', label: 'Date', render: (invoice) => formatDate(invoice.date) },
+            { key: 'date', label: 'Date', render: (invoice) => formatTableDate(invoice.date) },
             { key: 'status', label: 'Status', render: (invoice) => <StatusBadge status={invoiceStatus(invoice)} /> },
             { key: 'cost', label: 'Amount', className: 'numeric-cell', render: (invoice) => formatMoney(invoice.cost ?? invoice.total, invoice.currency) },
             { key: 'actions', label: 'Actions', render: (invoice) => <InvoiceActions invoice={invoice} compact /> }

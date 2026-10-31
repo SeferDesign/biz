@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ResourcePage } from '../../components/ResourcePage.js';
-import { formatDate, formatMoney, newestExpensesFirst, parsePage } from '../../lib/api.js';
+import { formatMoney, formatTableDate, newestExpensesFirst, parsePage } from '../../lib/api.js';
 import { getApiData } from '../../lib/api-server.js';
 import { Button } from '../../components/ui/button.js';
 import { ButtonGroup } from '../../components/ui/button-group.js';
@@ -35,7 +35,7 @@ export default async function ExpensesPage({ searchParams }) {
         pageHref={filter ? `/expenses?${filter}=true` : '/expenses'}
         page={parsePage(params?.page)}
         columns={[
-          { key: 'date', label: 'Date', render: (expense) => <Link className="table-link" href={`/expenses/${expense.id}`}>{formatDate(expense.date)}</Link> },
+          { key: 'date', label: 'Date', render: (expense) => <Link className="table-link" href={`/expenses/${expense.id}`}>{formatTableDate(expense.date)}</Link> },
           { key: 'name', label: 'Expense' },
           { key: 'vendor', label: 'Vendor', render: (expense) => vendorsById.get(expense.vendor_id)?.name || '-' },
           { key: 'account', label: 'Account' },

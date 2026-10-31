@@ -33,7 +33,6 @@ export default async function VendorsPage({ searchParams }) {
         { key: 'category', label: 'Category' },
         { key: 'expenses', label: 'Expense records', render: (vendor) => totalsByVendor.get(vendor.id)?.count || 0 },
         { key: 'amount', label: 'Recorded spend', className: 'numeric-cell', render: (vendor) => formatMoney(totalsByVendor.get(vendor.id)?.amount || 0) },
-        { key: 'notes', label: 'Notes' },
         {
           key: 'expense_action',
           label: 'New expense',

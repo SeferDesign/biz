@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ResourcePage, StatusBadge } from '../../components/ResourcePage.js';
 import InvoiceActions from '../../components/InvoiceActions.js';
-import { formatDate, formatMoney, invoiceStatus, invoicesByStatusFirst, parsePage } from '../../lib/api.js';
+import { formatMoney, formatTableDate, invoiceStatus, invoicesByStatusFirst, parsePage } from '../../lib/api.js';
 import { getApiData } from '../../lib/api-server.js';
 
 export default async function InvoicesPage({ searchParams }) {
@@ -23,13 +23,14 @@ export default async function InvoicesPage({ searchParams }) {
       pageHref="/invoices"
       page={parsePage(params?.page)}
       columns={[
-        { key: 'date', label: 'Invoice', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}`}>{formatDate(invoice.date)}<br/></Link> },
+        { key: 'date', label: 'Invoice Date', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}`}>{formatTableDate(invoice.date)}</Link> },
+        { key: 'id', label: 'Invoice ID', render: (invoice) => String(invoice.id) },
         { key: 'client', label: 'Client', render: (invoice) => {
           const client = clientsById.get(invoice.client_id);
           return client ? <Link className="table-link" href={`/clients/${client.id}`}>{client.name}</Link> : `Client ${invoice.client_id || '-'}`;
         } },
         { key: 'status', label: 'Status', render: (invoice) => <StatusBadge status={invoiceStatus(invoice)} /> },
-        { key: 'paiddate', label: 'Paid date', render: (invoice) => formatDate(invoice.paiddate) },
+        { key: 'paiddate', label: 'Paid date', render: (invoice) => formatTableDate(invoice.paiddate) },
         { key: 'cost', label: 'Amount', className: 'numeric-cell', render: (invoice) => formatMoney(invoice.cost ?? invoice.total, invoice.currency) },
         { key: 'actions', label: 'Actions', render: (invoice) => <InvoiceActions invoice={invoice} compact /> }
       ]}

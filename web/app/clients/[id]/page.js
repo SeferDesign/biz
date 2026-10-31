@@ -6,7 +6,7 @@ import NewButton from '../../../components/NewButton.js';
 import ResourceActions from '../../../components/ResourceActions.js';
 import ClientPortalLinkPanel from '../../../components/ClientPortalLinkPanel.js';
 import Notice from '../../../components/Notice.js';
-import { browserApiBaseUrl, formatDate, formatMoney, invoiceStatus, newestInvoicesFirst, parsePage } from '../../../lib/api.js';
+import { browserApiBaseUrl, formatMoney, formatTableDate, invoiceStatus, newestInvoicesFirst, parsePage } from '../../../lib/api.js';
 import { getApiData } from '../../../lib/api-server.js';
 
 export default async function ClientDetailPage({ params, searchParams }) {
@@ -75,7 +75,7 @@ export default async function ClientDetailPage({ params, searchParams }) {
             page={parsePage(query?.page)}
             columns={[
               { key: 'id', label: 'Invoice', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}${accessTokenQuery}`}>{invoice.display_id || invoice.display_id_number || invoice.id}</Link> },
-              { key: 'date', label: 'Date', render: (invoice) => formatDate(invoice.date) },
+              { key: 'date', label: 'Date', render: (invoice) => formatTableDate(invoice.date) },
               { key: 'description', label: 'Description' },
               { key: 'status', label: 'Status', render: (invoice) => <StatusBadge status={invoiceStatus(invoice)} /> },
               { key: 'cost', label: 'Amount', className: 'numeric-cell', render: (invoice) => formatMoney(invoice.cost ?? invoice.total, invoice.currency) }
