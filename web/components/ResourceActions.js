@@ -8,7 +8,7 @@ export default function ResourceActions({ editHref, deleteEndpoint, returnTo, la
   return (
     <ButtonGroup aria-label={`${label} actions`}>
       <Button asChild variant="outline"><Link href={editHref}><Pencil className="size-4" aria-hidden="true" />Edit</Link></Button>
-      <DeleteButton endpoint={deleteEndpoint} returnTo={returnTo} label={`Delete ${label}`} />
+      <DeleteButton endpoint={deleteEndpoint} returnTo={returnTo} label={`Delete`} />
     </ButtonGroup>
   );
 }
