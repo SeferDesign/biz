@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Copy, Link2 } from 'lucide-react';
+import { Check, Copy, Link2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { browserApiBaseUrl } from '../lib/api.js';
 import { Alert, AlertDescription } from './ui/alert.js';
@@ -39,6 +39,7 @@ export default function ClientLinkPanel({ invoiceId, initialAccessToken }) {
       await navigator.clipboard.writeText(link);
       setStatus('copied');
       setTimeout(() => setStatus(''), 2000);
+      toast.success('Client invoice link copied to clipboard.');
     } catch {
       setError('Copy failed. Select the link and copy it manually.');
     }
@@ -48,9 +49,11 @@ export default function ClientLinkPanel({ invoiceId, initialAccessToken }) {
     <section className="detail-section client-link-panel">
       <div className="section-heading"><h2>Client link</h2><span className="section-note">Anyone with this link can view and pay this invoice</span></div>
       {accessToken ? (
-        <div className="copy-field">
-          <Input aria-label="Client invoice link" readOnly value={link} onFocus={(event) => event.target.select()} />
-          <Button variant="outline" type="button" disabled={!link} onClick={copyLink}><Copy className="size-4" aria-hidden="true" />{status === 'copied' ? 'Copied' : 'Copy link'}</Button>
+        <div className="flex min-w-0 items-center gap-2">
+          <Input className="flex-1" aria-label="Client invoice link" readOnly value={link} onFocus={(event) => event.target.select()} />
+          <Button className="shrink-0" size="icon" variant="outline" type="button" title={status === 'copied' ? 'Client link copied' : 'Copy client link'} aria-label={status === 'copied' ? 'Client link copied' : 'Copy client link'} disabled={!link} onClick={copyLink}>
+            {status === 'copied' ? <Check className="size-4" aria-hidden="true" /> : <Copy className="size-4" aria-hidden="true" />}
+          </Button>
         </div>
       ) : (
         <Button variant="outline" type="button" disabled={status === 'creating'} onClick={createLink}>

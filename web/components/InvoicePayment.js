@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Separator } from './ui/separator.js';
 import { browserApiBaseUrl, formatMoney } from '../lib/api.js';
 import { companyInfo, displayIdNumber } from '@seferbiz/company';
+import { toast } from 'sonner';
 
 export default function InvoicePayment({ invoiceId, accessToken, methods = [], amount, currency }) {
   const [pendingMethod, setPendingMethod] = useState('');
@@ -25,6 +26,7 @@ export default function InvoicePayment({ invoiceId, accessToken, methods = [], a
     try {
       await navigator.clipboard.writeText(`Zelle recipient: ${companyInfo.emailContact}\nAmount: ${amountLabel}\nMemo: ${invoiceReference}`);
       setZelleCopied(true);
+      toast.success('Payment details copied to clipboard.');
     } catch {
       setError('Could not copy payment details. Please try again or use another payment method.');
     } finally {
