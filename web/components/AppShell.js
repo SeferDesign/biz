@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { browserApiBaseUrl } from '../lib/api.js';
 import {
   Building2,
@@ -44,6 +44,14 @@ import {
 } from './ui/sidebar.js';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { companyInfo } from '@seferbiz/company';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator
+} from './ui/breadcrumb.js';
 
 const overviewNavigation = [
 	{ href: '/', label: 'Overview', icon: House },
@@ -64,6 +72,54 @@ const insightsNavigation = [
   { href: '/payments', label: 'Payment Options', icon: CreditCard },
   { href: '/settings/backups', label: 'Backup Status', icon: HardDrive }
 ];
+
+const staticBreadcrumbs = {
+  '/': [{ label: 'Overview' }],
+  '/clients': [{ label: 'Workspace', href: '/' }, { label: 'Clients' }],
+  '/invoices': [{ label: 'Workspace', href: '/' }, { label: 'Invoices' }],
+  '/vendors': [{ label: 'Workspace', href: '/' }, { label: 'Vendors' }],
+  '/expenses': [{ label: 'Workspace', href: '/' }, { label: 'Expenses' }],
+  '/years': [{ label: 'Workspace', href: '/' }, { label: 'Years' }],
+  '/best': [{ label: 'Insights' }, { label: 'Best Performances' }],
+  '/payments': [{ label: 'Insights' }, { label: 'Payment Options' }],
+  '/payment': [{ label: 'Payment' }],
+  '/settings/templates': [{ label: 'Invoices', href: '/invoices' }, { label: 'Templates' }],
+  '/settings/backups': [{ label: 'Insights' }, { label: 'Backup Status' }],
+  '/settings/account': [{ label: 'Account' }],
+  '/settings/account/profile': [{ label: 'Account', href: '/settings/account' }, { label: 'Profile' }],
+  '/settings/account/api-keys': [{ label: 'Account', href: '/settings/account' }, { label: 'API Keys' }],
+  '/settings/account/password': [{ label: 'Account', href: '/settings/account' }, { label: 'Password' }],
+  '/settings/account/security': [{ label: 'Account', href: '/settings/account' }, { label: 'Security' }],
+  '/settings/password': [{ label: 'Settings' }, { label: 'Password' }],
+  '/settings/security': [{ label: 'Settings' }, { label: 'Security' }]
+};
+
+const resourceBreadcrumbs = {
+  clients: { plural: 'Clients', singular: 'Client' },
+  invoices: { plural: 'Invoices', singular: 'Invoice' },
+  vendors: { plural: 'Vendors', singular: 'Vendor' },
+  expenses: { plural: 'Expenses', singular: 'Expense' },
+  years: { plural: 'Years', singular: 'Year' }
+};
+
+function getBreadcrumbItems(pathname) {
+  if (staticBreadcrumbs[pathname]) return staticBreadcrumbs[pathname];
+
+  const segments = pathname.split('/').filter(Boolean);
+  const resource = resourceBreadcrumbs[segments[0]];
+  if (!resource) return [{ label: segments.at(-1)?.replaceAll('-', ' ') || 'Page' }];
+
+  const basePath = `/${segments[0]}`;
+  const items = [{ label: 'Workspace', href: '/' }, { label: resource.plural, href: basePath }];
+  if (segments[1] === 'new') return [...items, { label: `New ${resource.singular}` }];
+  if (segments.length < 2) return items;
+
+  const detailPath = `${basePath}/${segments[1]}`;
+  const detailLabel = segments[0] === 'years' ? segments[1] : `${resource.singular} #${segments[1]}`;
+  items.push({ label: detailLabel, href: detailPath });
+  if (segments[2] === 'edit') items.push({ label: 'Edit' });
+  return items;
+}
 
 function NavItem({ pathname, item }) {
   const { setOpenMobile } = useSidebar();
@@ -154,6 +210,32 @@ function SidebarSearch() {
   }
 
   return <OmniSearch />;
+}
+
+function Breadcrumbs({ pathname }) {
+  const items = getBreadcrumbItems(pathname);
+  return (
+    <Breadcrumb className="min-w-0">
+      <BreadcrumbList className="flex-nowrap overflow-hidden">
+        {items.map((item, index) => (
+          <Fragment key={`${item.label}-${index}`}>
+            {index > 0 && <BreadcrumbSeparator />}
+            <BreadcrumbItem className={index < items.length - 1 ? 'hidden md:inline-flex' : 'min-w-0'}>
+              {index === items.length - 1 ? (
+                <BreadcrumbPage className="truncate">{item.label}</BreadcrumbPage>
+              ) : item.href ? (
+                <BreadcrumbLink asChild>
+                  <Link href={item.href} className="truncate">{item.label}</Link>
+                </BreadcrumbLink>
+              ) : (
+                <span className="truncate">{item.label}</span>
+              )}
+            </BreadcrumbItem>
+          </Fragment>
+        ))}
+      </BreadcrumbList>
+    </Breadcrumb>
+  );
 }
 
 export default function AppShell({ children, user, avatarUrl }) {
@@ -267,6 +349,8 @@ export default function AppShell({ children, user, avatarUrl }) {
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 px-4 transition-[height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
           <SidebarTrigger />
+          <div aria-hidden="true" className="h-4 w-px shrink-0 bg-border" />
+          <Breadcrumbs pathname={pathname} />
         </header>
         <main className="main-content">{children}</main>
       </SidebarInset>
