@@ -1,13 +1,15 @@
 'use client';
 
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { browserApiBaseUrl } from '../lib/api.js';
+import { Alert, AlertDescription } from './ui/alert.js';
 import { Button } from './ui/button.js';
 import { Input } from './ui/input.js';
+import { Spinner } from './ui/spinner.js';
 
 export default function ChangePasswordForm() {
   const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
 
   async function submit(event) {
@@ -15,7 +17,6 @@ export default function ChangePasswordForm() {
     const formElement = event.currentTarget;
     setBusy(true);
     setError('');
-    setMessage('');
     const form = new FormData(formElement);
     const currentPassword = form.get('current_password');
     const newPassword = form.get('new_password');
@@ -35,7 +36,7 @@ export default function ChangePasswordForm() {
       const result = await response.json().catch(() => null);
       if (!response.ok) throw new Error(result?.error || 'Could not update password.');
       formElement.reset();
-      setMessage(result.message);
+      toast.success(result.message || 'Password updated.');
     } catch (cause) {
       setError(cause.message);
     } finally {
@@ -61,9 +62,8 @@ export default function ChangePasswordForm() {
           <span className="form-label">Confirm new password</span>
           <Input name="new_password_confirmation" type="password" autoComplete="new-password" minLength={8} required />
         </label>
-        {error && <p className="form-error" role="alert">{error}</p>}
-        {message && <p className="security-message" role="status">{message}</p>}
-        <div className="form-actions"><Button type="submit" disabled={busy}>{busy ? 'Updating...' : 'Update password'}</Button></div>
+        {error && <Alert className="form-field-wide" variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
+        <div className="form-actions"><Button aria-busy={busy} type="submit" disabled={busy}>{busy && <Spinner />}{busy ? 'Updating...' : 'Update password'}</Button></div>
       </form>
     </section>
   );

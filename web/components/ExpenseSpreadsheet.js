@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Plus, Save } from 'lucide-react';
+import { Spinner } from './ui/spinner.js';
 import { Button } from './ui/button.js';
 import { formatMoney } from '../lib/api.js';
 import { expenseAccountOptions } from '../lib/record-fields.js';
@@ -213,7 +214,7 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
 
       <div className="sheet-toolbar">
         <span className={`sheet-state${changedCount ? ' is-dirty' : ''}`}>{changedCount ? `${changedCount} unsaved change${changedCount === 1 ? '' : 's'}` : message || 'All changes saved'}</span>
-        <Button type="button" disabled={busy || !changedCount} onClick={saveChanges}><Save className="size-4" aria-hidden="true" />{busy ? 'Saving...' : `Save changes${changedCount ? ` (${changedCount})` : ''}`}</Button>
+        <Button aria-busy={busy} type="button" disabled={busy || !changedCount} onClick={saveChanges}>{busy ? <Spinner /> : <Save className="size-4" aria-hidden="true" />}{busy ? 'Saving...' : `Save changes${changedCount ? ` (${changedCount})` : ''}`}</Button>
       </div>
       {error && <Notice className="sheet-notice" title="Could not save batch">{error}</Notice>}
 
@@ -308,7 +309,7 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
         </SpreadsheetTable>
         <div className="sheet-add-action">
           <span className="section-note">{draftCount} filled row{draftCount === 1 ? '' : 's'}</span>
-          <Button type="button" disabled={busy || !draftCount} onClick={addExpenses}>{busy ? 'Saving...' : `Add expenses${draftCount ? ` (${draftCount})` : ''}`}</Button>
+          <Button aria-busy={busy} type="button" disabled={busy || !draftCount} onClick={addExpenses}>{busy ? <Spinner /> : <Plus className="size-4" aria-hidden="true" />}{busy ? 'Saving...' : `Add expenses${draftCount ? ` (${draftCount})` : ''}`}</Button>
         </div>
       </section>
     </>

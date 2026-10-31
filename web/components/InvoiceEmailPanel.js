@@ -3,8 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Mail } from 'lucide-react';
+import { toast } from 'sonner';
 import { browserApiBaseUrl, formatDateTime } from '../lib/api.js';
 import { Button } from './ui/button.js';
+import { Alert, AlertDescription } from './ui/alert.js';
+import { Spinner } from './ui/spinner.js';
 
 export default function InvoiceEmailPanel({ invoiceId, initialSends = [], historyError = '' }) {
   const router = useRouter();
@@ -24,6 +27,7 @@ export default function InvoiceEmailPanel({ invoiceId, initialSends = [], histor
         return;
       }
       if (body?.email_send) setSends((current) => [body.email_send, ...current]);
+      toast.success('Invoice email sent.');
       setSending(false);
       router.refresh();
     } catch {
@@ -37,11 +41,11 @@ export default function InvoiceEmailPanel({ invoiceId, initialSends = [], histor
       <div className="section-heading">
         <h2>Email history</h2>
         <Button variant="outline" type="button" disabled={sending} aria-busy={sending} onClick={sendEmail}>
-          <Mail className="size-4" aria-hidden="true" />
+          {sending ? <Spinner /> : <Mail className="size-4" aria-hidden="true" />}
           {sending ? 'Sending...' : sends.length ? 'Resend invoice email' : 'Send invoice email'}
         </Button>
       </div>
-      {error && <p className="action-error" role="alert">{error}</p>}
+      {error && <Alert className="mt-2" variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
       {sends.length ? (
         <ul className="invoice-email-history">
           {sends.map((send, index) => (

@@ -2,22 +2,23 @@
 
 import { useState } from 'react';
 import { Save } from 'lucide-react';
+import { toast } from 'sonner';
 import { browserApiBaseUrl } from '../lib/api.js';
+import { Alert, AlertDescription } from './ui/alert.js';
 import { Button } from './ui/button.js';
 import { Input } from './ui/input.js';
+import { Spinner } from './ui/spinner.js';
 
 export default function AccountProfileForm({ initialUser }) {
   const [firstName, setFirstName] = useState(initialUser?.first_name || '');
   const [lastName, setLastName] = useState(initialUser?.last_name || '');
   const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
 
   async function submit(event) {
     event.preventDefault();
     setBusy(true);
     setError('');
-    setMessage('');
 
     try {
       const response = await fetch(`${browserApiBaseUrl}/auth/profile`, {
@@ -34,7 +35,7 @@ export default function AccountProfileForm({ initialUser }) {
 
       setFirstName(result.user?.first_name || '');
       setLastName(result.user?.last_name || '');
-      setMessage(result.message || 'Profile updated.');
+      toast.success(result.message || 'Profile updated.');
     } catch (cause) {
       setError(cause.message);
     } finally {
@@ -73,10 +74,9 @@ export default function AccountProfileForm({ initialUser }) {
             onChange={(event) => setLastName(event.target.value)}
           />
         </label>
-        {error && <p className="form-error" role="alert">{error}</p>}
-        {message && <p className="security-message" role="status">{message}</p>}
+        {error && <Alert className="form-field-wide" variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
         <div className="form-actions">
-          <Button type="submit" disabled={busy}><Save className="size-4" aria-hidden="true" />{busy ? 'Saving...' : 'Save profile'}</Button>
+          <Button aria-busy={busy} type="submit" disabled={busy}>{busy ? <Spinner /> : <Save className="size-4" aria-hidden="true" />}{busy ? 'Saving...' : 'Save profile'}</Button>
         </div>
       </form>
     </section>

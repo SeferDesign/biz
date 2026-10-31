@@ -17,6 +17,7 @@ export default async function NewInvoiceTemplatePage() {
       fields={invoiceTemplateFields(clientsResult.data || [])}
       endpoint={`${browserApiBaseUrl}/invoice-templates`}
       returnTo="/settings/templates"
+      createdRecordHref="/settings/templates/:id/edit"
       submitLabel="Create template"
     />
   );

@@ -7,6 +7,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { browserApiBaseUrl } from '../lib/api.js';
 import { Command, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from './ui/command.js';
 import { Kbd } from './ui/kbd.js';
+import { Skeleton } from './ui/skeleton.js';
 
 const resultGroups = [
   { type: 'Client', label: 'Clients', Icon: Users },
@@ -149,9 +150,14 @@ export default function OmniSearch({ compact = false }) {
               )}
               {hasQuery && canSearch && <CommandSeparator />}
               {loading || error ? (
-                <div className="py-8 text-center text-sm text-muted-foreground" role="status">
-                  {loading ? 'Searching records...' : error}
-                </div>
+                loading ? (
+                  <div className="space-y-2 p-3" role="status" aria-label="Searching records">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-4/5" />
+                    <Skeleton className="h-10 w-3/5" />
+                    <span className="sr-only">Searching records...</span>
+                  </div>
+                ) : <div className="py-8 text-center text-sm text-muted-foreground" role="status">{error}</div>
               ) : canSearch ? (
                 <>
                   {groupedResults.map(({ type, label, Icon, items }, index) => (

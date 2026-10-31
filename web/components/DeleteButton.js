@@ -3,11 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from './ui/button.js';
-import { ButtonGroupText } from './ui/button-group.js';
+import { Alert, AlertDescription } from './ui/alert.js';
+import { Spinner } from './ui/spinner.js';
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -19,6 +20,7 @@ import {
 
 export default function DeleteButton({ endpoint, returnTo, label = 'Delete record' }) {
   const router = useRouter();
+  const [open, setOpen] = useState(false);
   const [error, setError] = useState('');
   const [deleting, setDeleting] = useState(false);
 
@@ -33,6 +35,8 @@ export default function DeleteButton({ endpoint, returnTo, label = 'Delete recor
         setDeleting(false);
         return;
       }
+      toast.success(`${label} completed.`);
+      setOpen(false);
       router.push(returnTo);
       router.refresh();
     } catch {
@@ -43,22 +47,22 @@ export default function DeleteButton({ endpoint, returnTo, label = 'Delete recor
 
   return (
     <>
-      <AlertDialog>
+      <AlertDialog open={open} onOpenChange={(nextOpen) => { if (!deleting) setOpen(nextOpen); }}>
         <AlertDialogTrigger asChild>
-          <Button variant="destructive" type="button" disabled={deleting}><Trash2 className="size-4" aria-hidden="true" />{label}</Button>
+          <Button variant="destructive" type="button"><Trash2 className="size-4" aria-hidden="true" />{label}</Button>
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{label}?</AlertDialogTitle>
             <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
           </AlertDialogHeader>
+          {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
           <AlertDialogFooter>
-            <AlertDialogCancel asChild><Button variant="outline">Cancel</Button></AlertDialogCancel>
-            <AlertDialogAction asChild><Button variant="destructive" disabled={deleting} onClick={remove}><Trash2 className="size-4" aria-hidden="true" />{deleting ? 'Deleting...' : label}</Button></AlertDialogAction>
+            <AlertDialogCancel asChild><Button variant="outline" disabled={deleting}>Cancel</Button></AlertDialogCancel>
+            <Button aria-busy={deleting} variant="destructive" disabled={deleting} onClick={remove}>{deleting ? <Spinner /> : <Trash2 className="size-4" aria-hidden="true" />}{deleting ? 'Deleting...' : label}</Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      {error && <ButtonGroupText className="action-error whitespace-normal" role="alert">{error}</ButtonGroupText>}
     </>
   );
 }

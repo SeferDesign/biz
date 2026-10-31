@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Button } from './ui/button.js';
 import { ArrowRight, Check, Copy, CreditCard, Landmark } from 'lucide-react';
+import { Spinner } from './ui/spinner.js';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card.js';
 import { Separator } from './ui/separator.js';
 import { browserApiBaseUrl, formatMoney } from '../lib/api.js';
@@ -12,6 +13,7 @@ export default function InvoicePayment({ invoiceId, accessToken, methods = [], a
   const [pendingMethod, setPendingMethod] = useState('');
   const [error, setError] = useState('');
   const [zelleCopied, setZelleCopied] = useState(false);
+  const [copyingZelle, setCopyingZelle] = useState(false);
   const fromCents = (cents) => formatMoney(cents / 100, currency);
   const amountLabel = formatMoney(amount, currency);
   const invoiceReference = `Invoice #${displayIdNumber(invoiceId)}`;
@@ -19,11 +21,14 @@ export default function InvoicePayment({ invoiceId, accessToken, methods = [], a
   async function copyZelleDetails() {
     setError('');
     setZelleCopied(false);
+    setCopyingZelle(true);
     try {
       await navigator.clipboard.writeText(`Zelle recipient: ${companyInfo.emailContact}\nAmount: ${amountLabel}\nMemo: ${invoiceReference}`);
       setZelleCopied(true);
     } catch {
       setError('Could not copy payment details. Please try again or use another payment method.');
+    } finally {
+      setCopyingZelle(false);
     }
   }
 
@@ -74,7 +79,7 @@ export default function InvoicePayment({ invoiceId, accessToken, methods = [], a
                 type="button"
               >
                 {pendingMethod === option.method ? 'Opening checkout...' : 'Pay now'}
-                <ArrowRight className="size-4" aria-hidden="true" />
+                {pendingMethod === option.method ? <Spinner /> : <ArrowRight className="size-4" aria-hidden="true" />}
               </Button>
             </CardContent>
           </Card>
@@ -92,9 +97,9 @@ export default function InvoicePayment({ invoiceId, accessToken, methods = [], a
           <CardContent className="mt-auto space-y-4">
             <Separator />
             <p className="text-2xl font-semibold tabular-nums">{amountLabel}</p>
-            <Button className="w-full justify-between" variant="outline" disabled={Boolean(pendingMethod)} onClick={copyZelleDetails} type="button">
-              {zelleCopied ? 'Payment details copied' : 'Copy payment details'}
-              {zelleCopied ? <Check className="size-4" aria-hidden="true" /> : <Copy className="size-4" aria-hidden="true" />}
+            <Button className="w-full justify-between" variant="outline" disabled={Boolean(pendingMethod) || copyingZelle} aria-busy={copyingZelle} onClick={copyZelleDetails} type="button">
+              {copyingZelle ? 'Copying payment details...' : zelleCopied ? 'Payment details copied' : 'Copy payment details'}
+              {copyingZelle ? <Spinner /> : zelleCopied ? <Check className="size-4" aria-hidden="true" /> : <Copy className="size-4" aria-hidden="true" />}
             </Button>
           </CardContent>
         </Card>

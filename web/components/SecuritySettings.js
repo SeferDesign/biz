@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { browserApiBaseUrl } from '../lib/api.js';
 import { startRegistration } from '@simplewebauthn/browser';
 import { KeyRound, Trash2 } from 'lucide-react';
@@ -9,6 +10,8 @@ import { Input } from './ui/input.js';
 import { Badge } from './ui/badge.js';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card.js';
 import { Empty, EmptyHeader, EmptyTitle } from './ui/empty.js';
+import { Alert, AlertDescription } from './ui/alert.js';
+import { Spinner } from './ui/spinner.js';
 
 async function postJson(path, body = {}) {
   const response = await fetch(path, {
@@ -36,60 +39,55 @@ export default function SecuritySettings({ initialSettings }) {
   const [code, setCode] = useState('');
   const [passkeyName, setPasskeyName] = useState('');
   const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState('');
 
   async function startSetup() {
-    setBusy(true);
+    setBusy('setup');
     setError('');
-    setMessage('');
     try {
       setSetup(await postJson(`${browserApiBaseUrl}/auth/otp/setup`));
     } catch (cause) {
       setError(cause.message);
     } finally {
-      setBusy(false);
+      setBusy('');
     }
   }
 
   async function enable(event) {
     event.preventDefault();
-    setBusy(true);
+    setBusy('enable');
     setError('');
-    setMessage('');
     try {
       setSettings(await postJson(`${browserApiBaseUrl}/auth/otp/enable`, { otp_attempt: code }));
       setSetup(null);
       setCode('');
-      setMessage('Two-factor authentication is enabled.');
+      toast.success('Two-factor authentication is enabled.');
     } catch (cause) {
       setError(cause.message);
     } finally {
-      setBusy(false);
+      setBusy('');
     }
   }
 
   async function disable(event) {
     event.preventDefault();
-    setBusy(true);
+    setBusy('disable');
     setError('');
-    setMessage('');
     try {
       setSettings(await postJson(`${browserApiBaseUrl}/auth/otp/disable`, { otp_attempt: code }));
       setCode('');
       setSetup(null);
-      setMessage('Two-factor authentication is disabled.');
+      toast.success('Two-factor authentication is disabled.');
     } catch (cause) {
       setError(cause.message);
     } finally {
-      setBusy(false);
+      setBusy('');
     }
   }
 
   async function addPasskey() {
-    setBusy(true);
+    setBusy('passkey');
     setError('');
-    setMessage('');
     try {
       const options = await postJson(`${browserApiBaseUrl}/auth/passkeys/registration/options`);
       const credential = await startRegistration({ optionsJSON: options.publicKey });
@@ -100,26 +98,25 @@ export default function SecuritySettings({ initialSettings }) {
       });
       setSettings((current) => ({ ...current, passkeys: [...current.passkeys, created] }));
       setPasskeyName('');
-      setMessage('Passkey added.');
+      toast.success('Passkey added.');
     } catch (cause) {
       setError(cause.message || 'Passkey setup was cancelled or failed. Try again.');
     } finally {
-      setBusy(false);
+      setBusy('');
     }
   }
 
   async function removePasskey(id) {
-    setBusy(true);
+    setBusy(`remove:${id}`);
     setError('');
-    setMessage('');
     try {
       await deleteRequest(`${browserApiBaseUrl}/auth/passkeys/${id}`);
       setSettings((current) => ({ ...current, passkeys: current.passkeys.filter((passkey) => passkey.id !== id) }));
-      setMessage('Passkey removed.');
+      toast.success('Passkey removed.');
     } catch (cause) {
       setError(cause.message);
     } finally {
-      setBusy(false);
+      setBusy('');
     }
   }
 
@@ -147,8 +144,9 @@ export default function SecuritySettings({ initialSettings }) {
         </div>
 
         {!settings.otp_enabled && !setup && (
-          <Button type="button" disabled={busy} onClick={startSetup}>
-            {busy ? 'Preparing...' : settings.otp_configured ? 'Replace authenticator setup' : 'Set up authenticator'}
+          <Button aria-busy={busy === 'setup'} type="button" disabled={Boolean(busy)} onClick={startSetup}>
+            {busy === 'setup' && <Spinner />}
+            {busy === 'setup' ? 'Preparing...' : settings.otp_configured ? 'Replace authenticator setup' : 'Set up authenticator'}
           </Button>
         )}
 
@@ -165,7 +163,7 @@ export default function SecuritySettings({ initialSettings }) {
                   <span className="form-label">Current authenticator code</span>
                   <Input value={code} onChange={(event) => setCode(event.target.value)} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9 ]{6,12}" required />
                 </label>
-                <Button type="submit" disabled={busy}>{busy ? 'Verifying...' : 'Verify and enable'}</Button>
+                <Button aria-busy={busy === 'enable'} type="submit" disabled={Boolean(busy)}>{busy === 'enable' && <Spinner />}{busy === 'enable' ? 'Verifying...' : 'Verify and enable'}</Button>
               </form>
             </CardContent>
           </Card>
@@ -177,7 +175,7 @@ export default function SecuritySettings({ initialSettings }) {
               <span className="form-label">Current authenticator code</span>
               <Input value={code} onChange={(event) => setCode(event.target.value)} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9 ]{6,12}" required />
             </label>
-            <Button variant="destructive" type="submit" disabled={busy}>{busy ? 'Verifying...' : 'Disable two-factor authentication'}</Button>
+            <Button aria-busy={busy === 'disable'} variant="destructive" type="submit" disabled={Boolean(busy)}>{busy === 'disable' && <Spinner />}{busy === 'disable' ? 'Verifying...' : 'Disable two-factor authentication'}</Button>
           </form>
         )}
 
@@ -192,9 +190,9 @@ export default function SecuritySettings({ initialSettings }) {
                 <span className="form-label">Passkey name</span>
                 <Input value={passkeyName} onChange={(event) => setPasskeyName(event.target.value)} maxLength={255} placeholder="e.g. MacBook" />
               </label>
-              <Button type="button" disabled={busy} onClick={addPasskey}>
-                <KeyRound aria-hidden="true" size={16} />
-                Add passkey
+              <Button aria-busy={busy === 'passkey'} type="button" disabled={Boolean(busy)} onClick={addPasskey}>
+                {busy === 'passkey' ? <Spinner /> : <KeyRound aria-hidden="true" size={16} />}
+                {busy === 'passkey' ? 'Adding passkey...' : 'Add passkey'}
               </Button>
             </div>
           </div>
@@ -208,10 +206,11 @@ export default function SecuritySettings({ initialSettings }) {
                     title={`Remove ${passkey.name}`}
                     variant="outline"
                     type="button"
-                    disabled={busy}
+                    disabled={Boolean(busy)}
+                    aria-busy={busy === `remove:${passkey.id}`}
                     onClick={() => removePasskey(passkey.id)}
                   >
-                    <Trash2 aria-hidden="true" size={16} />
+                    {busy === `remove:${passkey.id}` ? <Spinner /> : <Trash2 aria-hidden="true" size={16} />}
                   </Button>
                 </li>
               ))}
@@ -225,8 +224,7 @@ export default function SecuritySettings({ initialSettings }) {
           )}
         </section>
 
-        {error && <p className="form-error" role="alert">{error}</p>}
-        {message && <p className="security-message" role="status">{message}</p>}
+        {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
       </div>
     </section>
   );

@@ -1,4 +1,5 @@
 import AppShell from '../components/AppShell.js';
+import { Toaster } from '../components/ui/sonner.js';
 import { createHash } from 'node:crypto';
 import { getApiData } from '../lib/api-server.js';
 import './globals.css';
@@ -20,7 +21,10 @@ export default async function RootLayout({ children }) {
     : undefined;
   return (
     <html lang="en">
-      <body><AppShell user={session.data?.user} avatarUrl={avatarUrl}>{children}</AppShell></body>
+      <body>
+        <AppShell user={session.data?.user} avatarUrl={avatarUrl}>{children}</AppShell>
+        <Toaster />
+      </body>
     </html>
   );
 }

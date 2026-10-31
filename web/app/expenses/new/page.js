@@ -11,5 +11,5 @@ export default async function NewExpensePage({ searchParams }) {
   const initialVendorId = vendors.some((vendor) => Number(vendor.id) === requestedVendorId)
     ? requestedVendorId
     : '';
-  return <RecordForm title="New expense" description="Record a business expense and its vendor." fields={expenseFields(vendors)} initialValues={{ vendor_id: initialVendorId, date: new Date().toISOString().slice(0, 10), cost: '' }} endpoint={`${browserApiBaseUrl}/expenses`} returnTo="/expenses" submitLabel="Create expense" />;
+  return <RecordForm title="New expense" description="Record a business expense and its vendor." fields={expenseFields(vendors)} initialValues={{ vendor_id: initialVendorId, date: new Date().toISOString().slice(0, 10), cost: '' }} endpoint={`${browserApiBaseUrl}/expenses`} returnTo="/expenses" createdRecordHref="/expenses/:id" submitLabel="Create expense" />;
 }

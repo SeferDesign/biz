@@ -11,16 +11,18 @@ import { companyInfo } from '@seferbiz/company';
 import { Button } from './ui/button.js';
 import { Input } from './ui/input.js';
 import { Card } from './ui/card.js';
+import { Alert, AlertDescription } from './ui/alert.js';
+import { Spinner } from './ui/spinner.js';
 
 export default function LoginForm({ returnTo }) {
   const router = useRouter();
   const [error, setError] = useState('');
-  const [submitting, setSubmitting] = useState(false);
+  const [submitting, setSubmitting] = useState('');
 
   async function submit(event) {
     event.preventDefault();
     setError('');
-    setSubmitting(true);
+    setSubmitting('password');
     const form = new FormData(event.currentTarget);
     try {
       const response = await fetch(`${browserApiBaseUrl}/auth/login`, {
@@ -36,20 +38,20 @@ export default function LoginForm({ returnTo }) {
       const result = await response.json().catch(() => null);
       if (!response.ok) {
         setError(result?.error || 'Sign-in failed. Check your credentials and try again.');
-        setSubmitting(false);
+        setSubmitting('');
         return;
       }
       router.replace(returnTo);
       router.refresh();
     } catch {
       setError('Authentication service is unavailable. Try again shortly.');
-      setSubmitting(false);
+      setSubmitting('');
     }
   }
 
   async function signInWithPasskey() {
     setError('');
-    setSubmitting(true);
+    setSubmitting('passkey');
     try {
       const optionsResponse = await fetch(`${browserApiBaseUrl}/auth/passkeys/authentication/options`, {
         method: 'POST',
@@ -73,7 +75,7 @@ export default function LoginForm({ returnTo }) {
     } catch (cause) {
       setError(cause.message || 'Passkey sign-in was cancelled or failed. Try again.');
     } finally {
-      setSubmitting(false);
+      setSubmitting('');
     }
   }
 
@@ -95,18 +97,19 @@ export default function LoginForm({ returnTo }) {
             <Input name="otp_attempt" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={12} />
           </label>
           <Link className="auth-inline-link" href="/forgot-password">Forgot your password?</Link>
-          {error && <p className="form-error" role="alert">{error}</p>}
-          <Button className="login-submit" disabled={submitting} type="submit">
-            {submitting ? 'Signing in...' : 'Sign in'}
+          {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
+          <Button className="login-submit" aria-busy={submitting === 'password'} disabled={Boolean(submitting)} type="submit">
+            {submitting === 'password' && <Spinner />}
+            {submitting === 'password' ? 'Signing in...' : 'Sign in'}
           </Button>
           <div className="flex w-full items-center gap-3 text-xs text-muted-foreground" aria-hidden="true">
             <span className="h-px flex-1 bg-border" />
             <span>or</span>
             <span className="h-px flex-1 bg-border" />
           </div>
-          <Button className="login-submit passkey-submit" variant="outline" disabled={submitting} onClick={signInWithPasskey} type="button">
-            <KeyRound aria-hidden="true" size={16} />
-            {submitting ? 'Waiting for passkey...' : 'Sign in with a passkey'}
+          <Button className="login-submit passkey-submit" aria-busy={submitting === 'passkey'} variant="outline" disabled={Boolean(submitting)} onClick={signInWithPasskey} type="button">
+            {submitting === 'passkey' ? <Spinner /> : <KeyRound aria-hidden="true" size={16} />}
+            {submitting === 'passkey' ? 'Waiting for passkey...' : 'Sign in with a passkey'}
           </Button>
         </form>
       </Card>

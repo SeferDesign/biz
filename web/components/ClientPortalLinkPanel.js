@@ -2,9 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { Copy, Link2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { browserApiBaseUrl } from '../lib/api.js';
+import { Alert, AlertDescription } from './ui/alert.js';
 import { Button } from './ui/button.js';
 import { Input } from './ui/input.js';
+import { Spinner } from './ui/spinner.js';
 
 export default function ClientPortalLinkPanel({ clientId, initialAccessToken }) {
   const [accessToken, setAccessToken] = useState(initialAccessToken || '');
@@ -24,6 +27,7 @@ export default function ClientPortalLinkPanel({ clientId, initialAccessToken }) 
       if (!response.ok || !body?.access_token) throw new Error(body?.error || `Could not create link (${response.status})`);
       setAccessToken(body.access_token);
       setStatus('');
+      toast.success('Client portal link created.');
     } catch (createError) {
       setError(createError.message);
       setStatus('');
@@ -50,11 +54,11 @@ export default function ClientPortalLinkPanel({ clientId, initialAccessToken }) 
         </div>
       ) : (
         <Button variant="outline" type="button" disabled={status === 'creating'} onClick={createLink}>
-          <Link2 className="size-4" aria-hidden="true" />
+          {status === 'creating' ? <Spinner /> : <Link2 className="size-4" aria-hidden="true" />}
           {status === 'creating' ? 'Creating...' : 'Create client link'}
         </Button>
       )}
-      {error && <p className="action-error" role="alert">{error}</p>}
+      {error && <Alert className="mt-2" variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
     </section>
   );
 }

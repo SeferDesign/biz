@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Play, RefreshCw } from 'lucide-react';
 import { Button } from './ui/button.js';
@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Alert, AlertDescription } from './ui/alert.js';
 import { Separator } from './ui/separator.js';
 import { browserApiBaseUrl } from '../lib/api.js';
+import { Spinner } from './ui/spinner.js';
 
 const stateLabels = {
   success: 'Successful',
@@ -44,6 +45,7 @@ export default function BackupStatus({ status }) {
   const [requestQueued, setRequestQueued] = useState(false);
   const [requestMessage, setRequestMessage] = useState('');
   const [requestError, setRequestError] = useState('');
+  const [refreshing, startRefresh] = useTransition();
   const state = stateLabels[status?.state] ? status.state : 'unavailable';
 
   async function triggerBackup() {
@@ -68,7 +70,7 @@ export default function BackupStatus({ status }) {
     setRequestQueued(false);
     setRequestMessage('');
     setRequestError('');
-    router.refresh();
+    startRefresh(() => router.refresh());
   }
 
   return (
@@ -79,11 +81,11 @@ export default function BackupStatus({ status }) {
           <p className="text-sm text-muted-foreground">Nightly MySQL backup uploads to encrypted S3 storage.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button type="button" variant="outline" size="icon" aria-label="Refresh backup status" title="Refresh backup status" onClick={refreshStatus}>
-            <RefreshCw className="size-4" aria-hidden="true" />
+          <Button aria-busy={refreshing} type="button" variant="outline" size="icon" aria-label="Refresh backup status" title="Refresh backup status" disabled={refreshing} onClick={refreshStatus}>
+            {refreshing ? <Spinner /> : <RefreshCw className="size-4" aria-hidden="true" />}
           </Button>
-          <Button type="button" disabled={!status?.configured || state === 'running' || requesting || requestQueued} onClick={triggerBackup}>
-            <Play className="size-4" aria-hidden="true" />
+          <Button aria-busy={requesting} type="button" disabled={!status?.configured || state === 'running' || requesting || requestQueued} onClick={triggerBackup}>
+            {requesting ? <Spinner /> : <Play className="size-4" aria-hidden="true" />}
             {requesting ? 'Queueing backup...' : state === 'running' ? 'Backup running' : requestQueued ? 'Backup queued' : 'Run backup now'}
           </Button>
         </div>

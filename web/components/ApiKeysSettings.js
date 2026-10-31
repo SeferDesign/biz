@@ -2,9 +2,12 @@
 
 import { useState } from 'react';
 import { KeyRound, Save, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { browserApiBaseUrl } from '../lib/api.js';
+import { Alert, AlertDescription } from './ui/alert.js';
 import { Button } from './ui/button.js';
 import { Input } from './ui/input.js';
+import { Spinner } from './ui/spinner.js';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table.js';
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from './ui/empty.js';
 
@@ -64,7 +67,7 @@ export default function ApiKeysSettings({ initialKeys }) {
 
   async function createKey(event) {
     event.preventDefault();
-    setBusy(true);
+    setBusy('create');
     setError('');
     setMessage('');
     try {
@@ -75,7 +78,7 @@ export default function ApiKeysSettings({ initialKeys }) {
       setKeys((previous) => [created, ...previous]);
       setNewLabel('');
       setNewKey('');
-      setMessage('API key created.');
+      toast.success('API key created.');
     } catch (cause) {
       setError(cause.message);
     } finally {
@@ -84,7 +87,7 @@ export default function ApiKeysSettings({ initialKeys }) {
   }
 
   async function updateKey(id, label, key) {
-    setBusy(true);
+    setBusy(`save:${id}`);
     setError('');
     setMessage('');
     try {
@@ -93,7 +96,7 @@ export default function ApiKeysSettings({ initialKeys }) {
         body: JSON.stringify({ label, key })
       });
       setKeys((previous) => previous.map((entry) => (entry.id === id ? updated : entry)));
-      setMessage('API key updated.');
+      toast.success('API key updated.');
     } catch (cause) {
       setError(cause.message);
     } finally {
@@ -102,7 +105,7 @@ export default function ApiKeysSettings({ initialKeys }) {
   }
 
   async function deleteKey(id) {
-    setBusy(true);
+    setBusy(`delete:${id}`);
     setError('');
     setMessage('');
     try {
@@ -112,7 +115,7 @@ export default function ApiKeysSettings({ initialKeys }) {
         throw new Error(body?.error || `Request failed (${response.status})`);
       }
       setKeys((previous) => previous.filter((entry) => entry.id !== id));
-      setMessage('API key deleted.');
+      toast.success('API key deleted.');
     } catch (cause) {
       setError(cause.message);
     } finally {
@@ -153,8 +156,8 @@ export default function ApiKeysSettings({ initialKeys }) {
           />
         </label>
         <div className="form-actions">
-          <Button variant="outline" type="button" disabled={busy} onClick={populateGeneratedKey}><KeyRound className="size-4" aria-hidden="true" />Generate key</Button>
-          <Button type="submit" disabled={busy}><KeyRound className="size-4" aria-hidden="true" />{busy ? 'Saving...' : 'Create key'}</Button>
+          <Button variant="outline" type="button" disabled={Boolean(busy)} onClick={populateGeneratedKey}><KeyRound className="size-4" aria-hidden="true" />Generate key</Button>
+          <Button aria-busy={busy === 'create'} type="submit" disabled={Boolean(busy)}>{busy === 'create' ? <Spinner /> : <KeyRound className="size-4" aria-hidden="true" />}{busy === 'create' ? 'Saving...' : 'Create key'}</Button>
         </div>
       </form>
 
@@ -191,7 +194,7 @@ export default function ApiKeysSettings({ initialKeys }) {
         </div>
       )}
 
-      {error && <p className="form-error" role="alert">{error}</p>}
+      {error && <Alert className="mt-4" variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
       {message && <p className="security-message" role="status">{message}</p>}
     </section>
   );
@@ -212,8 +215,8 @@ function ApiKeyRow({ entry, onSave, onDelete, busy }) {
       <TableCell>{formatDateTime(entry.last_used_at)}</TableCell>
       <TableCell>
         <div className="resource-actions">
-          <Button size="sm" type="button" disabled={busy} onClick={() => onSave(entry.id, label, key)}><Save className="size-4" aria-hidden="true" />Save</Button>
-          <Button size="sm" variant="destructive" type="button" disabled={busy} onClick={() => onDelete(entry.id)}><Trash2 className="size-4" aria-hidden="true" />Delete</Button>
+          <Button size="sm" type="button" disabled={Boolean(busy)} aria-busy={busy === `save:${entry.id}`} onClick={() => onSave(entry.id, label, key)}>{busy === `save:${entry.id}` ? <Spinner /> : <Save className="size-4" aria-hidden="true" />}Save</Button>
+          <Button size="sm" variant="destructive" type="button" disabled={Boolean(busy)} aria-busy={busy === `delete:${entry.id}`} onClick={() => onDelete(entry.id)}>{busy === `delete:${entry.id}` ? <Spinner /> : <Trash2 className="size-4" aria-hidden="true" />}Delete</Button>
         </div>
       </TableCell>
     </TableRow>

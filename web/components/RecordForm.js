@@ -11,6 +11,10 @@ import { Combobox } from './ui/combobox.js';
 import { DatePicker } from './ui/date-picker.js';
 import { browserApiBaseUrl } from '../lib/api.js';
 import { expandInvoiceTemplate } from '../lib/invoice-template.js';
+import { toast } from 'sonner';
+import { Alert, AlertDescription } from './ui/alert.js';
+import { Skeleton } from './ui/skeleton.js';
+import { Spinner } from './ui/spinner.js';
 
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -19,7 +23,7 @@ function initialValue(field, initialValues) {
   return field.multiplier && value !== '' ? Number(value) * field.multiplier : value;
 }
 
-export default function RecordForm({ title, description, fields, initialValues = {}, endpoint, method = 'POST', returnTo, submitLabel, lineItemsEnabled = false, initialLines = [], lineItemsEndpoint, emailEndpoint }) {
+export default function RecordForm({ title, description, fields, initialValues = {}, endpoint, method = 'POST', returnTo, createdRecordHref, submitLabel, lineItemsEnabled = false, initialLines = [], lineItemsEndpoint, emailEndpoint }) {
   const router = useRouter();
   const [values, setValues] = useState(() => Object.fromEntries(fields.map((field) => [field.name, initialValue(field, initialValues)])));
   const [lineItems, setLineItems] = useState(() => initialLines.map((line) => ({
@@ -192,6 +196,23 @@ export default function RecordForm({ title, description, fields, initialValues =
           return;
         }
       }
+      const resourceLabel = title.replace(/^(New|Edit)\s+/i, '');
+      if (saveMethod === 'POST') {
+        const recordName = String(body?.name ?? values.name ?? '').trim()
+          || (values.year ? String(values.year) : '')
+          || (body?.display_id_number != null ? `${resourceLabel} ${body.display_id_number}` : '')
+          || (body?.display_id ? `${resourceLabel} ${body.display_id}` : '')
+          || `${resourceLabel}${body?.id != null ? ` #${body.id}` : ''}`;
+        const recordHref = createdRecordHref && body?.id != null
+          ? createdRecordHref.replace(':id', encodeURIComponent(String(body.id)))
+          : null;
+        toast.success(recordName, {
+          description: `${resourceLabel} created`,
+          ...(recordHref ? { action: { label: 'Open', onClick: () => router.push(recordHref) } } : {})
+        });
+      } else {
+        toast.success(`${resourceLabel} updated`);
+      }
       router.push(returnTo);
       router.refresh();
     } catch {
@@ -261,11 +282,17 @@ export default function RecordForm({ title, description, fields, initialValues =
                     </Button>
                   </div>
                 )}
-                {templateLoading && <span className="form-help" role="status">Loading templates...</span>}
+                {templateLoading && (
+                  <div className="grid min-w-0 grid-cols-2 gap-2" role="status" aria-label="Loading invoice templates">
+                    <Skeleton className="h-10" />
+                    <Skeleton className="h-10" />
+                    <span className="sr-only">Loading invoice templates</span>
+                  </div>
+                )}
               </div>
               <Link href="/settings/templates">Manage templates</Link>
             </div>
-            {templateError && <span className="form-help" role="status">{templateError}</span>}
+            {templateError && <Alert className="mt-2" variant="destructive"><AlertDescription>{templateError}</AlertDescription></Alert>}
             <Textarea
               ref={descriptionRef}
               id="invoice-description"
@@ -361,9 +388,9 @@ export default function RecordForm({ title, description, fields, initialValues =
             <Button className="invoice-line-add" variant="outline" type="button" onClick={() => setLineItems((current) => [...current, { description: '', hours: '', rate: '', total: '' }])}><Plus className="size-4" aria-hidden="true" />Add line item</Button>
           </section>
         )}
-        {error && <p className="form-error" role="alert">{error}</p>}
+        {error && <Alert className="form-field-wide" variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
         <div className="form-actions">
-          <Button disabled={saving} type="submit">{saveMethod === 'POST' ? <Plus className="size-4" aria-hidden="true" /> : <Save className="size-4" aria-hidden="true" />}{saving ? 'Saving...' : submitLabel || 'Save record'}</Button>
+          <Button aria-busy={saving} disabled={saving} type="submit">{saving ? <Spinner /> : saveMethod === 'POST' ? <Plus className="size-4" aria-hidden="true" /> : <Save className="size-4" aria-hidden="true" />}{saving ? 'Saving...' : submitLabel || 'Save record'}</Button>
           <Button asChild variant="link"><Link href={returnTo}>Cancel</Link></Button>
         </div>
       </form>

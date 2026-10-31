@@ -8,6 +8,8 @@ import { browserApiBaseUrl, invoiceStatus } from '../lib/api.js';
 import { StatusBadge } from './ResourcePage.js';
 import { Button } from './ui/button.js';
 import { ButtonGroup } from './ui/button-group.js';
+import { toast } from 'sonner';
+import { Spinner } from './ui/spinner.js';
 
 export default function InvoiceActions({ invoice, lines, linesAvailable = true, compact = false }) {
   const router = useRouter();
@@ -38,6 +40,7 @@ export default function InvoiceActions({ invoice, lines, linesAvailable = true, 
       });
       setStatus(status);
       if (status === 'sent') await request(`${endpoint}/email`, { method: 'POST' });
+      toast.success(status === 'sent' ? `Invoice ${invoiceLabel} sent` : `Invoice ${invoiceLabel} marked as paid`);
       router.refresh();
     } catch (cause) {
       setError(cause.message || 'Could not reach the API. Check your connection and try again.');
@@ -77,6 +80,7 @@ export default function InvoiceActions({ invoice, lines, linesAvailable = true, 
           discount: line.discount
         })))
       });
+      toast.success(`Invoice ${invoiceLabel} duplicated`);
       router.push(`/invoices/${copy.id}/edit`);
       router.refresh();
     } catch (cause) {
@@ -87,18 +91,18 @@ export default function InvoiceActions({ invoice, lines, linesAvailable = true, 
   }
 
   if (compact) return <div className="invoice-row-actions">
-    {status === 'draft' && <Button size="icon" title="Send invoice" aria-label={`Send invoice ${invoiceLabel}`} variant="ghost" disabled={Boolean(busy)} onClick={() => changeStatus('sent')}><Mail size={17} aria-hidden="true" /></Button>}
-    {status !== 'paid' && !invoice.paid && <Button size="icon" title="Mark as paid" aria-label={`Mark invoice ${invoiceLabel} as paid`} variant="ghost" disabled={Boolean(busy)} onClick={() => changeStatus('paid')}><CircleCheck size={17} aria-hidden="true" /></Button>}
-    <Button size="icon" title="Duplicate invoice" aria-label={`Duplicate invoice ${invoiceLabel}`} variant="ghost" disabled={Boolean(busy) || duplicateId !== null} onClick={duplicate}><Copy size={17} aria-hidden="true" /></Button>
+    {status === 'draft' && <Button size="icon" title="Send invoice" aria-label={`Send invoice ${invoiceLabel}`} aria-busy={busy === 'sent'} variant="ghost" disabled={Boolean(busy)} onClick={() => changeStatus('sent')}>{busy === 'sent' ? <Spinner /> : <Mail size={17} aria-hidden="true" />}</Button>}
+    {status !== 'paid' && !invoice.paid && <Button size="icon" title="Mark as paid" aria-label={`Mark invoice ${invoiceLabel} as paid`} aria-busy={busy === 'paid'} variant="ghost" disabled={Boolean(busy)} onClick={() => changeStatus('paid')}>{busy === 'paid' ? <Spinner /> : <CircleCheck size={17} aria-hidden="true" />}</Button>}
+    <Button size="icon" title="Duplicate invoice" aria-label={`Duplicate invoice ${invoiceLabel}`} aria-busy={busy === 'duplicate'} variant="ghost" disabled={Boolean(busy) || duplicateId !== null} onClick={duplicate}>{busy === 'duplicate' ? <Spinner /> : <Copy size={17} aria-hidden="true" />}</Button>
     {error && <span className="action-error" role="alert">{error}{duplicateId !== null && <> <Link href={`/invoices/${duplicateId}/edit`}>Open new draft</Link></>}</span>}
   </div>;
 
   return <>
     <StatusBadge status={status} />
     <ButtonGroup aria-label="Invoice actions">
-      {status === 'draft' && <Button type="button" disabled={Boolean(busy)} onClick={() => changeStatus('sent')}><Mail className="size-4" aria-hidden="true" />{busy === 'sent' ? 'Sending...' : 'Send'}</Button>}
-      {status !== 'paid' && !invoice.paid && <Button variant="outline" type="button" disabled={Boolean(busy)} onClick={() => changeStatus('paid')}><CircleCheck className="size-4" aria-hidden="true" />{busy === 'paid' ? 'Updating...' : 'Mark as paid'}</Button>}
-      <Button variant="outline" type="button" disabled={Boolean(busy) || !linesAvailable || duplicateId !== null} onClick={duplicate}><Copy className="size-4" aria-hidden="true" />{busy === 'duplicate' ? 'Duplicating...' : 'Duplicate'}</Button>
+      {status === 'draft' && <Button aria-busy={busy === 'sent'} type="button" disabled={Boolean(busy)} onClick={() => changeStatus('sent')}>{busy === 'sent' ? <Spinner /> : <Mail className="size-4" aria-hidden="true" />}{busy === 'sent' ? 'Sending...' : 'Send'}</Button>}
+      {status !== 'paid' && !invoice.paid && <Button aria-busy={busy === 'paid'} variant="outline" type="button" disabled={Boolean(busy)} onClick={() => changeStatus('paid')}>{busy === 'paid' ? <Spinner /> : <CircleCheck className="size-4" aria-hidden="true" />}{busy === 'paid' ? 'Updating...' : 'Mark as paid'}</Button>}
+      <Button aria-busy={busy === 'duplicate'} variant="outline" type="button" disabled={Boolean(busy) || !linesAvailable || duplicateId !== null} onClick={duplicate}>{busy === 'duplicate' ? <Spinner /> : <Copy className="size-4" aria-hidden="true" />}{busy === 'duplicate' ? 'Duplicating...' : 'Duplicate'}</Button>
     </ButtonGroup>
     {error && <span className="action-error" role="alert">{error}{duplicateId !== null && <> <Link href={`/invoices/${duplicateId}/edit`}>Open new draft</Link></>}</span>}
   </>;

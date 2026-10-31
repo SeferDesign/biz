@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { Mail } from 'lucide-react';
+import { toast } from 'sonner';
 import { browserApiBaseUrl } from '../lib/api.js';
 import { useRouter } from 'next/navigation';
 import Brand from './Brand.js';
@@ -10,6 +11,8 @@ import { companyInfo } from '@seferbiz/company';
 import { Button } from './ui/button.js';
 import { Input } from './ui/input.js';
 import { Card, CardContent, CardHeader } from './ui/card.js';
+import { Alert, AlertDescription } from './ui/alert.js';
+import { Spinner } from './ui/spinner.js';
 
 async function submitJson(url, body) {
   const response = await fetch(url, {
@@ -53,8 +56,8 @@ export function ForgotPasswordForm() {
           <Input name="email" type="email" autoComplete="email" autoFocus required />
         </label>
         {message && <p className="security-message" role="status">{message}</p>}
-        {error && <p className="form-error" role="alert">{error}</p>}
-        <Button className="login-submit" type="submit" disabled={busy}><Mail className="size-4" aria-hidden="true" />{busy ? 'Sending...' : 'Send reset link'}</Button>
+        {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
+        <Button className="login-submit" aria-busy={busy} type="submit" disabled={busy}>{busy ? <Spinner /> : <Mail className="size-4" aria-hidden="true" />}{busy ? 'Sending...' : 'Send reset link'}</Button>
         <Link className="auth-inline-link" href="/login">Back to sign in</Link>
       </form>
     </AuthPanel>
@@ -64,7 +67,6 @@ export function ForgotPasswordForm() {
 export function ResetPasswordForm({ token }) {
   const router = useRouter();
   const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
 
   async function submit(event) {
@@ -80,7 +82,7 @@ export function ResetPasswordForm({ token }) {
     }
     try {
       const result = await submitJson(`${browserApiBaseUrl}/auth/password-reset/confirm`, { token, password });
-      setMessage(result.message);
+      toast.success(result.message || 'Password updated.');
       router.replace('/login');
       router.refresh();
     } catch (cause) {
@@ -101,9 +103,8 @@ export function ResetPasswordForm({ token }) {
           <span className="form-label">Confirm new password</span>
           <Input name="password_confirmation" type="password" autoComplete="new-password" minLength={8} required />
         </label>
-        {message && <p className="security-message" role="status">{message}</p>}
-        {error && <p className="form-error" role="alert">{error}</p>}
-        <Button className="login-submit" type="submit" disabled={busy || !token}>{busy ? 'Updating...' : 'Update password'}</Button>
+        {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
+        <Button className="login-submit" aria-busy={busy} type="submit" disabled={busy || !token}>{busy && <Spinner />}{busy ? 'Updating...' : 'Update password'}</Button>
         {!token && <p className="form-error" role="alert">This reset link is missing its token. Request a new link.</p>}
       </form>
     </AuthPanel>
