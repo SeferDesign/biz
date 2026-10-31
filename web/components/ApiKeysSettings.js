@@ -6,10 +6,10 @@ import { toast } from 'sonner';
 import { browserApiBaseUrl } from '../lib/api.js';
 import { Alert, AlertDescription } from './ui/alert.js';
 import { Button } from './ui/button.js';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card.js';
 import { Input } from './ui/input.js';
 import { Spinner } from './ui/spinner.js';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table.js';
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from './ui/empty.js';
 
 function formatDateTime(value) {
   if (!value) return 'Never';
@@ -124,78 +124,79 @@ export default function ApiKeysSettings({ initialKeys }) {
   }
 
   return (
-    <section className="editor-section">
-      <div className="page-heading">
-        <div>
-          <h1>API Keys</h1>
-          <p className="page-description">Create and manage bearer keys for scripts and integrations.</p>
-        </div>
-      </div>
+    <section className="grid w-full max-w-4xl gap-5">
+      {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
+      <Card>
+        <CardHeader>
+          <CardTitle>Create API key</CardTitle>
+          <CardDescription>Create a bearer key for scripts and integrations.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form className="grid gap-4" onSubmit={createKey}>
+            <label className="form-field">
+              <span className="form-label">Label</span>
+              <Input
+                name="label"
+                type="text"
+                maxLength={255}
+                value={newLabel}
+                onChange={(event) => setNewLabel(event.target.value)}
+                required
+              />
+            </label>
+            <label className="form-field">
+              <span className="form-label">Key</span>
+              <Input
+                name="key"
+                type="text"
+                maxLength={255}
+                value={newKey}
+                onChange={(event) => setNewKey(event.target.value)}
+                required
+              />
+            </label>
+            {message && <Alert role="status" variant="info"><AlertDescription>{message}</AlertDescription></Alert>}
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" type="button" disabled={Boolean(busy)} onClick={populateGeneratedKey}><KeyRound className="size-4" aria-hidden="true" />Generate key</Button>
+              <Button aria-busy={busy === 'create'} type="submit" disabled={Boolean(busy)}>{busy === 'create' ? <Spinner /> : <KeyRound className="size-4" aria-hidden="true" />}{busy === 'create' ? 'Saving...' : 'Create key'}</Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
 
-      <form className="record-form password-change-form" onSubmit={createKey}>
-        <label className="form-field">
-          <span className="form-label">Label</span>
-          <Input
-            name="label"
-            type="text"
-            maxLength={255}
-            value={newLabel}
-            onChange={(event) => setNewLabel(event.target.value)}
-            required
-          />
-        </label>
-        <label className="form-field form-field-wide">
-          <span className="form-label">Key</span>
-          <Input
-            name="key"
-            type="text"
-            maxLength={255}
-            value={newKey}
-            onChange={(event) => setNewKey(event.target.value)}
-            required
-          />
-        </label>
-        <div className="form-actions">
-          <Button variant="outline" type="button" disabled={Boolean(busy)} onClick={populateGeneratedKey}><KeyRound className="size-4" aria-hidden="true" />Generate key</Button>
-          <Button aria-busy={busy === 'create'} type="submit" disabled={Boolean(busy)}>{busy === 'create' ? <Spinner /> : <KeyRound className="size-4" aria-hidden="true" />}{busy === 'create' ? 'Saving...' : 'Create key'}</Button>
-        </div>
-      </form>
-
-      {keys.length === 0 ? (
-        <Empty>
-          <EmptyHeader>
-            <EmptyTitle>No API keys yet</EmptyTitle>
-            <EmptyDescription>Create a key above to authorize scripts with bearer auth.</EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      ) : (
-        <div className="table-wrap">
-          <Table className="data-table">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Label</TableHead>
-                <TableHead>Key</TableHead>
-                <TableHead>Last used</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {keys.map((entry) => (
-                <ApiKeyRow
-                  busy={busy}
-                  entry={entry}
-                  key={entry.id}
-                  onDelete={deleteKey}
-                  onSave={updateKey}
-                />
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+      {keys.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Existing API keys</CardTitle>
+            <CardDescription>Rename, rotate, or remove keys used by your integrations.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="table-wrap">
+              <Table className="data-table">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Label</TableHead>
+                    <TableHead>Key</TableHead>
+                    <TableHead>Last used</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {keys.map((entry) => (
+                    <ApiKeyRow
+                      busy={busy}
+                      entry={entry}
+                      key={entry.id}
+                      onDelete={deleteKey}
+                      onSave={updateKey}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
       )}
-
-      {error && <Alert className="mt-4" variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
-      {message && <p className="security-message" role="status">{message}</p>}
     </section>
   );
 }

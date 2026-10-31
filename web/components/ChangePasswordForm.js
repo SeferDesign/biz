@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { browserApiBaseUrl } from '../lib/api.js';
 import { Alert, AlertDescription } from './ui/alert.js';
 import { Button } from './ui/button.js';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card.js';
 import { Input } from './ui/input.js';
 import { Spinner } from './ui/spinner.js';
 
@@ -45,26 +46,33 @@ export default function ChangePasswordForm() {
   }
 
   return (
-    <section className="editor-section">
-      <div className="page-heading">
-        <div><h1>Change password</h1><p className="page-description">Verify your current password before setting a new one.</p></div>
-      </div>
-      <form className="record-form password-change-form" onSubmit={submit}>
-        <label className="form-field form-field-wide">
-          <span className="form-label">Current password</span>
-          <Input name="current_password" type="password" autoComplete="current-password" required />
-        </label>
-        <label className="form-field">
-          <span className="form-label">New password</span>
-          <Input name="new_password" type="password" autoComplete="new-password" minLength={8} required />
-        </label>
-        <label className="form-field">
-          <span className="form-label">Confirm new password</span>
-          <Input name="new_password_confirmation" type="password" autoComplete="new-password" minLength={8} required />
-        </label>
-        {error && <Alert className="form-field-wide" variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
-        <div className="form-actions"><Button aria-busy={busy} type="submit" disabled={busy}>{busy && <Spinner />}{busy ? 'Updating...' : 'Update password'}</Button></div>
-      </form>
+    <section className="w-full max-w-4xl">
+      <Card>
+        <CardHeader>
+          <CardTitle>Change password</CardTitle>
+          <CardDescription>Verify your current password before setting a new one.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form className="grid gap-4 sm:grid-cols-2" onSubmit={submit}>
+            <label className="form-field sm:col-span-2">
+              <span className="form-label">Current password</span>
+              <Input name="current_password" type="password" autoComplete="current-password" required />
+            </label>
+            <label className="form-field">
+              <span className="form-label">New password</span>
+              <Input name="new_password" type="password" autoComplete="new-password" minLength={8} required />
+            </label>
+            <label className="form-field">
+              <span className="form-label">Confirm new password</span>
+              <Input name="new_password_confirmation" type="password" autoComplete="new-password" minLength={8} required />
+            </label>
+            {error && <Alert className="sm:col-span-2" variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
+            <div className="sm:col-span-2">
+              <Button aria-busy={busy} type="submit" disabled={busy}>{busy && <Spinner />}{busy ? 'Updating...' : 'Update password'}</Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </section>
   );
 }

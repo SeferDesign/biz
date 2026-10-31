@@ -3,6 +3,7 @@ import RecordForm from '../../../../components/RecordForm.js';
 import { getApiData } from '../../../../lib/api-server.js';
 import { browserApiBaseUrl } from '../../../../lib/api.js';
 import { invoiceTemplateFields } from '../../../../lib/record-fields.js';
+import { Card, CardContent } from '../../../../components/ui/card.js';
 
 export const metadata = { title: 'New Invoice Template' };
 
@@ -11,14 +12,18 @@ export default async function NewInvoiceTemplatePage() {
   if (clientsResult.error) return <Notice title="Clients unavailable">{clientsResult.error}</Notice>;
 
   return (
-    <RecordForm
-      title="New Invoice Template"
-      description="Create a reusable invoice description for every client or a specific client."
-      fields={invoiceTemplateFields(clientsResult.data || [])}
-      endpoint={`${browserApiBaseUrl}/invoice-templates`}
-      returnTo="/settings/templates"
-      createdRecordHref="/settings/templates/:id/edit"
-      submitLabel="Create template"
-    />
+    <Card className="mx-auto w-full max-w-4xl">
+      <CardContent className="pt-6">
+        <RecordForm
+          title="New Invoice Template"
+          description="Create a reusable invoice description for every client or a specific client."
+          fields={invoiceTemplateFields(clientsResult.data || [])}
+          endpoint={`${browserApiBaseUrl}/invoice-templates`}
+          returnTo="/settings/templates"
+          createdRecordHref="/settings/templates/:id/edit"
+          submitLabel="Create template"
+        />
+      </CardContent>
+    </Card>
   );
 }

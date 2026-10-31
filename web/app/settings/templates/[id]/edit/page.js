@@ -4,6 +4,7 @@ import RecordForm from '../../../../../components/RecordForm.js';
 import { browserApiBaseUrl } from '../../../../../lib/api.js';
 import { getApiData } from '../../../../../lib/api-server.js';
 import { invoiceTemplateFields } from '../../../../../lib/record-fields.js';
+import { Card, CardContent } from '../../../../../components/ui/card.js';
 
 export const metadata = { title: 'Edit Invoice Template' };
 
@@ -20,15 +21,19 @@ export default async function EditInvoiceTemplatePage({ params }) {
   if (!template) notFound();
 
   return (
-    <RecordForm
-      title="Edit Invoice Template"
-      description={`Update the reusable description “${template.name}”.`}
-      fields={invoiceTemplateFields(clientsResult.data || [])}
-      initialValues={template}
-      endpoint={`${browserApiBaseUrl}/invoice-templates/${template.id}`}
-      method="PATCH"
-      returnTo="/settings/templates"
-      submitLabel="Save changes"
-    />
+    <Card className="mx-auto w-full max-w-4xl">
+      <CardContent className="pt-6">
+        <RecordForm
+          title="Edit Invoice Template"
+          description={`Update the reusable description “${template.name}”.`}
+          fields={invoiceTemplateFields(clientsResult.data || [])}
+          initialValues={template}
+          endpoint={`${browserApiBaseUrl}/invoice-templates/${template.id}`}
+          method="PATCH"
+          returnTo="/settings/templates"
+          submitLabel="Save changes"
+        />
+      </CardContent>
+    </Card>
   );
 }

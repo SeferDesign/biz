@@ -3,6 +3,7 @@ import NewButton from './NewButton.js';
 import ResourceActions from './ResourceActions.js';
 import { browserApiBaseUrl } from '../lib/api.js';
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from './ui/empty.js';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card.js';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table.js';
 
 export default function InvoiceTemplatesIndex({ initialTemplates, clients }) {
@@ -47,33 +48,37 @@ export default function InvoiceTemplatesIndex({ initialTemplates, clients }) {
           </EmptyHeader>
         </Empty>
       ) : (
-        <div className="space-y-8">
-          <section className="space-y-3">
-            <div className="section-heading">
-              <h2>Global templates</h2>
-              <span className="section-note">Available to every client</span>
-            </div>
-            {globalTemplates.length ? (
-              <TemplateTable templates={globalTemplates} />
-            ) : (
-              <p className="text-sm text-muted-foreground">No global templates.</p>
-            )}
-          </section>
+        <div className="grid gap-5">
+          <Card>
+            <CardHeader>
+              <CardTitle>Global templates</CardTitle>
+              <CardDescription>Available to every client.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {globalTemplates.length ? (
+                <TemplateTable templates={globalTemplates} />
+              ) : (
+                <p className="text-sm text-muted-foreground">No global templates.</p>
+              )}
+            </CardContent>
+          </Card>
 
-          <section className="space-y-4">
-            <div className="section-heading">
-              <h2>Client-specific templates</h2>
-              <span className="section-note">{sortedClientGroups.length} clients</span>
-            </div>
-            {sortedClientGroups.length ? sortedClientGroups.map((group) => (
-              <section className="space-y-3" key={group.clientId}>
-                <h3 className="text-sm font-medium">{group.clientName}</h3>
-                <TemplateTable templates={group.templates} />
-              </section>
-            )) : (
-              <p className="text-sm text-muted-foreground">No client-specific templates.</p>
-            )}
-          </section>
+          <Card>
+            <CardHeader>
+              <CardTitle>Client-specific templates</CardTitle>
+              <CardDescription>{sortedClientGroups.length} {sortedClientGroups.length === 1 ? 'client' : 'clients'}</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-5">
+              {sortedClientGroups.length ? sortedClientGroups.map((group) => (
+                <section className="grid gap-3" key={group.clientId}>
+                  <h3 className="text-sm font-medium">{group.clientName}</h3>
+                  <TemplateTable templates={group.templates} />
+                </section>
+              )) : (
+                <p className="text-sm text-muted-foreground">No client-specific templates.</p>
+              )}
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>
