@@ -191,7 +191,11 @@
   }
 
   .numeric-cell {
-    @apply text-end font-mono;
+    @apply text-end;
+  }
+
+  td.numeric-cell {
+    @apply font-mono;
   }
 
   .detail-section {
