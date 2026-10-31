@@ -78,8 +78,8 @@ export default function LoginForm({ returnTo }) {
   }
 
   return (
-    <main className="login-page">
-      <Brand/>
+    <main className="flex min-h-svh flex-col items-center justify-center gap-6 p-4">
+      <Brand classes="inline-flex w-[190px] items-center justify-center [&_img]:h-auto [&_img]:w-full" />
       <Card className="w-full max-w-[420px] p-8">
         <form className="login-form" onSubmit={submit}>
           <label className="form-field">
@@ -99,7 +99,11 @@ export default function LoginForm({ returnTo }) {
           <Button className="login-submit" disabled={submitting} type="submit">
             {submitting ? 'Signing in...' : 'Sign in'}
           </Button>
-          <div className="auth-divider" aria-hidden="true"><span>or</span></div>
+          <div className="flex w-full items-center gap-3 text-xs text-muted-foreground" aria-hidden="true">
+            <span className="h-px flex-1 bg-border" />
+            <span>or</span>
+            <span className="h-px flex-1 bg-border" />
+          </div>
           <Button className="login-submit passkey-submit" variant="outline" disabled={submitting} onClick={signInWithPasskey} type="button">
             <KeyRound aria-hidden="true" size={16} />
             {submitting ? 'Waiting for passkey...' : 'Sign in with a passkey'}

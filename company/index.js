@@ -16,13 +16,21 @@ export const companyInfo = {
     last_name: 'Sefer',
     email: 'rob@seferdesign.com'
   },
-  logoPath: '/images/sdc_white.svg',
+  logoPath: '/images/sdc.svg',
   logo: {
-    pathPublic: '/images/sdc_white.svg'
+    pathPublic: '/images/sdc.svg'
   }
 };
 
 export const companyEmailFrom = `${companyInfo.name} <${companyInfo.emailContact}>`;
+
+export function formatMailingAddress({ address1, address2, city, state, zipcode } = {}) {
+  const clean = (value) => (value == null ? '' : String(value).trim());
+  const streetLine = [clean(address1), clean(address2)].filter(Boolean).join(' ');
+  const locality = [clean(city), clean(state)].filter(Boolean).join(', ');
+  const localityLine = [locality, clean(zipcode)].filter(Boolean).join(' ');
+  return [streetLine, localityLine].filter(Boolean).join('\n');
+}
 
 export function displayIdNumber(id) {
   return (100000 + Number(id)).toString();

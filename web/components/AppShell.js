@@ -252,11 +252,13 @@ export default function AppShell({ children, user, avatarUrl }) {
   // Visitors without a session only reach public pages and access-token record links.
   if (!user?.email) {
     return (
-      <div className="public-shell">
-        <header className="public-header">
-          <Brand/>
+      <div className="min-h-svh bg-background">
+        <header className="border-b border-border bg-background">
+          <div className="mx-auto flex h-16 w-full max-w-7xl items-center px-4 md:px-6 [&_img]:h-8 [&_img]:w-auto">
+            <Brand classes="inline-flex items-center" />
+          </div>
         </header>
-        <div className="main-content">{children}</div>
+        <main className="mx-auto w-full max-w-7xl space-y-6 px-4 pb-8 pt-6 md:px-6 md:pt-8">{children}</main>
       </div>
     );
   }
@@ -352,7 +354,7 @@ export default function AppShell({ children, user, avatarUrl }) {
           <div aria-hidden="true" className="h-4 w-px shrink-0 bg-border" />
           <Breadcrumbs pathname={pathname} />
         </header>
-        <main className="main-content">{children}</main>
+        <div className="flex min-w-0 flex-1 flex-col gap-6 p-4 md:p-6">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

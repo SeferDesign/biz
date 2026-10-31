@@ -3,6 +3,14 @@ import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from 'lucide-re
 import { cn } from '@/lib/utils';
 import { buttonVariants } from './button.js';
 
+function getPaginationItems(currentPage, pageCount) {
+  if (pageCount <= 7) return Array.from({ length: pageCount }, (_, index) => index + 1);
+
+  if (currentPage <= 3) return [1, 2, 3, 4, 'ellipsis', pageCount];
+  if (currentPage >= pageCount - 2) return [1, 'ellipsis', pageCount - 3, pageCount - 2, pageCount - 1, pageCount];
+  return [1, 'ellipsis', currentPage - 1, currentPage, currentPage + 1, 'ellipsis', pageCount];
+}
+
 function Pagination({ className, ...props }) {
   return (
     <nav
@@ -87,4 +95,4 @@ function PaginationEllipsis({ className, ...props }) {
   );
 }
 
-export { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious };
+export { getPaginationItems, Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious };

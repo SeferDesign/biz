@@ -1,16 +1,8 @@
 import AppShell from '../components/AppShell.js';
 import { createHash } from 'node:crypto';
 import { getApiData } from '../lib/api-server.js';
-import { Instrument_Sans } from 'next/font/google';
 import './globals.css';
 import { companyInfo } from '@seferbiz/company';
-
-const instrumentSans = Instrument_Sans({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  display: 'swap',
-  variable: '--font-sans'
-});
 
 export const metadata = {
   title: `${companyInfo.name} ${companyInfo.acronym} Admin`,
@@ -27,7 +19,7 @@ export default async function RootLayout({ children }) {
     ? `https://www.gravatar.com/avatar/${createHash('sha256').update(email).digest('hex')}?d=404&s=80`
     : undefined;
   return (
-    <html className={instrumentSans.variable} lang="en">
+    <html lang="en">
       <body><AppShell user={session.data?.user} avatarUrl={avatarUrl}>{children}</AppShell></body>
     </html>
   );

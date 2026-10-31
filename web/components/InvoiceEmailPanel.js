@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Mail } from 'lucide-react';
 import { browserApiBaseUrl, formatDateTime } from '../lib/api.js';
 import { Button } from './ui/button.js';
 
@@ -36,6 +37,7 @@ export default function InvoiceEmailPanel({ invoiceId, initialSends = [], histor
       <div className="section-heading">
         <h2>Email history</h2>
         <Button variant="outline" type="button" disabled={sending} aria-busy={sending} onClick={sendEmail}>
+          <Mail className="size-4" aria-hidden="true" />
           {sending ? 'Sending...' : sends.length ? 'Resend invoice email' : 'Send invoice email'}
         </Button>
       </div>

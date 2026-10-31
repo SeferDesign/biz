@@ -63,3 +63,24 @@ export function expenseFields(vendors) {
     { name: 'notes', label: 'Notes', type: 'textarea', wide: true }
   ];
 }
+
+export function invoiceTemplateFields(clients) {
+  return [
+    { name: 'name', label: 'Template name', required: true },
+    {
+      name: 'client_id',
+      label: 'Use for',
+      type: 'relation',
+      options: clients.map((client) => ({ value: client.id, label: client.name }))
+    },
+    {
+      name: 'description',
+      label: 'Description',
+      type: 'textarea',
+      rows: 6,
+      wide: true,
+      required: true,
+      helpText: 'Use {today} or {yesterday} to insert the local date as YYYY-MM-DD when applied.'
+    }
+  ];
+}

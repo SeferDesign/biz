@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Plus, Save, Trash2 } from 'lucide-react';
 import { Button } from './ui/button.js';
 import { Input } from './ui/input.js';
 import { Textarea } from './ui/textarea.js';
@@ -206,10 +207,11 @@ export default function RecordForm({ title, description, fields, initialValues =
     ?.find((option) => String(option.value) === String(values.client_id))?.rate;
 
   return (
-    <section className="editor-section">
-      <div className="page-heading">
-        <div><h1>{title}</h1><p className="page-description">{description}</p></div>
-      </div>
+    <section className="mx-auto w-full max-w-4xl space-y-6">
+      <header className="space-y-2 border-b border-border pb-5">
+        <h1 className="text-2xl font-semibold leading-none">{title}</h1>
+        <p className="max-w-2xl text-sm text-muted-foreground">{description}</p>
+      </header>
       <form className="record-form" onSubmit={submit}>
         {fields.map((field) => lineItemsEnabled && field.name === 'description' ? (
           <div className="form-field form-field-wide" key={field.name}>
@@ -276,7 +278,7 @@ export default function RecordForm({ title, description, fields, initialValues =
                 {monthNames.map((month, index) => (
                   <span className="month-goal-field" key={month}>
                     <span>{month.slice(0, 3)}</span>
-                    <input
+                    <Input
                       aria-label={`${month} goal`}
                       type="number"
                       min="0"
@@ -321,16 +323,16 @@ export default function RecordForm({ title, description, fields, initialValues =
                 <label><span>Hours</span><Input type="number" min="0" step="0.01" value={line.hours} onChange={(event) => updateLineItem(index, 'hours', event.target.value)} /></label>
                 <label><span>Rate</span><Input type="number" min="0" step="0.01" placeholder={selectedClientRate == null ? '' : String(selectedClientRate)} value={line.rate} onChange={(event) => updateLineItem(index, 'rate', event.target.value)} /></label>
                 <label><span>Amount</span><Input type="number" min="0" step="0.01" value={line.total === '' && line.hours !== '' && line.rate !== '' ? Number(line.hours) * Number(line.rate) : line.total} readOnly={line.hours !== '' && line.rate !== ''} onChange={(event) => updateLineItem(index, 'total', event.target.value)} /></label>
-                <Button className="invoice-line-remove" variant="outline" size="sm" type="button" aria-label={`Remove line item ${index + 1}`} onClick={() => setLineItems((current) => current.filter((_, itemIndex) => itemIndex !== index))}>Remove</Button>
+                <Button className="invoice-line-remove" variant="outline" size="sm" type="button" aria-label={`Remove line item ${index + 1}`} onClick={() => setLineItems((current) => current.filter((_, itemIndex) => itemIndex !== index))}><Trash2 className="size-4" aria-hidden="true" />Remove</Button>
               </div>
             ))}
-            <Button className="invoice-line-add" variant="outline" type="button" onClick={() => setLineItems((current) => [...current, { description: '', hours: '', rate: '', total: '' }])}>+ Add line item</Button>
+            <Button className="invoice-line-add" variant="outline" type="button" onClick={() => setLineItems((current) => [...current, { description: '', hours: '', rate: '', total: '' }])}><Plus className="size-4" aria-hidden="true" />Add line item</Button>
           </section>
         )}
         {error && <p className="form-error" role="alert">{error}</p>}
         <div className="form-actions">
-          <Button disabled={saving} type="submit">{saving ? 'Saving...' : submitLabel || 'Save record'}</Button>
-          <Button asChild variant="outline"><Link href={returnTo}>Cancel</Link></Button>
+          <Button disabled={saving} type="submit">{saveMethod === 'POST' ? <Plus className="size-4" aria-hidden="true" /> : <Save className="size-4" aria-hidden="true" />}{saving ? 'Saving...' : submitLabel || 'Save record'}</Button>
+          <Button asChild variant="link"><Link href={returnTo}>Cancel</Link></Button>
         </div>
       </form>
     </section>

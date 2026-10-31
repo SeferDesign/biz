@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { formatMailingAddress } from '@seferbiz/company';
 import { DetailGrid, ResourcePage, StatusBadge } from '../../../components/ResourcePage.js';
 import NewButton from '../../../components/NewButton.js';
 import ResourceActions from '../../../components/ResourceActions.js';
@@ -35,7 +36,7 @@ export default async function ClientDetailPage({ params, searchParams }) {
   const outstandingBalance = [...outstandingByCurrency]
     .map(([currency, amount]) => formatMoney(amount, currency))
     .join(' · ') || formatMoney(0);
-  const address = [client.address1, client.address2, [client.city, client.state, client.zipcode].filter(Boolean).join(' ')].filter(Boolean).join('\n');
+  const address = formatMailingAddress(client);
 	const billingEmails = [client.email_accounting, client.email_accounting_2, client.email_accounting_3, client.email]
 	.filter((value, index, all) => value && all.indexOf(value) === index);
   const billingEmailsDisplay = billingEmails.join(', ');
@@ -55,7 +56,7 @@ export default async function ClientDetailPage({ params, searchParams }) {
         ['Contact', client.contact],
         [`Billing email${billingEmails.length > 1 ? 's' : ''}`, billingEmailsDisplay],
         ['Website', client.site_url ? <a href={client.site_url} rel="noreferrer" target="_blank">{client.site_url}</a> : '-'],
-        ['Address', address ? <address className="detail-address">{address}</address> : null],
+        ['Address', address ? <address className="whitespace-pre-line not-italic">{address}</address> : null],
         ['Outstanding balance', outstandingBalance],
         ...(accessToken ? [] : [
           ['Preferred payment', client.preferred_paymenttype],

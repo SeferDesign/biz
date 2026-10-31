@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { Plus, Save } from 'lucide-react';
 import { Button } from './ui/button.js';
 import { formatMoney } from '../lib/api.js';
 import { expenseAccountOptions } from '../lib/record-fields.js';
@@ -10,7 +11,7 @@ import Notice from './Notice.js';
 import { DatePicker } from './ui/date-picker.js';
 import { Combobox } from './ui/combobox.js';
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from './ui/empty.js';
-import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from './ui/pagination.js';
+import { getPaginationItems, Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './ui/pagination.js';
 
 const blankExpense = () => ({ name: '', vendor_id: '', date: '', cost: '', account: '', notes: '' });
 
@@ -209,7 +210,7 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
 
       <div className="sheet-toolbar">
         <span className="sheet-state">{changedCount ? `${changedCount} unsaved change${changedCount === 1 ? '' : 's'}` : message || 'All changes saved'}</span>
-        <Button type="button" disabled={busy || !changedCount} onClick={saveChanges}>{busy ? 'Saving...' : `Save changes${changedCount ? ` (${changedCount})` : ''}`}</Button>
+        <Button type="button" disabled={busy || !changedCount} onClick={saveChanges}><Save className="size-4" aria-hidden="true" />{busy ? 'Saving...' : `Save changes${changedCount ? ` (${changedCount})` : ''}`}</Button>
       </div>
       {error && <Notice className="sheet-notice" title="Could not save batch">{error}</Notice>}
 
@@ -243,9 +244,24 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
                   }}
                 />
               </PaginationItem>
-              <PaginationItem>
-                <span>Page {currentPage} of {pageCount} · Showing {(currentPage - 1) * recordsPerPage + 1}–{Math.min(currentPage * recordsPerPage, expenses.length)} of {expenses.length}</span>
-              </PaginationItem>
+              {getPaginationItems(currentPage, pageCount).map((pageItem, index) => (
+                <PaginationItem key={`${pageItem}-${index}`}>
+                  {pageItem === 'ellipsis' ? (
+                    <PaginationEllipsis />
+                  ) : (
+                    <PaginationLink
+                      href="#"
+                      isActive={pageItem === currentPage}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        setPage(pageItem);
+                      }}
+                    >
+                      {pageItem}
+                    </PaginationLink>
+                  )}
+                </PaginationItem>
+              ))}
               <PaginationItem>
                 <PaginationNext
                   href="#"
@@ -265,7 +281,7 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
       <section className="sheet-section">
         <div className="section-heading">
           <h2>Add expenses</h2>
-          <Button variant="outline" type="button" disabled={busy} onClick={() => setDrafts((current) => [...current, ...Array.from({ length: 5 }, blankExpense)])}>Add 5 rows</Button>
+          <Button variant="outline" type="button" disabled={busy} onClick={() => setDrafts((current) => [...current, ...Array.from({ length: 5 }, blankExpense)])}><Plus className="size-4" aria-hidden="true" />Add 5 rows</Button>
         </div>
         <SpreadsheetTable>
           {drafts.map((expense, index) => (

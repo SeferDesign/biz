@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 import { createInvoicePdf } from '../pdf/invoice-pdf.js';
-import { companyEmailFrom, companyInfo, displayId, displayIdNumber } from '@seferbiz/company';
+import { companyEmailFrom, companyInfo, displayId, displayIdNumber, formatMailingAddress } from '@seferbiz/company';
 
 let transporter;
 
@@ -54,8 +54,7 @@ export async function sendInvoiceEmail({ invoice, client, lines }, transport) {
 		`Status: ${invoice.paid ? 'PAID' : 'NOT PAID'}`,
     '',
 		`${companyInfo.legalEntity || 'N/A'}`,
-		`${companyInfo.address.address1 || 'N/A'}${companyInfo.address.address2 ? ` ${companyInfo.address.address2}` : ''}`,
-		`${companyInfo.address.city || 'N/A'}, ${companyInfo.address.state || 'N/A'} ${companyInfo.address.zipcode || 'N/A'}`,
+    formatMailingAddress(companyInfo.address) || 'N/A',
 		``,
 		`${invoice.description || ''}`,
 		``,

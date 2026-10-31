@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Trash2 } from 'lucide-react';
 import { Button } from './ui/button.js';
 import { ButtonGroupText } from './ui/button-group.js';
 import {
@@ -44,7 +45,7 @@ export default function DeleteButton({ endpoint, returnTo, label = 'Delete recor
     <>
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button variant="destructive" type="button" disabled={deleting}>{label}</Button>
+          <Button variant="destructive" type="button" disabled={deleting}><Trash2 className="size-4" aria-hidden="true" />{label}</Button>
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -53,7 +54,7 @@ export default function DeleteButton({ endpoint, returnTo, label = 'Delete recor
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel asChild><Button variant="outline">Cancel</Button></AlertDialogCancel>
-            <AlertDialogAction asChild><Button variant="destructive" disabled={deleting} onClick={remove}>{deleting ? 'Deleting...' : label}</Button></AlertDialogAction>
+            <AlertDialogAction asChild><Button variant="destructive" disabled={deleting} onClick={remove}><Trash2 className="size-4" aria-hidden="true" />{deleting ? 'Deleting...' : label}</Button></AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

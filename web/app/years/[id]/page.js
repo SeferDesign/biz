@@ -5,6 +5,8 @@ import Notice from '../../../components/Notice.js';
 import ResourceActions from '../../../components/ResourceActions.js';
 import ColumnChart from '../../../components/charts/ColumnChart.js';
 import DonutChart from '../../../components/charts/DonutChart.js';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card.js';
+import { Separator } from '../../../components/ui/separator.js';
 import { chartColors, financeBars, goalOutlines } from '../../../components/charts/theme.js';
 import { browserApiBaseUrl, formatDate, formatMoney, parsePage } from '../../../lib/api.js';
 import { getApiData } from '../../../lib/api-server.js';
@@ -77,20 +79,35 @@ export default async function YearDetailPage({ params, searchParams }) {
         />
       </section>
       <section className="detail-section">
-        <div className="section-heading"><h2>Quarterly taxes</h2></div>
-        <div className="quarter-grid">
+        <div className="section-heading"><h2>Quarterly tax estimates</h2></div>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {quarters.map((quarter) => (
-            <div className="quarter" key={quarter.quarter}>
-              <h3>Quarter {quarter.quarter} <small>({quarter.firstMonth} - {quarter.lastMonth})</small></h3>
-              <dl>
-                <div><dt>Income</dt><dd className="amount-positive">{formatMoney(quarter.income)}</dd></div>
-                <div><dt>Tax est.</dt><dd className="amount-negative">{formatMoney(quarter.taxEstimate)}</dd></div>
-                <div><dt>Payment est.*</dt><dd className="amount-negative">{formatMoney(quarter.paymentEstimate)}</dd></div>
-              </dl>
-            </div>
+            <Card className="h-full" key={quarter.quarter}>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Quarter {quarter.quarter}</CardTitle>
+                <CardDescription>{quarter.firstMonth} - {quarter.lastMonth}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Separator />
+                <dl className="space-y-3 text-sm">
+                  <div className="flex items-baseline justify-between gap-4">
+                    <dt className="text-muted-foreground">Income</dt>
+                    <dd className="m-0 font-medium tabular-nums">{formatMoney(quarter.income)}</dd>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-4">
+                    <dt className="text-muted-foreground">Tax estimate</dt>
+                    <dd className="m-0 font-medium tabular-nums">{formatMoney(quarter.taxEstimate)}</dd>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-4">
+                    <dt className="text-muted-foreground">Payment estimate*</dt>
+                    <dd className="m-0 font-semibold tabular-nums">{formatMoney(quarter.paymentEstimate)}</dd>
+                  </div>
+                </dl>
+              </CardContent>
+            </Card>
           ))}
         </div>
-        <p className="section-note">* Based on IRS estimated-tax payment periods: January - March, April - May, June - August, September - December.</p>
+        <p className="text-sm text-muted-foreground">* Based on IRS estimated-tax payment periods: January - March, April - May, June - August, September - December.</p>
       </section>
       <div className="chart-columns detail-section">
         <section>

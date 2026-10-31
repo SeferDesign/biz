@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { KeyRound, Save, Trash2 } from 'lucide-react';
 import { browserApiBaseUrl } from '../lib/api.js';
 import { Button } from './ui/button.js';
 import { Input } from './ui/input.js';
@@ -152,8 +153,8 @@ export default function ApiKeysSettings({ initialKeys }) {
           />
         </label>
         <div className="form-actions">
-          <Button variant="outline" type="button" disabled={busy} onClick={populateGeneratedKey}>Generate key</Button>
-          <Button type="submit" disabled={busy}>{busy ? 'Saving...' : 'Create key'}</Button>
+          <Button variant="outline" type="button" disabled={busy} onClick={populateGeneratedKey}><KeyRound className="size-4" aria-hidden="true" />Generate key</Button>
+          <Button type="submit" disabled={busy}><KeyRound className="size-4" aria-hidden="true" />{busy ? 'Saving...' : 'Create key'}</Button>
         </div>
       </form>
 
@@ -211,8 +212,8 @@ function ApiKeyRow({ entry, onSave, onDelete, busy }) {
       <TableCell>{formatDateTime(entry.last_used_at)}</TableCell>
       <TableCell>
         <div className="resource-actions">
-          <Button size="sm" type="button" disabled={busy} onClick={() => onSave(entry.id, label, key)}>Save</Button>
-          <Button size="sm" variant="destructive" type="button" disabled={busy} onClick={() => onDelete(entry.id)}>Delete</Button>
+          <Button size="sm" type="button" disabled={busy} onClick={() => onSave(entry.id, label, key)}><Save className="size-4" aria-hidden="true" />Save</Button>
+          <Button size="sm" variant="destructive" type="button" disabled={busy} onClick={() => onDelete(entry.id)}><Trash2 className="size-4" aria-hidden="true" />Delete</Button>
         </div>
       </TableCell>
     </TableRow>

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { Mail } from 'lucide-react';
 import { browserApiBaseUrl } from '../lib/api.js';
 import { useRouter } from 'next/navigation';
 import Brand from './Brand.js';
@@ -53,7 +54,7 @@ export function ForgotPasswordForm() {
         </label>
         {message && <p className="security-message" role="status">{message}</p>}
         {error && <p className="form-error" role="alert">{error}</p>}
-        <Button className="login-submit" type="submit" disabled={busy}>{busy ? 'Sending...' : 'Send reset link'}</Button>
+        <Button className="login-submit" type="submit" disabled={busy}><Mail className="size-4" aria-hidden="true" />{busy ? 'Sending...' : 'Send reset link'}</Button>
         <Link className="auth-inline-link" href="/login">Back to sign in</Link>
       </form>
     </AuthPanel>

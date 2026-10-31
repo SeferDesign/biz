@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { FileDown } from 'lucide-react';
+import { formatMailingAddress } from '@seferbiz/company';
 import { DetailGrid, ResourcePage, StatusBadge } from '../../../components/ResourcePage.js';
 import ResourceActions from '../../../components/ResourceActions.js';
 import InvoiceActions from '../../../components/InvoiceActions.js';
@@ -7,7 +9,9 @@ import InvoiceEmailPanel from '../../../components/InvoiceEmailPanel.js';
 import InvoicePayment from '../../../components/InvoicePayment.js';
 import ClientLinkPanel from '../../../components/ClientLinkPanel.js';
 import Notice from '../../../components/Notice.js';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card.js';
 import { Button } from '../../../components/ui/button.js';
+import { Separator } from '../../../components/ui/separator.js';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../components/ui/table.js';
 import { browserApiBaseUrl, formatDate, formatDateTime, formatMoney, invoiceStatus, parsePage } from '../../../lib/api.js';
 import { getApiData } from '../../../lib/api-server.js';
@@ -42,15 +46,14 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
   const payments = paymentsResult.data || [];
   const isPaid = invoice.paid === true || invoice.paid === 1 || invoice.status === 'paid';
   const billedTo = invoice.client;
-  const billedToAddress = billedTo && [billedTo.address1, billedTo.address2, [billedTo.city, billedTo.state, billedTo.zipcode].filter(Boolean).join(' ')]
-    .filter(Boolean).join('\n');
+  const billedToAddress = billedTo && formatMailingAddress(billedTo);
   const detailItems = accessToken
     ? [
       [isPaid ? 'Amount' : 'Amount due', formatMoney(invoice.cost ?? invoice.total, invoice.currency)],
       ['Billed to', billedTo?.name],
       ['Issue date', formatDate(invoice.date)],
       ['Payment terms', billedTo?.payment_terms || 'Net 15'],
-      ...(billedToAddress ? [['Address', <address className="detail-address">{billedToAddress}</address>]] : []),
+      ...(billedToAddress ? [['Address', <address className="not-italic whitespace-pre-line">{billedToAddress}</address>]] : []),
       ...(isPaid ? [['Paid date', formatDate(invoice.paiddate)], ['Payment method', invoice.paymenttype]] : [])
     ]
     : [
@@ -60,6 +63,25 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
       ['Issue date', formatDate(invoice.date)],
       ['Paid date', formatDate(invoice.paiddate)]
     ];
+  const publicDetailItems = detailItems.filter(([label, value]) => (
+    label !== 'Amount' && label !== 'Amount due' && value != null && value !== '' && value !== '-'
+  ));
+  const lineItemsContent = lineResult.error ? (
+    <Notice>{lineResult.error}</Notice>
+  ) : (
+    <ResourcePage
+      hideHeading
+      data={lines}
+      pageHref={`/invoices/${invoice.id}${accessTokenQuery}`}
+      page={parsePage(query?.page)}
+      columns={[
+        { key: 'description', label: 'Description' },
+        { key: 'hours', label: 'Hours', render: (line) => line.hours ?? '-' },
+        { key: 'rate', label: 'Rate', className: 'numeric-cell', render: (line) => line.rate ? formatMoney(line.rate) : '-' },
+        { key: 'total', label: 'Line total', className: 'numeric-cell', render: (line) => formatMoney(line.total ?? line.amount, invoice.currency) }
+      ]}
+    />
+  );
   return (
     <>
       {paymentResult && (
@@ -78,16 +100,60 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
       {query?.checkout === 'canceled' && !isPaid && (
         <Notice role="status" title="Payment canceled" variant="info">You were not charged. You can choose a payment method below to try again.</Notice>
       )}
-      <div className="page-heading">
-        <div><h1>Invoice #{invoice.id}</h1></div>
-        <div className="detail-actions">
-          {accessToken ? <StatusBadge status={invoiceStatus(invoice)} /> : <InvoiceActions key={`${invoice.id}-${invoiceStatus(invoice)}`} invoice={invoice} lines={lines} linesAvailable={!lineResult.error} />}
-          <Button asChild variant="outline"><a href={`${browserApiBaseUrl}/invoices/${invoice.id}/pdf${accessTokenQuery}`}>Download PDF</a></Button>
-          {!accessToken && <ResourceActions editHref={`/invoices/${invoice.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/invoices/${invoice.id}`} returnTo="/invoices" label="invoice" />}
+      {accessToken ? (
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-muted-foreground">Invoice</p>
+            <h1 className="text-3xl font-semibold">Invoice #{invoice.id}</h1>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusBadge status={invoiceStatus(invoice)} />
+            <Button asChild variant="outline"><a href={`${browserApiBaseUrl}/invoices/${invoice.id}/pdf${accessTokenQuery}`}><FileDown className="size-4" aria-hidden="true" />Download PDF</a></Button>
+          </div>
+        </header>
+      ) : (
+        <div className="page-heading">
+          <div><h1>Invoice #{invoice.id}</h1></div>
+          <div className="detail-actions flex flex-wrap items-center gap-2">
+            <InvoiceActions key={`${invoice.id}-${invoiceStatus(invoice)}`} invoice={invoice} lines={lines} linesAvailable={!lineResult.error} />
+            <Button asChild variant="outline"><a href={`${browserApiBaseUrl}/invoices/${invoice.id}/pdf${accessTokenQuery}`}><FileDown className="size-4" aria-hidden="true" />Download PDF</a></Button>
+            <ResourceActions editHref={`/invoices/${invoice.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/invoices/${invoice.id}`} returnTo="/invoices" label="invoice" />
+          </div>
         </div>
-      </div>
-      <DetailGrid items={detailItems} />
-		<p className="invoice-description">{invoice.description}</p>
+      )}
+      {accessToken ? (
+        <Card>
+          <CardHeader>
+            <CardDescription>{isPaid ? 'Amount paid' : 'Amount due'}</CardDescription>
+            <CardTitle className="text-3xl tabular-nums">{formatMoney(invoice.cost ?? invoice.total, invoice.currency)}</CardTitle>
+          </CardHeader>
+          <Separator />
+          <CardContent className="space-y-6 pt-6">
+            <dl className="grid gap-x-6 gap-y-5 sm:grid-cols-2 xl:grid-cols-4">
+              {publicDetailItems.map(([label, value]) => (
+                <div className="min-w-0 space-y-1" key={label}>
+                  <dt className="text-sm text-muted-foreground">{label}</dt>
+                  <dd className="break-words text-sm font-medium">{value ?? '—'}</dd>
+                </div>
+              ))}
+            </dl>
+            {invoice.description && (
+              <>
+                <Separator />
+                <div className="space-y-1">
+                  <h2 className="text-sm font-medium">Description</h2>
+                  <p className="text-sm leading-6 text-muted-foreground">{invoice.description}</p>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          <DetailGrid items={detailItems} />
+          <p className="invoice-description">{invoice.description}</p>
+        </>
+      )}
       {!accessToken && <ClientLinkPanel invoiceId={invoice.id} initialAccessToken={invoice.access_token} />}
       {!accessToken && payments.length > 0 && (
         <section className="detail-section">
@@ -121,24 +187,23 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
         />
       )}
       {accessToken && !isPaid && (
-        <p className="section-note payment-alternatives">Prefer to pay another way? See <Link className="inline-link" href="/payments">all payment options</Link>.</p>
+        <div className="flex flex-col gap-2 rounded-md bg-muted p-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">Prefer a different payment method?</p>
+          <Button asChild variant="link" size="sm"><Link href="/payments">View all payment options</Link></Button>
+        </div>
       )}
-      <section className="detail-section">
-        {lineResult.error ? <Notice>{lineResult.error}</Notice> : (
-          <ResourcePage
-            hideHeading
-            data={lines}
-            pageHref={`/invoices/${invoice.id}${accessTokenQuery}`}
-            page={parsePage(query?.page)}
-            columns={[
-              { key: 'description', label: 'Description' },
-              { key: 'hours', label: 'Hours', render: (line) => line.hours ?? '-' },
-              { key: 'rate', label: 'Rate', className: 'numeric-cell', render: (line) => line.rate ? formatMoney(line.rate) : '-' },
-              { key: 'total', label: 'Line total', className: 'numeric-cell', render: (line) => formatMoney(line.total ?? line.amount, invoice.currency) }
-            ]}
-          />
-        )}
-      </section>
+      {accessToken ? (
+        <Card className="overflow-hidden">
+          <CardHeader>
+            <CardTitle>Itemized services</CardTitle>
+            <CardDescription>Details for this invoice.</CardDescription>
+          </CardHeader>
+          <Separator />
+          <CardContent className="overflow-x-auto p-0">{lineItemsContent}</CardContent>
+        </Card>
+      ) : (
+        <section className="mt-8">{lineItemsContent}</section>
+      )}
     </>
   );
 }

@@ -130,7 +130,7 @@ export default function SecuritySettings({ initialSettings }) {
           <h1>Two-factor authentication</h1>
           <p className="page-description">Require an authenticator code whenever this account signs in.</p>
         </div>
-        <Badge variant={settings.otp_enabled ? 'success' : 'secondary'}>
+        <Badge variant={settings.otp_enabled ? 'default' : 'secondary'}>
           {settings.otp_enabled ? 'Enabled' : 'Disabled'}
         </Badge>
       </div>

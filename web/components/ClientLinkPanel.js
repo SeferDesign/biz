@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Copy, Link2 } from 'lucide-react';
 import { browserApiBaseUrl } from '../lib/api.js';
 import { Button } from './ui/button.js';
 import { Input } from './ui/input.js';
@@ -45,10 +46,11 @@ export default function ClientLinkPanel({ invoiceId, initialAccessToken }) {
       {accessToken ? (
         <div className="copy-field">
           <Input aria-label="Client invoice link" readOnly value={link} onFocus={(event) => event.target.select()} />
-          <Button variant="outline" type="button" disabled={!link} onClick={copyLink}>{status === 'copied' ? 'Copied' : 'Copy link'}</Button>
+          <Button variant="outline" type="button" disabled={!link} onClick={copyLink}><Copy className="size-4" aria-hidden="true" />{status === 'copied' ? 'Copied' : 'Copy link'}</Button>
         </div>
       ) : (
         <Button variant="outline" type="button" disabled={status === 'creating'} onClick={createLink}>
+          <Link2 className="size-4" aria-hidden="true" />
           {status === 'creating' ? 'Creating...' : 'Create client link'}
         </Button>
       )}

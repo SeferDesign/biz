@@ -4,7 +4,9 @@ import { Badge } from './ui/badge.js';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert.js';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table.js';
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from './ui/empty.js';
-import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from './ui/pagination.js';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card.js';
+import { Separator } from './ui/separator.js';
+import { getPaginationItems, Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './ui/pagination.js';
 
 export function ResourcePage({ title, description, data, error, columns, countLabel, count, hideHeading = false, actionHref, actionLabel, pageHref, page = 1, pageParam = 'page' }) {
   const records = Array.isArray(data) ? data : [];
@@ -76,9 +78,17 @@ export function ResourcePage({ title, description, data, error, columns, countLa
                 tabIndex={currentPage === 1 ? -1 : undefined}
               />
             </PaginationItem>
-            <PaginationItem>
-              <span>Page {currentPage} of {pageCount} · Showing {(currentPage - 1) * recordsPerPage + 1}–{Math.min(currentPage * recordsPerPage, records.length)} of {records.length}</span>
-            </PaginationItem>
+            {getPaginationItems(currentPage, pageCount).map((pageItem, index) => (
+              <PaginationItem key={`${pageItem}-${index}`}>
+                {pageItem === 'ellipsis' ? (
+                  <PaginationEllipsis />
+                ) : (
+                  <PaginationLink href={hrefForPage(pageItem)} isActive={pageItem === currentPage}>
+                    {pageItem}
+                  </PaginationLink>
+                )}
+              </PaginationItem>
+            ))}
             <PaginationItem>
               <PaginationNext
                 href={hrefForPage(Math.min(pageCount, currentPage + 1))}
@@ -96,26 +106,34 @@ export function ResourcePage({ title, description, data, error, columns, countLa
 export function StatusBadge({ status }) {
   const value = String(status || 'draft').toLowerCase();
   const variant = {
-    paid: 'success',
-    succeeded: 'success',
-    sent: 'warning',
-    due: 'warning',
-    processing: 'info',
-    submitted: 'info',
+    paid: 'default',
+    succeeded: 'default',
+    sent: 'secondary',
+    due: 'secondary',
+    processing: 'outline',
+    submitted: 'outline',
     failed: 'destructive'
   }[value] || 'secondary';
-  return <Badge className="uppercase" variant={variant}>{value}</Badge>;
+  return <Badge variant={variant}>{value}</Badge>;
 }
 
 export function DetailGrid({ items }) {
   return (
-    <dl className="detail-grid">
-      {items.map(([label, value]) => (
-        <div className="detail-item" key={label}>
-          <dt>{label}</dt>
-          <dd>{value || '-'}</dd>
-        </div>
-      ))}
-    </dl>
+    <Card>
+      <CardHeader>
+        <CardTitle>Details</CardTitle>
+      </CardHeader>
+      <Separator />
+      <CardContent className="pt-6">
+        <dl className="grid gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map(([label, value]) => (
+            <div className="min-w-0 space-y-1" key={label}>
+              <dt className="text-sm text-muted-foreground">{label}</dt>
+              <dd className="break-words text-sm font-medium">{value == null || value === '' ? '—' : value}</dd>
+            </div>
+          ))}
+        </dl>
+      </CardContent>
+    </Card>
   );
 }

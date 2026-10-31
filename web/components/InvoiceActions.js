@@ -96,9 +96,9 @@ export default function InvoiceActions({ invoice, lines, linesAvailable = true, 
   return <>
     <StatusBadge status={status} />
     <ButtonGroup aria-label="Invoice actions">
-      {status === 'draft' && <Button type="button" disabled={Boolean(busy)} onClick={() => changeStatus('sent')}>{busy === 'sent' ? 'Sending...' : 'Send'}</Button>}
-      {status !== 'paid' && !invoice.paid && <Button variant="outline" type="button" disabled={Boolean(busy)} onClick={() => changeStatus('paid')}>{busy === 'paid' ? 'Updating...' : 'Mark as paid'}</Button>}
-      <Button variant="outline" type="button" disabled={Boolean(busy) || !linesAvailable || duplicateId !== null} onClick={duplicate}>{busy === 'duplicate' ? 'Duplicating...' : 'Duplicate'}</Button>
+      {status === 'draft' && <Button type="button" disabled={Boolean(busy)} onClick={() => changeStatus('sent')}><Mail className="size-4" aria-hidden="true" />{busy === 'sent' ? 'Sending...' : 'Send'}</Button>}
+      {status !== 'paid' && !invoice.paid && <Button variant="outline" type="button" disabled={Boolean(busy)} onClick={() => changeStatus('paid')}><CircleCheck className="size-4" aria-hidden="true" />{busy === 'paid' ? 'Updating...' : 'Mark as paid'}</Button>}
+      <Button variant="outline" type="button" disabled={Boolean(busy) || !linesAvailable || duplicateId !== null} onClick={duplicate}><Copy className="size-4" aria-hidden="true" />{busy === 'duplicate' ? 'Duplicating...' : 'Duplicate'}</Button>
     </ButtonGroup>
     {error && <span className="action-error" role="alert">{error}{duplicateId !== null && <> <Link href={`/invoices/${duplicateId}/edit`}>Open new draft</Link></>}</span>}
   </>;

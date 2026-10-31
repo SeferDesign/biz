@@ -1,4 +1,4 @@
-import InvoiceTemplatesSettings from '../../../components/InvoiceTemplatesSettings.js';
+import InvoiceTemplatesIndex from '../../../components/InvoiceTemplatesIndex.js';
 import Notice from '../../../components/Notice.js';
 import { getApiData } from '../../../lib/api-server.js';
 
@@ -11,5 +11,5 @@ export default async function InvoiceTemplatesPage() {
   ]);
   if (templatesResult.error) return <Notice title="Invoice templates unavailable">{templatesResult.error}</Notice>;
   if (clientsResult.error) return <Notice title="Clients unavailable">{clientsResult.error}</Notice>;
-  return <InvoiceTemplatesSettings initialTemplates={templatesResult.data || []} clients={clientsResult.data || []} />;
+  return <InvoiceTemplatesIndex initialTemplates={templatesResult.data || []} clients={clientsResult.data || []} />;
 }

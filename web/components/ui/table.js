@@ -21,7 +21,8 @@ function TableRow({ className, ...props }) {
 }
 
 function TableHead({ className, ...props }) {
-  return <th data-slot="table-head" className={cn('h-10 px-2 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0', className)} {...props} />;
+  const alignment = className?.split(/\s+/).includes('numeric-cell') ? 'text-end' : 'text-left';
+  return <th data-slot="table-head" className={cn('h-10 px-2 align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0', alignment, className)} {...props} />;
 }
 
 function TableCell({ className, ...props }) {

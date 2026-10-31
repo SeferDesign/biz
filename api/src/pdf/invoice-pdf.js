@@ -1,5 +1,5 @@
 import PDFDocument from 'pdfkit';
-import { companyInfo, displayId } from '@seferbiz/company';
+import { companyInfo, displayId, formatMailingAddress } from '@seferbiz/company';
 
 function invoiceNumber(id, clientName) {
   return displayId(clientName, id);
@@ -35,7 +35,7 @@ export function createInvoicePdf({ invoice, client, lines }) {
         client.name || 'Client',
         client.contact,
         client.email || client.email_accounting,
-        [client.address1, client.address2, client.city, client.state, client.zipcode].filter(Boolean).join(', ')
+        formatMailingAddress(client)
       ].filter(Boolean).join('\n');
       document.font('Helvetica-Bold').fontSize(9).fillColor('#19372f').text('BILL TO', margin, 174);
       document.font('Helvetica').fontSize(10).fillColor('#1c2b27')
@@ -87,7 +87,7 @@ export function createInvoicePdf({ invoice, client, lines }) {
         .fillColor('#1f5083')
         .text(companyInfo.emailContact, { link: `mailto:${companyInfo.emailContact}`, underline: true, continued: true })
         .fillColor('#65736d')
-        .text(` or mailed to:\n${companyInfo.legalEntity}\n${companyInfo.address.address1}\n${companyInfo.address.city}, ${companyInfo.address.state} ${companyInfo.address.zipcode}`, { link: null, underline: false });
+        .text(` or mailed to:\n${companyInfo.legalEntity}\n${formatMailingAddress(companyInfo.address)}`, { link: null, underline: false });
       document.end();
     } catch (error) {
       reject(error);
