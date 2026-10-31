@@ -7,7 +7,8 @@ import { financeBars, goalOutlines } from '../components/charts/theme.js';
 import { formatMoney, formatTableDate, invoiceStatus, newestInvoicesFirst } from '../lib/api.js';
 import { getApiData } from '../lib/api-server.js';
 import { monthlyFinances, trailingMonths } from '../lib/chart-data.js';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table.js';
+import { Badge } from '../components/ui/badge.js';
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card.js';
 
 const monthFormatter = new Intl.DateTimeFormat('en-US', { month: 'long', timeZone: 'UTC' });
 
@@ -79,40 +80,57 @@ export default async function Home() {
       revenue: monthRevenue,
       expenses: monthExpenses
     }
-  ].map((row) => ({ ...row, net: row.revenue - row.expenses }));
+  ].map((row) => ({
+    ...row,
+    net: row.revenue - row.expenses,
+    goalProgress: row.goal > 0 ? Math.round((row.revenue / row.goal) * 100) : null
+  }));
 
   return (
     <>
 
       {error && <Notice title="Some data is unavailable">{error}</Notice>}
 
-      <section className="overview-finance" aria-label="Current receivables and goals">
-        <p className="overview-receivable">Total Receivable: <strong>{formatMoney(totalOpen)}</strong> ({openInvoices.length} invoices)</p>
-        <div className="table-wrap">
-          <Table className="data-table overview-table">
-            <TableHeader>
-              <TableRow>
-                <TableHead scope="col" />
-                <TableHead className="numeric-cell" scope="col">Goal</TableHead>
-                <TableHead className="numeric-cell" scope="col">Revenue</TableHead>
-                <TableHead className="numeric-cell" scope="col">Expenses</TableHead>
-                <TableHead className="numeric-cell" scope="col">Net</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {financialRows.map((row) => (
-                <TableRow key={row.label}>
-                  <TableCell className="primary-cell">
-                    {row.href ? <Link className="inline-link" href={row.href}>{row.label}</Link> : row.label}
-                  </TableCell>
-                  <TableCell className="numeric-cell">{formatMoney(row.goal)}</TableCell>
-                  <TableCell className="numeric-cell amount-positive">{formatMoney(row.revenue)}</TableCell>
-                  <TableCell className="numeric-cell amount-negative">{formatMoney(row.expenses)}</TableCell>
-                  <TableCell className="numeric-cell">{formatMoney(row.net)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+      <section className="overview-finance" aria-label="Receivables and current period finances">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <Card className="min-w-0 md:col-span-2 xl:col-span-1">
+            <CardHeader className="relative p-4 pb-3">
+              <CardDescription>Total receivable</CardDescription>
+              <CardTitle className="w-full text-end text-2xl font-semibold tabular-nums">{formatMoney(totalOpen)}</CardTitle>
+              <Badge variant="outline" className="absolute right-4 top-4 rounded-lg">
+                {openInvoices.length} {openInvoices.length === 1 ? 'invoice' : 'invoices'}
+              </Badge>
+            </CardHeader>
+            <CardFooter className="flex-col items-start gap-1 px-4 pb-4 pt-0 text-sm md:flex-row md:items-center md:justify-between">
+              <p className="font-medium">Outstanding balance</p>
+              <p className="text-muted-foreground">Across all open invoices</p>
+            </CardFooter>
+          </Card>
+          {financialRows.map((row) => (
+            <Card key={row.label} className="min-w-0">
+              <CardHeader className="relative p-4 pb-3">
+                <CardDescription>
+                  {row.href ? <Link className="inline-link" href={row.href}>{row.label}</Link> : row.label} revenue
+                </CardDescription>
+                <CardTitle className="w-full text-end text-2xl font-semibold tabular-nums">{formatMoney(row.revenue)}</CardTitle>
+                <Badge variant="outline" className="absolute right-4 top-4 rounded-lg">
+                  {row.goalProgress === null ? 'No goal' : `${row.goalProgress}% of goal`}
+                </Badge>
+              </CardHeader>
+              <CardFooter className="flex-col items-start gap-1 px-4 pb-4 pt-0 text-sm">
+                <p className="flex w-full items-center justify-between gap-2 text-muted-foreground">
+                  <span>Expenses</span>
+                  <span className="font-mono tabular-nums text-end">{formatMoney(row.expenses)}</span>
+                </p>
+                <p className="flex w-full items-center justify-between gap-2 font-medium">
+                  <span>Net</span>
+                  <span className={`font-mono tabular-nums text-end ${row.net < 0 ? 'amount-negative' : 'amount-positive'}`}>
+                    {formatMoney(row.net)}
+                  </span>
+                </p>
+              </CardFooter>
+            </Card>
+          ))}
         </div>
       </section>
 

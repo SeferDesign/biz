@@ -1,14 +1,13 @@
 export const chartColors = {
-  revenue: '#57ae6b',
-  expenses: '#e05d56',
-  goal: '#b3cde0',
-  grid: '#dce4dd',
-  axis: '#65736d'
+  revenue: 'var(--chart-revenue)',
+  expenses: 'var(--chart-expenses)',
+  goal: 'var(--chart-goal)',
+  grid: 'var(--border)',
+  axis: 'var(--muted-foreground)'
 };
 
 export const chartPalette = [
-  '#57ae6b', '#4a8fe7', '#d4a054', '#e05d56', '#2e2a7a', '#9b6bd6',
-  '#3bb3b0', '#e58fb1', '#7f8c8d', '#b5c94c', '#a0522d'
+  'var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'
 ];
 
 export const financeBars = [

@@ -75,3 +75,13 @@ test('invoice list groups drafts, sent, and paid before sorting newest first wit
   ];
   assert.deepEqual(invoices.toSorted(invoicesByStatusFirst).map((invoice) => invoice.id), [5, 3, 7, 6, 2, 4, 1, 8]);
 });
+
+test('monthly chart goals prefer month targets and fall back to the annual goal', async () => {
+  const { monthlyGoal, monthlyFinances } = await import('../lib/chart-data.js');
+  const years = [{ year: 2025, goal_year: 24000, goals_months: [0, 3000] }];
+
+  assert.equal(monthlyGoal(years, 2025, 1), 2000);
+  assert.equal(monthlyGoal(years, 2025, 2), 3000);
+  assert.equal(monthlyGoal(years, 2024, 1), null);
+  assert.equal(monthlyFinances([{ key: '2025-01', year: 2025, month: 1, label: 'January' }], { years })[0].goal, 2000);
+});

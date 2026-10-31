@@ -85,8 +85,11 @@ function totalsByKey(records, keyOf, amountOf) {
 }
 
 export function monthlyGoal(years, year, month) {
-  const goal = Number(years.find((item) => Number(item.year) === year)?.goals_months?.[month - 1]);
-  return goal > 0 ? goal : null;
+  const yearRecord = years.find((item) => Number(item.year) === year);
+  const goal = Number(yearRecord?.goals_months?.[month - 1]);
+  if (goal > 0) return goal;
+  const annualGoal = Number(yearRecord?.goal_year);
+  return annualGoal > 0 ? roundMoney(annualGoal / 12) : null;
 }
 
 // IRS estimated-tax payment periods, as [first, last] month; they differ from calendar quarters.
@@ -122,7 +125,6 @@ export function monthlyFinances(months, { invoices = [], expenses = [], years = 
       label,
       revenue: monthRevenue,
       expenses: monthExpenses,
-      // Stacked on expenses so the column's full height equals revenue.
       revenueOverExpenses: roundMoney(Math.max(monthRevenue - monthExpenses, 0)),
       goal: monthlyGoal(years, year, month)
     };

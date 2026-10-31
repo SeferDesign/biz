@@ -1,22 +1,18 @@
 'use client';
 
-import { Bar, BarChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, Legend, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { chartColors, chartFormat } from './theme.js';
 
 const outlineAxisId = 'outline';
 
-/**
- * bars: [{ key, label, color, valueKey }] drawn as columns (stacked when `stacked`); tooltips show `valueKey` when set.
- * outlines: [{ key, label, color }] drawn as dashed targets over each column; null values are skipped.
- * lines: [{ value, label, color, dashed }] drawn as horizontal reference lines; null values are skipped.
- */
+// bars: [{ key, label, color, valueKey }]; outlines: [{ key, label, color }]; lines: [{ value, label, color, dashed }].
 export default function ColumnChart({
   data,
   categoryKey = 'label',
   bars,
   outlines = [],
-  lines = [],
   stacked = false,
+  lines = [],
   format = 'number',
   height = 320,
   maxBarSize = 96,
@@ -28,14 +24,14 @@ export default function ColumnChart({
   const tooltipValue = (value, name, item) => formatter.value(valueKeys.has(item?.dataKey) ? item.payload[valueKeys.get(item.dataKey)] : value);
 
   return (
-    <figure className="chart" role="img" aria-label={label}>
+    <figure className="chart" aria-label={label}>
       <ResponsiveContainer width="100%" height={height}>
-        <BarChart data={data} margin={{ top: 16, right: 12, bottom: 4, left: 4 }}>
-          <CartesianGrid vertical={false} stroke={chartColors.grid} />
-          <XAxis dataKey={categoryKey} tick={tick} tickLine={false} axisLine={{ stroke: chartColors.grid }} />
+        <BarChart accessibilityLayer data={data} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
+          <CartesianGrid vertical={false} stroke={chartColors.grid} strokeDasharray="3 3" />
+          <XAxis dataKey={categoryKey} tick={tick} tickLine={false} tickMargin={10} axisLine={false} />
           {outlines.length > 0 && <XAxis dataKey={categoryKey} xAxisId={outlineAxisId} hide />}
-          <YAxis tick={tick} tickFormatter={formatter.axis} tickLine={false} axisLine={false} width={76} />
-          <Tooltip formatter={tooltipValue} cursor={{ fill: 'rgb(28 43 39 / 4%)' }} />
+          <YAxis tick={tick} tickFormatter={formatter.axis} tickLine={false} tickMargin={8} axisLine={false} width={72} />
+          <Tooltip formatter={tooltipValue} />
           {bars.map((bar) => (
             <Bar
               key={bar.key}
@@ -43,7 +39,8 @@ export default function ColumnChart({
               name={bar.label}
               fill={bar.color}
               stackId={stacked ? 'stack' : undefined}
-              stroke={stacked ? '#ffffff' : undefined}
+              stroke={stacked ? 'var(--background)' : undefined}
+              radius={[4, 4, 0, 0]}
               maxBarSize={maxBarSize}
               isAnimationActive={false}
             />
@@ -56,19 +53,21 @@ export default function ColumnChart({
               xAxisId={outlineAxisId}
               fill="none"
               stroke={outline.color}
-              strokeWidth={2}
-              strokeDasharray="6 4"
+              strokeWidth={1}
+              strokeDasharray="4 4"
+              legendType="line"
               maxBarSize={maxBarSize}
               isAnimationActive={false}
             />
           ))}
+          {bars.length > 1 && <Legend verticalAlign="bottom" height={28} />}
           {lines.filter((line) => line.value != null).map((line) => (
             <ReferenceLine
               key={line.label}
               y={line.value}
               stroke={line.color}
-              strokeWidth={2}
-              strokeDasharray={line.dashed ? '6 4' : undefined}
+              strokeWidth={1}
+              strokeDasharray={line.dashed ? '4 4' : undefined}
               ifOverflow="extendDomain"
               label={{
                 value: `${line.label} ${formatter.axis(line.value)}`,
