@@ -40,7 +40,7 @@ async function isValidRecordLink(request) {
 
 export async function proxy(request) {
   const { pathname } = request.nextUrl;
-  if (['/login', '/forgot-password', '/reset-password', '/payment', '/payments'].includes(pathname) || pathname.startsWith('/api/')) {
+  if (['/healthz', '/login', '/forgot-password', '/reset-password', '/payment', '/payments'].includes(pathname) || pathname.startsWith('/api/')) {
     return NextResponse.next();
   }
 

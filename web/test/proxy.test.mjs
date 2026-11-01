@@ -74,6 +74,18 @@ test('missing sessions redirect to login without fetching the API', async (conte
   assert.equal(fetchMock.mock.callCount(), 0);
 });
 
+test('health checks bypass authentication and API availability without redirects', async (context) => {
+  const fetchMock = context.mock.method(globalThis, 'fetch', async () => {
+    throw new Error('Unexpected API request');
+  });
+  for (const token of ['', 'invalid-session']) {
+    const response = await proxy(request('/healthz', token));
+    assert.equal(response.headers.get('x-middleware-next'), '1');
+    assert.equal(response.headers.get('location'), null);
+  }
+  assert.equal(fetchMock.mock.callCount(), 0);
+});
+
 test('public pages bypass session checks and valid record links remain accessible', async (context) => {
   const fetchMock = context.mock.method(globalThis, 'fetch', async () => new Response(null, { status: 200 }));
   for (const path of ['/login', '/forgot-password', '/reset-password', '/payment', '/payments', '/api/v1/auth/login']) {

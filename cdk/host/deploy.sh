@@ -241,7 +241,7 @@ wait_for_health() {
 	local container="$1" health_path="$2" attempt
 	for ((attempt = 0; attempt < 60; attempt += 1)); do
 		if docker exec "$container" node -e \
-			'fetch(process.argv[1]).then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))' \
+			'fetch(process.argv[1], { redirect: "manual" }).then((response) => process.exit(response.status === 200 ? 0 : 1)).catch(() => process.exit(1))' \
 			"http://127.0.0.1:3000${health_path}" >/dev/null 2>&1; then
 			return 0
 		fi
@@ -258,7 +258,7 @@ wait_for_proxy_health() {
 	local container="$1" proxy_port="$2" health_path="$3" attempt
 	for ((attempt = 0; attempt < 30; attempt += 1)); do
 		if docker exec "$container" node -e \
-			'fetch(process.argv[1]).then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))' \
+			'fetch(process.argv[1], { redirect: "manual" }).then((response) => process.exit(response.status === 200 ? 0 : 1)).catch(() => process.exit(1))' \
 			"http://biz-caddy:${proxy_port}${health_path}" >/dev/null 2>&1; then
 			return 0
 		fi
