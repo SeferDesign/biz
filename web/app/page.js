@@ -67,18 +67,18 @@ export default async function Home() {
   const monthExpenses = sumExpenses(expenses, (expense) => dateInRange(expense.date, monthStart, monthEnd));
 
   const financialRows = [
+		{
+			label: monthLabel,
+			goal: monthGoal > 0 ? monthGoal : Number(yearRecord?.goal_year || 0) / 12,
+			revenue: monthRevenue,
+			expenses: monthExpenses
+		},
     {
       label: String(currentYear),
       href: yearRecord ? `/years/${yearRecord.id}` : '/years',
       goal: Number(yearRecord?.goal_year || 0),
       revenue: yearRevenue,
       expenses: yearExpenses
-    },
-    {
-      label: monthLabel,
-      goal: monthGoal > 0 ? monthGoal : Number(yearRecord?.goal_year || 0) / 12,
-      revenue: monthRevenue,
-      expenses: monthExpenses
     }
   ].map((row) => ({
     ...row,
@@ -95,7 +95,7 @@ export default async function Home() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           <Card className="min-w-0 md:col-span-2 xl:col-span-1">
             <CardHeader className="relative p-4 pb-3">
-              <CardDescription>Total receivable</CardDescription>
+              <CardDescription>Receivable</CardDescription>
               <CardTitle className="w-full text-end text-2xl font-semibold tabular-nums">{formatMoney(totalOpen)}</CardTitle>
               <Badge variant="outline" className="absolute right-4 top-4 rounded-lg">
                 {openInvoices.length} {openInvoices.length === 1 ? 'invoice' : 'invoices'}
@@ -110,7 +110,7 @@ export default async function Home() {
             <Card key={row.label} className="min-w-0">
               <CardHeader className="relative p-4 pb-3">
                 <CardDescription>
-                  {row.href ? <Link className="inline-link" href={row.href}>{row.label}</Link> : row.label} revenue
+                  {row.href ? <Link className="inline-link" href={row.href}>{row.label}</Link> : row.label}
                 </CardDescription>
                 <CardTitle className="w-full text-end text-2xl font-semibold tabular-nums">{formatMoney(row.revenue)}</CardTitle>
                 <Badge variant="outline" className="absolute right-4 top-4 rounded-lg">
