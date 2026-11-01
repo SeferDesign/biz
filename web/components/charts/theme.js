@@ -22,11 +22,17 @@ export const chartTooltipStyles = {
 };
 
 export const financeBars = [
-  { key: 'expenses', label: 'Expenses', color: chartColors.expenses },
-  { key: 'revenueOverExpenses', valueKey: 'revenue', label: 'Revenue', color: chartColors.revenue }
+  { key: 'expenses', label: 'Expenses', color: chartColors.expenses, displayOrder: 1 },
+  { key: 'revenueOverExpenses', valueKey: 'revenue', label: 'Revenue', color: chartColors.revenue, displayOrder: 0 }
 ];
 
 export const goalOutlines = [{ key: 'goal', label: 'Goal', color: chartColors.goal }];
+
+export function chartSeries(bars, outlines = []) {
+  return [...bars, ...outlines.map((outline) => ({ ...outline, outlined: true }))]
+    .map((series, index) => ({ ...series, displayOrder: series.displayOrder ?? index }))
+    .sort((first, second) => first.displayOrder - second.displayOrder);
+}
 
 const formats = {
   currency: {

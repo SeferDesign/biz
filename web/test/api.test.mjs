@@ -97,3 +97,15 @@ test('monthly chart goals prefer month targets and fall back to the annual goal'
   assert.equal(monthlyGoal(years, 2024, 1), null);
   assert.equal(monthlyFinances([{ key: '2025-01', year: 2025, month: 1, label: 'January' }], { years })[0].goal, 2000);
 });
+
+test('finance legend and tooltip series order does not change stacking or revenue values', async () => {
+  const { chartSeries, financeBars, goalOutlines } = await import('../components/charts/theme.js');
+  const series = chartSeries(financeBars, goalOutlines);
+
+  assert.deepEqual(series.map((item) => item.label), ['Revenue', 'Expenses', 'Goal']);
+  assert.equal(series[0].valueKey, 'revenue');
+  assert.equal(series[2].outlined, true);
+  assert.deepEqual(financeBars.map((item) => item.label), ['Expenses', 'Revenue']);
+  assert.equal(goalOutlines[0].outlined, undefined);
+  assert.deepEqual(chartSeries([{ key: 'second' }, { key: 'first' }]).map((item) => item.key), ['second', 'first']);
+});
