@@ -29,7 +29,7 @@ export default async function ExpensesPage({ searchParams }) {
       </nav>
       <ResourcePage
         title="Expenses"
-        data={expenseResult.data?.toSorted(newestExpensesFirst)}
+        data={expenseResult.data?.toSorted(filter === 'future' ? (left, right) => newestExpensesFirst(right, left) : newestExpensesFirst)}
         error={expenseResult.error || vendorResult.error}
         countLabel="expenses"
         actionHref="/expenses/new"
