@@ -80,7 +80,7 @@ export function invoiceTemplateFields(clients) {
       rows: 6,
       wide: true,
       required: true,
-      helpText: 'Use {today} or {yesterday} to insert the local date as YYYY-MM-DD when applied.'
+      helpText: 'Use {today} or {yesterday} for a local date (YYYY-MM-DD), {current_month} or {last_month} for a month name, and {current_year} for the year.'
     }
   ];
 }
