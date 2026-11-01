@@ -4,8 +4,14 @@ ARG BUILD_ENV=prod
 # Shared base for every stage so local and production run the same runtime.
 FROM node:${NODE_VERSION_MAJOR}-bookworm-slim AS node-base
 ARG BUILD_ENV
+ARG TZ
+RUN apt-get update \
+	&& DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata \
+	&& rm -rf /var/lib/apt/lists/*
 ENV BUILD_ENV=${BUILD_ENV} \
 	NODE_ENV=production \
+	TZ=${TZ} \
+	NEXT_PUBLIC_TIMEZONE=${TZ} \
 	NPM_CONFIG_UPDATE_NOTIFIER=false \
 	NPM_CONFIG_FUND=false
 WORKDIR /app

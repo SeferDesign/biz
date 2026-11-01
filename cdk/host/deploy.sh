@@ -15,9 +15,11 @@ app_domain="$(cfg appDomain)"
 api_domain="$(cfg apiDomain)"
 log_group="$(cfg logGroup)"
 secrets_parameter="$(cfg secretsParameter)"
+timezone="$(cfg timezone)"
 mysql_image="mysql:$(cfg mysqlVersion)"
 
 cd /opt/biz
+timedatectl set-timezone "$timezone"
 umask 077
 mkdir -p /opt/biz/backup-status
 chmod 755 /opt/biz/backup-status
@@ -101,9 +103,11 @@ jq -r '
 jq -r \
 	--arg region "$region" \
 	--arg app_url "https://$app_domain" \
-	--arg api_url "https://$api_domain" '
+	--arg api_url "https://$api_domain" \
+	--arg timezone "$timezone" '
 	{
 		NODE_ENV: "production",
+		TZ: $timezone,
 		BUILD_ENV: "prod",
 		PORT: "3000",
 		BACKUP_STATUS_FILE: "/var/lib/biz-backup/status.json",
@@ -133,6 +137,8 @@ jq -r \
 
 cat >web.env <<EOF
 NODE_ENV=production
+TZ=${timezone}
+NEXT_PUBLIC_TIMEZONE=${timezone}
 PORT=3000
 API_INTERNAL_URL=http://biz-api:3000
 NEXT_PUBLIC_API_URL=https://${api_domain}

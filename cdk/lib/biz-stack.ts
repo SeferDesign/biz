@@ -74,6 +74,7 @@ export class BizStack extends Stack {
         platform,
         buildArgs: {
           NODE_VERSION_MAJOR: process.env.NODE_VERSION_MAJOR ?? buildEnv.NODE_VERSION_MAJOR,
+          TZ: buildEnv.TZ,
           BUILD_ENV: 'prod',
           ...(target === 'web-production' && { NEXT_PUBLIC_API_URL: `https://${props.apiDomainName}` }),
         },
@@ -109,6 +110,7 @@ export class BizStack extends Stack {
         web: webImage.imageUri,
         hostBundle: hostBundle.s3ObjectUrl,
         mysqlVersion: buildEnv.MYSQL_VERSION,
+        timezone: buildEnv.TZ,
         appDomain: props.appDomainName,
         apiDomain: props.apiDomainName,
         acmeEmail: props.acmeEmail,

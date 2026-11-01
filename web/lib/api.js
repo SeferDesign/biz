@@ -10,6 +10,7 @@ const defaultApiVersion = 'v1';
 
 export const browserApiBaseUrl = `${publicApiBaseUrl}/${defaultApiVersion}`;
 export const recordsPerPage = 12;
+export const businessTimeZone = process.env.NEXT_PUBLIC_TIMEZONE;
 
 export function parsePage(value) {
   const page = Number(value);
@@ -54,7 +55,7 @@ export function formatDateTime(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '-';
   return new Intl.DateTimeFormat('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit'
+    month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: businessTimeZone
   }).format(date);
 }
 

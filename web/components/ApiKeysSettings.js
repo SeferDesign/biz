@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { KeyRound, Save, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { browserApiBaseUrl } from '../lib/api.js';
+import { browserApiBaseUrl, businessTimeZone } from '../lib/api.js';
 import { Alert, AlertDescription } from './ui/alert.js';
 import { Button } from './ui/button.js';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card.js';
@@ -20,7 +20,8 @@ function formatDateTime(value) {
     day: 'numeric',
     year: 'numeric',
     hour: 'numeric',
-    minute: '2-digit'
+    minute: '2-digit',
+    timeZone: businessTimeZone
   }).format(date);
 }
 

@@ -29,6 +29,18 @@ test('browser API URLs use the public host while server requests use the interna
   assert.deepEqual(await getApiData('/clients', { accessToken: 'signed-session' }), { data: [] });
 });
 
+test('timestamps use the business timezone instead of the runtime timezone', async (context) => {
+  configureEnvironment(context, {
+    NEXT_PUBLIC_API_URL: 'https://example.test',
+    NEXT_PUBLIC_TIMEZONE: 'America/Chicago',
+    TZ: 'UTC'
+  });
+  const { businessTimeZone, formatDateTime } = await import('../lib/api.js?business-timezone');
+
+  assert.equal(businessTimeZone, 'America/Chicago');
+  assert.match(formatDateTime('2026-01-15T12:30:00Z'), /6:30 AM/);
+});
+
 for (const [label, value] of [['missing', undefined], ['empty', ''], ['blank', '   ']]) {
   test(`browser API URLs reject ${label} public configuration instead of using a fallback`, async (context) => {
     configureEnvironment(context, {

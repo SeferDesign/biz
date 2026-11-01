@@ -8,7 +8,7 @@ import { Badge } from './ui/badge.js';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card.js';
 import { Alert, AlertDescription } from './ui/alert.js';
 import { Separator } from './ui/separator.js';
-import { browserApiBaseUrl } from '../lib/api.js';
+import { browserApiBaseUrl, businessTimeZone } from '../lib/api.js';
 import { Spinner } from './ui/spinner.js';
 
 const stateLabels = {
@@ -35,7 +35,8 @@ function formatDateTime(value) {
   if (Number.isNaN(date.getTime())) return 'Unknown';
   return new Intl.DateTimeFormat('en-US', {
     dateStyle: 'medium',
-    timeStyle: 'short'
+    timeStyle: 'short',
+    timeZone: businessTimeZone
   }).format(date);
 }
 
