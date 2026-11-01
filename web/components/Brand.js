@@ -7,7 +7,7 @@ export default function Brand({ href = companyInfo.website, label = companyInfo.
 	}
   return (
     <Link className={classes} href={href}>
-      <img className="brand-logo" src={companyInfo.logo.pathPublic} alt={label} />
+      <img className="brand-logo dark:invert" src={companyInfo.logo.pathPublic} alt={label} />
     </Link>
   );
 }

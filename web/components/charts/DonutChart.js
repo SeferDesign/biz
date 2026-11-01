@@ -1,7 +1,7 @@
 'use client';
 
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
-import { chartColors, chartFormat, chartPalette } from './theme.js';
+import { chartFormat, chartPalette, chartTooltipStyles } from './theme.js';
 
 // data: [{ [nameKey], [valueKey] }]; slices take colors from `colors` in order.
 export default function DonutChart({
@@ -31,7 +31,7 @@ export default function DonutChart({
           >
             {data.map((entry, index) => <Cell key={entry[nameKey]} fill={colors[index % colors.length]} />)}
           </Pie>
-          <Tooltip formatter={formatter.value} />
+          <Tooltip {...chartTooltipStyles} formatter={formatter.value} />
           <Legend verticalAlign="bottom" height={56} />
         </PieChart>
       </ResponsiveContainer>

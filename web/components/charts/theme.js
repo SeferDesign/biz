@@ -10,6 +10,17 @@ export const chartPalette = [
   'var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'
 ];
 
+export const chartTooltipStyles = {
+  contentStyle: {
+    backgroundColor: 'var(--popover)',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-md)',
+    color: 'var(--popover-foreground)'
+  },
+  itemStyle: { color: 'var(--popover-foreground)' },
+  labelStyle: { color: 'var(--popover-foreground)' }
+};
+
 export const financeBars = [
   { key: 'expenses', label: 'Expenses', color: chartColors.expenses },
   { key: 'revenueOverExpenses', valueKey: 'revenue', label: 'Revenue', color: chartColors.revenue }

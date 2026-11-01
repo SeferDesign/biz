@@ -1,7 +1,7 @@
 'use client';
 
 import { Bar, BarChart, CartesianGrid, Legend, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { chartColors, chartFormat } from './theme.js';
+import { chartColors, chartFormat, chartTooltipStyles } from './theme.js';
 
 const outlineAxisId = 'outline';
 
@@ -31,7 +31,7 @@ export default function ColumnChart({
           <XAxis dataKey={categoryKey} tick={tick} tickLine={false} tickMargin={10} axisLine={false} />
           {outlines.length > 0 && <XAxis dataKey={categoryKey} xAxisId={outlineAxisId} hide />}
           <YAxis tick={tick} tickFormatter={formatter.axis} tickLine={false} tickMargin={8} axisLine={false} width={72} />
-          <Tooltip formatter={tooltipValue} />
+          <Tooltip {...chartTooltipStyles} cursor={{ fill: 'var(--muted)', fillOpacity: 0.45 }} formatter={tooltipValue} />
           {bars.map((bar) => (
             <Bar
               key={bar.key}

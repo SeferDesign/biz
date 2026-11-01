@@ -189,7 +189,7 @@ function TeamSwitcher() {
             {state === 'collapsed' ? (
               <GalleryVerticalEnd aria-hidden="true" />
             ) : (
-              <img src={companyInfo.logo.pathPublic} alt={companyInfo.name} className="h-auto w-[190px] max-w-none shrink-0 brightness-0" />
+              <img src={companyInfo.logo.pathPublic} alt={companyInfo.name} className="h-auto w-[190px] max-w-none shrink-0 brightness-0 dark:invert" />
             )}
           </Link>
         </SidebarMenuButton>

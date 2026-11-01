@@ -42,6 +42,7 @@
 }
 
 :root {
+  color-scheme: light;
   --radius: 0.625rem;
   --background: #ffffff;
   --foreground: #09090b;
@@ -77,6 +78,46 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --background: #09090b;
+    --foreground: #fafafa;
+    --card: #18181b;
+    --card-foreground: #fafafa;
+    --popover: #18181b;
+    --popover-foreground: #fafafa;
+    --primary: #fafafa;
+    --primary-foreground: #18181b;
+    --secondary: #27272a;
+    --secondary-foreground: #fafafa;
+    --muted: #27272a;
+    --muted-foreground: #a1a1aa;
+    --accent: #27272a;
+    --accent-foreground: #fafafa;
+    --destructive: #f43f5e;
+    --border: #3f3f46;
+    --input: #3f3f46;
+    --ring: #71717a;
+    --sidebar: #111113;
+    --sidebar-foreground: #fafafa;
+    --sidebar-primary: #fafafa;
+    --sidebar-primary-foreground: #18181b;
+    --sidebar-accent: #27272a;
+    --sidebar-accent-foreground: #fafafa;
+    --sidebar-border: #3f3f46;
+    --sidebar-ring: #71717a;
+    --chart-revenue: #4ade80;
+    --chart-expenses: #f87171;
+    --chart-goal: #a1a1aa;
+    --chart-1: oklch(0.72 0.19 41.116);
+    --chart-2: oklch(0.72 0.12 184.704);
+    --chart-3: oklch(0.72 0.1 227.392);
+    --chart-4: oklch(0.8 0.16 84.429);
+    --chart-5: oklch(0.76 0.17 70.08);
+  }
 }
 
 @layer base {
