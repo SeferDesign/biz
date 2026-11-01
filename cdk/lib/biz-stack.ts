@@ -1,9 +1,10 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { Annotations, CfnOutput, Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
+import { Annotations, CfnOutput, CustomResource, Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as ecrAssets from 'aws-cdk-lib/aws-ecr-assets';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as s3 from 'aws-cdk-lib/aws-s3';
@@ -194,34 +195,45 @@ export class BizStack extends Stack {
     const eip = new ec2.CfnEIP(this, 'HostIp', { domain: 'vpc', instanceId: host.instanceId });
 
     // Rolls new images/scripts onto the running host. Ignored on first boot, when user data deploys itself.
-    const sendDeploy: cr.AwsSdkCall = {
-      service: 'SSM',
-      action: 'sendCommand',
-      parameters: {
-        InstanceIds: [host.instanceId],
-        DocumentName: 'AWS-RunShellScript',
-        Comment: `biz deploy ${this.stackName}`,
-        Parameters: { commands: ['/opt/biz/update.sh'] },
-        CloudWatchOutputConfig: { CloudWatchOutputEnabled: true, CloudWatchLogGroupName: logGroup.logGroupName },
+    const deployProviderCode = lambda.Code.fromAsset(path.join(__dirname, '..', 'deploy-provider'));
+    const deployOnEvent = new lambda.Function(this, 'DeployOnEvent', {
+      runtime: lambda.Runtime.PYTHON_3_13,
+      handler: 'handler.on_event',
+      code: deployProviderCode,
+      timeout: Duration.seconds(60),
+    });
+    deployOnEvent.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['ssm:SendCommand'],
+      resources: [
+        `arn:${this.partition}:ssm:${this.region}::document/AWS-RunShellScript`,
+        `arn:${this.partition}:ec2:${this.region}:${this.account}:instance/${host.instanceId}`,
+      ],
+    }));
+
+    const deployIsComplete = new lambda.Function(this, 'DeployIsComplete', {
+      runtime: lambda.Runtime.PYTHON_3_13,
+      handler: 'handler.is_complete',
+      code: deployProviderCode,
+      timeout: Duration.seconds(60),
+    });
+    deployIsComplete.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['ssm:GetCommandInvocation'],
+      resources: ['*'],
+    }));
+
+    const deployProvider = new cr.Provider(this, 'DeployProvider', {
+      onEventHandler: deployOnEvent,
+      isCompleteHandler: deployIsComplete,
+      queryInterval: Duration.seconds(10),
+      totalTimeout: Duration.minutes(35),
+    });
+    const deployCommand = new CustomResource(this, 'DeployCommand', {
+      serviceToken: deployProvider.serviceToken,
+      properties: {
+        instanceId: host.instanceId,
+        logGroup: logGroup.logGroupName,
+        deploymentVersion: [host.instanceId, apiImage.assetHash, webImage.assetHash, hostBundle.assetHash].join(':'),
       },
-      physicalResourceId: cr.PhysicalResourceId.of(
-        [host.instanceId, apiImage.assetHash, webImage.assetHash, hostBundle.assetHash].join(':'),
-      ),
-      ignoreErrorCodesMatching: 'InvalidInstanceId',
-    };
-    const deployCommand = new cr.AwsCustomResource(this, 'DeployCommand', {
-      onCreate: sendDeploy,
-      onUpdate: sendDeploy,
-      installLatestAwsSdk: false,
-      policy: cr.AwsCustomResourcePolicy.fromStatements([
-        new iam.PolicyStatement({
-          actions: ['ssm:SendCommand'],
-          resources: [
-            `arn:${this.partition}:ssm:${this.region}::document/AWS-RunShellScript`,
-            `arn:${this.partition}:ec2:${this.region}:${this.account}:instance/${host.instanceId}`,
-          ],
-        }),
-      ]),
     });
     deployCommand.node.addDependency(deployParameter);
 
