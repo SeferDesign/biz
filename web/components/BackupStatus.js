@@ -21,12 +21,12 @@ const stateLabels = {
 };
 
 const stateVariants = {
-  success: 'default',
-  failed: 'destructive',
-  running: 'secondary',
+  success: 'success',
+  failed: 'danger',
+  running: 'info',
   never: 'outline',
-  pending: 'secondary',
-  unavailable: 'secondary'
+  pending: 'warning',
+  unavailable: 'warning'
 };
 
 function formatDateTime(value) {

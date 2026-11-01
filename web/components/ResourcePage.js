@@ -106,13 +106,14 @@ export function ResourcePage({ title, description, data, error, columns, countLa
 export function StatusBadge({ status }) {
   const value = String(status || 'draft').toLowerCase();
   const variant = {
-    paid: 'default',
-    succeeded: 'default',
-    sent: 'secondary',
-    due: 'secondary',
-    processing: 'outline',
-    submitted: 'outline',
-    failed: 'destructive'
+    paid: 'success',
+    succeeded: 'success',
+    sent: 'info',
+    due: 'warning',
+    processing: 'info',
+    submitted: 'info',
+    overdue: 'danger',
+    failed: 'danger'
   }[value] || 'secondary';
   return <Badge variant={variant}>{value}</Badge>;
 }

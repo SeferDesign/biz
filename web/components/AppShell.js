@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Fragment, useState } from 'react';
 import { browserApiBaseUrl } from '../lib/api.js';
+import { iconColors } from '../lib/icon-colors.js';
 import {
   Building2,
   CalendarDays,
@@ -59,23 +60,24 @@ import {
 } from './ui/breadcrumb.js';
 
 const overviewNavigation = [
-	{ href: '/', label: 'Overview', icon: House },
-  { href: '/clients', label: 'Clients', icon: Users },
+	{ href: '/', label: 'Overview', icon: House, iconColor: iconColors.overview },
+  { href: '/clients', label: 'Clients', icon: Users, iconColor: iconColors.clients },
   {
     href: '/invoices',
     label: 'Invoices',
     icon: FileText,
+    iconColor: iconColors.invoices,
     children: [{ href: '/settings/templates', label: 'Templates' }]
   },
-  { href: '/vendors', label: 'Vendors', icon: Building2 },
-  { href: '/expenses', label: 'Expenses', icon: Receipt },
-  { href: '/years', label: 'Years', icon: CalendarDays }
+  { href: '/vendors', label: 'Vendors', icon: Building2, iconColor: iconColors.vendors },
+  { href: '/expenses', label: 'Expenses', icon: Receipt, iconColor: iconColors.expenses },
+  { href: '/years', label: 'Years', icon: CalendarDays, iconColor: iconColors.years }
 ];
 
 const insightsNavigation = [
-  { href: '/best', label: 'Best Performances', icon: Award },
-  { href: '/payments', label: 'Payment Options', icon: CreditCard },
-  { href: '/settings/backups', label: 'Backup Status', icon: HardDrive }
+  { href: '/best', label: 'Best Performances', icon: Award, iconColor: iconColors.best },
+  { href: '/payments', label: 'Payment Options', icon: CreditCard, iconColor: iconColors.payments },
+  { href: '/settings/backups', label: 'Backup Status', icon: HardDrive, iconColor: iconColors.backups }
 ];
 
 const staticBreadcrumbs = {
@@ -136,7 +138,7 @@ function NavItem({ pathname, item }) {
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={active} tooltip={item.label}>
         <Link href={item.href} aria-current={isRouteActive(item.href) ? 'page' : undefined} onClick={() => setOpenMobile(false)}>
-          <item.icon />
+          <item.icon className={item.iconColor} />
           <span>{item.label}</span>
         </Link>
       </SidebarMenuButton>

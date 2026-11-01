@@ -128,7 +128,7 @@ export default function SecuritySettings({ initialSettings }) {
             <CardTitle>Two-factor authentication</CardTitle>
             <CardDescription>Require an authenticator code whenever this account signs in.</CardDescription>
           </div>
-          <Badge className="shrink-0" variant={settings.otp_enabled ? 'default' : 'secondary'}>
+          <Badge className="shrink-0" variant={settings.otp_enabled ? 'success' : 'secondary'}>
             {settings.otp_enabled ? 'Enabled' : 'Disabled'}
           </Badge>
         </CardHeader>

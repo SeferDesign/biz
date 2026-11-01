@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Wallet, CalendarDays, CalendarFold } from 'lucide-react';
 import { ResourcePage, StatusBadge } from '../components/ResourcePage.js';
 import InvoiceActions from '../components/InvoiceActions.js';
 import Notice from '../components/Notice.js';
@@ -7,6 +8,7 @@ import { financeBars, goalOutlines } from '../components/charts/theme.js';
 import { formatMoney, formatTableDate, invoiceStatus, newestInvoicesFirst } from '../lib/api.js';
 import { getApiData } from '../lib/api-server.js';
 import { monthlyFinances, trailingMonths } from '../lib/chart-data.js';
+import { iconColors } from '../lib/icon-colors.js';
 import { Badge } from '../components/ui/badge.js';
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card.js';
 
@@ -71,14 +73,16 @@ export default async function Home() {
 			label: monthLabel,
 			goal: monthGoal > 0 ? monthGoal : Number(yearRecord?.goal_year || 0) / 12,
 			revenue: monthRevenue,
-			expenses: monthExpenses
+			expenses: monthExpenses,
+			icon: CalendarFold
 		},
     {
       label: String(currentYear),
       href: yearRecord ? `/years/${yearRecord.id}` : '/years',
       goal: Number(yearRecord?.goal_year || 0),
       revenue: yearRevenue,
-      expenses: yearExpenses
+      expenses: yearExpenses,
+			icon: CalendarDays
     }
   ].map((row) => ({
     ...row,
@@ -95,9 +99,9 @@ export default async function Home() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           <Card className="min-w-0 md:col-span-2 xl:col-span-1">
             <CardHeader className="relative p-4 pb-3">
-              <CardDescription>Receivable</CardDescription>
+              <CardDescription className="flex items-center gap-2"><Wallet className="size-4 text-warning" aria-hidden="true" />Receivable</CardDescription>
               <CardTitle className="w-full text-end text-2xl font-semibold tabular-nums">{formatMoney(totalOpen)}</CardTitle>
-              <Badge variant="outline" className="absolute right-4 top-4 rounded-lg">
+              <Badge variant={openInvoices.length > 0 ? 'warning' : 'secondary'} className="absolute right-4 top-4">
                 {openInvoices.length} {openInvoices.length === 1 ? 'invoice' : 'invoices'}
               </Badge>
             </CardHeader>
@@ -109,11 +113,12 @@ export default async function Home() {
           {financialRows.map((row) => (
             <Card key={row.label} className="min-w-0">
               <CardHeader className="relative p-4 pb-3">
-                <CardDescription>
+                <CardDescription className="flex items-center gap-2">
+                  <row.icon className={`size-4 ${iconColors.years}`} aria-hidden="true" />
                   {row.href ? <Link className="inline-link" href={row.href}>{row.label}</Link> : row.label}
                 </CardDescription>
                 <CardTitle className="w-full text-end text-2xl font-semibold tabular-nums">{formatMoney(row.revenue)}</CardTitle>
-                <Badge variant="outline" className="absolute right-4 top-4 rounded-lg">
+                <Badge variant={row.goalProgress === null ? 'secondary' : row.goalProgress >= 100 ? 'success' : 'info'} className="absolute right-4 top-4">
                   {row.goalProgress === null ? 'No goal' : `${row.goalProgress}% of goal`}
                 </Badge>
               </CardHeader>
@@ -128,6 +133,12 @@ export default async function Home() {
                     {formatMoney(row.net)}
                   </span>
                 </p>
+								{/* {row.goal && (
+									<p className="flex w-full items-center justify-between gap-2 text-muted-foreground italic">
+										<span>Goal</span>
+										<span className="font-mono tabular-nums text-end">{formatMoney(row.goal)}</span>
+									</p>
+								)} */}
               </CardFooter>
             </Card>
           ))}

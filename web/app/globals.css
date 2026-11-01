@@ -25,6 +25,16 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-teal: var(--teal);
+  --color-mauve: var(--mauve);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -59,6 +69,16 @@
   --accent: #f4f4f5;
   --accent-foreground: #18181b;
   --destructive: #e11d48;
+  --success: #357052;
+  --success-soft: #edf5ef;
+  --warning: #88621f;
+  --warning-soft: #faf3e3;
+  --info: #496d99;
+  --info-soft: #eef3f9;
+  --danger: #a34e5a;
+  --danger-soft: #faeef0;
+  --teal: #397b7a;
+  --mauve: #876483;
   --border: #e4e4e7;
   --input: #e4e4e7;
   --ring: #a1a1aa;
@@ -98,6 +118,16 @@
     --accent: #27272a;
     --accent-foreground: #fafafa;
     --destructive: #f43f5e;
+    --success: #91c6a4;
+    --success-soft: #1c3025;
+    --warning: #d9b573;
+    --warning-soft: #342c1d;
+    --info: #9bb9dc;
+    --info-soft: #202d3e;
+    --danger: #e0a0ab;
+    --danger-soft: #382329;
+    --teal: #8bbfbc;
+    --mauve: #c2a2bd;
     --border: #3f3f46;
     --input: #3f3f46;
     --ring: #71717a;
@@ -131,6 +161,14 @@
 }
 
 @layer components {
+  .amount-positive {
+    color: var(--success);
+  }
+
+  .amount-negative {
+    color: var(--danger);
+  }
+
   .record-form {
     @apply mx-auto grid w-full max-w-4xl grid-cols-1 gap-6 sm:grid-cols-2;
   }

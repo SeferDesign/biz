@@ -15,6 +15,7 @@ import { Separator } from '../../../components/ui/separator.js';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../components/ui/table.js';
 import { browserApiBaseUrl, formatDate, formatDateTime, formatMoney, invoiceStatus, parsePage } from '../../../lib/api.js';
 import { getApiData } from '../../../lib/api-server.js';
+import { iconColors } from '../../../lib/icon-colors.js';
 
 export const metadata = { title: 'Invoice Details' };
 
@@ -110,7 +111,7 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <StatusBadge status={invoiceStatus(invoice)} />
-            <Button asChild variant="outline"><a href={`${browserApiBaseUrl}/invoices/${invoice.id}/pdf${accessTokenQuery}`}><FileDown className="size-4" aria-hidden="true" />Download PDF</a></Button>
+            <Button asChild variant="outline"><a href={`${browserApiBaseUrl}/invoices/${invoice.id}/pdf${accessTokenQuery}`}><FileDown className={`size-4 ${iconColors.invoices}`} aria-hidden="true" />Download PDF</a></Button>
           </div>
         </header>
       ) : (
@@ -118,7 +119,7 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
           <div><h1>Invoice #{invoice.id}</h1></div>
           <div className="detail-actions flex flex-wrap items-center gap-2">
             <InvoiceActions key={`${invoice.id}-${invoiceStatus(invoice)}`} invoice={invoice} lines={lines} linesAvailable={!lineResult.error} />
-            <Button asChild variant="outline"><a href={`${browserApiBaseUrl}/invoices/${invoice.id}/pdf${accessTokenQuery}`}><FileDown className="size-4" aria-hidden="true" />Download PDF</a></Button>
+            <Button asChild variant="outline"><a href={`${browserApiBaseUrl}/invoices/${invoice.id}/pdf${accessTokenQuery}`}><FileDown className={`size-4 ${iconColors.invoices}`} aria-hidden="true" />Download PDF</a></Button>
             <ResourceActions editHref={`/invoices/${invoice.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/invoices/${invoice.id}`} returnTo="/invoices" label="invoice" />
           </div>
         </div>

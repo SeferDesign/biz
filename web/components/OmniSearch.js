@@ -5,26 +5,27 @@ import { useRouter } from 'next/navigation';
 import { Building2, CalendarDays, FileText, ListTree, Receipt, Search, Users } from 'lucide-react';
 import { Fragment, useEffect, useState } from 'react';
 import { browserApiBaseUrl } from '../lib/api.js';
+import { iconColors } from '../lib/icon-colors.js';
 import { Command, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from './ui/command.js';
 import { Kbd } from './ui/kbd.js';
 import { Skeleton } from './ui/skeleton.js';
 
 const resultGroups = [
-  { type: 'Client', label: 'Clients', Icon: Users },
-  { type: 'Invoice', label: 'Invoices', Icon: FileText },
-  { type: 'Expense', label: 'Expenses', Icon: Receipt },
-  { type: 'Vendor', label: 'Vendors', Icon: Building2 },
-  { type: 'Line item', label: 'Line items', Icon: ListTree },
-  { type: 'Year', label: 'Years', Icon: CalendarDays }
+  { type: 'Client', label: 'Clients', Icon: Users, iconColor: iconColors.clients },
+  { type: 'Invoice', label: 'Invoices', Icon: FileText, iconColor: iconColors.invoices },
+  { type: 'Expense', label: 'Expenses', Icon: Receipt, iconColor: iconColors.expenses },
+  { type: 'Vendor', label: 'Vendors', Icon: Building2, iconColor: iconColors.vendors },
+  { type: 'Line item', label: 'Line items', Icon: ListTree, iconColor: iconColors.invoices },
+  { type: 'Year', label: 'Years', Icon: CalendarDays, iconColor: iconColors.years }
 ];
 
 const createActions = [
-  { label: 'New invoice', detail: 'Create a client invoice', href: '/invoices/new', Icon: FileText },
-  { label: 'New expense', detail: 'Record a business expense', href: '/expenses/new', Icon: Receipt },
-  { label: 'New client', detail: 'Add a client', href: '/clients/new', Icon: Users },
-  { label: 'New vendor', detail: 'Add a vendor', href: '/vendors/new', Icon: Building2 },
-  { label: 'New financial year', detail: 'Set goals and tax rate', href: '/years/new', Icon: CalendarDays },
-  { label: 'New invoice template', detail: 'Create a reusable invoice description', href: '/settings/templates/new', Icon: FileText }
+  { label: 'New invoice', detail: 'Create a client invoice', href: '/invoices/new', Icon: FileText, iconColor: iconColors.invoices },
+  { label: 'New expense', detail: 'Record a business expense', href: '/expenses/new', Icon: Receipt, iconColor: iconColors.expenses },
+  { label: 'New client', detail: 'Add a client', href: '/clients/new', Icon: Users, iconColor: iconColors.clients },
+  { label: 'New vendor', detail: 'Add a vendor', href: '/vendors/new', Icon: Building2, iconColor: iconColors.vendors },
+  { label: 'New financial year', detail: 'Set goals and tax rate', href: '/years/new', Icon: CalendarDays, iconColor: iconColors.years },
+  { label: 'New invoice template', detail: 'Create a reusable invoice description', href: '/settings/templates/new', Icon: FileText, iconColor: iconColors.invoices }
 ];
 
 export default function OmniSearch({ compact = false }) {
@@ -139,9 +140,9 @@ export default function OmniSearch({ compact = false }) {
             <CommandList aria-label="Search results" className="max-h-[min(60vh,26rem)] p-1">
               {!hasQuery && (
                 <CommandGroup heading="Create">
-                  {createActions.map(({ label, detail, href, Icon }) => (
+                  {createActions.map(({ label, detail, href, Icon, iconColor }) => (
                     <CommandItem key={href} value={`${label} ${detail}`} onSelect={() => navigateTo(href)}>
-                      <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                      <Icon className={`size-4 shrink-0 ${iconColor}`} aria-hidden="true" />
                       <span className="min-w-0 flex-1 truncate">{label}</span>
                       <span className="truncate text-xs text-muted-foreground">{detail}</span>
                     </CommandItem>
@@ -160,14 +161,14 @@ export default function OmniSearch({ compact = false }) {
                 ) : <div className="py-8 text-center text-sm text-muted-foreground" role="status">{error}</div>
               ) : canSearch ? (
                 <>
-                  {groupedResults.map(({ type, label, Icon, items }, index) => (
+                  {groupedResults.map(({ type, label, Icon, iconColor, items }, index) => (
                     <Fragment key={type}>
                       {index > 0 && <CommandSeparator />}
                       <CommandGroup heading={label}>
                         {items.map((item) => (
                           <Fragment key={`${item.type}-${item.href}-${item.title}`}>
                             <CommandItem value={`${item.type}-${item.href}-${item.title}`} onSelect={() => navigateTo(item.href)}>
-                              <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                              <Icon className={`size-4 shrink-0 ${iconColor}`} aria-hidden="true" />
                               <span className="min-w-0 flex-1">
                                 <span className="block truncate">{item.title}</span>
                                 {item.detail && <span className="block truncate text-xs text-muted-foreground">{item.detail}</span>}
@@ -178,7 +179,7 @@ export default function OmniSearch({ compact = false }) {
                                 value={`new invoice for ${item.title}`}
                                 onSelect={() => navigateTo(`/invoices/new?client_id=${encodeURIComponent(item.href.split('/').at(-1))}`)}
                               >
-                                <FileText className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                                <FileText className={`size-4 shrink-0 ${iconColors.invoices}`} aria-hidden="true" />
                                 <span className="min-w-0 flex-1 truncate">New invoice for {item.title}</span>
                               </CommandItem>
                             )}
