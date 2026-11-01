@@ -14,6 +14,8 @@ import {
   calendarMonths, monthlyFinances, monthlyRunRate, onOrBefore, quarterlyTaxes, totalsByCategory
 } from '../../../lib/chart-data.js';
 
+export const metadata = { title: 'Year Details' };
+
 export default async function YearDetailPage({ params, searchParams }) {
   const { id } = await params;
   const query = await searchParams;

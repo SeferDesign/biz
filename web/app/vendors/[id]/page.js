@@ -7,6 +7,8 @@ import ResourceActions from '../../../components/ResourceActions.js';
 import { browserApiBaseUrl, formatMoney } from '../../../lib/api.js';
 import { getApiData } from '../../../lib/api-server.js';
 
+export const metadata = { title: 'Vendor Details' };
+
 export default async function VendorDetailPage({ params }) {
   const { id } = await params;
   const [vendorResult, expenseResult] = await Promise.all([

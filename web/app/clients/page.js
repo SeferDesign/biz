@@ -4,6 +4,8 @@ import { NewIconButton } from '../../components/NewButton.js';
 import { formatMoney, parsePage } from '../../lib/api.js';
 import { getApiData } from '../../lib/api-server.js';
 
+export const metadata = { title: 'Clients' };
+
 export default async function ClientsPage({ searchParams }) {
   const params = await searchParams;
   const result = await getApiData('/clients');

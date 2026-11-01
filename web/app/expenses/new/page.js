@@ -3,6 +3,8 @@ import { browserApiBaseUrl } from '../../../lib/api.js';
 import { getApiData } from '../../../lib/api-server.js';
 import { expenseFields } from '../../../lib/record-fields.js';
 
+export const metadata = { title: 'New Expense' };
+
 export default async function NewExpensePage({ searchParams }) {
   const params = await searchParams;
   const result = await getApiData('/vendors');

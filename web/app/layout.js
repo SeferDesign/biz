@@ -5,8 +5,13 @@ import { getApiData } from '../lib/api-server.js';
 import './globals.css';
 import { companyInfo } from '@seferbiz/company';
 
+const titleSuffix = `Biz | ${companyInfo.name}`;
+
 export const metadata = {
-  title: `${companyInfo.name} ${companyInfo.acronym} Admin`,
+  title: {
+    default: titleSuffix,
+    template: `%s | ${titleSuffix}`
+  },
   description: '',
   icons: {
     icon: '/images/favicon.png'

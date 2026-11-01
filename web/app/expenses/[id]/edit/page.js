@@ -5,6 +5,8 @@ import { getApiData } from '../../../../lib/api-server.js';
 import Notice from '../../../../components/Notice.js';
 import { expenseFields } from '../../../../lib/record-fields.js';
 
+export const metadata = { title: 'Edit Expense' };
+
 export default async function EditExpensePage({ params }) {
   const { id } = await params;
   const [expenseResult, vendorResult] = await Promise.all([

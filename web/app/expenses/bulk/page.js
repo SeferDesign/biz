@@ -3,6 +3,8 @@ import Notice from '../../../components/Notice.js';
 import { browserApiBaseUrl } from '../../../lib/api.js';
 import { getApiData } from '../../../lib/api-server.js';
 
+export const metadata = { title: 'Expense Spreadsheet' };
+
 export default async function ExpenseSpreadsheetPage() {
   const [expenseResult, vendorResult] = await Promise.all([
     getApiData('/expenses?all=true'),

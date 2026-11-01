@@ -4,6 +4,8 @@ import InvoiceActions from '../../components/InvoiceActions.js';
 import { formatMoney, formatTableDate, invoiceStatus, invoicesByStatusFirst, parsePage } from '../../lib/api.js';
 import { getApiData } from '../../lib/api-server.js';
 
+export const metadata = { title: 'Invoices' };
+
 export default async function InvoicesPage({ searchParams }) {
   const params = await searchParams;
   const [invoiceResult, clientResult] = await Promise.all([

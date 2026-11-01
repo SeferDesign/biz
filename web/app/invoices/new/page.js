@@ -3,6 +3,8 @@ import { browserApiBaseUrl } from '../../../lib/api.js';
 import { getApiData } from '../../../lib/api-server.js';
 import { invoiceFields } from '../../../lib/record-fields.js';
 
+export const metadata = { title: 'New Invoice' };
+
 export default async function NewInvoicePage({ searchParams }) {
   const params = await searchParams;
   const result = await getApiData('/clients');

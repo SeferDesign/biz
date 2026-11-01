@@ -16,6 +16,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { browserApiBaseUrl, formatDate, formatDateTime, formatMoney, invoiceStatus, parsePage } from '../../../lib/api.js';
 import { getApiData } from '../../../lib/api-server.js';
 
+export const metadata = { title: 'Invoice Details' };
+
 export default async function InvoiceDetailPage({ params, searchParams }) {
   const { id } = await params;
   const query = await searchParams;

@@ -6,6 +6,8 @@ import { browserApiBaseUrl, formatDate, formatMoney } from '../../../lib/api.js'
 import { getApiData } from '../../../lib/api-server.js';
 import Notice from '../../../components/Notice.js';
 
+export const metadata = { title: 'Expense Details' };
+
 export default async function ExpenseDetailPage({ params }) {
   const { id } = await params;
   const [expenseResult, vendorResult] = await Promise.all([

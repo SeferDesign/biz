@@ -6,6 +6,8 @@ import { getApiData } from '../../../../lib/api-server.js';
 import Notice from '../../../../components/Notice.js';
 import { clientFields } from '../../../../lib/record-fields.js';
 
+export const metadata = { title: 'Edit Client' };
+
 export default async function EditClientPage({ params }) {
   const { id } = await params;
   const result = await getApiData(`/clients/${encodeURIComponent(id)}`);

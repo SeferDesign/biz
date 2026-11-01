@@ -5,6 +5,8 @@ import { browserApiBaseUrl } from '../../../../lib/api.js';
 import { getApiData } from '../../../../lib/api-server.js';
 import { vendorFields } from '../../../../lib/record-fields.js';
 
+export const metadata = { title: 'Edit Vendor' };
+
 export default async function EditVendorPage({ params }) {
   const { id } = await params;
   const result = await getApiData(`/vendors/${encodeURIComponent(id)}`);

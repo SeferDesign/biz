@@ -5,6 +5,8 @@ import { getApiData } from '../../lib/api-server.js';
 import { Button } from '../../components/ui/button.js';
 import { ButtonGroup } from '../../components/ui/button-group.js';
 
+export const metadata = { title: 'Expenses' };
+
 export default async function ExpensesPage({ searchParams }) {
   const params = await searchParams;
   const filter = ['inactive', 'future'].find((key) => params?.[key] === 'true');

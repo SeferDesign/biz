@@ -5,6 +5,8 @@ import { browserApiBaseUrl } from '../../../../lib/api.js';
 import { getApiData } from '../../../../lib/api-server.js';
 import { invoiceFields } from '../../../../lib/record-fields.js';
 
+export const metadata = { title: 'Edit Invoice' };
+
 export default async function EditInvoicePage({ params }) {
   const { id } = await params;
   const [invoiceResult, clientResult, linesResult] = await Promise.all([

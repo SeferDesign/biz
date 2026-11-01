@@ -5,6 +5,8 @@ import { browserApiBaseUrl } from '../../../../lib/api.js';
 import { getApiData } from '../../../../lib/api-server.js';
 import { yearFields } from '../../../../lib/record-fields.js';
 
+export const metadata = { title: 'Edit Year' };
+
 export default async function EditYearPage({ params }) {
   const { id } = await params;
   const result = await getApiData(`/years/${encodeURIComponent(id)}/edit`);

@@ -9,6 +9,8 @@ import Notice from '../../../components/Notice.js';
 import { browserApiBaseUrl, formatMoney, formatTableDate, invoiceStatus, newestInvoicesFirst, parsePage } from '../../../lib/api.js';
 import { getApiData } from '../../../lib/api-server.js';
 
+export const metadata = { title: 'Client Details' };
+
 export default async function ClientDetailPage({ params, searchParams }) {
   const { id } = await params;
   const query = await searchParams;

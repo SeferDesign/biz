@@ -3,6 +3,8 @@ import { ResourcePage } from '../../components/ResourcePage.js';
 import { formatMoney, parsePage } from '../../lib/api.js';
 import { getApiData } from '../../lib/api-server.js';
 
+export const metadata = { title: 'Years' };
+
 export default async function YearsPage({ searchParams }) {
   const params = await searchParams;
   const result = await getApiData('/years');
