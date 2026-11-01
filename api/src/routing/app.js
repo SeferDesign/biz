@@ -4,6 +4,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import yaml from 'yaml';
 import swaggerUi from 'swagger-ui-express';
+import helmet from 'helmet';
+import { createOriginProtection, createRateLimiters } from './security.js';
 import { MySqlStore } from '../db/store.js';
 import clientsRouter from './clients/routes.js';
 import expensesRouter from './expenses/routes.js';
@@ -108,18 +110,32 @@ export function createApp({
   backupStatusFile = process.env.BACKUP_STATUS_FILE,
   backupTriggerFile = process.env.BACKUP_TRIGGER_FILE,
   sendPaymentNotification = deliverPaymentNotification,
-  buildEnv = process.env.BUILD_ENV
+  buildEnv = process.env.BUILD_ENV,
+  trustProxy = process.env.TRUST_PROXY === '1' ? 1 :
+    process.env.TRUST_PROXY ? process.env.TRUST_PROXY.split(',').map((value) => value.trim()) : false,
+  corsAllowedOrigins = allowedOrigins,
+  rateLimits = {}
 } = {}) {
   const app = express();
+  app.disable('x-powered-by');
+  app.set('trust proxy', trustProxy);
+  app.use(helmet({
+    contentSecurityPolicy: false,
+    crossOriginResourcePolicy: false,
+    strictTransportSecurity: buildEnv === 'prod'
+  }));
+  app.use('/v1', (req, res, next) => {
+    res.set('Cache-Control', 'no-store');
+    return next();
+  });
   // Signature verification needs the raw request body.
   app.post('/v1/stripe/webhook', express.raw({ type: 'application/json' }),
     createStripeWebhookHandler(store, { stripe, webhookSecret: stripeWebhookSecret, notify: sendPaymentNotification }));
-  app.use(express.json());
 
   // The web client is served from a different host than the API.
   app.use((req, res, next) => {
     const origin = req.headers.origin;
-    if (origin && allowedOrigins.includes(origin)) {
+    if (origin && corsAllowedOrigins.includes(origin)) {
       res.set('Access-Control-Allow-Origin', origin);
       res.set('Access-Control-Allow-Credentials', 'true');
       res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -131,6 +147,12 @@ export function createApp({
     }
     return next();
   });
+
+  const limiters = createRateLimiters(rateLimits);
+  app.use('/v1', limiters.api, createOriginProtection(corsAllowedOrigins));
+  app.use('/v1/auth', limiters.auth);
+  app.use('/v1/auth/password-reset', limiters.reset);
+  app.use(express.json({ limit: '100kb' }));
 
   if (buildEnv === 'local') {
     const openApiDocument = yaml.parse(
@@ -171,7 +193,15 @@ export function createApp({
   app.use('/v1', searchRouter(store));
 
   app.use((req, res) => {
-    res.status(404).json({ error: 'Route not found', path: req.originalUrl });
+    res.status(404).json({ error: 'Route not found', path: req.path });
+  });
+
+  app.use((error, req, res, next) => {
+    if (res.headersSent) return next(error);
+    if (error.type === 'entity.too.large') return res.status(413).json({ error: 'Request body is too large' });
+    if (error.type === 'entity.parse.failed') return res.status(400).json({ error: 'Invalid JSON body' });
+    console.error('API request failed:', error.message);
+    return res.status(500).json({ error: 'Internal server error' });
   });
 
   return app;

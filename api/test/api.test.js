@@ -44,6 +44,69 @@ function createTestApp(options = {}) {
   return createApp({ store: createMemoryStore(), apiAccessToken: TEST_API_ACCESS_TOKEN, buildEnv: 'local', ...options });
 }
 
+test('API rate limiting returns retry metadata and excludes health and preflight requests', async () => {
+  const app = createTestApp({ rateLimits: { api: { limit: 2 } } });
+  assert.equal((await request(app).get('/v1/clients')).status, 200);
+  assert.equal((await request(app).get('/v1/clients')).status, 200);
+  const limited = await request(app).get('/v1/clients');
+  assert.equal(limited.status, 429);
+  assert.ok(Number(limited.headers['retry-after']) > 0);
+  assert.ok(limited.headers.ratelimit);
+  assert.equal(limited.headers['x-powered-by'], undefined);
+  assert.equal((await supertest(app).get('/v1/health')).status, 200);
+  assert.equal((await supertest(app).options('/v1/clients')).status, 204);
+});
+
+test('authentication and password reset have separate stricter limits', async () => {
+  const app = createTestApp({ rateLimits: { auth: { limit: 3 }, reset: { limit: 1 } } });
+  assert.equal((await supertest(app).post('/v1/auth/password-reset').send({})).status, 202);
+  assert.equal((await supertest(app).post('/v1/auth/password-reset').send({})).status, 429);
+  assert.equal((await supertest(app).post('/v1/auth/login').send({})).status, 401);
+  assert.equal((await supertest(app).post('/v1/auth/login').send({})).status, 429);
+  assert.equal((await request(app).get('/v1/clients')).status, 200);
+});
+
+test('trusted proxies separate clients by IP while untrusted forwarded headers cannot bypass limits', async () => {
+  const trusted = createTestApp({ trustProxy: 'loopback', rateLimits: { api: { limit: 1 } } });
+  assert.equal((await request(trusted).get('/v1/clients').set('X-Forwarded-For', '192.0.2.1')).status, 200);
+  assert.equal((await request(trusted).get('/v1/clients').set('X-Forwarded-For', '192.0.2.1')).status, 429);
+  assert.equal((await request(trusted).get('/v1/clients').set('X-Forwarded-For', '192.0.2.2')).status, 200);
+  const untrusted = createTestApp({ rateLimits: { api: { limit: 1 } } });
+  assert.equal((await request(untrusted).get('/v1/clients')).status, 200);
+  assert.equal((await request(untrusted).get('/v1/clients').set('X-Forwarded-For', '192.0.2.3')).status, 429);
+});
+
+test('cookie-authenticated writes reject untrusted or missing origins but bearer clients still work', async () => {
+  const app = createTestApp({ corsAllowedOrigins: ['https://web.example'] });
+  const cookie = `biz_session=${createSessionToken({ id: 1, email: 'user@example.com' }, TEST_API_ACCESS_TOKEN)}`;
+  assert.equal((await supertest(app).patch('/v1/clients/1').set('Cookie', cookie).set('Origin', 'https://evil.example').send({ name: 'Blocked' })).status, 403);
+  assert.equal((await supertest(app).patch('/v1/clients/1').set('Cookie', cookie).send({ name: 'Blocked' })).status, 403);
+  assert.equal((await supertest(app).post('/v1/auth/login').set('Origin', 'https://evil.example').send({})).status, 403);
+  assert.equal((await supertest(app).patch('/v1/clients/1').set('Cookie', cookie).set('Authorization', 'Basic invalid').set('Origin', 'https://evil.example').send({ name: 'Blocked' })).status, 403);
+  assert.equal((await request(app).patch('/v1/clients/1').send({ name: 'Allowed' })).status, 200);
+  const allowed = await supertest(app).patch('/v1/clients/1').set('Cookie', cookie).set('Origin', 'https://web.example').send({ name: 'Allowed' });
+  assert.equal(allowed.status, 200);
+  assert.equal(allowed.headers['access-control-allow-origin'], 'https://web.example');
+  assert.equal((await supertest(app).patch('/v1/clients/1').set('Cookie', cookie).set('Host', 'api.example').set('Origin', 'http://api.example').send({ name: 'Allowed' })).status, 200);
+});
+
+test('API security headers and parser errors do not expose internal details or query tokens', async () => {
+  const app = createTestApp();
+  const health = await supertest(app).get('/v1/health');
+  assert.equal(health.headers['x-content-type-options'], 'nosniff');
+  assert.equal(health.headers['referrer-policy'], 'no-referrer');
+  assert.equal(health.headers['cache-control'], 'no-store');
+  const malformed = await request(app).post('/v1/clients').set('Content-Type', 'application/json').send('{');
+  assert.equal(malformed.status, 400);
+  assert.deepEqual(malformed.body, { error: 'Invalid JSON body' });
+  const oversized = await request(app).post('/v1/clients').send({ name: 'x'.repeat(110_000) });
+  assert.equal(oversized.status, 413);
+  assert.deepEqual(oversized.body, { error: 'Request body is too large' });
+  const missing = await request(app).get('/v1/missing?access_token=private');
+  assert.equal(missing.status, 404);
+  assert.equal(JSON.stringify(missing.body).includes('private'), false);
+});
+
 test('all API endpoints are exposed under /v1', async () => {
   const app = createTestApp();
 

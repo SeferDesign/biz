@@ -110,6 +110,7 @@ jq -r \
 		TZ: $timezone,
 		BUILD_ENV: "prod",
 		PORT: "3000",
+		TRUST_PROXY: "1",
 		BACKUP_STATUS_FILE: "/var/lib/biz-backup/status.json",
 		BACKUP_TRIGGER_FILE: "/var/lib/biz-backup-trigger/request",
 		WAIT_FOR: "biz-mysql:3306",

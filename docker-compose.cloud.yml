@@ -16,6 +16,7 @@ services:
       NODE_ENV: production
       TZ: ${TZ}
       PORT: 3000
+      TRUST_PROXY: ${TRUST_PROXY:-}
       DATABASE_URL: ${DATABASE_URL:-}
       API_ACCESS_TOKEN: ${API_ACCESS_TOKEN:?API_ACCESS_TOKEN must be configured}
       OTP_SECRET_ENCRYPTION_KEY: ${OTP_SECRET_ENCRYPTION_KEY:?OTP_SECRET_ENCRYPTION_KEY must be configured}
