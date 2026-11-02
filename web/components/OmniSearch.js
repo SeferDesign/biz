@@ -12,9 +12,9 @@ import { Skeleton } from './ui/skeleton.js';
 
 const resultGroups = [
   { type: 'Client', label: 'Clients', Icon: Users, iconColor: iconColors.clients },
+  { type: 'Vendor', label: 'Vendors', Icon: Building2, iconColor: iconColors.vendors },
   { type: 'Invoice', label: 'Invoices', Icon: FileText, iconColor: iconColors.invoices },
   { type: 'Expense', label: 'Expenses', Icon: Receipt, iconColor: iconColors.expenses },
-  { type: 'Vendor', label: 'Vendors', Icon: Building2, iconColor: iconColors.vendors },
   { type: 'Line item', label: 'Line items', Icon: ListTree, iconColor: iconColors.invoices },
   { type: 'Year', label: 'Years', Icon: CalendarDays, iconColor: iconColors.years }
 ];
