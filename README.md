@@ -64,22 +64,25 @@ you can sign in locally and re-enroll two-factor authentication with your local
 
 The web office requires sign-in with an existing user email and password;
 accounts with two-factor login enabled also require their current code. The web
-session is HttpOnly and expires 30 days after sign-in. Sessions survive deploys
-as long as `API_ACCESS_TOKEN` remains unchanged; the cloud deploy script preserves
-it in SSM. Temporary API outages return a non-cacheable 503 response instead of
-redirecting signed-in users to login. Existing sessions keep their original expiry
-until the next sign-in. The public web exceptions are
+session is HttpOnly and expires 30 days after sign-in. Each sign-in creates a
+database-backed device session; only a SHA-256 digest of its opaque bearer token
+is stored. Signing out revokes that session, and users can list or revoke their
+other sessions through `/v1/auth/sessions`. Password changes revoke other
+sessions; password resets revoke all sessions. Previously issued stateless
+sessions are invalidated by this change, so users must sign in again after the
+deployment. Temporary API outages return a non-cacheable 503 response instead
+of redirecting signed-in users to login. The public web exceptions are
 `/payment` and matching invoice/client access-token read links.
 Use “Forgot your password?” on the sign-in page to request a six-hour, single-use
 reset link by email. Signed-in users can change their password under
 `/settings/password` after confirming their current password. Reset mail uses the
 configured SMTP service and `PUBLIC_APP_URL`.
 
-On an existing API database, run `npm run local -- db:setup` to add the users
-table. Legacy user rows must be migrated before anyone can sign in; preserve the
-Devise `encrypted_password` and encrypted OTP fields.
+On an existing API database, run `npm run local -- db:setup` to add the users and
+device-session tables. Legacy user rows must be migrated before anyone can sign
+in; preserve the Devise `encrypted_password` and encrypted OTP fields.
 
-Protected API routes accept the signed user session or
+Protected API routes accept the opaque user session or
 `Authorization: Bearer <API_ACCESS_TOKEN>`. Local Compose uses
 `local-development-api-token` unless overridden; cloud Compose requires a
 secret `API_ACCESS_TOKEN`. Set `OTP_SECRET_ENCRYPTION_KEY` to the legacy

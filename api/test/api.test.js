@@ -8,7 +8,7 @@ import bcrypt from 'bcryptjs';
 import Stripe from 'stripe';
 import { createCipheriv, pbkdf2Sync, randomBytes } from 'node:crypto';
 import { companyInfo } from '@seferbiz/company';
-import { createSessionToken, generateOtpSecret, generateTotpCode, validOtpTimestep, verifySessionToken } from '../src/auth/session.js';
+import { createSessionToken, generateOtpSecret, generateTotpCode, hashSessionToken, SESSION_TTL_SECONDS, validOtpTimestep } from '../src/auth/session.js';
 import { seedUser } from '../src/db/seed.js';
 import { createApp } from '../src/routing/app.js';
 import { toCsv } from '../src/routing/shared/csv.js';
@@ -77,8 +77,13 @@ test('trusted proxies separate clients by IP while untrusted forwarded headers c
 });
 
 test('cookie-authenticated writes reject untrusted or missing origins but bearer clients still work', async () => {
-  const app = createTestApp({ corsAllowedOrigins: ['https://web.example'] });
-  const cookie = `biz_session=${createSessionToken({ id: 1, email: 'user@example.com' }, TEST_API_ACCESS_TOKEN)}`;
+  const store = createMemoryStore();
+  const user = { id: 1, email: 'user@example.com' };
+  const token = createSessionToken();
+  store.users.push(user);
+  await store.createUserSession(user.id, hashSessionToken(token), SESSION_TTL_SECONDS);
+  const app = createTestApp({ store, corsAllowedOrigins: ['https://web.example'] });
+  const cookie = `biz_session=${token}`;
   assert.equal((await supertest(app).patch('/v1/clients/1').set('Cookie', cookie).set('Origin', 'https://evil.example').send({ name: 'Blocked' })).status, 403);
   assert.equal((await supertest(app).patch('/v1/clients/1').set('Cookie', cookie).send({ name: 'Blocked' })).status, 403);
   assert.equal((await supertest(app).post('/v1/auth/login').set('Origin', 'https://evil.example').send({})).status, 403);
@@ -347,16 +352,61 @@ test('signed-in users can create, update, list, and delete API keys', async () =
   assert.equal((await supertest(app).get('/v1/auth/api-keys').set('Authorization', authorization)).body.length, 0);
 });
 
-test('session tokens remain valid for 30 days and reject expired or differently signed tokens', () => {
-  const now = Date.UTC(2026, 9, 29);
-  const user = { id: 7, email: 'owner@example.test' };
-  const token = createSessionToken(user, TEST_API_ACCESS_TOKEN, now);
-  const expiresAt = now + 30 * 24 * 60 * 60 * 1000;
+test('session tokens are high-entropy opaque values and only their hashes are persisted', () => {
+  const first = createSessionToken();
+  const second = createSessionToken();
 
-  assert.equal(verifySessionToken(token, TEST_API_ACCESS_TOKEN, now + 9 * 60 * 60 * 1000).id, user.id);
-  assert.equal(verifySessionToken(token, TEST_API_ACCESS_TOKEN, expiresAt - 1000).id, user.id);
-  assert.equal(verifySessionToken(token, TEST_API_ACCESS_TOKEN, expiresAt), null);
-  assert.equal(verifySessionToken(token, 'different-signing-secret', now), null);
+  assert.match(first, /^[A-Za-z0-9_-]{43}$/);
+  assert.notEqual(first, second);
+  assert.match(hashSessionToken(first), /^[a-f0-9]{64}$/);
+  assert.notEqual(hashSessionToken(first), first);
+  assert.equal(hashSessionToken('not-a-session-token'), null);
+});
+
+test('user sessions can be listed and individually revoked, and logout revokes the current session', async () => {
+  const store = createMemoryStore();
+  const firstUser = {
+    id: 72,
+    email: 'session-owner@example.test',
+    encrypted_password: await bcrypt.hash('example123', 4),
+    otp_required_for_login: false
+  };
+  const secondUser = {
+    id: 73,
+    email: 'other-session-owner@example.test',
+    encrypted_password: await bcrypt.hash('example123', 4),
+    otp_required_for_login: false
+  };
+  store.users.push(firstUser, secondUser);
+  const app = createApp({ store, apiAccessToken: TEST_API_ACCESS_TOKEN });
+  const firstLogin = await supertest(app).post('/v1/auth/login').send({ email: firstUser.email, password: 'example123' });
+  const secondLogin = await supertest(app).post('/v1/auth/login').send({ email: firstUser.email, password: 'example123' });
+  const otherLogin = await supertest(app).post('/v1/auth/login').send({ email: secondUser.email, password: 'example123' });
+  const firstAuth = `Bearer ${firstLogin.body.access_token}`;
+  const secondAuth = `Bearer ${secondLogin.body.access_token}`;
+  const otherAuth = `Bearer ${otherLogin.body.access_token}`;
+
+  assert.equal((await supertest(app).post('/v1/auth/logout')
+    .set('Authorization', `Bearer ${TEST_API_ACCESS_TOKEN}`)).status, 401);
+
+  const listed = await supertest(app).get('/v1/auth/sessions').set('Authorization', firstAuth);
+  assert.equal(listed.status, 200);
+  assert.equal(listed.body.length, 2);
+  const currentSession = listed.body.find((session) => session.current);
+  const otherSession = listed.body.find((session) => !session.current);
+  assert.ok(currentSession);
+  assert.ok(otherSession);
+
+  assert.equal((await supertest(app).delete(`/v1/auth/sessions/${currentSession.id}`).set('Authorization', otherAuth)).status, 404);
+  assert.equal((await supertest(app).get('/v1/auth/session').set('Authorization', firstAuth)).status, 200);
+
+  assert.equal((await supertest(app).delete(`/v1/auth/sessions/${otherSession.id}`).set('Authorization', firstAuth)).status, 204);
+  assert.equal((await supertest(app).get('/v1/auth/session').set('Authorization', secondAuth)).status, 401);
+  assert.equal((await supertest(app).get('/v1/auth/session').set('Authorization', firstAuth)).status, 200);
+
+  assert.equal((await supertest(app).post('/v1/auth/logout').set('Authorization', firstAuth)).status, 204);
+  assert.equal((await supertest(app).get('/v1/auth/session').set('Authorization', firstAuth)).status, 401);
+  assert.equal((await supertest(app).get('/v1/auth/session').set('Authorization', otherAuth)).status, 200);
 });
 
 test('legacy user credentials establish expiring API sessions and enforce OTP replay protection', async () => {
@@ -555,6 +605,7 @@ test('password reset is non-enumerating, single-use, and changes the Devise-comp
   });
 
   const unknown = await supertest(app).post('/v1/auth/password-reset').send({ email: 'unknown@example.test' });
+  const login = await supertest(app).post('/v1/auth/login').send({ email: user.email, password: 'old-password' });
   const requested = await supertest(app).post('/v1/auth/password-reset').send({ email: user.email });
   assert.equal(unknown.status, 202);
   assert.deepEqual(requested.body, unknown.body);
@@ -568,6 +619,7 @@ test('password reset is non-enumerating, single-use, and changes the Devise-comp
   });
   assert.equal(reset.status, 200);
   assert.equal(await bcrypt.compare('new-password', user.encrypted_password), true);
+  assert.equal((await supertest(app).get('/v1/auth/session').set('Authorization', `Bearer ${login.body.access_token}`)).status, 401);
   assert.equal(user.reset_password_token, null);
   assert.equal((await supertest(app).post('/v1/auth/password-reset/confirm').send({
     token: resetEmail.token,
@@ -586,6 +638,7 @@ test('signed-in users can change passwords only after verifying the current pass
   store.users.push(user);
   const app = createApp({ store, apiAccessToken: TEST_API_ACCESS_TOKEN });
   const login = await supertest(app).post('/v1/auth/login').send({ email: user.email, password: 'old-password' });
+  const otherLogin = await supertest(app).post('/v1/auth/login').send({ email: user.email, password: 'old-password' });
   const authorization = `Bearer ${login.body.access_token}`;
 
   assert.equal((await supertest(app).post('/v1/auth/password').send({ current_password: 'old-password', new_password: 'new-password' })).status, 401);
@@ -594,6 +647,8 @@ test('signed-in users can change passwords only after verifying the current pass
   assert.equal((await supertest(app).post('/v1/auth/password').set('Authorization', authorization)
     .send({ current_password: 'old-password', new_password: 'new-password' })).status, 200);
   assert.equal(await bcrypt.compare('new-password', user.encrypted_password), true);
+  assert.equal((await supertest(app).get('/v1/auth/session').set('Authorization', authorization)).status, 200);
+  assert.equal((await supertest(app).get('/v1/auth/session').set('Authorization', `Bearer ${otherLogin.body.access_token}`)).status, 401);
 });
 
 test('signed-in users can view and update first and last name with blank defaults', async () => {

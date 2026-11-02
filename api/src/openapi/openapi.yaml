@@ -96,7 +96,7 @@ paths:
               $ref: '#/components/schemas/LoginInput'
       responses:
         '200':
-          description: Signed bearer session
+          description: Opaque bearer session token; the API stores only its SHA-256 digest
         '401':
           description: Invalid email, password, or two-factor code
   /auth/passkeys/authentication/options:
@@ -126,7 +126,7 @@ paths:
                   type: object
       responses:
         '200':
-          description: Signed bearer session
+          description: Opaque bearer session token; the API stores only its SHA-256 digest
         '401':
           description: Passkey assertion is invalid or expired
   /auth/session:
@@ -137,6 +137,36 @@ paths:
           description: Authenticated user identity
         '401':
           description: Session is missing or expired
+  /auth/logout:
+    post:
+      summary: Revoke the current user session and clear its cookie
+      responses:
+        '204':
+          description: Session revoked
+        '401':
+          description: Session is missing, expired, or already revoked
+  /auth/sessions:
+    get:
+      summary: List active sessions for the current user
+      responses:
+        '200':
+          description: Active sessions, including the current session marker
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserSession'
+  /auth/sessions/{id}:
+    delete:
+      summary: Revoke one of the current user's sessions
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Session revoked
+        '404':
+          description: Session not found for the current user
   /auth/password-reset:
     post:
       summary: Request a password reset email
@@ -912,7 +942,7 @@ components:
     ApiToken:
       type: http
       scheme: bearer
-      description: The API_ACCESS_TOKEN configured for the API service.
+      description: The API_ACCESS_TOKEN configured for the API service, or an opaque user session token returned by login.
     RecordAccessToken:
       type: apiKey
       in: query
@@ -938,6 +968,26 @@ components:
       schema:
         type: integer
   schemas:
+    UserSession:
+      type: object
+      required: [id, user_agent, created_at, expires_at, current]
+      properties:
+        id:
+          type: integer
+        user_agent:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        last_used_at:
+          type: string
+          format: date-time
+          nullable: true
+        expires_at:
+          type: string
+          format: date-time
+        current:
+          type: boolean
     LoginInput:
       type: object
       required:

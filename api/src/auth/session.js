@@ -1,47 +1,15 @@
-import { createCipheriv, createDecipheriv, createHmac, pbkdf2Sync, randomBytes, timingSafeEqual } from 'node:crypto';
+import { createCipheriv, createDecipheriv, createHash, createHmac, pbkdf2Sync, randomBytes, timingSafeEqual } from 'node:crypto';
 
 export const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30;
 const base32Alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 
-export function createSessionToken(user, secret, now = Date.now()) {
-  if (!secret) return null;
-  const payload = Buffer.from(JSON.stringify({
-    sub: Number(user.id),
-    email: user.email,
-    first_name: typeof user.first_name === 'string' ? user.first_name : '',
-    last_name: typeof user.last_name === 'string' ? user.last_name : '',
-    exp: Math.floor(now / 1000) + SESSION_TTL_SECONDS
-  })).toString('base64url');
-  const signature = createHmac('sha256', secret).update(payload).digest('base64url');
-  return `${payload}.${signature}`;
+export function createSessionToken() {
+  return randomBytes(32).toString('base64url');
 }
 
-export function verifySessionToken(token, secret, now = Date.now()) {
-  if (!secret || typeof token !== 'string' || token.length > 2048) return null;
-  const [payload, signature, extra] = token.split('.');
-  if (!payload || !signature || extra !== undefined) return null;
-
-  const expected = createHmac('sha256', secret).update(payload).digest();
-  let actual;
-  try {
-    actual = Buffer.from(signature, 'base64url');
-  } catch {
-    return null;
-  }
-  if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) return null;
-
-  try {
-    const session = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
-    if (!Number.isSafeInteger(session.sub) || session.sub < 1 || !Number.isInteger(session.exp) || session.exp <= Math.floor(now / 1000)) return null;
-    return {
-      id: session.sub,
-      email: session.email,
-      first_name: typeof session.first_name === 'string' ? session.first_name : '',
-      last_name: typeof session.last_name === 'string' ? session.last_name : ''
-    };
-  } catch {
-    return null;
-  }
+export function hashSessionToken(token) {
+  if (typeof token !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(token)) return null;
+  return createHash('sha256').update(token).digest('hex');
 }
 
 function decodeRailsBase64(value) {

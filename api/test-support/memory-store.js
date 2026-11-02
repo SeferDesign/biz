@@ -33,11 +33,13 @@ export function createMemoryStore() {
   const invoiceTemplates = [];
   const invoicePayments = [];
   const users = [];
+  const userSessions = [];
   const apiKeys = [];
   const passkeys = [];
   const passkeyChallenges = new Map();
   return {
     users,
+    userSessions,
     invoicePayments,
     async getUserByEmail(email) {
       return users.find((user) => user.email.toLowerCase() === email.toLowerCase());
@@ -55,6 +57,56 @@ export function createMemoryStore() {
         last_name: user.last_name || ''
       } : undefined;
     },
+    async createUserSession(userId, tokenHash, ttlSeconds, userAgent = '') {
+      const session = {
+        id: Math.max(0, ...userSessions.map((item) => item.id)) + 1,
+        user_id: Number(userId),
+        token_hash: tokenHash,
+        user_agent: String(userAgent).slice(0, 512),
+        created_at: new Date().toISOString(),
+        last_used_at: null,
+        expires_at: new Date(Date.now() + ttlSeconds * 1000).toISOString(),
+        revoked_at: null
+      };
+      userSessions.push(session);
+      return session.id;
+    },
+    async getUserSessionByTokenHash(tokenHash) {
+      const session = userSessions.find((item) => item.token_hash === tokenHash &&
+        !item.revoked_at && new Date(item.expires_at).getTime() > Date.now());
+      const user = session && users.find((item) => item.id === session.user_id);
+      if (!session || !user) return null;
+      session.last_used_at = new Date().toISOString();
+      return {
+        session_id: session.id,
+        id: user.id,
+        email: user.email,
+        first_name: user.first_name || '',
+        last_name: user.last_name || ''
+      };
+    },
+    async getUserSessions(userId) {
+      return userSessions
+        .filter((item) => item.user_id === Number(userId) && !item.revoked_at && new Date(item.expires_at).getTime() > Date.now())
+        .sort((left, right) => String(right.last_used_at || right.created_at).localeCompare(String(left.last_used_at || left.created_at)))
+        .map(({ id, user_agent, created_at, last_used_at, expires_at }) => ({ id, user_agent, created_at, last_used_at, expires_at }));
+    },
+    async revokeUserSession(userId, sessionId) {
+      const session = userSessions.find((item) => item.id === Number(sessionId) && item.user_id === Number(userId) && !item.revoked_at);
+      if (!session) return false;
+      session.revoked_at = new Date().toISOString();
+      return true;
+    },
+    async revokeUserSessions(userId, exceptSessionId = null) {
+      let revoked = 0;
+      for (const session of userSessions) {
+        if (session.user_id !== Number(userId) || session.revoked_at ||
+            (exceptSessionId != null && session.id === Number(exceptSessionId))) continue;
+        session.revoked_at = new Date().toISOString();
+        revoked += 1;
+      }
+      return revoked;
+    },
     async updateUserProfile(id, { first_name, last_name }) {
       const user = users.find((item) => item.id === Number(id));
       if (!user) return undefined;
@@ -67,9 +119,10 @@ export function createMemoryStore() {
         last_name: user.last_name || ''
       };
     },
-    async updateUserPassword(id, encryptedPassword) {
+    async updateUserPassword(id, encryptedPassword, currentSessionId = null) {
       const user = users.find((item) => item.id === Number(id));
       if (user) Object.assign(user, { encrypted_password: encryptedPassword, reset_password_token: null, reset_password_sent_at: null });
+      await this.revokeUserSessions(id, currentSessionId);
     },
     async createPasswordReset(id, tokenDigest) {
       const user = users.find((item) => item.id === Number(id));
@@ -79,6 +132,7 @@ export function createMemoryStore() {
       const user = users.find((item) => item.reset_password_token === tokenDigest);
       if (!user || !user.reset_password_sent_at || Date.now() - new Date(user.reset_password_sent_at).getTime() > 6 * 60 * 60 * 1000) return false;
       Object.assign(user, { encrypted_password: encryptedPassword, reset_password_token: null, reset_password_sent_at: null });
+      await this.revokeUserSessions(user.id);
       return true;
     },
     async recordUserSignIn() {},

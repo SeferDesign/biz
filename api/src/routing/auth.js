@@ -12,6 +12,7 @@ import {
   createSessionToken,
   encryptOtpSecretForStorage,
   generateOtpSecret,
+  hashSessionToken,
   isOtpEnabled,
   SESSION_TTL_SECONDS,
   validOtpTimestep,
@@ -55,7 +56,6 @@ function cookieOptions(req, maxAgeSeconds, sessionCookieDomain) {
 }
 
 export function createAuthRouter(store, {
-  apiAccessToken,
   otpSecretEncryptionKey,
   sessionCookieDomain,
   sendResetEmail = sendPasswordResetEmail,
@@ -90,12 +90,19 @@ export function createAuthRouter(store, {
   }
 
   async function establishSession(req, res, user) {
-    const token = createSessionToken(user, apiAccessToken);
-    if (!token) return res.status(503).json({ error: 'Authentication is not configured' });
+    const token = createSessionToken();
+    const tokenHash = hashSessionToken(token);
+    const sessionId = await store.createUserSession(
+      user.id,
+      tokenHash,
+      SESSION_TTL_SECONDS,
+      req.get('user-agent') || ''
+    );
     res.cookie('biz_session', token, cookieOptions(req, SESSION_TTL_SECONDS, sessionCookieDomain));
     await store.recordUserSignIn(user.id, req.ip);
     return res.json({
       access_token: token,
+      session_id: sessionId,
       user: {
         id: user.id,
         email: user.email,
@@ -294,6 +301,8 @@ export function createAuthRouter(store, {
   });
 
   router.post('/logout', async (req, res) => {
+    if (!requireUser(req, res)) return;
+    await store.revokeUserSession(req.authUser.id, req.authSessionId);
     res.clearCookie('biz_session', cookieOptions(req, 0, sessionCookieDomain));
     return res.status(204).end();
   });
@@ -343,6 +352,26 @@ export function createAuthRouter(store, {
         last_name: user.last_name || ''
       }
     });
+  });
+
+  router.get('/sessions', async (req, res) => {
+    if (!requireUser(req, res)) return;
+    const sessions = await store.getUserSessions(req.authUser.id);
+    return res.json(sessions.map((session) => ({
+      ...session,
+      id: Number(session.id),
+      current: Number(session.id) === req.authSessionId
+    })));
+  });
+
+  router.delete('/sessions/:id', async (req, res) => {
+    if (!requireUser(req, res)) return;
+    const id = parseId(req.params.id);
+    if (!id) return res.status(400).json({ error: 'Session id must be a positive integer' });
+    if (!await store.revokeUserSession(req.authUser.id, id)) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+    return res.sendStatus(204);
   });
 
   router.get('/profile', async (req, res) => {
@@ -397,7 +426,7 @@ export function createAuthRouter(store, {
     }
 
     const encryptedPassword = await bcrypt.hash(newPassword, 10);
-    await store.updateUserPassword(req.authUser.id, encryptedPassword);
+    await store.updateUserPassword(req.authUser.id, encryptedPassword, req.authSessionId);
     return res.json({ message: 'Password updated.' });
   });
 

@@ -76,6 +76,72 @@ export class MySqlStore {
     return rows[0];
   }
 
+  async createUserSession(userId, tokenHash, ttlSeconds, userAgent = '') {
+    await this.database.execute(
+      `DELETE FROM user_sessions
+       WHERE expires_at <= UTC_TIMESTAMP()
+         OR revoked_at < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 30 DAY)`
+    );
+    const [result] = await this.database.execute(
+      `INSERT INTO user_sessions (user_id, token_hash, user_agent, expires_at)
+       VALUES (?, ?, ?, DATE_ADD(UTC_TIMESTAMP(), INTERVAL ? SECOND))`,
+      [userId, tokenHash, String(userAgent).slice(0, 512), ttlSeconds]
+    );
+    return Number(result.insertId);
+  }
+
+  async getUserSessionByTokenHash(tokenHash) {
+    if (!tokenHash) return null;
+    const [rows] = await this.database.execute(
+      `SELECT s.id AS session_id, u.id, u.email,
+        COALESCE(u.first_name, '') AS first_name, COALESCE(u.last_name, '') AS last_name
+       FROM user_sessions s
+       INNER JOIN users u ON u.id = s.user_id
+       WHERE s.token_hash = ? AND s.revoked_at IS NULL AND s.expires_at > UTC_TIMESTAMP()
+       LIMIT 1`,
+      [tokenHash]
+    );
+    const session = rows[0];
+    if (!session) return null;
+    await this.database.execute(
+      `UPDATE user_sessions SET last_used_at = UTC_TIMESTAMP()
+       WHERE id = ? AND (last_used_at IS NULL OR last_used_at < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 5 MINUTE))`,
+      [session.session_id]
+    );
+    return { ...session, session_id: Number(session.session_id) };
+  }
+
+  async getUserSessions(userId) {
+    const [rows] = await this.database.execute(
+      `SELECT id, user_agent, created_at, last_used_at, expires_at
+       FROM user_sessions
+       WHERE user_id = ? AND revoked_at IS NULL AND expires_at > UTC_TIMESTAMP()
+       ORDER BY last_used_at DESC, created_at DESC`,
+      [userId]
+    );
+    return rows;
+  }
+
+  async revokeUserSession(userId, sessionId) {
+    const [result] = await this.database.execute(
+      `UPDATE user_sessions SET revoked_at = UTC_TIMESTAMP()
+       WHERE id = ? AND user_id = ? AND revoked_at IS NULL`,
+      [sessionId, userId]
+    );
+    return result.affectedRows > 0;
+  }
+
+  async revokeUserSessions(userId, exceptSessionId = null) {
+    const exceptClause = exceptSessionId == null ? '' : ' AND id <> ?';
+    const values = exceptSessionId == null ? [userId] : [userId, exceptSessionId];
+    const [result] = await this.database.execute(
+      `UPDATE user_sessions SET revoked_at = UTC_TIMESTAMP()
+       WHERE user_id = ? AND revoked_at IS NULL${exceptClause}`,
+      values
+    );
+    return result.affectedRows;
+  }
+
   async updateUserProfile(id, { first_name, last_name }) {
     await this.database.execute(
       'UPDATE users SET first_name = ?, last_name = ? WHERE id = ?',
@@ -84,11 +150,12 @@ export class MySqlStore {
     return this.getUserProfile(id);
   }
 
-  async updateUserPassword(id, encryptedPassword) {
+  async updateUserPassword(id, encryptedPassword, currentSessionId = null) {
     await this.database.execute(
       'UPDATE users SET encrypted_password = ?, reset_password_token = NULL, reset_password_sent_at = NULL WHERE id = ?',
       [encryptedPassword, id]
     );
+    await this.revokeUserSessions(id, currentSessionId);
   }
 
   async createPasswordReset(id, tokenDigest) {
@@ -99,13 +166,21 @@ export class MySqlStore {
   }
 
   async consumePasswordReset(tokenDigest, encryptedPassword) {
+    const [users] = await this.database.execute(
+      `SELECT id FROM users WHERE reset_password_token = ?
+       AND reset_password_sent_at >= DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 6 HOUR) LIMIT 1`,
+      [tokenDigest]
+    );
+    if (!users[0]) return false;
     const [result] = await this.database.execute(
       `UPDATE users SET encrypted_password = ?, reset_password_token = NULL,
         reset_password_sent_at = NULL WHERE reset_password_token = ?
         AND reset_password_sent_at >= DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 6 HOUR)`,
       [encryptedPassword, tokenDigest]
     );
-    return result.affectedRows > 0;
+    if (!result.affectedRows) return false;
+    await this.revokeUserSessions(users[0].id);
+    return true;
   }
 
   async recordUserSignIn(id, ipAddress) {

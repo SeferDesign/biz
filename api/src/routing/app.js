@@ -18,7 +18,7 @@ import vendorsRouter from './vendors/routes.js';
 import yearsRouter from './years/routes.js';
 import stripeRouter, { createStripeWebhookHandler } from './stripe/routes.js';
 import { timingSafeEqual } from 'node:crypto';
-import { verifySessionToken } from '../auth/session.js';
+import { hashSessionToken } from '../auth/session.js';
 import { createStripeClient } from '../payments/stripe.js';
 import { sendPaymentNotification as deliverPaymentNotification } from '../email/payment-notification-mailer.js';
 
@@ -60,10 +60,20 @@ function createAuthenticationMiddleware(store, apiAccessToken) {
     const cookieToken = readCookie(req, 'biz_session');
     if (tokenMatches(bearerToken || req.query.access_token, apiAccessToken)) return next();
     if (typeof bearerToken === 'string' && bearerToken && await store.touchApiKeyLastUsed?.(bearerToken)) return next();
-    const sessionUser = verifySessionToken(bearerToken || cookieToken, apiAccessToken);
-    if (sessionUser) {
-      req.authUser = sessionUser;
-      return next();
+    const sessionToken = bearerToken || cookieToken;
+    const sessionTokenHash = hashSessionToken(sessionToken);
+    if (sessionTokenHash) {
+      const session = await store.getUserSessionByTokenHash(sessionTokenHash);
+      if (session) {
+        req.authUser = {
+          id: session.id,
+          email: session.email,
+          first_name: session.first_name,
+          last_name: session.last_name
+        };
+        req.authSessionId = session.session_id;
+        return next();
+      }
     }
 
     const isInvoiceCheckout = req.method === 'POST' && /^\/invoices\/\d+\/checkout$/.test(req.path);
@@ -169,13 +179,12 @@ export function createApp({
   const authenticationMiddleware = createAuthenticationMiddleware(store, apiAccessToken);
   app.use('/v1', (req, res, next) => {
     if (req.method === 'POST' && [
-      '/auth/login', '/auth/logout', '/auth/password-reset', '/auth/password-reset/confirm',
+      '/auth/login', '/auth/password-reset', '/auth/password-reset/confirm',
       '/auth/passkeys/authentication/options', '/auth/passkeys/authentication/verify'
     ].includes(req.path)) return next();
     return authenticationMiddleware(req, res, next);
   });
   app.use('/v1/auth', createAuthRouter(store, {
-    apiAccessToken,
     otpSecretEncryptionKey,
     sessionCookieDomain,
     sendResetEmail,

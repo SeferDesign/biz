@@ -26,6 +26,19 @@ const statements = [
     UNIQUE INDEX users_email_unique (email),
     UNIQUE INDEX users_reset_password_token_unique (reset_password_token)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS user_sessions (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    token_hash CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    user_agent VARCHAR(512) NOT NULL DEFAULT '',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_used_at DATETIME NULL,
+    expires_at DATETIME NOT NULL,
+    revoked_at DATETIME NULL,
+    CONSTRAINT user_sessions_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE INDEX user_sessions_token_hash_unique (token_hash),
+    INDEX user_sessions_user_active_idx (user_id, revoked_at, expires_at)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   `CREATE TABLE IF NOT EXISTS api_keys (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
