@@ -204,7 +204,7 @@ export default function RecordForm({ title, description, fields, initialValues =
           || (body?.display_id ? `${resourceLabel} ${body.display_id}` : '')
           || `${resourceLabel}${body?.id != null ? ` #${body.id}` : ''}`;
         const recordHref = createdRecordHref && body?.id != null
-          ? createdRecordHref.replace(':id', encodeURIComponent(String(body.id)))
+          ? createdRecordHref.replace(/:(id|year)\b/g, (placeholder, key) => encodeURIComponent(String(body[key])))
           : null;
         toast.success(recordName, {
           description: `${resourceLabel} created`,

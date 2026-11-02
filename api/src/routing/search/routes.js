@@ -69,7 +69,7 @@ export default function searchRouter(store) {
     for (const year of snapshot.years) {
       const title = String(year.year);
       const rank = matchRank(query, [title]);
-      if (rank) matches.push(result('Year', title, 'Financial year', `/years/${year.id}`, rank));
+      if (rank) matches.push(result('Year', title, 'Financial year', `/years/${year.year}`, rank));
     }
 
     matches.sort((left, right) => right.rank - left.rank || left.title.localeCompare(right.title));

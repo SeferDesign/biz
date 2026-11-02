@@ -802,6 +802,7 @@ test('omni-search finds clients, vendors, expenses, invoices, and line items', a
   const client = await request(app).get('/v1/search?q=acme');
   const vendorAndExpense = await request(app).get('/v1/search?q=office');
   const line = await request(app).get('/v1/search?q=development');
+  const year = await request(app).get('/v1/search?q=2025');
   const empty = await request(app).get('/v1/search?q=nomatch');
   const tooShort = await request(app).get('/v1/search?q=a');
 
@@ -811,6 +812,7 @@ test('omni-search finds clients, vendors, expenses, invoices, and line items', a
   assert.deepEqual(vendorAndExpense.body.results.map((item) => item.type), ['Vendor', 'Expense']);
   assert.equal(line.body.results[0].type, 'Line item');
   assert.equal(line.body.results[0].href, '/invoices/1');
+  assert.equal(year.body.results.find((item) => item.type === 'Year').href, '/years/2025');
   assert.deepEqual(empty.body.results, []);
   assert.equal(tooShort.status, 400);
 });
@@ -823,6 +825,7 @@ test('year endpoints return records and report totals', async () => {
   const yearExpenses = await request(app).get('/v1/years/2025/expenses');
   const year = await request(app).get('/v1/years/2025');
   const edit = await request(app).get('/v1/years/1/edit');
+  const calendarEdit = await request(app).get('/v1/years/2025/edit');
   const form = await request(app).get('/v1/years/new');
 
   assert.equal(years.status, 200);
@@ -831,6 +834,7 @@ test('year endpoints return records and report totals', async () => {
   assert.equal(yearExpenses.body.total, 102.49);
   assert.equal(year.body.net_income, 2047.51);
   assert.equal(edit.body.year.year, 2025);
+  assert.deepEqual(calendarEdit.body, edit.body);
   assert.equal(form.body.year.goals_months.length, 12);
   assert.equal((await request(app).get('/v1/years/1900')).status, 404);
 });

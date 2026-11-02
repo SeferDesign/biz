@@ -19,7 +19,7 @@ export default async function YearsPage({ searchParams }) {
       pageHref="/years"
       page={parsePage(params?.page)}
       columns={[
-        { key: 'year', label: 'Year', render: (year) => <Link className="table-link" href={`/years/${year.id}`}>{year.year}</Link> },
+        { key: 'year', label: 'Year', render: (year) => <Link className="table-link" href={`/years/${year.year}`}>{year.year}</Link> },
         { key: 'taxrate', label: 'Tax rate', render: (year) => `${(Number(year.taxrate || 0) * 100).toFixed(1)}%` },
         { key: 'goal_year', label: 'Annual goal', className: 'numeric-cell', render: (year) => formatMoney(year.goal_year) },
         { key: 'monthly_goal', label: 'Monthly goal', className: 'numeric-cell', render: (year) => formatMoney((Number(year.goal_year) || 0) / 12) }

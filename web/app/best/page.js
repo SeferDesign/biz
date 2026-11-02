@@ -76,7 +76,7 @@ export default async function BestPage() {
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth() + 1;
   const currentQuarter = Math.ceil(currentMonth / 3);
-  const yearLink = (year) => <Link className="table-link" href={`/years/${year.id}`}>{year.year}</Link>;
+  const yearLink = (year) => <Link className="table-link" href={`/years/${year.year}`}>{year.year}</Link>;
   const months = years.flatMap((year) => monthNames.map((name, index) => {
     const month = index + 1;
     return {

@@ -78,7 +78,7 @@ export default async function Home() {
 		},
     {
       label: String(currentYear),
-      href: yearRecord ? `/years/${yearRecord.id}` : '/years',
+      href: yearRecord ? `/years/${yearRecord.year}` : '/years',
       goal: Number(yearRecord?.goal_year || 0),
       revenue: yearRevenue,
       expenses: yearExpenses,

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { DetailGrid, ResourcePage } from '../../../components/ResourcePage.js';
 import Notice from '../../../components/Notice.js';
 import ResourceActions from '../../../components/ResourceActions.js';
@@ -31,6 +31,12 @@ export default async function YearDetailPage({ params, searchParams }) {
   }
 
   const year = yearResult.data;
+  if (String(id) !== String(year.year)) {
+    const canonicalQuery = new URLSearchParams(Object.entries(query || {}).flatMap(([key, value]) => (
+      value == null ? [] : (Array.isArray(value) ? value : [value]).map((entry) => [key, String(entry)])
+    )));
+    redirect(`/years/${year.year}${canonicalQuery.size ? `?${canonicalQuery}` : ''}`);
+  }
   const invoices = incomeResult.data?.invoices || [];
   const expenses = expenseResult.data?.expenses || [];
   const monthlyData = monthlyFinances(calendarMonths(Number(year.year)), { invoices, expenses, years: [year] });
@@ -45,13 +51,13 @@ export default async function YearDetailPage({ params, searchParams }) {
   const expensePageQuery = new URLSearchParams();
   if (query?.expense_page) incomePageQuery.set('expense_page', String(query.expense_page));
   if (query?.income_page) expensePageQuery.set('income_page', String(query.income_page));
-  const incomePageHref = `/years/${year.id}${incomePageQuery.size ? `?${incomePageQuery}` : ''}`;
-  const expensePageHref = `/years/${year.id}${expensePageQuery.size ? `?${expensePageQuery}` : ''}`;
+  const incomePageHref = `/years/${year.year}${incomePageQuery.size ? `?${incomePageQuery}` : ''}`;
+  const expensePageHref = `/years/${year.year}${expensePageQuery.size ? `?${expensePageQuery}` : ''}`;
   return (
     <>
       <div className="page-heading">
         <div><h1>{year.year}</h1><p className="page-description">Annual income, expenses, and tax estimate.</p></div>
-        <ResourceActions editHref={`/years/${year.id}/edit`} deleteEndpoint={`${browserApiBaseUrl}/years/${year.id}`} returnTo="/years" label="year" />
+        <ResourceActions editHref={`/years/${year.year}/edit`} deleteEndpoint={`${browserApiBaseUrl}/years/${year.id}`} returnTo="/years" label="year" />
       </div>
       <DetailGrid items={[
         ['Paid income', formatMoney(year.income_total)],
