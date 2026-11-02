@@ -35,3 +35,8 @@ node_modules
 /docker/certs
 /web/.next
 /web/out
+
+# Xcode per-user state
+**/xcuserdata/
+*.xcuserstate
+/apple/SeferBiz/LocalSigning.xcconfig
