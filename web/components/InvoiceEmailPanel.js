@@ -8,6 +8,7 @@ import { browserApiBaseUrl, formatDateTime } from '../lib/api.js';
 import { Button } from './ui/button.js';
 import { Alert, AlertDescription } from './ui/alert.js';
 import { Spinner } from './ui/spinner.js';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table.js';
 
 export default function InvoiceEmailPanel({ invoiceId, initialSends = [], historyError = '' }) {
   const router = useRouter();
@@ -47,14 +48,24 @@ export default function InvoiceEmailPanel({ invoiceId, initialSends = [], histor
       </div>
       {error && <Alert className="mt-2" variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
       {sends.length ? (
-        <ul className="invoice-email-history">
-          {sends.map((send, index) => (
-            <li key={send.id ?? `${send.sent_at}-${index}`}>
-              <time dateTime={send.sent_at}>{formatDateTime(send.sent_at)}</time>
-              <span>Sent to {send.recipient}</span>
-            </li>
-          ))}
-        </ul>
+        <div className="table-wrap">
+          <Table className="data-table" aria-label="Invoice email history">
+            <TableHeader>
+              <TableRow>
+                <TableHead scope="col" className="date-cell">Sent</TableHead>
+                <TableHead scope="col">Recipient</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sends.map((send, index) => (
+                <TableRow key={send.id ?? `${send.sent_at}-${index}`}>
+                  <TableCell className="date-cell"><time dateTime={send.sent_at}>{formatDateTime(send.sent_at)}</time></TableCell>
+                  <TableCell className="break-all">{send.recipient}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       ) : !error ? <p className="section-note">No invoice emails sent.</p> : null}
     </section>
   );

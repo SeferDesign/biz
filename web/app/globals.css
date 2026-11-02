@@ -320,6 +320,11 @@
     @apply mt-8 space-y-4;
   }
 
+  .detail-section.client-link-panel,
+  .detail-section.invoice-email-panel {
+    @apply mt-4;
+  }
+
   .sheet-hero {
     @apply rounded-xl border border-border bg-gradient-to-r from-card via-card to-muted/40 p-4 shadow-sm sm:p-5;
   }

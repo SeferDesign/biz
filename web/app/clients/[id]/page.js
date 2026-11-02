@@ -46,7 +46,7 @@ export default async function ClientDetailPage({ params, searchParams }) {
   return (
     <>
       <div className="page-heading">
-        <div><h1>{client.name || 'Unnamed client'}</h1><p className="page-description">{client.contact || 'No primary contact listed'}</p></div>
+        <div><h1>{client.name || 'Unnamed client'}</h1></div>
         {!accessToken && (
           <div className="heading-actions">
             <NewButton href={`/invoices/new?client_id=${encodeURIComponent(client.id)}`} label="New Invoice" />
@@ -54,7 +54,7 @@ export default async function ClientDetailPage({ params, searchParams }) {
           </div>
         )}
       </div>
-      <DetailGrid items={[
+      <DetailGrid hideHeading={Boolean(accessToken)} items={[
         ['Contact', client.contact],
         [`Billing email${billingEmails.length > 1 ? 's' : ''}`, billingEmailsDisplay],
         ['Website', client.site_url ? <a href={client.site_url} rel="noreferrer" target="_blank">{client.site_url}</a> : '-'],

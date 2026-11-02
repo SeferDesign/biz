@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { FileDown } from 'lucide-react';
-import { formatMailingAddress } from '@seferbiz/company';
+import { displayId, formatMailingAddress } from '@seferbiz/company';
 import { DetailGrid, ResourcePage, StatusBadge } from '../../../components/ResourcePage.js';
 import ResourceActions from '../../../components/ResourceActions.js';
 import InvoiceActions from '../../../components/InvoiceActions.js';
@@ -85,6 +85,11 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
       ]}
     />
   );
+  const itemizedServicesContent = (
+    <>
+      <CardContent className="min-w-0 overflow-x-auto">{lineItemsContent}</CardContent>
+    </>
+  );
   return (
     <>
       {paymentResult && (
@@ -105,9 +110,8 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
       )}
       {accessToken ? (
         <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-muted-foreground">Invoice</p>
-            <h1 className="text-3xl font-semibold">Invoice #{invoice.id}</h1>
+          <div className="min-w-0 space-y-1">
+            <h1 className="break-words text-3xl font-semibold">Invoice #{invoice.display_id || displayId(invoice.client?.name, invoice.id)}</h1>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <StatusBadge status={invoiceStatus(invoice)} />
@@ -126,9 +130,9 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
       )}
       {accessToken ? (
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3">
             <CardDescription>{isPaid ? 'Amount paid' : 'Amount due'}</CardDescription>
-            <CardTitle className="text-3xl tabular-nums">{formatMoney(invoice.cost ?? invoice.total, invoice.currency)}</CardTitle>
+            <CardTitle className="text-2xl tabular-nums">{formatMoney(invoice.cost ?? invoice.total, invoice.currency)}</CardTitle>
           </CardHeader>
           <Separator />
           <CardContent className="space-y-6 pt-6">
@@ -144,20 +148,21 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
               <>
                 <Separator />
                 <div className="space-y-1">
-                  <h2 className="text-sm font-medium">Description</h2>
-                  <p className="text-sm leading-6 text-muted-foreground">{invoice.description}</p>
+                  <p className="text-sm leading-6">{invoice.description}</p>
                 </div>
               </>
             )}
           </CardContent>
+          {itemizedServicesContent}
         </Card>
       ) : (
-        <>
-          <DetailGrid items={detailItems} />
-          <p className="invoice-description">{invoice.description}</p>
-        </>
+        <DetailGrid items={detailItems}>
+          {invoice.description && (
+            <CardContent><p className="invoice-description">{invoice.description}</p></CardContent>
+          )}
+          {itemizedServicesContent}
+        </DetailGrid>
       )}
-      {!accessToken && <ClientLinkPanel invoiceId={invoice.id} initialAccessToken={invoice.access_token} />}
       {!accessToken && payments.length > 0 && (
         <section className="detail-section">
           <div className="section-heading"><h2>Online payments</h2><span className="section-note">{payments.length} via Stripe</span></div>
@@ -179,7 +184,6 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
           </div>
         </section>
       )}
-      {!accessToken && <InvoiceEmailPanel invoiceId={invoice.id} initialSends={emailSendsResult.data || []} historyError={emailSendsResult.error} />}
       {paymentOptions?.enabled && paymentStatus !== 'processing' && (
         <InvoicePayment
           invoiceId={invoice.id}
@@ -195,18 +199,8 @@ export default async function InvoiceDetailPage({ params, searchParams }) {
           <Button asChild variant="link" size="sm"><Link href="/payments">View all payment options</Link></Button>
         </div>
       )}
-      {accessToken ? (
-        <Card className="overflow-hidden">
-          <CardHeader>
-            <CardTitle>Itemized services</CardTitle>
-            <CardDescription>Details for this invoice.</CardDescription>
-          </CardHeader>
-          <Separator />
-          <CardContent className="overflow-x-auto p-0">{lineItemsContent}</CardContent>
-        </Card>
-      ) : (
-        <section className="mt-8">{lineItemsContent}</section>
-      )}
+      {!accessToken && <ClientLinkPanel invoiceId={invoice.id} initialAccessToken={invoice.access_token} />}
+      {!accessToken && <InvoiceEmailPanel invoiceId={invoice.id} initialSends={emailSendsResult.data || []} historyError={emailSendsResult.error} />}
     </>
   );
 }

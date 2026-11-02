@@ -118,13 +118,17 @@ export function StatusBadge({ status }) {
   return <Badge variant={variant}>{value}</Badge>;
 }
 
-export function DetailGrid({ items }) {
+export function DetailGrid({ items, children, hideHeading = false }) {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Details</CardTitle>
-      </CardHeader>
-      <Separator />
+      {!hideHeading && (
+        <>
+          <CardHeader>
+            <CardTitle>Details</CardTitle>
+          </CardHeader>
+          <Separator />
+        </>
+      )}
       <CardContent className="pt-6">
         <dl className="grid gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
           {items.map(([label, value]) => (
@@ -135,6 +139,7 @@ export function DetailGrid({ items }) {
           ))}
         </dl>
       </CardContent>
+      {children}
     </Card>
   );
 }

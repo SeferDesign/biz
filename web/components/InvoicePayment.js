@@ -57,7 +57,6 @@ export default function InvoicePayment({ invoiceId, accessToken, methods = [], a
     <section className="space-y-4">
       <header className="space-y-1">
         <h2 className="text-xl font-semibold">Choose a payment method</h2>
-        <p className="text-sm text-muted-foreground">Review the total and any processing fee before continuing.</p>
       </header>
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {methods.map((option) => (
