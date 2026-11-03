@@ -35,3 +35,19 @@ __API_DOMAIN__ {
 		health_timeout 2s
 	}
 }
+
+:8082 {
+	reverse_proxy __API_PROBE_UPSTREAM__:3000 {
+		health_uri /v1/health
+		health_interval 5s
+		health_timeout 2s
+	}
+}
+
+:8083 {
+	reverse_proxy __WEB_PROBE_UPSTREAM__:3000 {
+		health_uri /healthz
+		health_interval 5s
+		health_timeout 2s
+	}
+}

@@ -208,12 +208,15 @@ save_deploy_state() {
 
 write_caddyfile() {
 	local api_upstream="${1:-biz-api-blue}" web_upstream="${2:-biz-web-blue}" temporary_file
+	local api_probe_upstream="${3:-$api_upstream}" web_probe_upstream="${4:-$web_upstream}"
 	temporary_file="$(mktemp /opt/biz/Caddyfile.XXXXXX)"
 	sed -e "s|__APP_DOMAIN__|${app_domain}|g" \
 		-e "s|__API_DOMAIN__|${api_domain}|g" \
 		-e "s|__ACME_EMAIL__|$(cfg acmeEmail)|g" \
 		-e "s|__API_UPSTREAM__|${api_upstream}|g" \
 		-e "s|__WEB_UPSTREAM__|${web_upstream}|g" \
+		-e "s|__API_PROBE_UPSTREAM__|${api_probe_upstream}|g" \
+		-e "s|__WEB_PROBE_UPSTREAM__|${web_probe_upstream}|g" \
 		"$host_dir/Caddyfile.template" >"$temporary_file"
 	chmod 644 "$temporary_file"
 	cat "$temporary_file" >Caddyfile
@@ -271,9 +274,16 @@ wait_for_proxy_health() {
 
 switch_upstreams() {
 	local next_api="$1" next_web="$2" probe_container="$3" proxy_port="$4" health_path="$5"
-	local previous_api="$active_api" previous_web="$active_web"
-	write_caddyfile "$next_api" "$next_web"
+	local previous_api="$active_api" previous_web="$active_web" candidate_proxy_port
+	if [[ "$proxy_port" == 8080 ]]; then candidate_proxy_port=8082; else candidate_proxy_port=8083; fi
+	write_caddyfile "$previous_api" "$previous_web" "$next_api" "$next_web"
 	if caddy_running; then
+		if ! reload_caddy || ! wait_for_proxy_health "$probe_container" "$candidate_proxy_port" "$health_path"; then
+			write_caddyfile "$previous_api" "$previous_web"
+			reload_caddy || true
+			return 1
+		fi
+		write_caddyfile "$next_api" "$next_web"
 		if ! reload_caddy || ! wait_for_proxy_health "$probe_container" "$proxy_port" "$health_path"; then
 			write_caddyfile "$previous_api" "$previous_web"
 			reload_caddy || true
