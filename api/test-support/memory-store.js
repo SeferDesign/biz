@@ -32,6 +32,7 @@ export function createMemoryStore() {
   const invoiceEmailSends = [];
   const invoiceTemplates = [];
   const invoicePayments = [];
+  const history = [];
   const users = [];
   const userSessions = [];
   const apiKeys = [];
@@ -41,6 +42,7 @@ export function createMemoryStore() {
     users,
     userSessions,
     invoicePayments,
+    history,
     async getUserByEmail(email) {
       return users.find((user) => user.email.toLowerCase() === email.toLowerCase());
     },
@@ -281,6 +283,22 @@ export function createMemoryStore() {
         clients: sortClientsByRecentActivity(snapshot.clients, snapshot.invoices)
       };
     },
+    async recordHistory(entry) {
+      const record = {
+        id: Math.max(0, ...history.map((item) => item.id)) + 1,
+        created_at: new Date().toISOString(),
+        ...structuredClone(entry)
+      };
+      history.push(record);
+      return record.id;
+    },
+    async listHistory({ entityType, entityId, pageSize, offset }) {
+      const filtered = history.filter((record) =>
+        (!entityType || record.entity_type === entityType) &&
+        (!entityId || record.entity_id === Number(entityId))
+      ).toSorted((left, right) => String(right.created_at).localeCompare(String(left.created_at)) || right.id - left.id);
+      return { items: filtered.slice(offset, offset + pageSize), total: filtered.length };
+    },
     async getDashboardSummary() {
       const now = new Date();
       const year = now.getUTCFullYear();
@@ -487,6 +505,9 @@ export function createMemoryStore() {
     async getExpense(id) {
       return snapshot.expenses.find((item) => item.id === Number(id));
     },
+    async getExpensesByIds(ids) {
+      return snapshot.expenses.filter((item) => ids.includes(Number(item.id)));
+    },
     async createExpense(input) {
       const expense = { id: Math.max(0, ...snapshot.expenses.map((item) => item.id)) + 1, ...input };
       snapshot.expenses.push(expense);
@@ -529,6 +550,9 @@ export function createMemoryStore() {
     },
     async getInvoice(id) {
       return snapshot.invoices.find((item) => item.id === Number(id));
+    },
+    async getInvoiceLines(invoiceId) {
+      return snapshot.lines.filter((line) => Number(line.invoice_id) === Number(invoiceId));
     },
     async getInvoiceEmailSends(invoiceId) {
       return invoiceEmailSends
@@ -589,7 +613,22 @@ export function createMemoryStore() {
     async markInvoicePaid(id, { paiddate, paymenttype }) {
       const invoice = await this.getInvoice(id);
       if (!invoice || invoice.paid) return false;
+      const before = structuredClone(invoice);
       Object.assign(invoice, { paid: true, status: 'paid', paiddate, paymenttype });
+      await this.recordHistory({
+        entity_type: 'invoice',
+        entity_id: invoice.id,
+        action: 'payment_received',
+        actor_user_id: null,
+        actor_email: null,
+        source: 'stripe',
+        changes: {
+          paid: { from: Boolean(before.paid), to: true },
+          status: { from: before.status, to: 'paid' },
+          paiddate: { from: before.paiddate ?? null, to: paiddate },
+          paymenttype: { from: before.paymenttype ?? null, to: paymenttype }
+        }
+      });
       return true;
     },
     async getInvoicePayments(invoiceId) {

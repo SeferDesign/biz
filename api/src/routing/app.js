@@ -15,6 +15,7 @@ import backupStatusRouter from './backup-status/routes.js';
 import { createAuthRouter } from './auth.js';
 import searchRouter from './search/routes.js';
 import dashboardRouter from './dashboard/routes.js';
+import historyRouter from './history/routes.js';
 import vendorsRouter from './vendors/routes.js';
 import yearsRouter from './years/routes.js';
 import stripeRouter, { createStripeWebhookHandler } from './stripe/routes.js';
@@ -59,8 +60,14 @@ function createAuthenticationMiddleware(store, apiAccessToken) {
   return async (req, res, next) => {
     const bearerToken = req.get('authorization')?.match(/^Bearer\s+(.+)$/i)?.[1];
     const cookieToken = readCookie(req, 'biz_session');
-    if (tokenMatches(bearerToken || req.query.access_token, apiAccessToken)) return next();
-    if (typeof bearerToken === 'string' && bearerToken && await store.touchApiKeyLastUsed?.(bearerToken)) return next();
+    if (tokenMatches(bearerToken || req.query.access_token, apiAccessToken)) {
+      req.authSource = 'api_access_token';
+      return next();
+    }
+    if (typeof bearerToken === 'string' && bearerToken && await store.touchApiKeyLastUsed?.(bearerToken)) {
+      req.authSource = 'api_key';
+      return next();
+    }
     const sessionToken = bearerToken || cookieToken;
     const sessionTokenHash = hashSessionToken(sessionToken);
     if (sessionTokenHash) {
@@ -73,6 +80,7 @@ function createAuthenticationMiddleware(store, apiAccessToken) {
           last_name: session.last_name
         };
         req.authSessionId = session.session_id;
+        req.authSource = 'user_session';
         return next();
       }
     }
@@ -202,6 +210,7 @@ export function createApp({
   app.use('/v1', vendorsRouter(store));
   app.use('/v1', searchRouter(store));
   app.use('/v1', dashboardRouter(store));
+  app.use('/v1', historyRouter(store));
 
   app.use((req, res) => {
     res.status(404).json({ error: 'Route not found', path: req.path });

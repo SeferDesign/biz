@@ -3,6 +3,7 @@ import { sendCsv } from '../shared/csv.js';
 import { findYear, invoiceAmount, invoiceDate, sum, yearExpenses, yearIncome } from '../shared/finance.js';
 import { isFiniteNumber, parseId } from '../shared/validation.js';
 import { withInvoiceDisplayIds } from '@seferbiz/company';
+import { historyFields, writeHistory } from '../shared/history.js';
 
 function validateYearInput(input, { partial = false } = {}) {
   if (!partial || input.year !== undefined) {
@@ -47,7 +48,9 @@ export default function yearsRouter(store) {
     const error = validateYearInput(input);
     if (error) return res.status(400).json({ error });
     try {
-      return res.status(201).json(await store.createYear(input));
+      const year = await store.createYear(input);
+      await writeHistory(store, req, { entityType: 'year', entityId: year.id, action: 'created', after: year, fields: historyFields.year });
+      return res.status(201).json(year);
     } catch (cause) {
       if (cause.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'That year already exists' });
       throw cause;
@@ -119,8 +122,11 @@ export default function yearsRouter(store) {
     const error = validateYearInput(req.body, { partial: true });
     if (error) return res.status(400).json({ error });
     try {
+      const current = await store.getYear(id);
+      const before = current ? structuredClone(current) : null;
       const year = await store.updateYear(id, req.body);
       if (!year) return res.status(404).json({ error: 'Year not found' });
+      await writeHistory(store, req, { entityType: 'year', entityId: id, action: 'updated', before, after: year, fields: historyFields.year });
       return res.json(year);
     } catch (cause) {
       if (cause.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'That year already exists' });
@@ -140,8 +146,11 @@ export default function yearsRouter(store) {
     const error = validateYearInput(input);
     if (error) return res.status(400).json({ error });
     try {
+      const current = await store.getYear(id);
+      const before = current ? structuredClone(current) : null;
       const year = await store.updateYear(id, input);
       if (!year) return res.status(404).json({ error: 'Year not found' });
+      await writeHistory(store, req, { entityType: 'year', entityId: id, action: 'updated', before, after: year, fields: historyFields.year });
       return res.json(year);
     } catch (cause) {
       if (cause.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'That year already exists' });
@@ -152,7 +161,9 @@ export default function yearsRouter(store) {
   router.delete('/years/:id', async (req, res) => {
     const id = parseId(req.params.id);
     if (!id) return res.status(400).json({ error: 'Year id must be a positive integer' });
-    if (!await store.deleteYear(id)) return res.status(404).json({ error: 'Year not found' });
+    const before = await store.getYear(id);
+    if (!before || !await store.deleteYear(id)) return res.status(404).json({ error: 'Year not found' });
+    await writeHistory(store, req, { entityType: 'year', entityId: id, action: 'deleted', before, fields: historyFields.year });
     return res.sendStatus(204);
   });
 

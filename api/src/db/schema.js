@@ -167,6 +167,19 @@ const statements = [
     CONSTRAINT invoice_payments_invoice_fk FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
     INDEX invoice_payments_invoice_idx (invoice_id, submitted_at)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS change_history (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    entity_type VARCHAR(32) NOT NULL,
+    entity_id BIGINT UNSIGNED NOT NULL,
+    action VARCHAR(32) NOT NULL,
+    actor_user_id INT NULL,
+    actor_email VARCHAR(255) NULL,
+    source VARCHAR(32) NOT NULL,
+    changes JSON NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX change_history_entity_idx (entity_type, entity_id, created_at, id),
+    INDEX change_history_created_idx (created_at, id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   `CREATE TABLE IF NOT EXISTS expenses (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255), vendor_id BIGINT UNSIGNED,

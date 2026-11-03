@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { hasText, parseId, parsePagination } from '../shared/validation.js';
+import { historyFields, writeHistory } from '../shared/history.js';
 
 export default function vendorsRouter(store) {
   const router = Router();
@@ -26,7 +27,9 @@ export default function vendorsRouter(store) {
 
   router.post('/vendors', async (req, res) => {
     if (!hasText(req.body?.name)) return res.status(400).json({ error: 'Vendor name is required' });
-    return res.status(201).json(await store.createVendor(req.body));
+    const vendor = await store.createVendor(req.body);
+    await writeHistory(store, req, { entityType: 'vendor', entityId: vendor.id, action: 'created', after: vendor, fields: historyFields.vendor });
+    return res.status(201).json(vendor);
   });
 
   router.patch('/vendors/:id', async (req, res) => {
@@ -36,8 +39,11 @@ export default function vendorsRouter(store) {
       return res.status(400).json({ error: 'Vendor name cannot be empty' });
     }
     if (!Object.keys(req.body || {}).length) return res.status(400).json({ error: 'At least one vendor field is required' });
+    const current = await store.getVendor(id);
+    const before = current ? structuredClone(current) : null;
     const vendor = await store.updateVendor(id, req.body);
     if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
+    await writeHistory(store, req, { entityType: 'vendor', entityId: id, action: 'updated', before, after: vendor, fields: historyFields.vendor });
     return res.json(vendor);
   });
 
@@ -45,15 +51,20 @@ export default function vendorsRouter(store) {
     const id = parseId(req.params.id);
     if (!id) return res.status(400).json({ error: 'Vendor id must be a positive integer' });
     if (!hasText(req.body?.name)) return res.status(400).json({ error: 'Vendor name is required' });
+    const current = await store.getVendor(id);
+    const before = current ? structuredClone(current) : null;
     const vendor = await store.updateVendor(id, req.body);
     if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
+    await writeHistory(store, req, { entityType: 'vendor', entityId: id, action: 'updated', before, after: vendor, fields: historyFields.vendor });
     return res.json(vendor);
   });
 
   router.delete('/vendors/:id', async (req, res) => {
     const id = parseId(req.params.id);
     if (!id) return res.status(400).json({ error: 'Vendor id must be a positive integer' });
-    if (!await store.deleteVendor(id)) return res.status(404).json({ error: 'Vendor not found' });
+    const before = await store.getVendor(id);
+    if (!before || !await store.deleteVendor(id)) return res.status(404).json({ error: 'Vendor not found' });
+    await writeHistory(store, req, { entityType: 'vendor', entityId: id, action: 'deleted', before, fields: historyFields.vendor });
     return res.sendStatus(204);
   });
 

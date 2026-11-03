@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { hasText, isDate, isFiniteNumber, parseId, parsePagination } from '../shared/validation.js';
+import { historyFields, writeHistory } from '../shared/history.js';
 
 const expenseAccountTypes = new Set(['Business', 'Personal']);
 
@@ -60,6 +61,9 @@ export default function expensesRouter(store) {
     }
     if (await hasMissingVendor(store, expenses)) return res.status(400).json({ error: 'Vendor not found' });
     const created = await store.createExpenses(expenses.map((expense) => ({ ...expense, cost: Number(expense.cost), vendor_id: expense.vendor_id ? Number(expense.vendor_id) : null })));
+    await Promise.all(created.map((expense) => writeHistory(store, req, {
+      entityType: 'expense', entityId: expense.id, action: 'created', after: expense, fields: historyFields.expense
+    })));
     return res.status(201).json({ expenses: created });
   });
 
@@ -83,8 +87,14 @@ export default function expensesRouter(store) {
       }
     }
     if (await hasMissingVendor(store, expenses)) return res.status(400).json({ error: 'Vendor not found' });
+    const before = await store.getExpensesByIds(expenses.map((expense) => Number(expense.id)));
     const updated = await store.updateExpenses(expenses.map((expense) => ({ ...expense, id: Number(expense.id), cost: Number(expense.cost), vendor_id: expense.vendor_id ? Number(expense.vendor_id) : null })));
     if (!updated) return res.status(404).json({ error: 'One or more expenses were not found; no changes were saved' });
+    const beforeById = new Map(before.map((expense) => [Number(expense.id), structuredClone(expense)]));
+    await Promise.all(updated.map((expense) => writeHistory(store, req, {
+      entityType: 'expense', entityId: expense.id, action: 'updated', before: beforeById.get(Number(expense.id)),
+      after: expense, fields: historyFields.expense
+    })));
     return res.json({ expenses: updated });
   });
 
@@ -106,7 +116,9 @@ export default function expensesRouter(store) {
       return res.status(400).json({ error: 'Vendor id must be a positive integer' });
     }
     if (vendorId && !await store.getVendor(Number(vendorId))) return res.status(400).json({ error: 'Vendor not found' });
-    return res.status(201).json(await store.createExpense(req.body));
+    const expense = await store.createExpense(req.body);
+    await writeHistory(store, req, { entityType: 'expense', entityId: expense.id, action: 'created', after: expense, fields: historyFields.expense });
+    return res.status(201).json(expense);
   });
 
   router.patch('/expenses/:id', async (req, res) => {
@@ -122,8 +134,11 @@ export default function expensesRouter(store) {
       if (!parseId(input.vendor_id)) return res.status(400).json({ error: 'Vendor id must be a positive integer' });
       if (!await store.getVendor(Number(input.vendor_id))) return res.status(400).json({ error: 'Vendor not found' });
     }
+    const current = await store.getExpense(id);
+    const before = current ? structuredClone(current) : null;
     const expense = await store.updateExpense(id, input);
     if (!expense) return res.status(404).json({ error: 'Expense not found' });
+    await writeHistory(store, req, { entityType: 'expense', entityId: id, action: 'updated', before, after: expense, fields: historyFields.expense });
     return res.json(expense);
   });
 
@@ -139,15 +154,20 @@ export default function expensesRouter(store) {
       return res.status(400).json({ error: 'Vendor id must be a positive integer' });
     }
     if (vendorId && !await store.getVendor(Number(vendorId))) return res.status(400).json({ error: 'Vendor not found' });
+    const current = await store.getExpense(id);
+    const before = current ? structuredClone(current) : null;
     const expense = await store.updateExpense(id, req.body);
     if (!expense) return res.status(404).json({ error: 'Expense not found' });
+    await writeHistory(store, req, { entityType: 'expense', entityId: id, action: 'updated', before, after: expense, fields: historyFields.expense });
     return res.json(expense);
   });
 
   router.delete('/expenses/:id', async (req, res) => {
     const id = parseId(req.params.id);
     if (!id) return res.status(400).json({ error: 'Expense id must be a positive integer' });
-    if (!await store.deleteExpense(id)) return res.status(404).json({ error: 'Expense not found' });
+    const before = await store.getExpense(id);
+    if (!before || !await store.deleteExpense(id)) return res.status(404).json({ error: 'Expense not found' });
+    await writeHistory(store, req, { entityType: 'expense', entityId: id, action: 'deleted', before, fields: historyFields.expense });
     return res.sendStatus(204);
   });
 

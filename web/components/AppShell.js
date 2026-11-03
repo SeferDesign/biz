@@ -17,7 +17,8 @@ import {
   Users,
   ChevronDown,
   LogOut,
-  GalleryVerticalEnd
+  GalleryVerticalEnd,
+  History
 } from 'lucide-react';
 import OmniSearch from './OmniSearch.js';
 import Brand from './Brand.js';
@@ -77,6 +78,7 @@ const overviewNavigation = [
 const insightsNavigation = [
   { href: '/best', label: 'Best Performances', icon: Award, iconColor: iconColors.best },
   { href: '/payments', label: 'Payment Options', icon: CreditCard, iconColor: iconColors.payments },
+  { href: '/history', label: 'Change History', icon: History, iconColor: iconColors.overview },
   { href: '/settings/backups', label: 'Backup Status', icon: HardDrive, iconColor: iconColors.backups }
 ];
 
@@ -89,6 +91,7 @@ const staticBreadcrumbs = {
   '/years': [{ label: 'Workspace', href: '/' }, { label: 'Years' }],
   '/best': [{ label: 'Insights' }, { label: 'Best Performances' }],
   '/payments': [{ label: 'Insights' }, { label: 'Payment Options' }],
+  '/history': [{ label: 'Insights' }, { label: 'Change History' }],
   '/payment': [{ label: 'Payment' }],
   '/settings/templates': [{ label: 'Invoices', href: '/invoices' }, { label: 'Templates' }],
   '/settings/backups': [{ label: 'Insights' }, { label: 'Backup Status' }],

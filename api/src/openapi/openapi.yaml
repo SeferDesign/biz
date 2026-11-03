@@ -335,6 +335,27 @@ paths:
       responses:
         '200':
           description: Aggregated monthly and annual finance totals, receivables, goals, and up to six recent invoices
+  /history:
+    get:
+      summary: List business record change history
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - name: entity_type
+          in: query
+          schema:
+            type: string
+            enum: [client, invoice, expense, vendor, year]
+        - name: entity_id
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Newest history records and total count
+        '400':
+          description: Invalid history filters or pagination
   /invoices:
     get:
       summary: List invoices; page and page_size opt in to a paged response with items and total

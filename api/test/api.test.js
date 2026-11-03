@@ -853,6 +853,84 @@ test('dashboard endpoint returns compact totals and recent invoice labels', asyn
   assert.equal(typeof response.body.monthlyExpenses, 'object');
 });
 
+test('client history records actor, redacted changes, updates, and deletion', async () => {
+  const app = createTestApp();
+  const created = await request(app).post('/v1/clients').send({ name: 'History Client', federalein: 'secret-ein' });
+  const updated = await request(app).patch(`/v1/clients/${created.body.id}`).send({ name: 'Renamed Client' });
+  const removed = await request(app).delete(`/v1/clients/${created.body.id}`);
+  const response = await request(app).get(`/v1/history?entity_type=client&entity_id=${created.body.id}`);
+
+  assert.equal(created.status, 201);
+  assert.equal(updated.status, 200);
+  assert.equal(removed.status, 204);
+  assert.deepEqual(response.body.items.map((item) => item.action), ['deleted', 'updated', 'created']);
+  assert.equal(response.body.items[0].source, 'api_access_token');
+  assert.equal(response.body.items[0].actor_email, null);
+  assert.deepEqual(response.body.items[1].changes.name, { from: 'History Client', to: 'Renamed Client' });
+  assert.equal(JSON.stringify(response.body).includes('secret-ein'), false);
+  const secondPage = await request(app).get(`/v1/history?entity_type=client&entity_id=${created.body.id}&page=2&page_size=1`);
+  assert.equal(secondPage.body.total, 3);
+  assert.equal(secondPage.body.items.length, 1);
+  assert.equal((await request(app).get('/v1/history?entity_type=unknown')).status, 400);
+});
+
+test('history attributes changes to the signed-in user', async () => {
+  const store = createMemoryStore();
+  const user = { id: 21, email: 'history@example.com' };
+  const token = createSessionToken();
+  store.users.push(user);
+  await store.createUserSession(user.id, hashSessionToken(token), SESSION_TTL_SECONDS);
+  const app = createTestApp({ store });
+  const created = await supertest(app)
+    .post('/v1/vendors')
+    .set('Authorization', `Bearer ${token}`)
+    .send({ name: 'Session Vendor' });
+  const history = await request(app).get(`/v1/history?entity_type=vendor&entity_id=${created.body.id}`);
+
+  assert.equal(created.status, 201);
+  assert.equal(history.body.items[0].actor_user_id, user.id);
+  assert.equal(history.body.items[0].actor_email, user.email);
+  assert.equal(history.body.items[0].source, 'user_session');
+});
+
+test('invoice, expense, vendor, and year changes appear in the history feed', async () => {
+  const app = createTestApp();
+  const vendor = await request(app).post('/v1/vendors').send({ name: 'History Vendor', notes: 'Initial' });
+  const expense = await request(app).post('/v1/expenses').send({
+    name: 'History Expense', vendor_id: vendor.body.id, date: '2026-01-05', cost: 25, account: 'Business'
+  });
+  const updatedExpense = await request(app).patch(`/v1/expenses/${expense.body.id}`).send({ cost: 30 });
+  const bulkCreated = await request(app).post('/v1/expenses/bulk').send({ expenses: [{
+    name: 'Bulk History Expense', vendor_id: vendor.body.id, date: '2026-01-07', cost: 10, account: 'Business'
+  }] });
+  const bulkExpense = bulkCreated.body.expenses[0];
+  await request(app).patch('/v1/expenses/bulk').send({ expenses: [{
+    id: bulkExpense.id, name: bulkExpense.name, vendor_id: bulkExpense.vendor_id,
+    date: bulkExpense.date, cost: 15, account: bulkExpense.account
+  }] });
+  const invoice = await request(app).post('/v1/invoices').send({ client_id: 1, date: '2026-01-06', cost: 200 });
+  await request(app).post(`/v1/invoices/${invoice.body.id}/lines`).send({ description: 'First line', total: 100 });
+  await request(app).put(`/v1/invoices/${invoice.body.id}/lines`).send([
+    { description: 'Replacement line', total: 200 }
+  ]);
+  const year = await request(app).post('/v1/years').send({ year: 2026, goal_year: 30000 });
+  await request(app).patch(`/v1/years/${year.body.id}`).send({ goal_year: 36000 });
+  await request(app).patch(`/v1/vendors/${vendor.body.id}`).send({ notes: 'Updated' });
+  const history = await request(app).get('/v1/history?page_size=100');
+  const types = history.body.items.map((item) => item.entity_type);
+
+  assert.equal(updatedExpense.body.cost, 30);
+  assert.ok(types.includes('vendor'));
+  assert.ok(types.includes('expense'));
+  assert.ok(types.includes('invoice'));
+  assert.ok(types.includes('year'));
+  assert.ok(history.body.items.some((item) => item.action === 'line_created'));
+  assert.ok(history.body.items.some((item) => item.action === 'lines_replaced'));
+  assert.ok(history.body.items.some((item) => item.entity_type === 'expense' && item.action === 'created'));
+  assert.ok(history.body.items.some((item) => item.entity_type === 'year' && item.changes.goal_year.to.toString() === '36000'));
+  assert.equal((await request(app).get(`/v1/history?entity_type=invoice&entity_id=${invoice.body.id}`)).body.total, 3);
+});
+
 test('year endpoints return records and report totals', async () => {
   const app = createTestApp();
 
@@ -1053,6 +1131,7 @@ test('Stripe embedded checkout charges card fees, confirms payment, and accepts 
   const confirmed = await supertest(app).get('/v1/invoices/1/stripe?session_id=cs_test_2&access_token=invoice-link-token');
   assert.equal(confirmed.body.status, 'paid');
   assert.equal((await store.getInvoice(1)).paymenttype, 'Stripe ACH');
+  assert.ok(store.history.some((item) => item.action === 'payment_received' && item.source === 'stripe'));
   assert.equal((await supertest(app).post('/v1/invoices/1/checkout?access_token=invoice-link-token').send({ method: 'card' })).status, 409);
 
   const payload = JSON.stringify({

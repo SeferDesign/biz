@@ -598,6 +598,45 @@ export class MySqlStore {
     return { clients, vendors, expenses, invoices, lines, years };
   }
 
+  async recordHistory(entry) {
+    const [result] = await this.database.execute(
+      `INSERT INTO change_history (entity_type, entity_id, action, actor_user_id, actor_email, source, changes)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [entry.entity_type, entry.entity_id, entry.action, entry.actor_user_id, entry.actor_email,
+        entry.source, JSON.stringify(entry.changes)]
+    );
+    return result.insertId;
+  }
+
+  async listHistory({ entityType, entityId, pageSize, offset }) {
+    const filters = [];
+    const values = [];
+    if (entityType) {
+      filters.push('entity_type = ?');
+      values.push(entityType);
+    }
+    if (entityId) {
+      filters.push('entity_id = ?');
+      values.push(entityId);
+    }
+    const where = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
+    const [[countRows], [items]] = await Promise.all([
+      this.database.execute(`SELECT COUNT(*) AS total FROM change_history ${where}`, values),
+      this.database.execute(`SELECT id, entity_type, entity_id, action, actor_user_id, actor_email,
+          source, changes, created_at
+        FROM change_history ${where} ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?`, [...values, pageSize, offset])
+    ]);
+    return { items, total: Number(countRows[0].total) };
+  }
+
+  async getExpensesByIds(ids) {
+    if (!ids.length) return [];
+    const [rows] = await this.database.execute(
+      `SELECT * FROM expenses WHERE id IN (${ids.map(() => '?').join(', ')})`, ids
+    );
+    return rows;
+  }
+
   async getClient(id) {
     const [rows] = await this.database.query('SELECT *, email_accounting AS email FROM clients WHERE id = ?', [id]);
     return rows[0];
@@ -811,6 +850,13 @@ export class MySqlStore {
     return rows[0];
   }
 
+  async getInvoiceLines(invoiceId) {
+    const [rows] = await this.database.execute(
+      'SELECT *, total AS amount FROM `lines` WHERE invoice_id = ? ORDER BY id', [invoiceId]
+    );
+    return rows;
+  }
+
   async getInvoicePayments(invoiceId) {
     const [rows] = await this.database.query(
       'SELECT * FROM invoice_payments WHERE invoice_id = ? ORDER BY submitted_at DESC, id DESC',
@@ -951,10 +997,48 @@ export class MySqlStore {
   }
 
   async markInvoicePaid(id, { paiddate, paymenttype }) {
-    const [result] = await this.database.execute(
-      "UPDATE invoices SET paid = TRUE, status = 'paid', paiddate = ?, paymenttype = ? WHERE id = ? AND paid = FALSE",
-      [paiddate, paymenttype, id]
-    );
-    return result.affectedRows > 0;
+    const connection = await this.database.getConnection();
+    let transactionStarted = false;
+    try {
+      await connection.beginTransaction();
+      transactionStarted = true;
+      const [rows] = await connection.execute(
+        'SELECT id, paid, status, paiddate, paymenttype FROM invoices WHERE id = ? FOR UPDATE', [id]
+      );
+      const before = rows[0];
+      if (!before || before.paid) {
+        await connection.rollback();
+        transactionStarted = false;
+        return false;
+      }
+      const [result] = await connection.execute(
+        "UPDATE invoices SET paid = TRUE, status = 'paid', paiddate = ?, paymenttype = ? WHERE id = ? AND paid = FALSE",
+        [paiddate, paymenttype, id]
+      );
+      if (!result.affectedRows) {
+        await connection.rollback();
+        transactionStarted = false;
+        return false;
+      }
+      const changes = {
+        paid: { from: Boolean(before.paid), to: true },
+        status: { from: before.paid ? 'paid' : before.status, to: 'paid' },
+        paiddate: { from: before.paiddate, to: paiddate },
+        paymenttype: { from: before.paymenttype, to: paymenttype }
+      };
+      await connection.execute(
+        `INSERT INTO change_history (entity_type, entity_id, action, actor_user_id, actor_email, source, changes)
+         VALUES ('invoice', ?, 'payment_received', NULL, NULL, 'stripe', ?)`,
+        [id, JSON.stringify(changes)]
+      );
+      await connection.commit();
+      transactionStarted = false;
+      return true;
+    } catch (error) {
+      if (transactionStarted) await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
   }
 }

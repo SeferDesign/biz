@@ -4,6 +4,7 @@ import { publicInvoice, publicLine } from '../shared/public-views.js';
 import { sendInvoiceEmail as deliverInvoiceEmail } from '../../email/invoice-mailer.js';
 import { createInvoicePdf } from '../../pdf/invoice-pdf.js';
 import { displayIdNumber, withInvoiceDisplayIds } from '@seferbiz/company';
+import { historyFields, writeHistory } from '../shared/history.js';
 
 const invoiceStatuses = new Set(['draft', 'sent', 'paid']);
 
@@ -59,6 +60,7 @@ export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoic
     const invoiceInput = { ...input, client_id: Number(input.client_id), cost: Number(input.cost) };
     if (invoiceInput.status) invoiceInput.paid = invoiceInput.status === 'paid';
     const invoice = await store.createInvoice(invoiceInput);
+    await writeHistory(store, req, { entityType: 'invoice', entityId: invoice.id, action: 'created', after: invoice, fields: historyFields.invoice });
     return res.status(201).json(withInvoiceDisplayIds(invoice, client?.name));
   });
 
@@ -97,8 +99,11 @@ export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoic
     if (updates.client_id !== undefined) updates.client_id = Number(updates.client_id);
     if (updates.cost !== undefined) updates.cost = Number(updates.cost);
     if (updates.status !== undefined) updates.paid = updates.status === 'paid';
+    const current = await store.getInvoice(id);
+    const before = current ? structuredClone(current) : null;
     const invoice = await store.updateInvoice(id, updates);
     if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
+    await writeHistory(store, req, { entityType: 'invoice', entityId: id, action: 'updated', before, after: invoice, fields: historyFields.invoice });
     const client = invoice.client_id ? await store.getClient(invoice.client_id) : null;
     return res.json(withInvoiceDisplayIds(invoice, client?.name));
   });
@@ -112,8 +117,11 @@ export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoic
     if (!await store.getClient(Number(input.client_id))) return res.status(400).json({ error: 'Client not found' });
     const updates = { ...input, client_id: Number(input.client_id), cost: Number(input.cost) };
     updates.paid = updates.status ? updates.status === 'paid' : Boolean(updates.paid);
+    const current = await store.getInvoice(id);
+    const before = current ? structuredClone(current) : null;
     const invoice = await store.updateInvoice(id, updates);
     if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
+    await writeHistory(store, req, { entityType: 'invoice', entityId: id, action: 'updated', before, after: invoice, fields: historyFields.invoice });
     const client = invoice.client_id ? await store.getClient(invoice.client_id) : null;
     return res.json(withInvoiceDisplayIds(invoice, client?.name));
   });
@@ -121,7 +129,9 @@ export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoic
   router.delete('/invoices/:id', async (req, res) => {
     const id = parseId(req.params.id);
     if (!id) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
-    if (!await store.deleteInvoice(id)) return res.status(404).json({ error: 'Invoice not found' });
+    const before = await store.getInvoice(id);
+    if (!before || !await store.deleteInvoice(id)) return res.status(404).json({ error: 'Invoice not found' });
+    await writeHistory(store, req, { entityType: 'invoice', entityId: id, action: 'deleted', before, fields: historyFields.invoice });
     return res.sendStatus(204);
   });
 
@@ -163,7 +173,13 @@ export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoic
       const result = await sendInvoiceEmail({ invoice, client, lines });
       const recipient = result?.recipient || client.email || client.email_accounting;
       const emailSend = await store.recordInvoiceEmailSend(invoice.id, recipient);
-      if (invoice.status === 'draft') await store.updateInvoice(invoice.id, { status: 'sent' });
+      if (invoice.status === 'draft') {
+        const updated = await store.updateInvoice(invoice.id, { status: 'sent' });
+        await writeHistory(store, req, {
+          entityType: 'invoice', entityId: invoice.id, action: 'email_sent', changeMode: 'updated',
+          before: { status: 'draft' }, after: { status: updated.status }, fields: ['status']
+        });
+      }
       return res.json({
         invoice_id: invoice.id,
         status: 'sent',
@@ -183,7 +199,12 @@ export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoic
   });
 
   router.post('/invoices/:invoice_id/lines', async (req, res) => {
-    const line = await store.createInvoiceLine(Number(req.params.invoice_id), req.body);
+    const invoiceId = Number(req.params.invoice_id);
+    const line = await store.createInvoiceLine(invoiceId, req.body);
+    await writeHistory(store, req, {
+      entityType: 'invoice', entityId: invoiceId, action: 'line_created', changeMode: 'created',
+      after: line, fields: historyFields.invoiceLine
+    });
     res.status(201).json(line);
   });
 
@@ -204,8 +225,13 @@ export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoic
       hourly: line.hourly ?? null,
       discount: Boolean(line.discount)
     }));
+    const beforeLines = structuredClone(await store.getInvoiceLines(invoiceId));
     const updatedLines = await store.replaceInvoiceLines(invoiceId, lines);
     if (!updatedLines) return res.status(404).json({ error: 'Invoice not found' });
+    await writeHistory(store, req, {
+      entityType: 'invoice', entityId: invoiceId, action: 'lines_replaced', changeMode: 'updated',
+      before: { lines: beforeLines }, after: { lines: updatedLines }, fields: ['lines']
+    });
     return res.json(updatedLines);
   });
 

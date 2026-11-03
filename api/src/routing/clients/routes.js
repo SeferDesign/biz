@@ -3,6 +3,7 @@ import { hasText, parseId, parsePagination } from '../shared/validation.js';
 import { publicClient } from '../shared/public-views.js';
 import { withInvoiceDisplayIds } from '@seferbiz/company';
 import { publicInvoice } from '../shared/public-views.js';
+import { historyFields, writeHistory } from '../shared/history.js';
 
 const paymentTerms = new Set(['Net 15', 'Net 30', 'Net 60', 'Net 90']);
 const preferredPaymentMethods = new Set(['Check', 'Credit Card', 'Zelle', 'PayPal', 'Stripe', 'ACH', 'Cryptocurrency', 'Cash', 'Venmo', 'Other']);
@@ -66,7 +67,9 @@ export default function clientsRouter(store) {
     if (!hasText(req.body?.name)) return res.status(400).json({ error: 'Client name is required' });
     if (invalidPaymentTerms(req.body)) return res.status(400).json({ error: 'Payment terms must be Net 15, Net 30, Net 60, or Net 90' });
     if (invalidPreferredPaymentMethod(req.body)) return res.status(400).json({ error: 'Preferred payment method is not supported' });
-    return res.status(201).json(await store.createClient(normalizeClientInput(req.body)));
+    const client = await store.createClient(normalizeClientInput(req.body));
+    await writeHistory(store, req, { entityType: 'client', entityId: client.id, action: 'created', after: client, fields: historyFields.client });
+    return res.status(201).json(client);
   });
 
   router.patch('/clients/:id', async (req, res) => {
@@ -80,8 +83,11 @@ export default function clientsRouter(store) {
     if (!Object.keys(req.body || {}).length) {
       return res.status(400).json({ error: 'At least one client field is required' });
     }
+    const current = await store.getClient(id);
+    const before = current ? structuredClone(current) : null;
     const client = await store.updateClient(id, normalizeClientInput(req.body));
     if (!client) return res.status(404).json({ error: 'Client not found' });
+    await writeHistory(store, req, { entityType: 'client', entityId: id, action: 'updated', before, after: client, fields: historyFields.client });
     return res.json(client);
   });
 
@@ -91,15 +97,20 @@ export default function clientsRouter(store) {
     if (!hasText(req.body?.name)) return res.status(400).json({ error: 'Client name is required' });
     if (invalidPaymentTerms(req.body)) return res.status(400).json({ error: 'Payment terms must be Net 15, Net 30, Net 60, or Net 90' });
     if (invalidPreferredPaymentMethod(req.body)) return res.status(400).json({ error: 'Preferred payment method is not supported' });
+    const current = await store.getClient(id);
+    const before = current ? structuredClone(current) : null;
     const client = await store.updateClient(id, normalizeClientInput(req.body));
     if (!client) return res.status(404).json({ error: 'Client not found' });
+    await writeHistory(store, req, { entityType: 'client', entityId: id, action: 'updated', before, after: client, fields: historyFields.client });
     return res.json(client);
   });
 
   router.delete('/clients/:id', async (req, res) => {
     const id = parseId(req.params.id);
     if (!id) return res.status(400).json({ error: 'Client id must be a positive integer' });
-    if (!await store.deleteClient(id)) return res.status(404).json({ error: 'Client not found' });
+    const before = await store.getClient(id);
+    if (!before || !await store.deleteClient(id)) return res.status(404).json({ error: 'Client not found' });
+    await writeHistory(store, req, { entityType: 'client', entityId: id, action: 'deleted', before, fields: historyFields.client });
     return res.sendStatus(204);
   });
 
