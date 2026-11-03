@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Plus, Save } from 'lucide-react';
+import { Check, CircleDot, Plus, Save } from 'lucide-react';
 import { Spinner } from './ui/spinner.js';
 import { Button } from './ui/button.js';
 import { formatMoney } from '../lib/api.js';
@@ -15,6 +15,11 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from './ui/empty.js'
 import { getPaginationItems, Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './ui/pagination.js';
 
 const blankExpense = () => ({ name: '', vendor_id: '', date: '', cost: '', account: 'Business', notes: '' });
+
+function hasDraftInput(expense) {
+  return ['name', 'vendor_id', 'date', 'cost', 'notes']
+    .some((field) => String(expense[field] ?? '').trim() !== '');
+}
 
 function editableExpense(expense) {
   return {
@@ -114,7 +119,7 @@ function ExpenseRow({ expense, vendors, label, onChange, showId = false, rowClas
 function SpreadsheetTable({ children, includeId = false, variant = 'existing' }) {
   return (
     <div className={`table-wrap spreadsheet-wrap spreadsheet-wrap-${variant}`}>
-      <table className="data-table spreadsheet-table">
+      <table className={`data-table spreadsheet-table${includeId ? ' spreadsheet-table-with-id' : ''}`}>
         <thead>
           <tr>
             {includeId && <th>ID</th>}
@@ -137,7 +142,7 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const changedCount = dirtyIds.size;
-  const draftCount = drafts.filter((expense) => Object.values(expense).some(Boolean)).length;
+  const draftCount = drafts.filter(hasDraftInput).length;
   const pageCount = Math.max(1, Math.ceil(expenses.length / recordsPerPage));
   const currentPage = Math.min(page, pageCount);
   const visibleExpenses = expenses.slice((currentPage - 1) * recordsPerPage, currentPage * recordsPerPage);
@@ -174,7 +179,7 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
   }
 
   async function addExpenses() {
-    const entered = drafts.filter((expense) => Object.values(expense).some(Boolean));
+    const entered = drafts.filter(hasDraftInput);
     if (!entered.length) {
       setError('Enter at least one new expense row.');
       return;
@@ -204,22 +209,34 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
 
   return (
     <>
-      <div className="page-heading sheet-hero">
+      <div className="page-heading sheet-heading">
         <div>
-          <h1>Bulk expenses</h1>
-          <p className="page-description">Edit existing rows and add new expenses in one workspace. Save updates as a batch when you are ready.</p>
+          <h1>Expense spreadsheet</h1>
+          <p className="page-description">Edit existing expenses and add new records in batches.</p>
         </div>
-        <span className="sheet-count">{expenses.length} records</span>
+        <div className="heading-actions sheet-heading-actions">
+          <span className="sheet-count">{expenses.length} records</span>
+          <Button aria-busy={busy} type="button" disabled={busy || !changedCount} onClick={saveChanges}>
+            {busy ? <Spinner /> : <Save className="size-4" aria-hidden="true" />}
+            {busy ? 'Saving...' : `Save changes${changedCount ? ` (${changedCount})` : ''}`}
+          </Button>
+        </div>
       </div>
 
-      <div className="sheet-toolbar">
-        <span className={`sheet-state${changedCount ? ' is-dirty' : ''}`}>{changedCount ? `${changedCount} unsaved change${changedCount === 1 ? '' : 's'}` : message || 'All changes saved'}</span>
-        <Button aria-busy={busy} type="button" disabled={busy || !changedCount} onClick={saveChanges}>{busy ? <Spinner /> : <Save className="size-4" aria-hidden="true" />}{busy ? 'Saving...' : `Save changes${changedCount ? ` (${changedCount})` : ''}`}</Button>
+      <div className={`sheet-state${changedCount ? ' is-dirty' : ''}`} role="status" aria-live="polite">
+        {changedCount ? <CircleDot className="size-4" aria-hidden="true" /> : <Check className="size-4" aria-hidden="true" />}
+        <span>{changedCount ? `${changedCount} unsaved change${changedCount === 1 ? '' : 's'}` : message || 'All changes saved'}</span>
       </div>
       {error && <Notice className="sheet-notice" title="Could not save batch">{error}</Notice>}
 
       <section className="sheet-section">
-        <div className="section-heading"><h2>Edit expenses</h2><span className="section-note">Changes are saved together.</span></div>
+        <div className="section-heading sheet-section-heading">
+          <div>
+            <h2>Existing expenses</h2>
+            <p className="section-note">Edit rows, then save your changes together.</p>
+          </div>
+          <span className="section-note">{visibleExpenses.length} shown · {expenses.length} total</span>
+        </div>
         {expenses.length ? (
           <SpreadsheetTable includeId variant="existing">
             {visibleExpenses.map((expense) => (
@@ -291,8 +308,11 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
       </section>
 
       <section className="sheet-section">
-        <div className="section-heading">
-          <h2>Add expenses</h2>
+        <div className="section-heading sheet-section-heading">
+          <div>
+            <h2>Add expenses</h2>
+            <p className="section-note">Enter rows below and add them together.</p>
+          </div>
           <Button variant="outline" type="button" disabled={busy} onClick={() => setDrafts((current) => [...current, ...Array.from({ length: 5 }, blankExpense)])}><Plus className="size-4" aria-hidden="true" />Add 5 rows</Button>
         </div>
         <SpreadsheetTable variant="draft">
@@ -302,7 +322,7 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
               expense={expense}
               vendors={vendors}
               label={`New expense row ${index + 1}`}
-              rowClassName={Object.values(expense).some(Boolean) ? 'is-filled' : ''}
+              rowClassName={hasDraftInput(expense) ? 'is-filled' : ''}
               onChange={(field, value) => updateDraft(index, field, value)}
             />
           ))}
