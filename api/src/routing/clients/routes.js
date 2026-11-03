@@ -36,8 +36,9 @@ export default function clientsRouter(store) {
   router.post('/clients/:id/access-token', async (req, res) => {
     const id = parseId(req.params.id);
     if (!id) return res.status(400).json({ error: 'Client id must be a positive integer' });
-    if (!await store.getClient(id)) return res.status(404).json({ error: 'Client not found' });
-    return res.json({ access_token: await store.ensureClientAccessToken(id) });
+    const accessToken = await store.ensureClientAccessToken(id);
+    if (!accessToken) return res.status(404).json({ error: 'Client not found' });
+    return res.json({ access_token: accessToken });
   });
 
   router.get('/clients/:id/invoices', async (req, res) => {

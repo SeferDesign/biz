@@ -271,8 +271,10 @@ test('API authentication protects resources while preserving public and access-t
   assert.equal(adminInvoice.access_token, 'invoice-link-token');
   const created = await supertest(app).post('/v1/invoices/2/access-token').set('Authorization', `Bearer ${TEST_API_ACCESS_TOKEN}`);
   assert.equal(created.body.access_token, 'invoice-token-2');
+  assert.equal((await supertest(app).post('/v1/invoices/999/access-token').set('Authorization', `Bearer ${TEST_API_ACCESS_TOKEN}`)).status, 404);
   const clientLink = await supertest(app).post('/v1/clients/1/access-token').set('Authorization', `Bearer ${TEST_API_ACCESS_TOKEN}`);
   assert.equal(clientLink.body.access_token, 'client-link-token');
+  assert.equal((await supertest(app).post('/v1/clients/999/access-token').set('Authorization', `Bearer ${TEST_API_ACCESS_TOKEN}`)).status, 404);
   const publicInvoices = await supertest(app).get('/v1/clients/1/invoices?access_token=client-link-token');
   assert.deepEqual(publicInvoices.body.map((invoice) => invoice.id), [3]);
   assert.equal(publicInvoices.body[0].access_token, undefined);
@@ -1145,23 +1147,38 @@ test('clients, vendors, years, and expenses support validated CRUD', async () =>
 });
 
 test('expenses support transactional bulk creation and updates', async () => {
-  const app = createTestApp();
+  const store = createMemoryStore();
+  const getVendor = store.getVendor.bind(store);
+  let activeVendorLookups = 0;
+  let maximumVendorLookups = 0;
+  store.getVendor = async (id) => {
+    activeVendorLookups += 1;
+    maximumVendorLookups = Math.max(maximumVendorLookups, activeVendorLookups);
+    try {
+      return await getVendor(id);
+    } finally {
+      activeVendorLookups -= 1;
+    }
+  };
+  const app = createTestApp({ store });
   const before = await request(app).get('/v1/expenses?all=true');
   const created = await request(app).post('/v1/expenses/bulk').send({ expenses: [
     { name: 'Annual hosting', vendor_id: 1, date: '2025-06-01', cost: 120, account: 'Business' },
-    { name: 'Domain renewal', vendor_id: 2, date: '2025-06-02', cost: 18, account: 'Business' }
+    { name: 'Domain renewal', vendor_id: 2, date: '2025-06-02', cost: 18, account: 'Business' },
+    { name: 'Hosting add-on', vendor_id: '1', date: '2025-06-03', cost: 12, account: 'Business' }
   ] });
 
   assert.equal(created.status, 201);
-  assert.equal(created.body.expenses.length, 2);
-  assert.equal((await request(app).get('/v1/expenses?all=true')).body.length, before.body.length + 2);
+  assert.equal(created.body.expenses.length, 3);
+  assert.equal(maximumVendorLookups, 2);
+  assert.equal((await request(app).get('/v1/expenses?all=true')).body.length, before.body.length + 3);
 
   const updated = await request(app).patch('/v1/expenses/bulk').send({ expenses: created.body.expenses.map((expense) => ({
     ...expense,
     cost: Number(expense.cost) + 1
   })) });
   assert.equal(updated.status, 200);
-  assert.deepEqual(updated.body.expenses.map((expense) => expense.cost), [121, 19]);
+  assert.deepEqual(updated.body.expenses.map((expense) => expense.cost), [121, 19, 13]);
 
   const missingRow = await request(app).patch('/v1/expenses/bulk').send({ expenses: [
     { ...updated.body.expenses[0], cost: 999 },

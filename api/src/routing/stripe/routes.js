@@ -91,8 +91,10 @@ export default function stripeRouter(store, { stripe, appUrl, notify }) {
         if (previous?.status === 'open') await stripe.checkout.sessions.expire(previous.id);
       }
 
-      const accessToken = invoice.access_token || await store.ensureInvoiceAccessToken(invoice.id);
-      const client = invoice.client_id ? await store.getClient(invoice.client_id) : null;
+      const [accessToken, client] = await Promise.all([
+        invoice.access_token || store.ensureInvoiceAccessToken(invoice.id),
+        invoice.client_id ? store.getClient(invoice.client_id) : null
+      ]);
       const customer = await ensureStripeCustomer(stripe, store, client);
       const breakdown = paymentBreakdown(invoice, method);
       const currency = (invoice.currency || 'USD').toLowerCase();

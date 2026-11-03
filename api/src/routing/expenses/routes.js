@@ -7,6 +7,15 @@ function isExpenseAccount(value) {
   return value === undefined || value === null || value === '' || expenseAccountTypes.has(value);
 }
 
+async function hasMissingVendor(store, expenses) {
+  const vendorIds = [...new Set(expenses
+    .map((expense) => expense.vendor_id)
+    .filter(Boolean)
+    .map(Number))];
+  const vendors = await Promise.all(vendorIds.map((vendorId) => store.getVendor(vendorId)));
+  return vendors.some((vendor) => !vendor);
+}
+
 export default function expensesRouter(store) {
   const router = Router();
 
@@ -40,8 +49,8 @@ export default function expensesRouter(store) {
       if (vendorId !== undefined && vendorId !== null && !parseId(vendorId)) {
         return res.status(400).json({ error: 'Vendor id must be a positive integer' });
       }
-      if (vendorId && !await store.getVendor(Number(vendorId))) return res.status(400).json({ error: 'Vendor not found' });
     }
+    if (await hasMissingVendor(store, expenses)) return res.status(400).json({ error: 'Vendor not found' });
     const created = await store.createExpenses(expenses.map((expense) => ({ ...expense, cost: Number(expense.cost), vendor_id: expense.vendor_id ? Number(expense.vendor_id) : null })));
     return res.status(201).json({ expenses: created });
   });
@@ -64,8 +73,8 @@ export default function expensesRouter(store) {
       if (vendorId !== undefined && vendorId !== null && !parseId(vendorId)) {
         return res.status(400).json({ error: 'Vendor id must be a positive integer' });
       }
-      if (vendorId && !await store.getVendor(Number(vendorId))) return res.status(400).json({ error: 'Vendor not found' });
     }
+    if (await hasMissingVendor(store, expenses)) return res.status(400).json({ error: 'Vendor not found' });
     const updated = await store.updateExpenses(expenses.map((expense) => ({ ...expense, id: Number(expense.id), cost: Number(expense.cost), vendor_id: expense.vendor_id ? Number(expense.vendor_id) : null })));
     if (!updated) return res.status(404).json({ error: 'One or more expenses were not found; no changes were saved' });
     return res.json({ expenses: updated });

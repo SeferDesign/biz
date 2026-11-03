@@ -92,14 +92,16 @@ export function createAuthRouter(store, {
   async function establishSession(req, res, user) {
     const token = createSessionToken();
     const tokenHash = hashSessionToken(token);
-    const sessionId = await store.createUserSession(
-      user.id,
-      tokenHash,
-      SESSION_TTL_SECONDS,
-      req.get('user-agent') || ''
-    );
+    const [sessionId] = await Promise.all([
+      store.createUserSession(
+        user.id,
+        tokenHash,
+        SESSION_TTL_SECONDS,
+        req.get('user-agent') || ''
+      ),
+      store.recordUserSignIn(user.id, req.ip)
+    ]);
     res.cookie('biz_session', token, cookieOptions(req, SESSION_TTL_SECONDS, sessionCookieDomain));
-    await store.recordUserSignIn(user.id, req.ip);
     return res.json({
       access_token: token,
       session_id: sessionId,
@@ -124,9 +126,11 @@ export function createAuthRouter(store, {
   }
 
   async function securitySettings(userId) {
-    const settings = await store.getUserOtpSettings(userId);
+    const [settings, passkeys] = await Promise.all([
+      store.getUserOtpSettings(userId),
+      store.getPasskeysByUser(userId)
+    ]);
     if (!settings) return null;
-    const passkeys = await store.getPasskeysByUser(userId);
     return {
       otp_enabled: isOtpEnabled(settings),
       otp_configured: Boolean(settings.encrypted_otp_secret),
@@ -192,8 +196,10 @@ export function createAuthRouter(store, {
     if (!rp || typeof challengeId !== 'string' || typeof response?.id !== 'string') {
       return res.status(401).json(invalidCredentials);
     }
-    const challenge = await store.consumePasskeyChallenge(challengeId, 'authentication');
-    const credential = await store.getPasskeyByCredentialId(response.id);
+    const [challenge, credential] = await Promise.all([
+      store.consumePasskeyChallenge(challengeId, 'authentication'),
+      store.getPasskeyByCredentialId(response.id)
+    ]);
     if (!challenge || !credential) return res.status(401).json(invalidCredentials);
     let verification;
     try {
@@ -214,8 +220,10 @@ export function createAuthRouter(store, {
       return res.status(401).json(invalidCredentials);
     }
     if (!verification.verified) return res.status(401).json(invalidCredentials);
-    await store.updatePasskeyCounter(response.id, verification.authenticationInfo.newCounter);
-    const user = await store.getUserProfile(credential.user_id);
+    const [, user] = await Promise.all([
+      store.updatePasskeyCounter(response.id, verification.authenticationInfo.newCounter),
+      store.getUserProfile(credential.user_id)
+    ]);
     if (!user) return res.status(401).json(invalidCredentials);
     return establishSession(req, res, user);
   });

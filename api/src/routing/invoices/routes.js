@@ -47,11 +47,11 @@ export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoic
     const input = normalizeInvoiceInput(req.body);
     const error = validateInvoiceInput(input);
     if (error) return res.status(400).json({ error });
-    if (!await store.getClient(Number(input.client_id))) return res.status(400).json({ error: 'Client not found' });
+    const client = await store.getClient(Number(input.client_id));
+    if (!client) return res.status(400).json({ error: 'Client not found' });
     const invoiceInput = { ...input, client_id: Number(input.client_id), cost: Number(input.cost) };
     if (invoiceInput.status) invoiceInput.paid = invoiceInput.status === 'paid';
     const invoice = await store.createInvoice(invoiceInput);
-    const client = await store.getClient(invoice.client_id);
     return res.status(201).json(withInvoiceDisplayIds(invoice, client?.name));
   });
 
@@ -71,8 +71,9 @@ export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoic
   router.post('/invoices/:id/access-token', async (req, res) => {
     const id = parseId(req.params.id);
     if (!id) return res.status(400).json({ error: 'Invoice id must be a positive integer' });
-    if (!await store.getInvoice(id)) return res.status(404).json({ error: 'Invoice not found' });
-    return res.json({ access_token: await store.ensureInvoiceAccessToken(id) });
+    const accessToken = await store.ensureInvoiceAccessToken(id);
+    if (!accessToken) return res.status(404).json({ error: 'Invoice not found' });
+    return res.json({ access_token: accessToken });
   });
 
   router.patch('/invoices/:id', async (req, res) => {
@@ -145,8 +146,12 @@ export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoic
     const client = snapshot.clients.find((item) => item.id === invoice.client_id);
     if (!client) return res.status(400).json({ error: 'Invoice client not found' });
     const lines = snapshot.lines.filter((line) => line.invoice_id === invoice.id);
-    if (!invoice.access_token) invoice.access_token = await store.ensureInvoiceAccessToken(invoice.id);
-    if (!client.access_token) client.access_token = await store.ensureClientAccessToken(client.id);
+    const [invoiceAccessToken, clientAccessToken] = await Promise.all([
+      invoice.access_token || store.ensureInvoiceAccessToken(invoice.id),
+      client.access_token || store.ensureClientAccessToken(client.id)
+    ]);
+    if (!invoice.access_token) invoice.access_token = invoiceAccessToken;
+    if (!client.access_token) client.access_token = clientAccessToken;
     try {
       const result = await sendInvoiceEmail({ invoice, client, lines });
       const recipient = result?.recipient || client.email || client.email_accounting;
