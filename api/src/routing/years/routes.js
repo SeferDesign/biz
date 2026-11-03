@@ -4,6 +4,7 @@ import { findYear, invoiceAmount, invoiceDate, sum, yearExpenses, yearIncome } f
 import { isFiniteNumber, parseId } from '../shared/validation.js';
 import { withInvoiceDisplayIds } from '@seferbiz/company';
 import { historyFields, writeHistory } from '../shared/history.js';
+import { businessDate } from '../../date.js';
 
 function validateYearInput(input, { partial = false } = {}) {
   if (!partial || input.year !== undefined) {
@@ -97,7 +98,7 @@ export default function yearsRouter(store) {
     const year = findYear(req.params.id, snapshot.years);
     if (!year) return res.status(404).json({ error: 'Year not found' });
     const vendors = new Map(snapshot.vendors.map((vendor) => [vendor.id, vendor]));
-    const today = new Date().toISOString().slice(0, 10);
+    const today = businessDate();
     const rows = yearExpenses(year.year, snapshot.expenses)
       .filter((expense) => expense.date <= today)
       .sort((left, right) => left.date.localeCompare(right.date) || left.id - right.id)

@@ -14,6 +14,7 @@ import { createApp } from '../src/routing/app.js';
 import { toCsv } from '../src/routing/shared/csv.js';
 import { sendInvoiceEmail } from '../src/email/invoice-mailer.js';
 import { sendPaymentNotification } from '../src/email/payment-notification-mailer.js';
+import { businessDate } from '../src/date.js';
 import { createMemoryStore } from '../test-support/memory-store.js';
 
 const TEST_API_ACCESS_TOKEN = 'test-api-token';
@@ -902,6 +903,35 @@ test('recurring expense catch-up activates overdue plans once and creates the ne
   assert.deepEqual(expenses.map(({ date, is_planned }) => [date, is_planned]), [
     ['2025-01-31', false], ['2025-02-28', false], ['2025-03-31', true]
   ]);
+});
+
+test('a next-business-day occurrence stays upcoming until the business date changes', async () => {
+  const previousTimezone = process.env.TZ;
+  process.env.TZ = 'America/Chicago';
+  try {
+    const today = businessDate();
+    const tomorrowDate = new Date(`${today}T00:00:00Z`);
+    tomorrowDate.setUTCDate(tomorrowDate.getUTCDate() + 1);
+    const tomorrow = tomorrowDate.toISOString().slice(0, 10);
+    const store = createMemoryStore();
+    const { rule, expense } = await store.createRecurringExpenseRule({
+      name: 'Tomorrow service', vendor_id: 1, start_date: tomorrow, cost: 50,
+      account: 'Business', interval_unit: 'month', interval_count: 1
+    });
+
+    const upcoming = await store.listExpenses({ pageSize: 20, offset: 0, filter: 'future' });
+    const past = await store.listExpenses({ pageSize: 20, offset: 0, filter: 'inactive' });
+    assert.ok(upcoming.items.some((item) => item.id === expense.id));
+    assert.equal(past.items.some((item) => item.id === expense.id), false);
+    assert.equal(await store.processDueRecurringExpenses(today), 0);
+    assert.equal((await store.getExpense(expense.id)).is_planned, true);
+    assert.equal(await store.processDueRecurringExpenses(tomorrow), 1);
+    assert.equal((await store.getExpense(expense.id)).is_planned, false);
+    assert.ok((await store.getRecurringExpenseRule(rule.id)).next_date > tomorrow);
+  } finally {
+    if (previousTimezone === undefined) delete process.env.TZ;
+    else process.env.TZ = previousTimezone;
+  }
 });
 
 test('deleting a planned occurrence skips it while leaving the recurring rule active', async () => {

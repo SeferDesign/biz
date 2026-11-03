@@ -1,4 +1,5 @@
 import { recurringDate } from '../src/recurring/schedule.js';
+import { businessDate } from '../src/date.js';
 
 const initialSnapshot = {
   invoices: [
@@ -304,9 +305,7 @@ export function createMemoryStore() {
       return { items: filtered.slice(offset, offset + pageSize), total: filtered.length };
     },
     async getDashboardSummary() {
-      const now = new Date();
-      const year = now.getUTCFullYear();
-      const month = now.getUTCMonth() + 1;
+      const [year, month] = businessDate().split('-').map(Number);
       const monthKey = `${year}-${String(month).padStart(2, '0')}`;
       const trailingStart = new Date(Date.UTC(year, month - 5, 1));
       const dataStart = new Date(Date.UTC(year, 0, 1));
@@ -390,12 +389,12 @@ export function createMemoryStore() {
       return { items: invoices.slice(offset, offset + pageSize), total: invoices.length };
     },
     async listExpenses({ pageSize, offset, filter }) {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = businessDate();
       const filtered = snapshot.expenses.filter((expense) => {
         if (filter === 'all') return true;
         if (filter === 'future') return expense.date > today;
         if (filter === 'inactive') return expense.date <= today && !expense.is_planned;
-        const cutoff = new Date();
+        const cutoff = new Date(`${today}T00:00:00Z`);
         cutoff.setUTCFullYear(cutoff.getUTCFullYear() - 1);
         return !expense.is_planned && expense.date >= cutoff.toISOString().slice(0, 10) && expense.date <= today;
       });
@@ -414,7 +413,7 @@ export function createMemoryStore() {
       const vendors = snapshot.vendors.map((vendor) => {
         const expenses = snapshot.expenses.filter((expense) =>
           Number(expense.vendor_id) === Number(vendor.id) && !expense.is_planned &&
-          expense.date <= new Date().toISOString().slice(0, 10));
+          expense.date <= businessDate());
         return {
           ...vendor,
           expense_count: expenses.length,
@@ -570,7 +569,7 @@ export function createMemoryStore() {
       if (!rule.active && updates.active === true && rule.next_date) {
         let resumeIndex = Number(rule.next_index);
         let resumeDate = rule.next_date;
-        const today = new Date().toISOString().slice(0, 10);
+        const today = businessDate();
         while (resumeDate <= today && resumeIndex < 10000) {
           resumeIndex += 1;
           resumeDate = recurringDate(rule.start_date, rule.interval_unit, Number(rule.interval_count), resumeIndex);
@@ -610,7 +609,7 @@ export function createMemoryStore() {
       }
       return rule;
     },
-    async processDueRecurringExpenses(today = new Date().toISOString().slice(0, 10)) {
+    async processDueRecurringExpenses(today = businessDate()) {
       const activatedIds = new Set();
       for (const rule of recurringExpenseRules) {
         if (!rule.active || !rule.next_date || rule.next_date > today) continue;

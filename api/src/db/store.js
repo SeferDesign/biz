@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { getPool } from './pool.js';
 import { recurringDate } from '../recurring/schedule.js';
+import { businessDate } from '../date.js';
 
 const createAccessToken = () => randomBytes(24).toString('base64url');
 
@@ -476,7 +477,7 @@ export class MySqlStore {
   }
 
   async listExpenses({ pageSize, offset, filter }) {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = businessDate();
     let where = '';
     let values = [];
     if (filter === 'future') {
@@ -486,7 +487,7 @@ export class MySqlStore {
       where = 'WHERE expenses.date <= ? AND expenses.is_planned = FALSE';
       values = [today];
     } else if (filter !== 'all') {
-      const cutoff = new Date();
+      const cutoff = new Date(`${today}T00:00:00Z`);
       cutoff.setUTCFullYear(cutoff.getUTCFullYear() - 1);
       where = 'WHERE expenses.date >= ? AND expenses.date <= ? AND expenses.is_planned = FALSE';
       values = [cutoff.toISOString().slice(0, 10), today];
@@ -502,23 +503,22 @@ export class MySqlStore {
   }
 
   async listVendors({ pageSize, offset }) {
+    const today = businessDate();
     const [[countRows], [rows]] = await Promise.all([
       this.database.query('SELECT COUNT(*) AS total FROM vendors'),
       this.database.execute(`SELECT vendors.*, COUNT(expenses.id) AS expense_count,
         COALESCE(SUM(expenses.cost), 0) AS expense_total
         FROM vendors LEFT JOIN expenses ON expenses.vendor_id = vendors.id
-          AND expenses.date <= UTC_DATE() AND expenses.is_planned = FALSE
+          AND expenses.date <= ? AND expenses.is_planned = FALSE
         GROUP BY vendors.id
         ORDER BY LOWER(REGEXP_REPLACE(vendors.name, '^(the|a|an)[[:space:]]+', '')), vendors.id
-        LIMIT ? OFFSET ?`, [pageSize, offset])
+        LIMIT ? OFFSET ?`, [today, pageSize, offset])
     ]);
     return { items: rows, total: Number(countRows[0].total) };
   }
 
   async getDashboardSummary() {
-    const now = new Date();
-    const year = now.getUTCFullYear();
-    const month = now.getUTCMonth() + 1;
+    const [year, month] = businessDate().split('-').map(Number);
     const monthKey = `${year}-${String(month).padStart(2, '0')}`;
     const trailingStart = new Date(Date.UTC(year, month - 5, 1));
     const yearStart = new Date(Date.UTC(year, 0, 1));
@@ -943,7 +943,7 @@ export class MySqlStore {
     return this.getRecurringExpenseRule(id);
   }
 
-  async processDueRecurringExpenses(today = new Date().toISOString().slice(0, 10)) {
+  async processDueRecurringExpenses(today = businessDate()) {
     const connection = await this.database.getConnection();
     let transactionStarted = false;
     let activated = 0;

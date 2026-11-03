@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { hasText, isDate, isFiniteNumber, parseId, parsePagination } from '../shared/validation.js';
 import { historyFields, writeHistory } from '../shared/history.js';
+import { businessDate } from '../../date.js';
 
 const expenseAccountTypes = new Set(['Business', 'Personal']);
 
@@ -38,11 +39,11 @@ export default function expensesRouter(store) {
     if (req.query.all === 'true') {
       return res.json(expenses.sort((left, right) => left.date.localeCompare(right.date) || left.name.localeCompare(right.name)));
     }
-    const now = new Date().toISOString().slice(0, 10);
+    const now = businessDate();
     const filtered = expenses.filter((expense) => {
       if (req.query.future === 'true') return expense.date > now;
       if (req.query.inactive === 'true') return expense.date <= now && !expense.is_planned;
-      const cutoff = new Date();
+      const cutoff = new Date(`${now}T00:00:00Z`);
       cutoff.setUTCFullYear(cutoff.getUTCFullYear() - 1);
       return !expense.is_planned && expense.date >= cutoff.toISOString().slice(0, 10) && expense.date <= now;
     });
