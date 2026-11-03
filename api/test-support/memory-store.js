@@ -302,7 +302,22 @@ export function createMemoryStore() {
         (!entityType || record.entity_type === entityType) &&
         (!entityId || record.entity_id === Number(entityId))
       ).toSorted((left, right) => String(right.created_at).localeCompare(String(left.created_at)) || right.id - left.id);
-      return { items: filtered.slice(offset, offset + pageSize), total: filtered.length };
+      const items = filtered.slice(offset, offset + pageSize).map((record) => {
+        const collection = { client: 'clients', expense: 'expenses', vendor: 'vendors', invoice: 'invoices' }[record.entity_type];
+        const entity = snapshot[collection]?.find((item) => item.id === record.entity_id);
+        const actor = users.find((user) => user.id === record.actor_user_id);
+        return {
+          ...record,
+          actor_first_name: actor?.first_name ?? null,
+          actor_last_name: actor?.last_name ?? null,
+          entity_name: entity?.name ?? null,
+          client_name: record.entity_type === 'invoice'
+            ? snapshot.clients.find((client) => client.id === entity?.client_id)?.name ?? null : null,
+          vendor_name: record.entity_type === 'expense'
+            ? snapshot.vendors.find((vendor) => vendor.id === entity?.vendor_id)?.name ?? null : null
+        };
+      });
+      return { items, total: filtered.length };
     },
     async getDashboardSummary() {
       const [year, month] = businessDate().split('-').map(Number);

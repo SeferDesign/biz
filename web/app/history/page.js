@@ -1,30 +1,35 @@
 import Link from 'next/link';
+import { ChevronRight } from 'lucide-react';
 import { ResourcePage } from '../../components/ResourcePage.js';
 import HistoryFilter from '../../components/HistoryFilter.js';
 import { formatDateTime, parsePage } from '../../lib/api.js';
 import { getApiData } from '../../lib/api-server.js';
+import { formatHistoryValue, historyActorLabel, historyChangeSides, historyRecordLabel } from '../../lib/history-diff.js';
 
 export const metadata = { title: 'Change History' };
 
-const entityTypes = ['client', 'invoice', 'expense', 'vendor', 'year'];
+const entityTypes = ['client', 'invoice', 'expense', 'recurring_expense', 'vendor', 'year'];
 
-function displayValue(value) {
-  if (value === null || value === undefined || value === '') return '—';
-  if (Array.isArray(value)) {
-    return value.map((item) => typeof item === 'object' && item !== null
-      ? `${item.description || 'Line item'} (${displayValue(item.total)})`
-      : String(item)).join(', ') || 'None';
-  }
-  if (typeof value === 'object') return JSON.stringify(value);
-  if (typeof value === 'boolean') return value ? 'Yes' : 'No';
-  return String(value);
-}
+function describeChanges(changes, action) {
+  const entries = Object.entries(changes || {});
+  if (!entries.length) return <span className="text-muted-foreground">No field changes</span>;
 
-function describeChanges(changes) {
-  return Object.entries(changes || {}).map(([field, change]) => {
-    const label = field.replaceAll('_', ' ');
-    return `${label}: ${displayValue(change.from)} → ${displayValue(change.to)}`;
-  }).join('; ');
+  return (
+    <dl className="history-diff">
+      {entries.map(([field, change]) => (
+        <div className="history-diff-field" key={field}>
+          <dt className="history-diff-label">{field.replaceAll('_', ' ')}</dt>
+          {historyChangeSides(action).map((side) => (
+            <dd className={`history-diff-value history-diff-${side}`} key={side}>
+              <span className="sr-only">{side === 'from' ? 'Previous value: ' : 'New value: '}</span>
+              <span className="history-diff-marker" aria-hidden="true">{side === 'from' ? '-' : '+'}</span>
+              <span>{formatHistoryValue(change[side])}</span>
+            </dd>
+          ))}
+        </div>
+      ))}
+    </dl>
+  );
 }
 
 function entityHref(record) {
@@ -32,6 +37,7 @@ function entityHref(record) {
     client: '/clients',
     invoice: '/invoices',
     expense: '/expenses',
+    recurring_expense: '/expenses/recurring',
     vendor: '/vendors',
     year: '/years'
   };
@@ -63,17 +69,45 @@ export default async function HistoryPage({ searchParams }) {
         countLabel="changes"
         pageHref={entityType ? `/history?entity_type=${encodeURIComponent(entityType)}` : '/history'}
         page={page}
-        columns={[
-          { key: 'created_at', label: 'When', className: 'date-cell', render: (record) => formatDateTime(record.created_at) },
-          { key: 'entity', label: 'Record', render: (record) => {
-            const href = entityHref(record);
-            const label = `${record.entity_type.replaceAll('_', ' ')} #${record.entity_id}`;
-            return href ? <Link className="table-link" href={href}>{label}</Link> : label;
-          } },
-          { key: 'action', label: 'Action', render: (record) => record.action.replaceAll('_', ' ') },
-          { key: 'actor', label: 'By', render: (record) => record.actor_email || record.source.replaceAll('_', ' ') },
-          { key: 'changes', label: 'Changes', render: (record) => describeChanges(record.changes) }
-        ]}
+        renderRecords={(records) => (
+          <ol className="history-feed" aria-label="Record activity">
+            {records.map((record, index) => {
+              const href = entityHref(record);
+              const label = historyRecordLabel(record);
+              const fieldCount = Object.keys(record.changes || {}).length;
+              return (
+                <li className="history-event" key={record.id}>
+                  <article>
+                    <header className="history-event-header">
+                      <div className="min-w-0 space-y-1">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                          <span className="capitalize text-muted-foreground">{record.entity_type.replaceAll('_', ' ')}</span>
+                          <span className="font-medium capitalize">{record.action.replaceAll('_', ' ')}</span>
+                        </div>
+                        <h2 className="history-event-title">
+                          {href ? <Link className="hover:underline underline-offset-4" href={href}>{label}</Link> : label}
+                        </h2>
+                      </div>
+                      <div className="history-event-meta">
+                        <time>{formatDateTime(record.created_at)}</time>
+                        <span>By {historyActorLabel(record)}</span>
+                      </div>
+                    </header>
+                    <details className="history-event-details" open={index === 0}>
+                      <summary>
+                        <ChevronRight className="history-event-chevron" size={14} aria-hidden="true" />
+                        <span className="history-show-changes">Show changes</span>
+                        <span className="history-hide-changes">Hide changes</span>
+                        <span className="text-muted-foreground">{fieldCount} {fieldCount === 1 ? 'field' : 'fields'}</span>
+                      </summary>
+                      {describeChanges(record.changes, record.action)}
+                    </details>
+                  </article>
+                </li>
+              );
+            })}
+          </ol>
+        )}
       />
     </>
   );

@@ -630,19 +630,29 @@ export class MySqlStore {
     const filters = [];
     const values = [];
     if (entityType) {
-      filters.push('entity_type = ?');
+      filters.push('h.entity_type = ?');
       values.push(entityType);
     }
     if (entityId) {
-      filters.push('entity_id = ?');
+      filters.push('h.entity_id = ?');
       values.push(entityId);
     }
     const where = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
     const [[countRows], [items]] = await Promise.all([
-      this.database.execute(`SELECT COUNT(*) AS total FROM change_history ${where}`, values),
-      this.database.execute(`SELECT id, entity_type, entity_id, action, actor_user_id, actor_email,
-          source, changes, created_at
-        FROM change_history ${where} ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?`, [...values, pageSize, offset])
+      this.database.execute(`SELECT COUNT(*) AS total FROM change_history h ${where}`, values),
+      this.database.execute(`SELECT h.id, h.entity_type, h.entity_id, h.action, h.actor_user_id, h.actor_email,
+          h.source, h.changes, h.created_at, COALESCE(c.name, e.name, v.name) AS entity_name,
+          ic.name AS client_name, ev.name AS vendor_name,
+          u.first_name AS actor_first_name, u.last_name AS actor_last_name
+        FROM change_history h
+        LEFT JOIN users u ON u.id = h.actor_user_id
+        LEFT JOIN clients c ON h.entity_type = 'client' AND c.id = h.entity_id
+        LEFT JOIN expenses e ON h.entity_type = 'expense' AND e.id = h.entity_id
+        LEFT JOIN vendors ev ON ev.id = e.vendor_id
+        LEFT JOIN vendors v ON h.entity_type = 'vendor' AND v.id = h.entity_id
+        LEFT JOIN invoices i ON h.entity_type = 'invoice' AND i.id = h.entity_id
+        LEFT JOIN clients ic ON ic.id = i.client_id
+        ${where} ORDER BY h.created_at DESC, h.id DESC LIMIT ? OFFSET ?`, [...values, pageSize, offset])
     ]);
     return { items, total: Number(countRows[0].total) };
   }

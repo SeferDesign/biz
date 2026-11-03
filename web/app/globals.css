@@ -317,6 +317,84 @@
     @apply font-mono;
   }
 
+  .history-feed {
+    @apply min-w-0 border-t border-border;
+  }
+
+  .history-event {
+    @apply min-w-0 border-b border-border py-5;
+  }
+
+  .history-event-header {
+    @apply flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-6;
+  }
+
+  .history-event-title {
+    @apply text-sm font-semibold;
+    overflow-wrap: anywhere;
+  }
+
+  .history-event-meta {
+    @apply flex min-w-0 flex-col gap-1 text-xs text-muted-foreground sm:shrink-0 sm:text-right;
+    overflow-wrap: anywhere;
+  }
+
+  .history-event-details {
+    @apply mt-3 min-w-0;
+  }
+
+  .history-event-details summary {
+    @apply flex w-fit cursor-pointer list-none flex-wrap items-center gap-2 rounded-sm text-xs font-medium focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-4;
+  }
+
+  .history-event-details summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .history-event-chevron {
+    @apply shrink-0;
+  }
+
+  .history-event-details[open] .history-event-chevron {
+    transform: rotate(90deg);
+  }
+
+  .history-hide-changes,
+  .history-event-details[open] .history-show-changes {
+    display: none;
+  }
+
+  .history-event-details[open] .history-hide-changes {
+    display: inline;
+  }
+
+  .history-diff {
+    @apply mt-4 min-w-0 space-y-3;
+  }
+
+  .history-diff-label {
+    @apply mb-1 text-xs font-medium text-muted-foreground;
+  }
+
+  .history-diff-value {
+    @apply grid gap-2 px-2 py-1 font-mono text-xs leading-5;
+    grid-template-columns: 1ch minmax(0, 1fr);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .history-diff-marker {
+    @apply select-none font-semibold;
+  }
+
+  .history-diff-from {
+    @apply bg-danger-soft text-danger;
+  }
+
+  .history-diff-to {
+    @apply bg-success-soft text-success;
+  }
+
   .detail-section {
     @apply mt-8 space-y-4;
   }

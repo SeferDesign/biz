@@ -1017,7 +1017,7 @@ test('client history records actor, redacted changes, updates, and deletion', as
 
 test('history attributes changes to the signed-in user', async () => {
   const store = createMemoryStore();
-  const user = { id: 21, email: 'history@example.com' };
+  const user = { id: 21, email: 'history@example.com', first_name: 'Alex', last_name: 'Smith' };
   const token = createSessionToken();
   store.users.push(user);
   await store.createUserSession(user.id, hashSessionToken(token), SESSION_TTL_SECONDS);
@@ -1031,7 +1031,10 @@ test('history attributes changes to the signed-in user', async () => {
   assert.equal(created.status, 201);
   assert.equal(history.body.items[0].actor_user_id, user.id);
   assert.equal(history.body.items[0].actor_email, user.email);
+  assert.equal(history.body.items[0].actor_first_name, user.first_name);
+  assert.equal(history.body.items[0].actor_last_name, user.last_name);
   assert.equal(history.body.items[0].source, 'user_session');
+  assert.equal(history.body.items[0].entity_name, 'Session Vendor');
 });
 
 test('invoice, expense, vendor, and year changes appear in the history feed', async () => {
@@ -1068,6 +1071,11 @@ test('invoice, expense, vendor, and year changes appear in the history feed', as
   assert.ok(history.body.items.some((item) => item.action === 'line_created'));
   assert.ok(history.body.items.some((item) => item.action === 'lines_replaced'));
   assert.ok(history.body.items.some((item) => item.entity_type === 'expense' && item.action === 'created'));
+  const expenseEntry = history.body.items.find((item) => item.entity_type === 'expense' && item.entity_id === expense.body.id);
+  assert.equal(expenseEntry.entity_name, 'History Expense');
+  assert.equal(expenseEntry.vendor_name, 'History Vendor');
+  const invoiceEntry = history.body.items.find((item) => item.entity_type === 'invoice');
+  assert.equal(invoiceEntry.client_name, 'Acme Inc.');
   assert.ok(history.body.items.some((item) => item.entity_type === 'year' && item.changes.goal_year.to.toString() === '36000'));
   assert.equal((await request(app).get(`/v1/history?entity_type=invoice&entity_id=${invoice.body.id}`)).body.total, 3);
 });

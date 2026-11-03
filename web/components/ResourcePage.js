@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card.js';
 import { Separator } from './ui/separator.js';
 import { getPaginationItems, Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './ui/pagination.js';
 
-export function ResourcePage({ title, description, data, error, columns, countLabel, count, total, hideHeading = false, actionHref, actionLabel, pageHref, page = 1, pageParam = 'page' }) {
+export function ResourcePage({ title, description, data, error, columns, renderRecords, countLabel, count, total, hideHeading = false, actionHref, actionLabel, pageHref, page = 1, pageParam = 'page' }) {
   const records = Array.isArray(data) ? data : [];
   const itemCount = count ?? records.length;
   const pageCount = Math.max(1, Math.ceil((total ?? records.length) / recordsPerPage));
@@ -48,7 +48,7 @@ export function ResourcePage({ title, description, data, error, columns, countLa
             <EmptyDescription>This list will fill in as records are added to the ledger.</EmptyDescription>
           </EmptyHeader>
         </Empty>
-      ) : (
+      ) : renderRecords ? renderRecords(visibleRecords) : (
         <div className="table-wrap">
           <Table className="data-table">
             <TableHeader>
