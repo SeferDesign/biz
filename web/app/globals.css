@@ -299,7 +299,8 @@
   }
 
   table a:not([data-slot="button"]):hover,
-  table a:not([data-slot="button"]):focus-visible {
+  table a:not([data-slot="button"]):focus-visible,
+  table tbody tr:hover a:not([data-slot="button"]) {
     @apply underline underline-offset-4;
   }
 
