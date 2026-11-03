@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ResourcePage } from '../../components/ResourcePage.js';
-import { formatMoney, formatTableDate, newestExpensesFirst, parsePage } from '../../lib/api.js';
+import { formatMoney, formatTableDate, parsePage } from '../../lib/api.js';
 import { getApiData } from '../../lib/api-server.js';
 import { Button } from '../../components/ui/button.js';
 import { ButtonGroup } from '../../components/ui/button-group.js';
@@ -10,12 +10,10 @@ export const metadata = { title: 'Expenses' };
 export default async function ExpensesPage({ searchParams }) {
   const params = await searchParams;
   const filter = ['inactive', 'future'].find((key) => params?.[key] === 'true');
-  const endpoint = filter ? `/expenses?${filter}=true` : '/expenses';
-  const [expenseResult, vendorResult] = await Promise.all([
-    getApiData(endpoint),
-    getApiData('/vendors')
-  ]);
-  const vendorsById = new Map((vendorResult.data || []).map((vendor) => [vendor.id, vendor]));
+  const page = parsePage(params?.page);
+  const query = new URLSearchParams({ page: String(page) });
+  if (filter) query.set(filter, 'true');
+  const expenseResult = await getApiData(`/expenses?${query}`);
 
   return (
     <>
@@ -29,19 +27,21 @@ export default async function ExpensesPage({ searchParams }) {
       </nav>
       <ResourcePage
         title="Expenses"
-        data={expenseResult.data?.toSorted(filter === 'future' ? (left, right) => newestExpensesFirst(right, left) : newestExpensesFirst)}
-        error={expenseResult.error || vendorResult.error}
+        data={expenseResult.data?.items}
+        total={expenseResult.data?.total}
+        error={expenseResult.error}
         countLabel="expenses"
         actionHref="/expenses/new"
         actionLabel="New expense"
         pageHref={filter ? `/expenses?${filter}=true` : '/expenses'}
-        page={parsePage(params?.page)}
+        page={page}
         columns={[
           { key: 'date', label: 'Date', className: 'date-cell', render: (expense) => <Link className="table-link" href={`/expenses/${expense.id}`}>{formatTableDate(expense.date)}</Link> },
           { key: 'name', label: 'Expense' },
           { key: 'vendor', label: 'Vendor', render: (expense) => {
-            const vendor = vendorsById.get(expense.vendor_id);
-            return vendor ? <Link className="table-link" href={`/vendors/${vendor.id}`}>{vendor.name}</Link> : '-';
+            return expense.vendor_name
+              ? <Link className="table-link" href={`/vendors/${expense.vendor_id}`}>{expense.vendor_name}</Link>
+              : '-';
           } },
           { key: 'account', label: 'Account' },
           { key: 'cost', label: 'Cost', className: 'numeric-cell', render: (expense) => formatMoney(expense.cost) }

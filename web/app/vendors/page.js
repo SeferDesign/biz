@@ -8,33 +8,25 @@ export const metadata = { title: 'Vendors' };
 
 export default async function VendorsPage({ searchParams }) {
   const params = await searchParams;
-  const [vendorResult, expenseResult] = await Promise.all([
-    getApiData('/vendors'),
-    getApiData('/expenses?inactive=true')
-  ]);
-  const totalsByVendor = new Map();
-  for (const expense of expenseResult.data || []) {
-    const totals = totalsByVendor.get(expense.vendor_id) || { count: 0, amount: 0 };
-    totals.count += 1;
-    totals.amount += Number(expense.cost || 0);
-    totalsByVendor.set(expense.vendor_id, totals);
-  }
+  const page = parsePage(params?.page);
+  const vendorResult = await getApiData(`/vendors?page=${page}`);
 
   return (
     <ResourcePage
       title="Vendors"
-      data={vendorResult.data}
-      error={vendorResult.error || expenseResult.error}
+      data={vendorResult.data?.items}
+      total={vendorResult.data?.total}
+      error={vendorResult.error}
       countLabel="vendors"
       actionHref="/vendors/new"
       actionLabel="New Vendor"
       pageHref="/vendors"
-      page={parsePage(params?.page)}
+      page={page}
       columns={[
         { key: 'name', label: 'Name', render: (vendor) => <Link className="table-link" href={`/vendors/${vendor.id}`}>{vendor.name}</Link> },
         { key: 'category', label: 'Category' },
-        { key: 'expenses', label: 'Expense records', className: 'numeric-cell', render: (vendor) => totalsByVendor.get(vendor.id)?.count || 0 },
-        { key: 'amount', label: 'Recorded spend', className: 'numeric-cell', render: (vendor) => formatMoney(totalsByVendor.get(vendor.id)?.amount || 0) },
+        { key: 'expenses', label: 'Expense records', className: 'numeric-cell', render: (vendor) => vendor.expense_count || 0 },
+        { key: 'amount', label: 'Recorded spend', className: 'numeric-cell', render: (vendor) => formatMoney(vendor.expense_total || 0) },
         {
           key: 'expense_action',
           label: 'New expense',

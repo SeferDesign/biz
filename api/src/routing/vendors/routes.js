@@ -1,10 +1,16 @@
 import { Router } from 'express';
-import { hasText, parseId } from '../shared/validation.js';
+import { hasText, parseId, parsePagination } from '../shared/validation.js';
 
 export default function vendorsRouter(store) {
   const router = Router();
 
   router.get('/vendors', async (req, res) => {
+    const pagination = parsePagination(req.query);
+    if (pagination === false) return res.status(400).json({ error: 'Invalid pagination parameters' });
+    if (pagination) {
+      const result = await store.listVendors(pagination);
+      return res.json({ ...result, page: pagination.page, pageSize: pagination.pageSize });
+    }
     const vendors = (await store.getSnapshot()).vendors;
     const sortableName = (name) => name.replace(/^(the|a|an)\s+/i, '');
     return res.json([...vendors].sort((left, right) => sortableName(left.name).localeCompare(sortableName(right.name))));

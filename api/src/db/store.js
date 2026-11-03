@@ -426,6 +426,178 @@ export class MySqlStore {
     };
   }
 
+  async listClients({ pageSize, offset }) {
+    const [[countRows], [rows]] = await Promise.all([
+      this.database.query('SELECT COUNT(*) AS total FROM clients'),
+      this.database.execute(`SELECT c.*, c.email_accounting AS email
+        FROM clients c
+        LEFT JOIN (
+          SELECT client_id, MAX(created_at) AS last_invoice_created_at
+          FROM invoices
+          WHERE client_id IS NOT NULL
+          GROUP BY client_id
+        ) invoice_activity ON invoice_activity.client_id = c.id
+        ORDER BY GREATEST(
+          COALESCE(c.created_at, '1970-01-01 00:00:00'),
+          COALESCE(invoice_activity.last_invoice_created_at, '1970-01-01 00:00:00')
+        ) DESC, c.id DESC LIMIT ? OFFSET ?`, [pageSize, offset])
+    ]);
+    return { items: rows, total: Number(countRows[0].total) };
+  }
+
+  async listInvoices({ pageSize, offset }) {
+    const [[countRows], [rows]] = await Promise.all([
+      this.database.query('SELECT COUNT(*) AS total FROM invoices'),
+      this.database.execute(`SELECT invoices.*, invoices.cost AS total,
+        CASE WHEN invoices.paid THEN 'paid' ELSE invoices.status END AS status,
+        (SELECT p.status FROM invoice_payments p WHERE p.invoice_id = invoices.id ORDER BY p.submitted_at DESC, p.id DESC LIMIT 1) AS payment_status,
+        clients.name AS client_name
+        FROM invoices LEFT JOIN clients ON clients.id = invoices.client_id
+        ORDER BY CASE WHEN invoices.paid OR invoices.status = 'paid' THEN 2 WHEN invoices.status = 'sent' THEN 1 ELSE 0 END,
+          invoices.date DESC, invoices.id DESC LIMIT ? OFFSET ?`, [pageSize, offset])
+    ]);
+    return { items: rows, total: Number(countRows[0].total) };
+  }
+
+  async listExpenses({ pageSize, offset, filter }) {
+    const today = new Date().toISOString().slice(0, 10);
+    let where = '';
+    let values = [];
+    if (filter === 'future') {
+      where = 'WHERE expenses.date > ?';
+      values = [today];
+    } else if (filter === 'inactive') {
+      where = 'WHERE expenses.date <= ?';
+      values = [today];
+    } else if (filter !== 'all') {
+      const cutoff = new Date();
+      cutoff.setUTCFullYear(cutoff.getUTCFullYear() - 1);
+      where = 'WHERE expenses.date >= ? AND expenses.date <= ?';
+      values = [cutoff.toISOString().slice(0, 10), today];
+    }
+    const order = filter === 'future' ? 'ASC' : 'DESC';
+    const [[countRows], [rows]] = await Promise.all([
+      this.database.execute(`SELECT COUNT(*) AS total FROM expenses ${where}`, values),
+      this.database.execute(`SELECT expenses.*, vendors.name AS vendor_name
+        FROM expenses LEFT JOIN vendors ON vendors.id = expenses.vendor_id
+        ${where} ORDER BY expenses.date ${order}, expenses.id ${order} LIMIT ? OFFSET ?`, [...values, pageSize, offset])
+    ]);
+    return { items: rows, total: Number(countRows[0].total) };
+  }
+
+  async listVendors({ pageSize, offset }) {
+    const [[countRows], [rows]] = await Promise.all([
+      this.database.query('SELECT COUNT(*) AS total FROM vendors'),
+      this.database.execute(`SELECT vendors.*, COUNT(expenses.id) AS expense_count,
+        COALESCE(SUM(expenses.cost), 0) AS expense_total
+        FROM vendors LEFT JOIN expenses ON expenses.vendor_id = vendors.id AND expenses.date <= UTC_DATE()
+        GROUP BY vendors.id
+        ORDER BY LOWER(REGEXP_REPLACE(vendors.name, '^(the|a|an)[[:space:]]+', '')), vendors.id
+        LIMIT ? OFFSET ?`, [pageSize, offset])
+    ]);
+    return { items: rows, total: Number(countRows[0].total) };
+  }
+
+  async getDashboardSummary() {
+    const now = new Date();
+    const year = now.getUTCFullYear();
+    const month = now.getUTCMonth() + 1;
+    const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+    const trailingStart = new Date(Date.UTC(year, month - 5, 1));
+    const yearStart = new Date(Date.UTC(year, 0, 1));
+    const dataStart = trailingStart < yearStart ? trailingStart : yearStart;
+    const rangeStart = dataStart.toISOString().slice(0, 10);
+    const rangeEnd = new Date(Date.UTC(year, month, 1)).toISOString().slice(0, 10);
+    const firstTrailingYear = trailingStart.getUTCFullYear();
+    const [[openRows], [revenueRows], [expenseRows], [yearRows], [recentInvoices]] = await Promise.all([
+      this.database.query(`SELECT COUNT(*) AS count, COALESCE(SUM(cost), 0) AS total
+        FROM invoices WHERE paid = FALSE AND status <> 'paid'`),
+      this.database.execute(`SELECT DATE_FORMAT(COALESCE(paiddate, date), '%Y-%m') AS month,
+          COALESCE(SUM(cost), 0) AS total
+        FROM invoices
+        WHERE (paid = TRUE OR status = 'paid') AND COALESCE(paiddate, date) >= ? AND COALESCE(paiddate, date) < ?
+        GROUP BY DATE_FORMAT(COALESCE(paiddate, date), '%Y-%m')`, [rangeStart, rangeEnd]),
+      this.database.execute(`SELECT DATE_FORMAT(date, '%Y-%m') AS month, COALESCE(SUM(cost), 0) AS total
+        FROM expenses WHERE date >= ? AND date < ? GROUP BY DATE_FORMAT(date, '%Y-%m')`, [rangeStart, rangeEnd]),
+      this.database.execute('SELECT * FROM years WHERE year BETWEEN ? AND ? ORDER BY year', [firstTrailingYear, year]),
+      this.database.execute(`SELECT invoices.*, invoices.cost AS total,
+          CASE WHEN invoices.paid THEN 'paid' ELSE invoices.status END AS status,
+          (SELECT p.status FROM invoice_payments p WHERE p.invoice_id = invoices.id ORDER BY p.submitted_at DESC, p.id DESC LIMIT 1) AS payment_status,
+          clients.name AS client_name
+        FROM invoices LEFT JOIN clients ON clients.id = invoices.client_id
+        ORDER BY invoices.date DESC,
+          CASE WHEN invoices.paid OR invoices.status = 'paid' THEN 2 WHEN invoices.status = 'sent' THEN 1 ELSE 0 END,
+          invoices.id DESC LIMIT 6`)
+    ]);
+    const monthlyRevenue = Object.fromEntries(revenueRows.map((row) => [row.month, Number(row.total)]));
+    const monthlyExpenses = Object.fromEntries(expenseRows.map((row) => [row.month, Number(row.total)]));
+    const sumCurrentYear = (monthly) => Object.entries(monthly)
+      .filter(([key]) => key.startsWith(`${year}-`))
+      .reduce((total, [, value]) => total + value, 0);
+    return {
+      year,
+      month: monthKey,
+      openInvoices: { count: Number(openRows[0].count), total: Number(openRows[0].total) },
+      monthlyRevenue,
+      monthlyExpenses,
+      yearRevenue: sumCurrentYear(monthlyRevenue),
+      yearExpenses: sumCurrentYear(monthlyExpenses),
+      yearRecords: yearRows.map(normalizeYear),
+      recentInvoices
+    };
+  }
+
+  async searchRecords(query) {
+    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+    const patterns = terms.map((term) => `%${term.replace(/[\\%_]/g, '\\$&')}%`);
+    const condition = (columns) => terms.map(() =>
+      `LOWER(CONCAT_WS(' ', ${columns.map((column) => `COALESCE(${column}, '')`).join(', ')})) COLLATE utf8mb4_unicode_ci LIKE ?`
+    ).join(' AND ');
+    const search = async (sql, primaryColumns, searchableColumns) => {
+      const primaryCondition = condition(primaryColumns);
+      const searchableCondition = condition(searchableColumns);
+      const [rows] = await this.database.execute(
+        `${sql.replace('/* rank */', `CASE WHEN ${primaryCondition} THEN 2 ELSE 1 END AS search_rank,`)}
+         WHERE ${searchableCondition}
+         ORDER BY search_rank DESC, title LIMIT 12`,
+        [...patterns, ...patterns]
+      );
+      return rows;
+    };
+    const [clients, vendors, expenses, invoices, lines, years] = await Promise.all([
+      search(`SELECT c.id, c.name, c.name AS title, c.contact, c.city, c.state, c.email_accounting,
+          CONCAT_WS(' ', c.contact, c.city, c.state) AS detail, /* rank */
+          CONCAT('/clients/', c.id) AS href FROM clients c`,
+      ['c.name'], ['c.name', 'c.contact', 'c.email_accounting', 'c.city']),
+      search(`SELECT v.id, v.name, v.name AS title, v.category, v.notes, v.category AS detail, /* rank */
+          CONCAT('/vendors/', v.id) AS href FROM vendors v`,
+      ['v.name'], ['v.name', 'v.category', 'v.notes']),
+      search(`SELECT e.id, e.name, e.name AS title, e.account, e.notes, e.date, v.name AS vendor_name,
+          CONCAT_WS(' · ', v.name, e.date, e.account) AS detail, /* rank */
+          CONCAT('/expenses/', e.id) AS href FROM expenses e LEFT JOIN vendors v ON v.id = e.vendor_id`,
+      ['e.name'], ['e.name', 'v.name', 'e.account', 'e.notes', 'e.date']),
+      search(`SELECT i.id, i.description, i.client_id, i.status, i.date, i.paymenttype, c.name AS client_name,
+          CAST(i.id AS CHAR) AS invoice_id_text, i.description AS title,
+          CONCAT_WS(' · ', CAST(i.id AS CHAR), c.name, i.status, i.date) AS detail,
+          CONCAT('/invoices/', i.id) AS href, /* rank */
+          CASE WHEN i.paid THEN 'paid' ELSE i.status END AS normalized_status
+        FROM invoices i LEFT JOIN clients c ON c.id = i.client_id`,
+      ['i.description', 'CAST(i.id + 100000 AS CHAR)',
+        `CONCAT(LOWER(LEFT(REGEXP_REPLACE(COALESCE(c.name, ''), '[^0-9A-Za-z]', ''), 21)), '-', LPAD(i.id + 100000, 6, '0'))`],
+      ['i.description', 'CAST(i.id AS CHAR)', 'CAST(i.id + 100000 AS CHAR)', 'c.name', 'i.status', 'i.date', 'i.paymenttype',
+        `CONCAT(LOWER(LEFT(REGEXP_REPLACE(COALESCE(c.name, ''), '[^0-9A-Za-z]', ''), 21)), '-', LPAD(i.id + 100000, 6, '0'))`]),
+      search(`SELECT l.id, l.description AS title, l.invoice_id, c.name AS client_name,
+          CONCAT('Invoice ', l.invoice_id) AS detail, CONCAT('/invoices/', l.invoice_id) AS href, /* rank */
+          l.description AS searchable_description
+        FROM \`lines\` l JOIN invoices i ON i.id = l.invoice_id LEFT JOIN clients c ON c.id = i.client_id`,
+      ['l.description'], ['l.description']),
+        search(`SELECT y.year AS id, y.year, CAST(y.year AS CHAR) AS title, 'Financial year' AS detail,
+          CONCAT('/years/', y.year) AS href, /* rank */ CAST(y.year AS CHAR) AS year_text FROM years y`,
+      ['CAST(y.year AS CHAR)'], ['CAST(y.year AS CHAR)'])
+    ]);
+    return { clients, vendors, expenses, invoices, lines, years };
+  }
+
   async getClient(id) {
     const [rows] = await this.database.query('SELECT *, email_accounting AS email FROM clients WHERE id = ?', [id]);
     return rows[0];

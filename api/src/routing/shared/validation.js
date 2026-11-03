@@ -3,6 +3,18 @@ export function parseId(value) {
   return Number.isSafeInteger(id) && id > 0 ? id : null;
 }
 
+export function parsePagination(query) {
+  if (query.page === undefined && query.page_size === undefined) return null;
+  const page = Number(query.page ?? 1);
+  const pageSize = Number(query.page_size ?? 12);
+  const offset = (page - 1) * pageSize;
+  if (!Number.isSafeInteger(page) || page < 1 || !Number.isSafeInteger(pageSize) || pageSize < 1 ||
+      pageSize > 100 || !Number.isSafeInteger(offset)) {
+    return false;
+  }
+  return { page, pageSize, offset };
+}
+
 export function hasText(value) {
   return typeof value === 'string' && value.trim().length > 0;
 }

@@ -8,17 +8,19 @@ export const metadata = { title: 'Clients' };
 
 export default async function ClientsPage({ searchParams }) {
   const params = await searchParams;
-  const result = await getApiData('/clients');
+  const page = parsePage(params?.page);
+  const result = await getApiData(`/clients?page=${page}`);
   return (
     <ResourcePage
       title="Clients"
-      data={result.data}
+      data={result.data?.items}
+      total={result.data?.total}
       error={result.error}
       countLabel="clients"
       actionHref="/clients/new"
       actionLabel="New Client"
       pageHref="/clients"
-      page={parsePage(params?.page)}
+      page={page}
       columns={[
         { key: 'name', label: 'Company', render: (client) => <Link className="table-link" href={`/clients/${client.id}`}>{client.name || 'Unnamed client'}</Link> },
         { key: 'contact', label: 'Contact' },

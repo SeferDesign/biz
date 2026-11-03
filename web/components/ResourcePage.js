@@ -8,12 +8,12 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card.js';
 import { Separator } from './ui/separator.js';
 import { getPaginationItems, Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './ui/pagination.js';
 
-export function ResourcePage({ title, description, data, error, columns, countLabel, count, hideHeading = false, actionHref, actionLabel, pageHref, page = 1, pageParam = 'page' }) {
+export function ResourcePage({ title, description, data, error, columns, countLabel, count, total, hideHeading = false, actionHref, actionLabel, pageHref, page = 1, pageParam = 'page' }) {
   const records = Array.isArray(data) ? data : [];
   const itemCount = count ?? records.length;
-  const pageCount = Math.max(1, Math.ceil(records.length / recordsPerPage));
+  const pageCount = Math.max(1, Math.ceil((total ?? records.length) / recordsPerPage));
   const currentPage = Math.min(page, pageCount);
-  const visibleRecords = pageHref
+  const visibleRecords = total !== undefined ? records : pageHref
     ? records.slice((currentPage - 1) * recordsPerPage, currentPage * recordsPerPage)
     : records;
   const hrefForPage = (nextPage) => {

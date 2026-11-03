@@ -14,6 +14,7 @@ import invoiceTemplatesRouter from './invoice-templates/routes.js';
 import backupStatusRouter from './backup-status/routes.js';
 import { createAuthRouter } from './auth.js';
 import searchRouter from './search/routes.js';
+import dashboardRouter from './dashboard/routes.js';
 import vendorsRouter from './vendors/routes.js';
 import yearsRouter from './years/routes.js';
 import stripeRouter, { createStripeWebhookHandler } from './stripe/routes.js';
@@ -200,6 +201,7 @@ export function createApp({
   app.use('/v1', expensesRouter(store));
   app.use('/v1', vendorsRouter(store));
   app.use('/v1', searchRouter(store));
+  app.use('/v1', dashboardRouter(store));
 
   app.use((req, res) => {
     res.status(404).json({ error: 'Route not found', path: req.path });

@@ -1,35 +1,34 @@
 import Link from 'next/link';
 import { ResourcePage, StatusBadge } from '../../components/ResourcePage.js';
 import InvoiceActions from '../../components/InvoiceActions.js';
-import { formatMoney, formatTableDate, invoiceStatus, invoicesByStatusFirst, parsePage } from '../../lib/api.js';
+import { formatMoney, formatTableDate, invoiceStatus, parsePage } from '../../lib/api.js';
 import { getApiData } from '../../lib/api-server.js';
 
 export const metadata = { title: 'Invoices' };
 
 export default async function InvoicesPage({ searchParams }) {
   const params = await searchParams;
-  const [invoiceResult, clientResult] = await Promise.all([
-    getApiData('/invoices'),
-    getApiData('/clients')
-  ]);
-  const clientsById = new Map((clientResult.data || []).map((client) => [client.id, client]));
+  const page = parsePage(params?.page);
+  const invoiceResult = await getApiData(`/invoices?page=${page}`);
 
   return (
     <ResourcePage
       title="Invoices"
-      data={invoiceResult.data?.toSorted(invoicesByStatusFirst)}
-      error={invoiceResult.error || clientResult.error}
+      data={invoiceResult.data?.items}
+      total={invoiceResult.data?.total}
+      error={invoiceResult.error}
       countLabel="invoices"
       actionHref="/invoices/new"
       actionLabel="New Invoice"
       pageHref="/invoices"
-      page={parsePage(params?.page)}
+      page={page}
       columns={[
         { key: 'date', label: 'Invoice Date', className: 'date-cell', render: (invoice) => <Link className="table-link" href={`/invoices/${invoice.id}`}>{formatTableDate(invoice.date)}</Link> },
         { key: 'id', label: 'Invoice ID', render: (invoice) => String(invoice.id) },
         { key: 'client', label: 'Client', render: (invoice) => {
-          const client = clientsById.get(invoice.client_id);
-          return client ? <Link className="table-link" href={`/clients/${client.id}`}>{client.name}</Link> : `Client ${invoice.client_id || '-'}`;
+          return invoice.client_name
+            ? <Link className="table-link" href={`/clients/${invoice.client_id}`}>{invoice.client_name}</Link>
+            : `Client ${invoice.client_id || '-'}`;
         } },
         { key: 'status', label: 'Status', render: (invoice) => <StatusBadge status={invoiceStatus(invoice)} /> },
         { key: 'paiddate', label: 'Paid date', className: 'date-cell', render: (invoice) => formatTableDate(invoice.paiddate) },

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { isDate, isFiniteNumber, parseId } from '../shared/validation.js';
+import { isDate, isFiniteNumber, parseId, parsePagination } from '../shared/validation.js';
 import { publicInvoice, publicLine } from '../shared/public-views.js';
 import { sendInvoiceEmail as deliverInvoiceEmail } from '../../email/invoice-mailer.js';
 import { createInvoicePdf } from '../../pdf/invoice-pdf.js';
@@ -38,6 +38,13 @@ export default function invoicesRouter(store, { sendInvoiceEmail = deliverInvoic
   const router = Router();
 
   router.get('/invoices', async (req, res) => {
+    const pagination = parsePagination(req.query);
+    if (pagination === false) return res.status(400).json({ error: 'Invalid pagination parameters' });
+    if (pagination) {
+      const result = await store.listInvoices(pagination);
+      const items = result.items.map((invoice) => withInvoiceDisplayIds(invoice, invoice.client_name));
+      return res.json({ items, total: result.total, page: pagination.page, pageSize: pagination.pageSize });
+    }
     const snapshot = await store.getSnapshot();
     const clientsById = new Map(snapshot.clients.map((client) => [Number(client.id), client]));
     return res.json(snapshot.invoices.map((invoice) => withInvoiceDisplayIds(invoice, clientsById.get(Number(invoice.client_id))?.name)));

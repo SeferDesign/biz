@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { hasText, parseId } from '../shared/validation.js';
+import { hasText, parseId, parsePagination } from '../shared/validation.js';
 import { publicClient } from '../shared/public-views.js';
 import { withInvoiceDisplayIds } from '@seferbiz/company';
 import { publicInvoice } from '../shared/public-views.js';
@@ -23,7 +23,13 @@ function normalizeClientInput(body) {
 export default function clientsRouter(store) {
   const router = Router();
 
-  router.get('/clients', async (req, res) => res.json((await store.getSnapshot()).clients));
+  router.get('/clients', async (req, res) => {
+    const pagination = parsePagination(req.query);
+    if (pagination === false) return res.status(400).json({ error: 'Invalid pagination parameters' });
+    if (!pagination) return res.json((await store.getSnapshot()).clients);
+    const result = await store.listClients(pagination);
+    return res.json({ ...result, page: pagination.page, pageSize: pagination.pageSize });
+  });
 
   router.get('/clients/:id', async (req, res) => {
     const id = parseId(req.params.id);

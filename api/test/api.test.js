@@ -804,6 +804,7 @@ test('omni-search finds clients, vendors, expenses, invoices, and line items', a
   const client = await request(app).get('/v1/search?q=acme');
   const vendorAndExpense = await request(app).get('/v1/search?q=office');
   const line = await request(app).get('/v1/search?q=development');
+  const invoiceNumber = await request(app).get('/v1/search?q=acmeinc-100001');
   const year = await request(app).get('/v1/search?q=2025');
   const empty = await request(app).get('/v1/search?q=nomatch');
   const tooShort = await request(app).get('/v1/search?q=a');
@@ -814,9 +815,42 @@ test('omni-search finds clients, vendors, expenses, invoices, and line items', a
   assert.deepEqual(vendorAndExpense.body.results.map((item) => item.type), ['Vendor', 'Expense']);
   assert.equal(line.body.results[0].type, 'Line item');
   assert.equal(line.body.results[0].href, '/invoices/1');
+  assert.equal(invoiceNumber.body.results[0].type, 'Invoice');
+  assert.equal(invoiceNumber.body.results[0].title, 'acmeinc-100001');
   assert.equal(year.body.results.find((item) => item.type === 'Year').href, '/years/2025');
   assert.deepEqual(empty.body.results, []);
   assert.equal(tooShort.status, 400);
+});
+
+test('resource lists support pagination without changing unpaged responses', async () => {
+  const app = createTestApp();
+  const clients = await request(app).get('/v1/clients?page=1&page_size=1');
+  const invoices = await request(app).get('/v1/invoices?page=1&page_size=2');
+  const expenses = await request(app).get('/v1/expenses?inactive=true&page=1&page_size=1');
+  const vendors = await request(app).get('/v1/vendors?page=1&page_size=1');
+
+  assert.deepEqual([clients.body.total, clients.body.page, clients.body.pageSize, clients.body.items.length], [2, 1, 1, 1]);
+  assert.deepEqual(invoices.body.items.map((invoice) => invoice.status), ['draft', 'sent']);
+  assert.equal(invoices.body.total, 3);
+  assert.equal(expenses.body.total, 2);
+  assert.equal(expenses.body.items[0].vendor_name, 'Office Depot');
+  assert.equal(vendors.body.total, 2);
+  assert.equal(vendors.body.items[0].expense_count, 1);
+  assert.equal(Array.isArray((await request(app).get('/v1/clients')).body), true);
+  assert.equal((await request(app).get('/v1/invoices?page=0')).status, 400);
+});
+
+test('dashboard endpoint returns compact totals and recent invoice labels', async () => {
+  const app = createTestApp();
+  const response = await request(app).get('/v1/dashboard');
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(response.body.openInvoices, { count: 2, total: 2180.5 });
+  assert.equal(response.body.recentInvoices.length, 3);
+  assert.equal(response.body.recentInvoices[0].client_name, 'Acme Inc.');
+  assert.equal(response.body.recentInvoices[0].display_id, 'acmeinc-100003');
+  assert.equal(typeof response.body.yearRevenue, 'number');
+  assert.equal(typeof response.body.monthlyExpenses, 'object');
 });
 
 test('year endpoints return records and report totals', async () => {

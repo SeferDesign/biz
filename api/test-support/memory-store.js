@@ -281,6 +281,125 @@ export function createMemoryStore() {
         clients: sortClientsByRecentActivity(snapshot.clients, snapshot.invoices)
       };
     },
+    async getDashboardSummary() {
+      const now = new Date();
+      const year = now.getUTCFullYear();
+      const month = now.getUTCMonth() + 1;
+      const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+      const trailingStart = new Date(Date.UTC(year, month - 5, 1));
+      const dataStart = new Date(Date.UTC(year, 0, 1));
+      if (trailingStart < dataStart) dataStart.setTime(trailingStart.getTime());
+      const firstMonth = dataStart.toISOString().slice(0, 7);
+      const monthlyRevenue = {};
+      const monthlyExpenses = {};
+      const addMonthly = (totals, key, amount) => {
+        totals[key] = (totals[key] || 0) + Number(amount || 0);
+      };
+      for (const invoice of snapshot.invoices) {
+        const date = String(invoice.paiddate || invoice.date || '').slice(0, 7);
+        if ((invoice.paid === true || invoice.status === 'paid') && date >= firstMonth && date <= monthKey) {
+          addMonthly(monthlyRevenue, date, invoice.cost ?? invoice.total);
+        }
+      }
+      for (const expense of snapshot.expenses) {
+        const date = String(expense.date || '').slice(0, 7);
+        if (date >= firstMonth && date <= monthKey) addMonthly(monthlyExpenses, date, expense.cost);
+      }
+      const yearRecords = snapshot.years.filter((record) =>
+        Number(record.year) >= trailingStart.getUTCFullYear() && Number(record.year) <= year);
+      const currentYearTotal = (totals) => Object.entries(totals)
+        .filter(([key]) => key.startsWith(`${year}-`))
+        .reduce((total, [, value]) => total + value, 0);
+      const openInvoices = snapshot.invoices.filter((invoice) => invoice.paid !== true && invoice.status !== 'paid');
+      const recentInvoices = [...snapshot.invoices]
+        .sort((left, right) => String(right.date || '').localeCompare(String(left.date || '')) ||
+          ({ draft: 0, sent: 1, paid: 2 }[left.status] ?? 3) - ({ draft: 0, sent: 1, paid: 2 }[right.status] ?? 3) ||
+          Number(right.id) - Number(left.id))
+        .slice(0, 6)
+        .map((invoice) => ({
+          ...invoice,
+          client_name: snapshot.clients.find((client) => Number(client.id) === Number(invoice.client_id))?.name
+        }));
+      return {
+        year,
+        month: monthKey,
+        openInvoices: {
+          count: openInvoices.length,
+          total: openInvoices.reduce((total, invoice) => total + Number(invoice.cost ?? invoice.total ?? 0), 0)
+        },
+        monthlyRevenue,
+        monthlyExpenses,
+        yearRevenue: currentYearTotal(monthlyRevenue),
+        yearExpenses: currentYearTotal(monthlyExpenses),
+        yearRecords,
+        recentInvoices
+      };
+    },
+    async searchRecords() {
+      const clientsById = new Map(snapshot.clients.map((client) => [Number(client.id), client]));
+      const vendorsById = new Map(snapshot.vendors.map((vendor) => [Number(vendor.id), vendor]));
+      return {
+        clients: snapshot.clients,
+        vendors: snapshot.vendors,
+        expenses: snapshot.expenses.map((expense) => ({
+          ...expense,
+          vendor_name: vendorsById.get(Number(expense.vendor_id))?.name
+        })),
+        invoices: snapshot.invoices.map((invoice) => ({
+          ...invoice,
+          client_name: clientsById.get(Number(invoice.client_id))?.name
+        })),
+        lines: snapshot.lines.map((line) => ({
+          ...line,
+          client_name: clientsById.get(Number(snapshot.invoices.find((invoice) => Number(invoice.id) === Number(line.invoice_id))?.client_id))?.name
+        })),
+        years: snapshot.years
+      };
+    },
+    async listClients({ pageSize, offset }) {
+      const clients = sortClientsByRecentActivity(snapshot.clients, snapshot.invoices);
+      return { items: clients.slice(offset, offset + pageSize), total: clients.length };
+    },
+    async listInvoices({ pageSize, offset }) {
+      const statusOrder = { draft: 0, sent: 1, paid: 2 };
+      const invoices = [...snapshot.invoices].sort((left, right) =>
+        (statusOrder[left.status] ?? 3) - (statusOrder[right.status] ?? 3) ||
+        String(right.date || '').localeCompare(String(left.date || '')) || Number(right.id) - Number(left.id));
+      return { items: invoices.slice(offset, offset + pageSize), total: invoices.length };
+    },
+    async listExpenses({ pageSize, offset, filter }) {
+      const today = new Date().toISOString().slice(0, 10);
+      const filtered = snapshot.expenses.filter((expense) => {
+        if (filter === 'all') return true;
+        if (filter === 'future') return expense.date > today;
+        if (filter === 'inactive') return expense.date <= today;
+        const cutoff = new Date();
+        cutoff.setUTCFullYear(cutoff.getUTCFullYear() - 1);
+        return expense.date >= cutoff.toISOString().slice(0, 10) && expense.date <= today;
+      });
+      filtered.sort((left, right) => (filter === 'future' ? 1 : -1) *
+        (String(left.date || '').localeCompare(String(right.date || '')) || Number(left.id) - Number(right.id)));
+      return {
+        items: filtered.slice(offset, offset + pageSize).map((expense) => ({
+          ...expense,
+          vendor_name: snapshot.vendors.find((vendor) => Number(vendor.id) === Number(expense.vendor_id))?.name
+        })),
+        total: filtered.length
+      };
+    },
+    async listVendors({ pageSize, offset }) {
+      const sortableName = (name) => String(name || '').replace(/^(the|a|an)\s+/i, '');
+      const vendors = snapshot.vendors.map((vendor) => {
+        const expenses = snapshot.expenses.filter((expense) =>
+          Number(expense.vendor_id) === Number(vendor.id) && expense.date <= new Date().toISOString().slice(0, 10));
+        return {
+          ...vendor,
+          expense_count: expenses.length,
+          expense_total: expenses.reduce((total, expense) => total + Number(expense.cost || 0), 0)
+        };
+      }).sort((left, right) => sortableName(left.name).localeCompare(sortableName(right.name)));
+      return { items: vendors.slice(offset, offset + pageSize), total: vendors.length };
+    },
     async getClient(id) {
       return snapshot.clients.find((item) => item.id === Number(id));
     },

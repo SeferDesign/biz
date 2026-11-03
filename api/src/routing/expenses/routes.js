@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { hasText, isDate, isFiniteNumber, parseId } from '../shared/validation.js';
+import { hasText, isDate, isFiniteNumber, parseId, parsePagination } from '../shared/validation.js';
 
 const expenseAccountTypes = new Set(['Business', 'Personal']);
 
@@ -20,6 +20,14 @@ export default function expensesRouter(store) {
   const router = Router();
 
   router.get('/expenses', async (req, res) => {
+    const pagination = parsePagination(req.query);
+    if (pagination === false) return res.status(400).json({ error: 'Invalid pagination parameters' });
+    if (pagination) {
+      const filter = req.query.all === 'true' ? 'all' :
+        req.query.future === 'true' ? 'future' : req.query.inactive === 'true' ? 'inactive' : 'recent';
+      const result = await store.listExpenses({ ...pagination, filter });
+      return res.json({ ...result, page: pagination.page, pageSize: pagination.pageSize });
+    }
     const expenses = (await store.getSnapshot()).expenses;
     if (req.query.all === 'true') {
       return res.json(expenses.sort((left, right) => left.date.localeCompare(right.date) || left.name.localeCompare(right.name)));
