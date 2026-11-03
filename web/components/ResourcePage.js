@@ -107,6 +107,8 @@ export function StatusBadge({ status }) {
   const value = String(status || 'draft').toLowerCase();
   const variant = {
     paid: 'success',
+    actual: 'secondary',
+    planned: 'warning',
     succeeded: 'success',
     sent: 'info',
     due: 'warning',

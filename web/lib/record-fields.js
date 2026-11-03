@@ -56,10 +56,28 @@ export const expenseAccountOptions = ['Business', 'Personal'].map((account) => (
 export function expenseFields(vendors) {
   return [
     { name: 'name', label: 'Expense name', required: true },
-    { name: 'vendor_id', label: 'Vendor', type: 'relation', options: vendors.map((vendor) => ({ value: vendor.id, label: vendor.name })) },
+    { name: 'vendor_id', label: 'Vendor', type: 'relation', required: true, options: vendors.map((vendor) => ({ value: vendor.id, label: vendor.name })) },
     { name: 'date', label: 'Date', type: 'date', required: true },
     { name: 'cost', label: 'Cost', type: 'number', min: 0, step: '0.01', required: true },
     { name: 'account', label: 'Account', type: 'select', required: true, defaultValue: 'Business', options: expenseAccountOptions },
+    { name: 'notes', label: 'Notes', type: 'textarea', wide: true }
+  ];
+}
+
+export function recurringExpenseFields(vendors) {
+  return [
+    { name: 'name', label: 'Expense name', required: true },
+    { name: 'vendor_id', label: 'Vendor', type: 'relation', required: true, options: vendors.map((vendor) => ({ value: vendor.id, label: vendor.name })) },
+    { name: 'cost', label: 'Cost', type: 'number', min: 0, step: '0.01', required: true },
+		{ name: 'account', label: 'Account', type: 'select', required: true, defaultValue: 'Business', options: expenseAccountOptions },
+    { name: 'interval_count', label: 'Repeat every', type: 'number', min: 1, max: 52, step: 1, required: true, defaultValue: 1 },
+    { name: 'interval_unit', label: 'Interval', type: 'select', required: true, defaultValue: 'month', options: [
+			{ value: 'week', label: 'Weeks' },
+      { value: 'month', label: 'Months' },
+      { value: 'year', label: 'Years' }
+    ] },
+		{ name: 'start_date', label: 'First occurrence', type: 'date', required: true },
+    { name: 'end_date', label: 'Last occurrence (optional)', type: 'date' },
     { name: 'notes', label: 'Notes', type: 'textarea', wide: true }
   ];
 }

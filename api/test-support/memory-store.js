@@ -1,3 +1,5 @@
+import { recurringDate } from '../src/recurring/schedule.js';
+
 const initialSnapshot = {
   invoices: [
     { id: 1, client_id: 1, status: 'draft', total: 1200, cost: 1200, currency: 'USD', date: '2025-01-10', created_at: '2025-01-10T00:00:00Z' },
@@ -32,6 +34,7 @@ export function createMemoryStore() {
   const invoiceEmailSends = [];
   const invoiceTemplates = [];
   const invoicePayments = [];
+  const recurringExpenseRules = [];
   const history = [];
   const users = [];
   const userSessions = [];
@@ -42,6 +45,7 @@ export function createMemoryStore() {
     users,
     userSessions,
     invoicePayments,
+    recurringExpenseRules,
     history,
     async getUserByEmail(email) {
       return users.find((user) => user.email.toLowerCase() === email.toLowerCase());
@@ -321,7 +325,7 @@ export function createMemoryStore() {
       }
       for (const expense of snapshot.expenses) {
         const date = String(expense.date || '').slice(0, 7);
-        if (date >= firstMonth && date <= monthKey) addMonthly(monthlyExpenses, date, expense.cost);
+        if (!expense.is_planned && date >= firstMonth && date <= monthKey) addMonthly(monthlyExpenses, date, expense.cost);
       }
       const yearRecords = snapshot.years.filter((record) =>
         Number(record.year) >= trailingStart.getUTCFullYear() && Number(record.year) <= year);
@@ -390,10 +394,10 @@ export function createMemoryStore() {
       const filtered = snapshot.expenses.filter((expense) => {
         if (filter === 'all') return true;
         if (filter === 'future') return expense.date > today;
-        if (filter === 'inactive') return expense.date <= today;
+        if (filter === 'inactive') return expense.date <= today && !expense.is_planned;
         const cutoff = new Date();
         cutoff.setUTCFullYear(cutoff.getUTCFullYear() - 1);
-        return expense.date >= cutoff.toISOString().slice(0, 10) && expense.date <= today;
+        return !expense.is_planned && expense.date >= cutoff.toISOString().slice(0, 10) && expense.date <= today;
       });
       filtered.sort((left, right) => (filter === 'future' ? 1 : -1) *
         (String(left.date || '').localeCompare(String(right.date || '')) || Number(left.id) - Number(right.id)));
@@ -409,7 +413,8 @@ export function createMemoryStore() {
       const sortableName = (name) => String(name || '').replace(/^(the|a|an)\s+/i, '');
       const vendors = snapshot.vendors.map((vendor) => {
         const expenses = snapshot.expenses.filter((expense) =>
-          Number(expense.vendor_id) === Number(vendor.id) && expense.date <= new Date().toISOString().slice(0, 10));
+          Number(expense.vendor_id) === Number(vendor.id) && !expense.is_planned &&
+          expense.date <= new Date().toISOString().slice(0, 10));
         return {
           ...vendor,
           expense_count: expenses.length,
@@ -473,6 +478,10 @@ export function createMemoryStore() {
     async getVendor(id) {
       return snapshot.vendors.find((item) => item.id === Number(id));
     },
+    async hasVendorUsage(id) {
+      return snapshot.expenses.some((expense) => Number(expense.vendor_id) === Number(id)) ||
+        recurringExpenseRules.some((rule) => Number(rule.vendor_id) === Number(id));
+    },
     async createVendor(input) {
       const vendor = { id: Math.max(0, ...snapshot.vendors.map((item) => item.id)) + 1, ...input };
       snapshot.vendors.push(vendor);
@@ -505,11 +514,167 @@ export function createMemoryStore() {
     async getExpense(id) {
       return snapshot.expenses.find((item) => item.id === Number(id));
     },
+    async listRecurringExpenseRules() {
+      return [...recurringExpenseRules].sort((left, right) => Number(right.active) - Number(left.active) ||
+        String(left.next_date || '').localeCompare(String(right.next_date || '')) || left.id - right.id);
+    },
+    async getRecurringExpenseRule(id) {
+      return recurringExpenseRules.find((item) => item.id === Number(id));
+    },
+    async deleteRecurringExpenseRule(id) {
+      const rule = await this.getRecurringExpenseRule(id);
+      if (!rule) return null;
+      const plannedExpenses = snapshot.expenses.filter((expense) =>
+        Number(expense.recurring_rule_id) === Number(id) && expense.is_planned);
+      const actualExpenses = snapshot.expenses.filter((expense) =>
+        Number(expense.recurring_rule_id) === Number(id) && !expense.is_planned);
+      snapshot.expenses = snapshot.expenses.filter((expense) =>
+        Number(expense.recurring_rule_id) !== Number(id) || !expense.is_planned);
+      for (const expense of actualExpenses) expense.recurring_rule_id = null;
+      removeById(recurringExpenseRules, id);
+      return { rule, plannedExpenses, preservedExpenseIds: actualExpenses.map((expense) => Number(expense.id)) };
+    },
+    async createRecurringExpenseRule(input) {
+      const rule = {
+        id: Math.max(0, ...recurringExpenseRules.map((item) => item.id)) + 1,
+        ...input,
+        date: input.start_date,
+        next_date: input.start_date,
+        next_index: 0,
+        active: true
+      };
+      recurringExpenseRules.push(rule);
+      const expense = await this.createExpense({
+        name: rule.name,
+        vendor_id: rule.vendor_id ?? null,
+        date: rule.next_date,
+        cost: rule.cost,
+        notes: rule.notes ?? null,
+        account: rule.account || 'Business',
+        is_planned: true,
+        recurring_rule_id: rule.id
+      });
+      return { rule, expense };
+    },
+    async updateRecurringExpenseRule(id, updates) {
+      const rule = await this.getRecurringExpenseRule(id);
+      if (!rule) return null;
+      const scheduleChanged = updates.start_date !== undefined || updates.interval_unit !== undefined || updates.interval_count !== undefined;
+      Object.assign(rule, updates);
+      if (scheduleChanged && updates.start_date === undefined) rule.start_date = rule.next_date || rule.start_date;
+      if (scheduleChanged) {
+        rule.date = rule.start_date;
+        rule.next_date = rule.start_date;
+        rule.next_index = 0;
+      }
+      if (!rule.active && updates.active === true && rule.next_date) {
+        let resumeIndex = Number(rule.next_index);
+        let resumeDate = rule.next_date;
+        const today = new Date().toISOString().slice(0, 10);
+        while (resumeDate <= today && resumeIndex < 10000) {
+          resumeIndex += 1;
+          resumeDate = recurringDate(rule.start_date, rule.interval_unit, Number(rule.interval_count), resumeIndex);
+        }
+        rule.next_index = resumeIndex;
+        rule.next_date = resumeDate;
+      }
+      if (rule.end_date && rule.next_date > rule.end_date) {
+        rule.active = false;
+        rule.next_date = null;
+      }
+      const planned = snapshot.expenses.find((expense) =>
+        Number(expense.recurring_rule_id) === Number(id) && expense.is_planned);
+      if (!rule.active || !rule.next_date) {
+        snapshot.expenses = snapshot.expenses.filter((expense) =>
+          Number(expense.recurring_rule_id) !== Number(id) || !expense.is_planned);
+      } else if (planned) {
+        Object.assign(planned, {
+          name: rule.name,
+          vendor_id: rule.vendor_id ?? null,
+          date: rule.next_date,
+          cost: rule.cost,
+          notes: rule.notes ?? null,
+          account: rule.account || 'Business'
+        });
+      } else {
+        await this.createExpense({
+          name: rule.name,
+          vendor_id: rule.vendor_id ?? null,
+          date: rule.next_date,
+          cost: rule.cost,
+          notes: rule.notes ?? null,
+          account: rule.account || 'Business',
+          is_planned: true,
+          recurring_rule_id: rule.id
+        });
+      }
+      return rule;
+    },
+    async processDueRecurringExpenses(today = new Date().toISOString().slice(0, 10)) {
+      const activatedIds = new Set();
+      for (const rule of recurringExpenseRules) {
+        if (!rule.active || !rule.next_date || rule.next_date > today) continue;
+        let occurrenceIndex = Number(rule.next_index);
+        let occurrenceDate = rule.next_date;
+        let catchUpCount = 0;
+        while (occurrenceDate <= today && catchUpCount < 1000) {
+          const planned = snapshot.expenses.find((expense) =>
+            Number(expense.recurring_rule_id) === Number(rule.id) && expense.date === occurrenceDate && expense.is_planned);
+          if (planned) {
+            planned.is_planned = false;
+            activatedIds.add(Number(planned.id));
+            await this.recordHistory({
+              entity_type: 'expense', entity_id: planned.id, action: 'activated',
+              actor_user_id: null, actor_email: null, source: 'scheduler',
+              changes: { is_planned: { from: true, to: false } }
+            });
+          }
+          occurrenceIndex += 1;
+          const nextDate = recurringDate(rule.start_date, rule.interval_unit, Number(rule.interval_count), occurrenceIndex);
+          if (rule.end_date && nextDate > rule.end_date) {
+            Object.assign(rule, { active: false, next_date: null, next_index: occurrenceIndex });
+            break;
+          }
+          Object.assign(rule, { next_date: nextDate, next_index: occurrenceIndex });
+          if (!snapshot.expenses.some((expense) =>
+            Number(expense.recurring_rule_id) === Number(rule.id) && expense.date === nextDate)) {
+            await this.createExpense({
+              name: rule.name,
+              vendor_id: rule.vendor_id ?? null,
+              date: nextDate,
+              cost: rule.cost,
+              notes: rule.notes ?? null,
+              account: rule.account || 'Business',
+              is_planned: true,
+              recurring_rule_id: rule.id
+            });
+          }
+          occurrenceDate = nextDate;
+          catchUpCount += 1;
+        }
+      }
+      for (const expense of snapshot.expenses) {
+        if (!expense.is_planned || expense.date > today) continue;
+        expense.is_planned = false;
+        activatedIds.add(Number(expense.id));
+        await this.recordHistory({
+          entity_type: 'expense', entity_id: expense.id, action: 'activated',
+          actor_user_id: null, actor_email: null, source: 'scheduler',
+          changes: { is_planned: { from: true, to: false } }
+        });
+      }
+      return activatedIds.size;
+    },
     async getExpensesByIds(ids) {
       return snapshot.expenses.filter((item) => ids.includes(Number(item.id)));
     },
     async createExpense(input) {
-      const expense = { id: Math.max(0, ...snapshot.expenses.map((item) => item.id)) + 1, ...input };
+      const expense = {
+        id: Math.max(0, ...snapshot.expenses.map((item) => item.id)) + 1,
+        is_planned: false,
+        recurring_rule_id: null,
+        ...input
+      };
       snapshot.expenses.push(expense);
       return expense;
     },

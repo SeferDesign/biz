@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { parseId, parsePagination } from '../shared/validation.js';
 
-const entityTypes = new Set(['client', 'invoice', 'expense', 'vendor', 'year']);
+const entityTypes = new Set(['client', 'invoice', 'expense', 'recurring_expense', 'vendor', 'year']);
 
 export default function historyRouter(store) {
   const router = Router();

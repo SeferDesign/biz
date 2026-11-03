@@ -32,6 +32,7 @@ test('activity summary email includes paid, sent, and expense totals for the per
       ],
       expenses: [
         { date: '2025-04-03', cost: 20 },
+        { date: '2025-04-04', cost: 900, is_planned: true },
         { date: '2025-03-30', cost: 9 }
       ]
     }

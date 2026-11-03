@@ -66,7 +66,7 @@ export function buildActivitySummary({ period, invoices = [], expenses = [], now
   const invoicesSent = invoices.filter((invoice) => inRange(invoice.date));
   const invoicesPaid = invoices.filter((invoice) =>
     (invoice.paid === true || invoice.paid === 1 || invoice.status === 'paid') && inRange(invoice.paiddate));
-  const periodExpenses = expenses.filter((expense) => inRange(expense.date));
+  const periodExpenses = expenses.filter((expense) => !expense.is_planned && Number(expense.is_planned) !== 1 && inRange(expense.date));
   const startDate = new Date(`${range.start}T00:00:00Z`);
   const endDate = new Date(`${range.end}T00:00:00Z`);
   const subject = `${range.title} - ${formatDate(startDate, { month: 'short', day: 'numeric' })} through ${formatDate(endDate, { month: 'short', day: 'numeric' })}`;

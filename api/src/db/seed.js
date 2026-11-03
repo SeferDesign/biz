@@ -17,6 +17,15 @@ function dateDaysAgo(days, now = new Date()) {
   return date.toISOString().slice(0, 10);
 }
 
+function dateDaysAhead(days, now = new Date()) {
+  return dateDaysAgo(-days, now);
+}
+
+function dateMonthsFromNow(months, now = new Date()) {
+  const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + months, 1));
+  return date.toISOString().slice(0, 10);
+}
+
 async function insertRows(database, table, columns, rows) {
   const names = columns.join(', ');
   const placeholders = columns.map(() => '?').join(', ');
@@ -40,6 +49,88 @@ export async function seedUser(database, password = process.env.SEED_USER_PASSWO
     [companyInfo.personMain.email, encryptedPassword, companyInfo.personMain.first_name, companyInfo.personMain.last_name]
   );
   return true;
+}
+
+async function insertRecurringExpenseSamples(connection, now) {
+  const seedName = 'recurring-expenses-v2';
+  const [marker] = await connection.execute('INSERT IGNORE INTO seed_runs (seed_name) VALUES (?)', [seedName]);
+  if (!marker.affectedRows) return 0;
+  async function ensureVendor(name, category) {
+    const [existing] = await connection.execute('SELECT id FROM vendors WHERE name = ? ORDER BY id LIMIT 1', [name]);
+    if (existing[0]) return Number(existing[0].id);
+    const [created] = await connection.execute(
+      'INSERT INTO vendors (name, category) VALUES (?, ?)', [name, category]
+    );
+    return Number(created.insertId);
+  }
+  const awsVendorId = await ensureVendor('Amazon Web Services', 'Web Service');
+  const internetVendorId = await ensureVendor('Comcast Business', 'Business Service');
+  const membershipVendorId = await ensureVendor('Professional Association', 'Education');
+  const firstDayNextMonth = dateMonthsFromNow(1, now);
+  const samples = [
+    {
+      name: 'AWS Monthly Usage', vendor_id: awsVendorId, cost: 125,
+      start_date: firstDayNextMonth, interval_unit: 'month', interval_count: 1,
+      account: 'Business', notes: 'Seed sample recurring expense.'
+    },
+    {
+      name: 'Office Internet', vendor_id: internetVendorId, cost: 89.99,
+      start_date: dateDaysAhead(7, now), interval_unit: 'month', interval_count: 1,
+      account: 'Business', notes: 'Seed sample recurring expense.'
+    },
+    {
+      name: 'Professional Membership', vendor_id: membershipVendorId, cost: 240,
+      start_date: dateMonthsFromNow(3, now), interval_unit: 'year', interval_count: 1,
+      account: 'Business', notes: 'Seed sample recurring expense.'
+    }
+  ];
+  for (const sample of samples) {
+    const [existingRules] = await connection.execute(
+      'SELECT id FROM recurring_expense_rules WHERE name = ? AND notes = ? ORDER BY id LIMIT 1',
+      [sample.name, sample.notes]
+    );
+    if (existingRules[0]) {
+      const ruleId = Number(existingRules[0].id);
+      await connection.execute('UPDATE recurring_expense_rules SET vendor_id = ? WHERE id = ?', [sample.vendor_id, ruleId]);
+      await connection.execute(
+        'UPDATE expenses SET vendor_id = ? WHERE recurring_rule_id = ? AND is_planned = TRUE', [sample.vendor_id, ruleId]
+      );
+      continue;
+    }
+    const [result] = await connection.execute(
+      `INSERT INTO recurring_expense_rules
+        (name, vendor_id, date, cost, notes, account, interval_unit, interval_count,
+         start_date, end_date, next_date, next_index, active)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, 0, TRUE)`,
+      [sample.name, sample.vendor_id, sample.start_date, sample.cost, sample.notes, sample.account,
+        sample.interval_unit, sample.interval_count, sample.start_date, sample.start_date]
+    );
+    await connection.execute(
+      `INSERT INTO expenses (name, vendor_id, date, cost, notes, account, is_planned, recurring_rule_id)
+       VALUES (?, ?, ?, ?, ?, ?, TRUE, ?)`,
+      [sample.name, sample.vendor_id, sample.start_date, sample.cost, sample.notes, sample.account, result.insertId]
+    );
+  }
+  return samples.length;
+}
+
+export async function seedRecurringExpenses(database = getPool(), now = new Date()) {
+  await initializeSchema(database);
+  const connection = await database.getConnection();
+  let transactionStarted = false;
+  try {
+    await connection.beginTransaction();
+    transactionStarted = true;
+    const inserted = await insertRecurringExpenseSamples(connection, now);
+    await connection.commit();
+    transactionStarted = false;
+    return inserted;
+  } catch (error) {
+    if (transactionStarted) await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
 }
 
 export async function seedDatabase(database = getPool(), now = new Date()) {
@@ -161,6 +252,7 @@ export async function seedDatabase(database = getPool(), now = new Date()) {
   await insertRows(connection, 'expenses', [
     'id', 'name', 'vendor_id', 'date', 'cost', 'notes', 'account'
   ], expenses);
+  await insertRecurringExpenseSamples(connection, now);
     await connection.execute('INSERT IGNORE INTO seed_runs (seed_name) VALUES (?)', [seedName]);
     await connection.commit();
   } catch (error) {
@@ -181,6 +273,9 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       await initializeSchema(database);
       if (!await seedUser(database)) throw new Error('SEED_USER_PASSWORD must be configured to seed a production user.');
       console.log('Seed user is ready.');
+    } else if (process.argv.includes('--recurring-only')) {
+      const inserted = await seedRecurringExpenses();
+      console.log(inserted ? `Processed ${inserted} recurring expense samples.` : 'Recurring expense samples already exist.');
     } else {
       await seedDatabase();
       console.log('MySQL seed data is ready.');

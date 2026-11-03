@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { getPool } from './pool.js';
+import { recurringDate } from '../recurring/schedule.js';
 
 const createAccessToken = () => randomBytes(24).toString('base64url');
 
@@ -10,7 +11,22 @@ const clientFields = [
 ];
 const vendorFields = ['name', 'category', 'notes'];
 const yearFields = ['year', 'taxrate', 'goal_year', 'goals_months'];
-const expenseFields = ['name', 'vendor_id', 'date', 'cost', 'notes', 'account'];
+const expenseFields = ['name', 'vendor_id', 'date', 'cost', 'notes', 'account', 'is_planned', 'recurring_rule_id'];
+const recurringExpenseFields = [
+  'name', 'vendor_id', 'date', 'cost', 'notes', 'account', 'interval_unit', 'interval_count',
+  'start_date', 'end_date', 'next_date', 'next_index', 'active'
+];
+
+const dateOnly = (value) => value instanceof Date ? value.toISOString().slice(0, 10) : String(value).slice(0, 10);
+
+async function insertPlannedExpense(connection, rule, date) {
+  const [result] = await connection.execute(
+    `INSERT INTO expenses (name, vendor_id, date, cost, notes, account, is_planned, recurring_rule_id)
+     VALUES (?, ?, ?, ?, ?, ?, TRUE, ?)`,
+    [rule.name, rule.vendor_id ?? null, date, rule.cost, rule.notes ?? null, rule.account || 'Business', rule.id]
+  );
+  return Number(result.insertId);
+}
 
 function normalizeYear(year) {
   return {
@@ -467,12 +483,12 @@ export class MySqlStore {
       where = 'WHERE expenses.date > ?';
       values = [today];
     } else if (filter === 'inactive') {
-      where = 'WHERE expenses.date <= ?';
+      where = 'WHERE expenses.date <= ? AND expenses.is_planned = FALSE';
       values = [today];
     } else if (filter !== 'all') {
       const cutoff = new Date();
       cutoff.setUTCFullYear(cutoff.getUTCFullYear() - 1);
-      where = 'WHERE expenses.date >= ? AND expenses.date <= ?';
+      where = 'WHERE expenses.date >= ? AND expenses.date <= ? AND expenses.is_planned = FALSE';
       values = [cutoff.toISOString().slice(0, 10), today];
     }
     const order = filter === 'future' ? 'ASC' : 'DESC';
@@ -490,7 +506,8 @@ export class MySqlStore {
       this.database.query('SELECT COUNT(*) AS total FROM vendors'),
       this.database.execute(`SELECT vendors.*, COUNT(expenses.id) AS expense_count,
         COALESCE(SUM(expenses.cost), 0) AS expense_total
-        FROM vendors LEFT JOIN expenses ON expenses.vendor_id = vendors.id AND expenses.date <= UTC_DATE()
+        FROM vendors LEFT JOIN expenses ON expenses.vendor_id = vendors.id
+          AND expenses.date <= UTC_DATE() AND expenses.is_planned = FALSE
         GROUP BY vendors.id
         ORDER BY LOWER(REGEXP_REPLACE(vendors.name, '^(the|a|an)[[:space:]]+', '')), vendors.id
         LIMIT ? OFFSET ?`, [pageSize, offset])
@@ -518,7 +535,8 @@ export class MySqlStore {
         WHERE (paid = TRUE OR status = 'paid') AND COALESCE(paiddate, date) >= ? AND COALESCE(paiddate, date) < ?
         GROUP BY DATE_FORMAT(COALESCE(paiddate, date), '%Y-%m')`, [rangeStart, rangeEnd]),
       this.database.execute(`SELECT DATE_FORMAT(date, '%Y-%m') AS month, COALESCE(SUM(cost), 0) AS total
-        FROM expenses WHERE date >= ? AND date < ? GROUP BY DATE_FORMAT(date, '%Y-%m')`, [rangeStart, rangeEnd]),
+        FROM expenses WHERE is_planned = FALSE AND date >= ? AND date < ?
+        GROUP BY DATE_FORMAT(date, '%Y-%m')`, [rangeStart, rangeEnd]),
       this.database.execute('SELECT * FROM years WHERE year BETWEEN ? AND ? ORDER BY year', [firstTrailingYear, year]),
       this.database.execute(`SELECT invoices.*, invoices.cost AS total,
           CASE WHEN invoices.paid THEN 'paid' ELSE invoices.status END AS status,
@@ -713,6 +731,14 @@ export class MySqlStore {
     return rows[0];
   }
 
+  async hasVendorUsage(id) {
+    const [rows] = await this.database.execute(
+      `SELECT EXISTS(SELECT 1 FROM expenses WHERE vendor_id = ?) OR
+        EXISTS(SELECT 1 FROM recurring_expense_rules WHERE vendor_id = ?) AS in_use`, [id, id]
+    );
+    return Boolean(rows[0].in_use);
+  }
+
   async createVendor(input) {
     const id = await insertRecord(this.database, 'vendors', vendorFields, input);
     return this.getVendor(id);
@@ -751,6 +777,234 @@ export class MySqlStore {
   async getExpense(id) {
     const [rows] = await this.database.query('SELECT * FROM expenses WHERE id = ?', [id]);
     return rows[0];
+  }
+
+  async listRecurringExpenseRules() {
+    const [rows] = await this.database.execute(
+      'SELECT * FROM recurring_expense_rules ORDER BY active DESC, next_date, id'
+    );
+    return rows;
+  }
+
+  async getRecurringExpenseRule(id) {
+    const [rows] = await this.database.execute('SELECT * FROM recurring_expense_rules WHERE id = ?', [id]);
+    return rows[0];
+  }
+
+  async deleteRecurringExpenseRule(id) {
+    const connection = await this.database.getConnection();
+    let transactionStarted = false;
+    try {
+      await connection.beginTransaction();
+      transactionStarted = true;
+      const [rules] = await connection.execute(
+        'SELECT * FROM recurring_expense_rules WHERE id = ? FOR UPDATE', [id]
+      );
+      const rule = rules[0];
+      if (!rule) {
+        await connection.rollback();
+        transactionStarted = false;
+        return null;
+      }
+      const [actualExpenses] = await connection.execute(
+        'SELECT id FROM expenses WHERE recurring_rule_id = ? AND is_planned = FALSE FOR UPDATE', [id]
+      );
+      const [plannedExpenses] = await connection.execute(
+        'SELECT * FROM expenses WHERE recurring_rule_id = ? AND is_planned = TRUE FOR UPDATE', [id]
+      );
+      await connection.execute(
+        'DELETE FROM expenses WHERE recurring_rule_id = ? AND is_planned = TRUE', [id]
+      );
+      await connection.execute('DELETE FROM recurring_expense_rules WHERE id = ?', [id]);
+      await connection.commit();
+      transactionStarted = false;
+      return { rule, plannedExpenses, preservedExpenseIds: actualExpenses.map((expense) => Number(expense.id)) };
+    } catch (error) {
+      if (transactionStarted) await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  async createRecurringExpenseRule(input) {
+    const connection = await this.database.getConnection();
+    let transactionStarted = false;
+    let ruleId;
+    let expenseId;
+    try {
+      await connection.beginTransaction();
+      transactionStarted = true;
+      const rule = {
+        ...input,
+        date: input.start_date,
+        next_date: input.start_date,
+        next_index: 0,
+        active: true
+      };
+      ruleId = await insertRecord(connection, 'recurring_expense_rules', recurringExpenseFields, rule);
+      await insertPlannedExpense(connection, { ...rule, id: ruleId }, rule.next_date);
+      const [rows] = await connection.execute(
+        'SELECT id FROM expenses WHERE recurring_rule_id = ? AND date = ? AND is_planned = TRUE',
+        [ruleId, rule.next_date]
+      );
+      expenseId = Number(rows[0]?.id);
+      await connection.commit();
+      transactionStarted = false;
+    } catch (error) {
+      if (transactionStarted) await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+    return { rule: await this.getRecurringExpenseRule(ruleId), expense: await this.getExpense(expenseId) };
+  }
+
+  async updateRecurringExpenseRule(id, updates) {
+    const connection = await this.database.getConnection();
+    let transactionStarted = false;
+    try {
+      await connection.beginTransaction();
+      transactionStarted = true;
+      const [rows] = await connection.execute(
+        'SELECT * FROM recurring_expense_rules WHERE id = ? FOR UPDATE', [id]
+      );
+      const current = rows[0];
+      if (!current) {
+        await connection.rollback();
+        transactionStarted = false;
+        return null;
+      }
+      const changes = Object.fromEntries(recurringExpenseFields
+        .filter((field) => updates[field] !== undefined)
+        .map((field) => [field, updates[field]]));
+      const next = { ...current, ...changes };
+      const scheduleChanged = updates.start_date !== undefined || updates.interval_unit !== undefined || updates.interval_count !== undefined;
+      if (scheduleChanged && updates.start_date === undefined) {
+        next.start_date = dateOnly(current.next_date || current.start_date);
+      }
+      if (scheduleChanged) {
+        next.date = next.start_date;
+        next.next_date = next.start_date;
+        next.next_index = 0;
+      }
+      if (!Boolean(Number(current.active)) && updates.active === true && current.next_date) {
+        let resumeIndex = Number(current.next_index);
+        let resumeDate = dateOnly(current.next_date);
+        const today = new Date().toISOString().slice(0, 10);
+        while (resumeDate <= today && resumeIndex < 10000) {
+          resumeIndex += 1;
+          resumeDate = recurringDate(dateOnly(next.start_date), next.interval_unit, Number(next.interval_count), resumeIndex);
+        }
+        next.next_index = resumeIndex;
+        next.next_date = resumeDate;
+      }
+      if (next.end_date && next.next_date && dateOnly(next.next_date) > dateOnly(next.end_date)) {
+        next.active = false;
+        next.next_date = null;
+      }
+      await updateRecord(connection, 'recurring_expense_rules', recurringExpenseFields, id, next);
+      const [plannedRows] = await connection.execute(
+        'SELECT id FROM expenses WHERE recurring_rule_id = ? AND is_planned = TRUE ORDER BY date, id FOR UPDATE', [id]
+      );
+      if (!next.active || !next.next_date) {
+        if (plannedRows.length) {
+          await connection.execute(
+            'DELETE FROM expenses WHERE recurring_rule_id = ? AND is_planned = TRUE', [id]
+          );
+        }
+      } else if (plannedRows[0]) {
+        await updateRecord(connection, 'expenses', expenseFields, plannedRows[0].id, {
+          name: next.name,
+          vendor_id: next.vendor_id,
+          date: next.next_date,
+          cost: next.cost,
+          notes: next.notes,
+          account: next.account,
+          is_planned: true,
+          recurring_rule_id: Number(id)
+        });
+        if (plannedRows.length > 1) {
+          await connection.execute(
+            'DELETE FROM expenses WHERE recurring_rule_id = ? AND is_planned = TRUE AND id <> ?', [id, plannedRows[0].id]
+          );
+        }
+      } else {
+        await insertPlannedExpense(connection, { ...next, id: Number(id) }, dateOnly(next.next_date));
+      }
+      await connection.commit();
+      transactionStarted = false;
+    } catch (error) {
+      if (transactionStarted) await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+    return this.getRecurringExpenseRule(id);
+  }
+
+  async processDueRecurringExpenses(today = new Date().toISOString().slice(0, 10)) {
+    const connection = await this.database.getConnection();
+    let transactionStarted = false;
+    let activated = 0;
+    try {
+      await connection.beginTransaction();
+      transactionStarted = true;
+      const [rules] = await connection.execute(
+        `SELECT * FROM recurring_expense_rules
+         WHERE active = TRUE AND next_date IS NOT NULL AND next_date <= ?
+         ORDER BY next_date, id FOR UPDATE`, [today]
+      );
+      for (const rule of rules) {
+        let occurrenceIndex = Number(rule.next_index);
+        let occurrenceDate = dateOnly(rule.next_date);
+        let catchUpCount = 0;
+        while (occurrenceDate <= today && catchUpCount < 1000) {
+          occurrenceIndex += 1;
+          const nextDate = recurringDate(
+            dateOnly(rule.start_date), rule.interval_unit, Number(rule.interval_count), occurrenceIndex
+          );
+          if (rule.end_date && nextDate > dateOnly(rule.end_date)) {
+            await connection.execute(
+              'UPDATE recurring_expense_rules SET active = FALSE, next_date = NULL, next_index = ? WHERE id = ?',
+              [occurrenceIndex, rule.id]
+            );
+            break;
+          }
+          await connection.execute(
+            'UPDATE recurring_expense_rules SET next_date = ?, next_index = ? WHERE id = ?',
+            [nextDate, occurrenceIndex, rule.id]
+          );
+          const [existingOccurrence] = await connection.execute(
+            'SELECT id FROM expenses WHERE recurring_rule_id = ? AND date = ? LIMIT 1 FOR UPDATE',
+            [rule.id, nextDate]
+          );
+          if (!existingOccurrence.length) await insertPlannedExpense(connection, rule, nextDate);
+          occurrenceDate = nextDate;
+          catchUpCount += 1;
+        }
+      }
+      const [dueExpenses] = await connection.execute(
+        'SELECT id FROM expenses WHERE is_planned = TRUE AND date <= ? ORDER BY date, id FOR UPDATE', [today]
+      );
+      for (const expense of dueExpenses) {
+        await connection.execute('UPDATE expenses SET is_planned = FALSE WHERE id = ? AND is_planned = TRUE', [expense.id]);
+        await connection.execute(
+          `INSERT INTO change_history (entity_type, entity_id, action, actor_user_id, actor_email, source, changes)
+           VALUES ('expense', ?, 'activated', NULL, NULL, 'scheduler', ?)`,
+          [expense.id, JSON.stringify({ is_planned: { from: true, to: false } })]
+        );
+        activated += 1;
+      }
+      await connection.commit();
+      transactionStarted = false;
+    } catch (error) {
+      if (transactionStarted) await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+    return activated;
   }
 
   async createExpense(input) {

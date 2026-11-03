@@ -110,6 +110,26 @@ const statements = [
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  `CREATE TABLE IF NOT EXISTS recurring_expense_rules (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    vendor_id BIGINT UNSIGNED NULL,
+    date DATE NOT NULL,
+    cost DECIMAL(12, 2) NOT NULL,
+    notes TEXT,
+    account VARCHAR(255) NOT NULL DEFAULT 'Business',
+    interval_unit VARCHAR(16) NOT NULL,
+    interval_count SMALLINT UNSIGNED NOT NULL DEFAULT 1,
+    start_date DATE NOT NULL,
+    end_date DATE NULL,
+    next_date DATE NULL,
+    next_index INT UNSIGNED NOT NULL DEFAULT 0,
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT recurring_expenses_vendor_fk FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE SET NULL,
+    INDEX recurring_expenses_due_idx (active, next_date)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   `CREATE TABLE IF NOT EXISTS invoices (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     client_id BIGINT UNSIGNED,
@@ -184,10 +204,15 @@ const statements = [
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255), vendor_id BIGINT UNSIGNED,
     date DATE, cost DECIMAL(12, 2), notes TEXT, account VARCHAR(255),
+    is_planned BOOLEAN NOT NULL DEFAULT FALSE,
+    recurring_rule_id BIGINT UNSIGNED NULL,
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT expenses_vendor_fk FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE SET NULL,
-    INDEX expenses_date_idx (date)
+    CONSTRAINT expenses_recurring_rule_fk FOREIGN KEY (recurring_rule_id) REFERENCES recurring_expense_rules(id) ON DELETE SET NULL,
+    INDEX expenses_date_idx (date),
+    INDEX expenses_actual_date_idx (is_planned, date),
+    UNIQUE INDEX expenses_recurring_date_unique (recurring_rule_id, date)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   `CREATE TABLE IF NOT EXISTS seed_runs (
     seed_name VARCHAR(100) NOT NULL PRIMARY KEY,
@@ -219,5 +244,42 @@ export async function initializeSchema(database = getPool()) {
   );
   if (!columns.length) {
     await database.query("ALTER TABLE clients ADD COLUMN payment_terms VARCHAR(16) NOT NULL DEFAULT 'Net 15'");
+  }
+  const [expenseColumns] = await database.query(
+    `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'expenses'`
+  );
+  const expenseColumnNames = new Set(expenseColumns.map((column) => column.COLUMN_NAME));
+  if (!expenseColumnNames.has('is_planned')) {
+    await database.query('ALTER TABLE expenses ADD COLUMN is_planned BOOLEAN NOT NULL DEFAULT FALSE AFTER account');
+  }
+  if (!expenseColumnNames.has('recurring_rule_id')) {
+    await database.query('ALTER TABLE expenses ADD COLUMN recurring_rule_id BIGINT UNSIGNED NULL AFTER is_planned');
+  }
+  const [expenseIndexes] = await database.query(
+    `SELECT INDEX_NAME FROM INFORMATION_SCHEMA.STATISTICS
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'expenses'`
+  );
+  const expenseIndexNames = new Set(expenseIndexes.map((index) => index.INDEX_NAME));
+  if (!expenseIndexNames.has('expenses_recurring_date_unique')) {
+    await database.query('ALTER TABLE expenses ADD UNIQUE INDEX expenses_recurring_date_unique (recurring_rule_id, date)');
+  }
+  if (!expenseIndexNames.has('expenses_actual_date_idx')) {
+    await database.query('ALTER TABLE expenses ADD INDEX expenses_actual_date_idx (is_planned, date)');
+  }
+  const [expenseForeignKeys] = await database.query(
+    `SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'expenses' AND CONSTRAINT_NAME = 'expenses_recurring_rule_fk'`
+  );
+  if (!expenseForeignKeys.length) {
+    await database.query(`ALTER TABLE expenses ADD CONSTRAINT expenses_recurring_rule_fk
+      FOREIGN KEY (recurring_rule_id) REFERENCES recurring_expense_rules(id) ON DELETE SET NULL`);
+  }
+  const [recurringRuleColumns] = await database.query(
+    `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'recurring_expense_rules'`
+  );
+  if (!recurringRuleColumns.some((column) => column.COLUMN_NAME === 'next_index')) {
+    await database.query('ALTER TABLE recurring_expense_rules ADD COLUMN next_index INT UNSIGNED NOT NULL DEFAULT 0 AFTER next_date');
   }
 }

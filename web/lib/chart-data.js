@@ -53,7 +53,8 @@ export function monthlyRunRate(total, year, now = new Date()) {
 
 export function totalsByCategory(expenses, vendors) {
   const categories = new Map(vendors.map((vendor) => [vendor.id, vendor.category || 'Uncategorized']));
-  const totals = totalsByKey(expenses, (expense) => categories.get(expense.vendor_id) || 'Uncategorized', (expense) => expense.cost);
+  const actualExpenses = expenses.filter((expense) => !expense.is_planned && Number(expense.is_planned) !== 1);
+  const totals = totalsByKey(actualExpenses, (expense) => categories.get(expense.vendor_id) || 'Uncategorized', (expense) => expense.cost);
   return [...totals]
     .map(([name, value]) => ({ name, value: roundMoney(value) }))
     .filter((item) => item.value > 0)
@@ -117,7 +118,8 @@ export function quarterlyTaxes(monthlyRows, taxrate) {
 
 export function monthlyFinances(months, { invoices = [], expenses = [], years = [] }) {
   const revenue = totalsByMonth(invoices.filter(isPaidInvoice), (invoice) => invoice.paiddate || invoice.date, invoiceAmount);
-  const spending = totalsByMonth(expenses, (expense) => expense.date, (expense) => expense.cost);
+  const spending = totalsByMonth(expenses.filter((expense) => !expense.is_planned && Number(expense.is_planned) !== 1),
+    (expense) => expense.date, (expense) => expense.cost);
   return months.map(({ key, year, month, label }) => {
     const monthRevenue = roundMoney(revenue.get(key) || 0);
     const monthExpenses = roundMoney(spending.get(key) || 0);

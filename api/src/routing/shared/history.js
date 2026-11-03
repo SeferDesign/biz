@@ -1,7 +1,7 @@
 const numericFields = new Set([
-  'account', 'client_id', 'cost', 'goal_year', 'hours', 'id', 'rate', 'taxrate', 'total', 'vendor_id', 'year'
+  'account', 'client_id', 'cost', 'goal_year', 'hours', 'id', 'rate', 'recurring_rule_id', 'taxrate', 'total', 'vendor_id', 'year'
 ]);
-const booleanFields = new Set(['discount', 'hourly', 'international', 'paid']);
+const booleanFields = new Set(['discount', 'hourly', 'international', 'is_planned', 'paid']);
 
 export const historyFields = {
   client: ['name', 'contact', 'site_url', 'logo', 'address1', 'address2', 'zipcode', 'city', 'state',
@@ -9,7 +9,8 @@ export const historyFields = {
     'preferred_paymenttype', 'currentrate', 'payment_terms'],
   invoice: ['client_id', 'date', 'cost', 'paid', 'paiddate', 'paymenttype', 'description', 'status', 'currency'],
   invoiceLine: ['description', 'hours', 'rate', 'total', 'hourly', 'discount'],
-  expense: ['name', 'vendor_id', 'date', 'cost', 'notes', 'account'],
+  expense: ['name', 'vendor_id', 'date', 'cost', 'notes', 'account', 'is_planned', 'recurring_rule_id'],
+  recurringExpense: ['name', 'vendor_id', 'cost', 'account', 'interval_unit', 'interval_count', 'start_date', 'end_date'],
   vendor: ['name', 'category', 'notes'],
   year: ['year', 'taxrate', 'goal_year', 'goals_months']
 };

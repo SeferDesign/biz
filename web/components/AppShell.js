@@ -71,7 +71,13 @@ const overviewNavigation = [
     children: [{ href: '/settings/templates', label: 'Templates' }]
   },
   { href: '/vendors', label: 'Vendors', icon: Building2, iconColor: iconColors.vendors },
-  { href: '/expenses', label: 'Expenses', icon: Receipt, iconColor: iconColors.expenses },
+  {
+    href: '/expenses',
+    label: 'Expenses',
+    icon: Receipt,
+    iconColor: iconColors.expenses,
+    children: [{ href: '/expenses/recurring', label: 'Recurring' }]
+  },
   { href: '/years', label: 'Years', icon: CalendarDays, iconColor: iconColors.years }
 ];
 
@@ -88,6 +94,8 @@ const staticBreadcrumbs = {
   '/invoices': [{ label: 'Workspace', href: '/' }, { label: 'Invoices' }],
   '/vendors': [{ label: 'Workspace', href: '/' }, { label: 'Vendors' }],
   '/expenses': [{ label: 'Workspace', href: '/' }, { label: 'Expenses' }],
+  '/expenses/recurring': [{ label: 'Workspace', href: '/' }, { label: 'Expenses', href: '/expenses' }, { label: 'Recurring' }],
+  '/expenses/recurring/new': [{ label: 'Workspace', href: '/' }, { label: 'Expenses', href: '/expenses' }, { label: 'Recurring', href: '/expenses/recurring' }, { label: 'New' }],
   '/years': [{ label: 'Workspace', href: '/' }, { label: 'Years' }],
   '/best': [{ label: 'Insights' }, { label: 'Best Performances' }],
   '/payments': [{ label: 'Insights' }, { label: 'Payment Options' }],
@@ -116,6 +124,16 @@ function getBreadcrumbItems(pathname) {
   if (staticBreadcrumbs[pathname]) return staticBreadcrumbs[pathname];
 
   const segments = pathname.split('/').filter(Boolean);
+  if (segments[0] === 'expenses' && segments[1] === 'recurring' && segments[2]) {
+    const items = [
+      { label: 'Workspace', href: '/' },
+      { label: 'Expenses', href: '/expenses' },
+      { label: 'Recurring', href: '/expenses/recurring' }
+    ];
+    items.push({ label: `Rule #${segments[2]}`, href: `/expenses/recurring/${segments[2]}/edit` });
+    if (segments[3] === 'edit') items.push({ label: 'Edit' });
+    return items;
+  }
   const resource = resourceBreadcrumbs[segments[0]];
   if (!resource) return [{ label: segments.at(-1)?.replaceAll('-', ' ') || 'Page' }];
 
@@ -136,11 +154,12 @@ function NavItem({ pathname, item }) {
   const isRouteActive = (href) => href === '/'
     ? pathname === '/'
     : pathname === href || pathname.startsWith(`${href}/`);
-  const active = isRouteActive(item.href) || item.children?.some((child) => isRouteActive(child.href));
+  const activeChild = item.children?.some((child) => isRouteActive(child.href)) || false;
+  const active = !activeChild && isRouteActive(item.href);
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={active} tooltip={item.label}>
-        <Link href={item.href} aria-current={isRouteActive(item.href) ? 'page' : undefined} onClick={() => setOpenMobile(false)}>
+        <Link href={item.href} aria-current={!activeChild && isRouteActive(item.href) ? 'page' : undefined} onClick={() => setOpenMobile(false)}>
           <item.icon className={item.iconColor} />
           <span>{item.label}</span>
         </Link>

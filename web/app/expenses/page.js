@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ResourcePage } from '../../components/ResourcePage.js';
+import { ResourcePage, StatusBadge } from '../../components/ResourcePage.js';
 import { formatMoney, formatTableDate, parsePage } from '../../lib/api.js';
 import { getApiData } from '../../lib/api-server.js';
 import { Button } from '../../components/ui/button.js';
@@ -22,6 +22,7 @@ export default async function ExpensesPage({ searchParams }) {
           <Button asChild size="sm" variant={!filter ? 'default' : 'outline'}><Link href="/expenses" aria-current={!filter ? 'page' : undefined}>Recent</Link></Button>
           <Button asChild size="sm" variant={filter === 'inactive' ? 'default' : 'outline'}><Link href="/expenses?inactive=true" aria-current={filter === 'inactive' ? 'page' : undefined}>Past</Link></Button>
           <Button asChild size="sm" variant={filter === 'future' ? 'default' : 'outline'}><Link href="/expenses?future=true" aria-current={filter === 'future' ? 'page' : undefined}>Upcoming</Link></Button>
+          <Button asChild size="sm" variant="outline"><Link href="/expenses/recurring">Recurring</Link></Button>
           <Button asChild size="sm" variant="outline"><Link href="/expenses/bulk">Spreadsheet</Link></Button>
         </ButtonGroup>
       </nav>
@@ -44,6 +45,7 @@ export default async function ExpensesPage({ searchParams }) {
               : '-';
           } },
           { key: 'account', label: 'Account' },
+          { key: 'status', label: 'Status', render: (expense) => expense.is_planned ? <StatusBadge status="planned" /> : '-' },
           { key: 'cost', label: 'Cost', className: 'numeric-cell', render: (expense) => formatMoney(expense.cost) }
         ]}
       />

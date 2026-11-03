@@ -96,6 +96,14 @@ test('monthly chart goals prefer month targets and fall back to the annual goal'
   assert.equal(monthlyGoal(years, 2025, 2), 3000);
   assert.equal(monthlyGoal(years, 2024, 1), null);
   assert.equal(monthlyFinances([{ key: '2025-01', year: 2025, month: 1, label: 'January' }], { years })[0].goal, 2000);
+  const january = monthlyFinances(
+    [{ key: '2025-01', year: 2025, month: 1, label: 'January' }],
+    { years, expenses: [
+      { date: '2025-01-10', cost: 5 },
+      { date: '2025-01-15', cost: 900, is_planned: true }
+    ] }
+  )[0];
+  assert.equal(january.expenses, 5);
 });
 
 test('finance legend and tooltip series order does not change stacking or revenue values', async () => {

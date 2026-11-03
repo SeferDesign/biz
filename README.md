@@ -49,6 +49,9 @@ rerunning the seed. Production user seeding requires both
 `npm run local -- mysql` to open a MySQL client. Production `DATABASE_URL`
 values must use the `mysql://` scheme.
 
+To add the sample recurring expenses without reseeding or changing existing
+records, run `npm run local -- seed-recurring`. This command is safe to rerun.
+
 To import a legacy live Rails/PostgreSQL dump into local MySQL, run:
 
 ```bash

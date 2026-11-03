@@ -63,7 +63,9 @@ export default function vendorsRouter(store) {
     const id = parseId(req.params.id);
     if (!id) return res.status(400).json({ error: 'Vendor id must be a positive integer' });
     const before = await store.getVendor(id);
-    if (!before || !await store.deleteVendor(id)) return res.status(404).json({ error: 'Vendor not found' });
+    if (!before) return res.status(404).json({ error: 'Vendor not found' });
+    if (await store.hasVendorUsage(id)) return res.status(409).json({ error: 'Vendor is used by existing expenses or recurring rules' });
+    if (!await store.deleteVendor(id)) return res.status(404).json({ error: 'Vendor not found' });
     await writeHistory(store, req, { entityType: 'vendor', entityId: id, action: 'deleted', before, fields: historyFields.vendor });
     return res.sendStatus(204);
   });

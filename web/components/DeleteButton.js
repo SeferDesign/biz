@@ -18,7 +18,7 @@ import {
   AlertDialogTrigger
 } from './ui/alert-dialog.js';
 
-export default function DeleteButton({ endpoint, returnTo, label = 'Delete record' }) {
+export default function DeleteButton({ endpoint, returnTo, label = 'Delete record', description = 'This action cannot be undone.' }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState('');
@@ -54,7 +54,7 @@ export default function DeleteButton({ endpoint, returnTo, label = 'Delete recor
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{label}?</AlertDialogTitle>
-            <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+            <AlertDialogDescription>{description}</AlertDialogDescription>
           </AlertDialogHeader>
           {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
           <AlertDialogFooter>

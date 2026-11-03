@@ -818,6 +818,89 @@ paths:
           description: Invalid Stripe signature
         '503':
           description: Stripe webhooks are not configured
+  /recurring-expenses:
+    get:
+      summary: List recurring expense rules
+      responses:
+        '200':
+          description: Recurring rules and their next scheduled dates
+    post:
+      summary: Create a recurring expense rule and its first planned occurrence
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, vendor_id, start_date, cost, account, interval_unit, interval_count]
+              properties:
+                name:
+                  type: string
+                vendor_id:
+                  type: integer
+                  nullable: true
+                start_date:
+                  type: string
+                  format: date
+                end_date:
+                  type: string
+                  format: date
+                  nullable: true
+                cost:
+                  type: number
+                  minimum: 0
+                account:
+                  type: string
+                  enum: [Business, Personal]
+                interval_unit:
+                  type: string
+                  enum: [week, month, year]
+                interval_count:
+                  type: integer
+                  minimum: 1
+                  maximum: 52
+                notes:
+                  type: string
+      responses:
+        '201':
+          description: Rule and first planned expense created
+        '400':
+          description: Invalid recurring expense rule
+  /recurring-expenses/{id}:
+    get:
+      summary: Get a recurring expense rule
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Recurring expense rule
+        '404':
+          description: Recurring rule not found
+    patch:
+      summary: Update or pause a recurring expense rule
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Recurring rule updated
+        '404':
+          description: Recurring rule not found
+    delete:
+      summary: Delete a recurring expense rule and its future planned expenses
+      description: Past actual expenses are retained and detached from the deleted rule.
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '204':
+          description: Recurring rule deleted; historical expenses preserved
+        '404':
+          description: Recurring rule not found
   /expenses:
     get:
       summary: List expenses; page and page_size opt in to a paged response with items and total
@@ -830,6 +913,16 @@ paths:
           schema:
             type: boolean
           description: Return all expenses for spreadsheet editing.
+        - name: future
+          in: query
+          schema:
+            type: boolean
+          description: Include upcoming expenses, including planned recurring occurrences.
+        - name: inactive
+          in: query
+          schema:
+            type: boolean
+          description: Return past actual expenses; planned occurrences are excluded.
       responses:
         '200':
           description: Expense list
@@ -1139,6 +1232,7 @@ components:
       type: object
       required:
         - name
+        - vendor_id
         - date
         - cost
       properties:
@@ -1146,7 +1240,6 @@ components:
           type: string
         vendor_id:
           type: integer
-          nullable: true
         date:
           type: string
           format: date

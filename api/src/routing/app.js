@@ -9,6 +9,7 @@ import { createOriginProtection, createRateLimiters } from './security.js';
 import { MySqlStore } from '../db/store.js';
 import clientsRouter from './clients/routes.js';
 import expensesRouter from './expenses/routes.js';
+import recurringExpensesRouter from './recurring-expenses/routes.js';
 import invoicesRouter from './invoices/routes.js';
 import invoiceTemplatesRouter from './invoice-templates/routes.js';
 import backupStatusRouter from './backup-status/routes.js';
@@ -207,6 +208,7 @@ export function createApp({
   app.use('/v1', stripeRouter(store, { stripe, appUrl: publicAppUrl, notify: sendPaymentNotification }));
   app.use('/v1', yearsRouter(store));
   app.use('/v1', expensesRouter(store));
+  app.use('/v1', recurringExpensesRouter(store));
   app.use('/v1', vendorsRouter(store));
   app.use('/v1', searchRouter(store));
   app.use('/v1', dashboardRouter(store));

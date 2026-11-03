@@ -11,6 +11,7 @@ import { recordsPerPage } from '../lib/api.js';
 import Notice from './Notice.js';
 import { DatePicker } from './ui/date-picker.js';
 import { Combobox } from './ui/combobox.js';
+import { StatusBadge } from './ResourcePage.js';
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from './ui/empty.js';
 import { getPaginationItems, Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './ui/pagination.js';
 
@@ -56,6 +57,7 @@ async function requestExpenses(url, method, expenses) {
 }
 
 function SheetCell({ label, type = 'text', value, onChange, vendors, step }) {
+  if (type === 'status') return value == null ? '-' : <StatusBadge status={value ? 'planned' : 'actual'} />;
   if (type === 'date') {
     return <DatePicker aria-label={label} label={label} value={value} onChange={onChange} compact className="spreadsheet-date-picker" />;
   }
@@ -94,6 +96,7 @@ function ExpenseRow({ expense, vendors, label, onChange, showId = false, rowClas
     ['vendor_id', 'Vendor', 'vendor'],
     ['account', 'Account', 'account'],
     ['cost', 'Cost', 'number'],
+    ['is_planned', 'Status', 'status'],
     ['notes', 'Notes', 'text']
   ];
 
@@ -101,7 +104,7 @@ function ExpenseRow({ expense, vendors, label, onChange, showId = false, rowClas
     <tr className={rowClassName}>
       {showId && <td className="sheet-id">{expense.id}</td>}
       {fields.map(([field, title, type]) => (
-        <td key={field} className={field === 'cost' ? 'numeric-cell' : undefined}>
+        <td key={field} className={field === 'cost' ? 'numeric-cell' : field === 'is_planned' ? 'status-cell' : undefined}>
           <SheetCell
             label={`${label} ${title}`}
             type={type}
@@ -123,7 +126,7 @@ function SpreadsheetTable({ children, includeId = false, variant = 'existing' })
         <thead>
           <tr>
             {includeId && <th>ID</th>}
-            <th>Date</th><th>Expense</th><th>Vendor</th><th>Account</th><th className="numeric-cell">Cost</th><th>Notes</th>
+            <th>Date</th><th>Expense</th><th>Vendor</th><th>Account</th><th className="numeric-cell">Cost</th><th>Status</th><th>Notes</th>
           </tr>
         </thead>
         <tbody>{children}</tbody>
@@ -184,9 +187,9 @@ export default function ExpenseSpreadsheet({ initialExpenses, vendors, apiBaseUr
       setError('Enter at least one new expense row.');
       return;
     }
-    const invalid = entered.find((expense) => !expense.name.trim() || !expense.date || expense.cost === '' || !Number.isFinite(Number(expense.cost)) || !expense.account);
+    const invalid = entered.find((expense) => !expense.name.trim() || !expense.vendor_id || !expense.date || expense.cost === '' || !Number.isFinite(Number(expense.cost)) || !expense.account);
     if (invalid) {
-      setError('Each new row needs a date, expense name, account, and numeric cost.');
+      setError('Each new row needs a vendor, date, expense name, account, and numeric cost.');
       return;
     }
     setBusy(true);

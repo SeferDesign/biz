@@ -840,8 +840,118 @@ test('resource lists support pagination without changing unpaged responses', asy
   assert.equal((await request(app).get('/v1/invoices?page=0')).status, 400);
 });
 
-test('dashboard endpoint returns compact totals and recent invoice labels', async () => {
+test('recurring expense rules create a planned occurrence and support pausing and resuming', async () => {
   const app = createTestApp();
+  const missingVendor = await request(app).post('/v1/recurring-expenses').send({
+    name: 'Monthly software', start_date: '2027-01-31', cost: 50,
+    account: 'Business', interval_unit: 'month', interval_count: 1
+  });
+  assert.equal(missingVendor.status, 400);
+  const created = await request(app).post('/v1/recurring-expenses').send({
+    name: 'Monthly software', vendor_id: 1, start_date: '2027-01-31', cost: 50,
+    account: 'Business', interval_unit: 'month', interval_count: 1
+  });
+
+  assert.equal(created.status, 201);
+  assert.equal(created.body.rule.next_date, '2027-01-31');
+  assert.equal(created.body.expense.is_planned, true);
+  assert.equal(created.body.expense.date, '2027-01-31');
+  const fetched = await request(app).get(`/v1/recurring-expenses/${created.body.rule.id}`);
+  assert.equal(fetched.body.name, 'Monthly software');
+  const updated = await request(app).patch(`/v1/recurring-expenses/${created.body.rule.id}`).send({ cost: 60 });
+  assert.equal(updated.body.cost, 60);
+  assert.equal((await request(app).get('/v1/expenses?all=true')).body.find((expense) => expense.is_planned).cost, 60);
+  const paused = await request(app).patch(`/v1/recurring-expenses/${created.body.rule.id}`).send({ active: false });
+  assert.equal(paused.body.active, false);
+  assert.equal((await request(app).get('/v1/expenses?all=true')).body.some((expense) => expense.is_planned), false);
+  const resumed = await request(app).patch(`/v1/recurring-expenses/${created.body.rule.id}`).send({ active: true });
+  assert.equal(resumed.body.active, true);
+  assert.equal((await request(app).get('/v1/expenses?all=true')).body.filter((expense) => expense.is_planned).length, 1);
+  assert.equal((await request(app).post('/v1/recurring-expenses').send({ name: 'Missing frequency' })).status, 400);
+});
+
+test('vendors used by expenses or recurring rules cannot be deleted', async () => {
+  const app = createTestApp();
+  const vendor = await request(app).post('/v1/vendors').send({ name: 'Recurring Vendor' });
+  const expense = await request(app).post('/v1/expenses').send({
+    name: 'One-off service', vendor_id: vendor.body.id, date: '2098-01-01', cost: 50, account: 'Business'
+  });
+  assert.equal(expense.status, 201);
+  assert.equal((await request(app).delete(`/v1/vendors/${vendor.body.id}`)).status, 409);
+  assert.equal((await request(app).delete(`/v1/expenses/${expense.body.id}`)).status, 204);
+  const rule = await request(app).post('/v1/recurring-expenses').send({
+    name: 'Monthly service', vendor_id: vendor.body.id, start_date: '2099-01-01', cost: 50,
+    account: 'Business', interval_unit: 'month', interval_count: 1
+  });
+
+  assert.equal(rule.status, 201);
+  assert.equal((await request(app).delete(`/v1/vendors/${vendor.body.id}`)).status, 409);
+  assert.equal((await request(app).get(`/v1/vendors/${vendor.body.id}`)).status, 200);
+});
+
+test('recurring expense catch-up activates overdue plans once and creates the next period', async () => {
+  const store = createMemoryStore();
+  const { rule } = await store.createRecurringExpenseRule({
+    name: 'Monthly supplies', vendor_id: 2, start_date: '2025-01-31', cost: 25,
+    account: 'Business', interval_unit: 'month', interval_count: 1
+  });
+
+  assert.equal(await store.processDueRecurringExpenses('2025-02-28'), 2);
+  assert.equal(await store.processDueRecurringExpenses('2025-02-28'), 0);
+  const expenses = (await store.getSnapshot()).expenses.filter((expense) => expense.recurring_rule_id === rule.id);
+  assert.deepEqual(expenses.map(({ date, is_planned }) => [date, is_planned]), [
+    ['2025-01-31', false], ['2025-02-28', false], ['2025-03-31', true]
+  ]);
+});
+
+test('deleting a planned occurrence skips it while leaving the recurring rule active', async () => {
+  const store = createMemoryStore();
+  const app = createTestApp({ store });
+  const created = await request(app).post('/v1/recurring-expenses').send({
+    name: 'Annual license', vendor_id: 1, start_date: '2099-01-31', cost: 120, account: 'Business',
+    interval_unit: 'year', interval_count: 1
+  });
+
+  assert.equal((await request(app).delete(`/v1/expenses/${created.body.expense.id}`)).status, 204);
+  assert.equal(await store.processDueRecurringExpenses('2099-01-31'), 0);
+  const rule = await store.getRecurringExpenseRule(created.body.rule.id);
+  const plans = (await store.getSnapshot()).expenses.filter((expense) =>
+    expense.recurring_rule_id === rule.id && expense.is_planned);
+  assert.equal(rule.active, true);
+  assert.equal(rule.next_date, '2100-01-31');
+  assert.deepEqual(plans.map((expense) => expense.date), ['2100-01-31']);
+});
+
+test('deleting a recurring rule removes planned expenses but preserves past actual expenses', async () => {
+  const store = createMemoryStore();
+  const app = createTestApp({ store });
+  const created = await request(app).post('/v1/recurring-expenses').send({
+    name: 'Monthly archive service', vendor_id: 1, start_date: '2099-01-31', cost: 40,
+    account: 'Business', interval_unit: 'month', interval_count: 1
+  });
+  const actual = await store.createExpense({
+    name: created.body.rule.name, vendor_id: 1, date: '2025-01-31', cost: 40,
+    account: 'Business', is_planned: false, recurring_rule_id: created.body.rule.id
+  });
+  const deleted = await request(app).delete(`/v1/recurring-expenses/${created.body.rule.id}`);
+  const expenses = (await store.getSnapshot()).expenses;
+
+  assert.equal(deleted.status, 204);
+  assert.equal(await store.getRecurringExpenseRule(created.body.rule.id), undefined);
+  assert.equal(expenses.some((expense) => expense.id === created.body.expense.id), false);
+  assert.deepEqual(expenses.find((expense) => expense.id === actual.id), {
+    ...actual,
+    recurring_rule_id: null
+  });
+  assert.equal(store.history.some((entry) => entry.entity_type === 'recurring_expense' && entry.action === 'deleted'), true);
+});
+
+test('dashboard endpoint returns compact totals and recent invoice labels', async () => {
+  const store = createMemoryStore();
+  const year = new Date().getUTCFullYear();
+  await store.createExpense({ name: 'Actual dashboard expense', date: `${year}-01-10`, cost: 10 });
+  await store.createExpense({ name: 'Planned dashboard expense', date: `${year}-01-11`, cost: 900, is_planned: true });
+  const app = createTestApp({ store });
   const response = await request(app).get('/v1/dashboard');
 
   assert.equal(response.status, 200);
@@ -851,6 +961,7 @@ test('dashboard endpoint returns compact totals and recent invoice labels', asyn
   assert.equal(response.body.recentInvoices[0].display_id, 'acmeinc-100003');
   assert.equal(typeof response.body.yearRevenue, 'number');
   assert.equal(typeof response.body.monthlyExpenses, 'object');
+  assert.equal(response.body.yearExpenses, 10);
 });
 
 test('client history records actor, redacted changes, updates, and deletion', async () => {
@@ -932,7 +1043,9 @@ test('invoice, expense, vendor, and year changes appear in the history feed', as
 });
 
 test('year endpoints return records and report totals', async () => {
-  const app = createTestApp();
+  const store = createMemoryStore();
+  const app = createTestApp({ store });
+  await store.createExpense({ name: 'Planned equipment', date: '2025-03-20', cost: 5000, is_planned: true });
 
   const years = await request(app).get('/v1/years');
   const income = await request(app).get('/v1/years/2025/income');
@@ -946,6 +1059,7 @@ test('year endpoints return records and report totals', async () => {
   assert.equal(years.body[0].year, 2025);
   assert.equal(income.body.total, 2150);
   assert.equal(yearExpenses.body.total, 102.49);
+  assert.equal(yearExpenses.body.expenses.some((expense) => expense.name === 'Planned equipment'), false);
   assert.equal(year.body.net_income, 2047.51);
   assert.equal(edit.body.year.year, 2025);
   assert.deepEqual(calendarEdit.body, edit.body);
@@ -981,6 +1095,9 @@ test('invoice, expense, and vendor endpoints return useful responses', async () 
   const invalidStripe = await request(app).get('/v1/invoices/1/stripe');
   const expenseList = await request(app).get('/v1/expenses?inactive=true');
   const vendorList = await request(app).get('/v1/vendors');
+  const forgedPlanned = await request(app).post('/v1/expenses').send({
+    name: 'Forged plan', date: '2026-01-01', cost: 100, is_planned: true
+  });
 
   assert.equal(email.status, 200);
   assert.equal(email.body.status, 'sent');
@@ -996,6 +1113,7 @@ test('invoice, expense, and vendor endpoints return useful responses', async () 
   assert.ok(emailSends.body[0].sent_at);
   assert.equal(invalidStripe.status, 400);
   assert.equal(expenseList.status, 200);
+  assert.equal(forgedPlanned.status, 400);
   assert.equal(expenseList.body.length, 2);
   assert.equal(vendorList.status, 200);
   assert.deepEqual(vendorList.body.map((vendor) => vendor.name), ['Adobe', 'Office Depot']);
@@ -1244,6 +1362,9 @@ test('clients, vendors, years, and expenses support validated CRUD', async () =>
   assert.equal((await request(app).get(`/v1/years/${createdYear.body.id}`)).status, 404);
 
   assert.equal((await request(app).post('/v1/expenses').send({ name: 'Invalid expense' })).status, 400);
+  assert.equal((await request(app).post('/v1/expenses').send({
+    name: 'Missing vendor', date: '2025-03-03', cost: 20, account: 'Business'
+  })).status, 400);
   assert.equal((await request(app).post('/v1/expenses').send({ name: 'Invalid account', date: '2025-03-03', cost: 20, account: 'Personal-ish' })).status, 400);
   const createdExpense = await request(app).post('/v1/expenses').send({
     name: 'Domain renewal',
@@ -1275,6 +1396,9 @@ test('expenses support transactional bulk creation and updates', async () => {
   };
   const app = createTestApp({ store });
   const before = await request(app).get('/v1/expenses?all=true');
+  assert.equal((await request(app).post('/v1/expenses/bulk').send({ expenses: [{
+    name: 'No vendor', date: '2025-05-31', cost: 50, account: 'Business'
+  }] })).status, 400);
   const created = await request(app).post('/v1/expenses/bulk').send({ expenses: [
     { name: 'Annual hosting', vendor_id: 1, date: '2025-06-01', cost: 120, account: 'Business' },
     { name: 'Domain renewal', vendor_id: 2, date: '2025-06-02', cost: 18, account: 'Business' },

@@ -371,7 +371,7 @@
   }
 
   .spreadsheet-table {
-    @apply min-w-[1040px] w-full table-fixed border-collapse text-sm;
+    @apply min-w-[1200px] w-full table-fixed border-collapse text-sm;
   }
 
   .spreadsheet-table th {
@@ -425,7 +425,16 @@
 
   .spreadsheet-table-with-id th:nth-child(7),
   .spreadsheet-table:not(.spreadsheet-table-with-id) th:nth-child(6) {
+    @apply w-24;
+  }
+
+  .spreadsheet-table-with-id th:nth-child(8),
+  .spreadsheet-table:not(.spreadsheet-table-with-id) th:nth-child(7) {
     @apply w-56;
+  }
+
+  .spreadsheet-table .status-cell {
+    @apply text-center;
   }
 
   .spreadsheet-table .sheet-id {

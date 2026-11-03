@@ -27,5 +27,6 @@ export function yearIncome(year, invoices) {
 }
 
 export function yearExpenses(year, expenses) {
-  return expenses.filter((expense) => new Date(`${expense.date}T00:00:00Z`).getUTCFullYear() === year);
+  return expenses.filter((expense) => expense.is_planned !== true && Number(expense.is_planned) !== 1 &&
+    new Date(`${expense.date}T00:00:00Z`).getUTCFullYear() === year);
 }
