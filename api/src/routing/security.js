@@ -1,4 +1,6 @@
 import { rateLimit } from 'express-rate-limit';
+const bearerPattern = /^Bearer\s+\S+$/i;
+const sessionCookiePattern = /(?:^|;\s*)biz_session=/;
 
 function createLimiter(identifier, defaults, options) {
   return rateLimit({
@@ -33,10 +35,10 @@ export function createRateLimiters(options = {}) {
 
 export function createOriginProtection(allowedOrigins) {
   return (req, res, next) => {
-    if (['GET', 'HEAD', 'OPTIONS'].includes(req.method) || /^Bearer\s+\S+$/i.test(req.get('authorization') || '')) return next();
+    if (['GET', 'HEAD', 'OPTIONS'].includes(req.method) || bearerPattern.test(req.get('authorization') || '')) return next();
     const origin = req.get('origin');
     const sameOrigin = `${req.protocol}://${req.get('host')}`;
-    const hasSessionCookie = /(?:^|;\s*)biz_session=/.test(req.get('cookie') || '');
+    const hasSessionCookie = sessionCookiePattern.test(req.get('cookie') || '');
     if ((origin && origin !== sameOrigin && !allowedOrigins.includes(origin)) ||
         (!origin && (hasSessionCookie || req.get('sec-fetch-site') === 'cross-site'))) {
       return res.status(403).json({ error: 'Request origin is not allowed' });

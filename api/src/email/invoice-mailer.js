@@ -3,6 +3,7 @@ import { createInvoicePdf } from '../pdf/invoice-pdf.js';
 import { companyEmailFrom, companyInfo, displayId, displayIdNumber, formatMailingAddress } from '@seferbiz/company';
 
 let transporter;
+const trailingSlashPattern = /\/$/;
 
 function getTransporter() {
   if (!process.env.SMTP_HOST) {
@@ -34,7 +35,7 @@ export async function sendInvoiceEmail({ invoice, client, lines }, transport) {
     const quantity = line.hours ? ` (${line.hours} hours${line.rate ? ` at ${currency} ${line.rate}/hour` : ''})` : '';
     return `- ${line.description || 'Invoice item'}${quantity}: ${currency} ${amount}`;
   });
-  const appUrl = process.env.PUBLIC_APP_URL?.replace(/\/$/, '');
+  const appUrl = process.env.PUBLIC_APP_URL?.replace(trailingSlashPattern, '');
   const invoiceDisplayId = displayId(client?.name, invoice.id);
   const invoiceDisplayNumber = displayIdNumber(invoice.id);
   const invoiceUrl = appUrl

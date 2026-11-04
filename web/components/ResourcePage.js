@@ -7,6 +7,7 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from './ui/empty.js'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card.js';
 import { Separator } from './ui/separator.js';
 import { getPaginationItems, Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './ui/pagination.js';
+const whitespacePattern = /\s+/;
 
 export function ResourcePage({ title, description, data, error, columns, renderRecords, countLabel, count, total, hideHeading = false, actionHref, actionLabel, pageHref, page = 1, pageParam = 'page' }) {
   const records = Array.isArray(data) ? data : [];
@@ -52,7 +53,7 @@ export function ResourcePage({ title, description, data, error, columns, renderR
         <div className="table-wrap">
           <Table className="data-table">
             <TableHeader>
-              <TableRow>{columns.map((column) => <TableHead className={column.className?.split(/\s+/).filter((name) => ['numeric-cell', 'date-cell'].includes(name)).join(' ') || undefined} key={column.key}>{column.label}</TableHead>)}</TableRow>
+              <TableRow>{columns.map((column) => <TableHead className={column.className?.split(whitespacePattern).filter((name) => ['numeric-cell', 'date-cell'].includes(name)).join(' ') || undefined} key={column.key}>{column.label}</TableHead>)}</TableRow>
             </TableHeader>
             <TableBody>
               {visibleRecords.map((record) => (

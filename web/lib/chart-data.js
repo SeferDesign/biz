@@ -1,6 +1,7 @@
 const monthName = new Intl.DateTimeFormat('en-US', { month: 'long', timeZone: 'UTC' });
 const shortMonthName = new Intl.DateTimeFormat('en-US', { month: 'short', timeZone: 'UTC' });
 const dayMs = 24 * 60 * 60 * 1000;
+const monthKeyPattern = /^\d{4}-\d{2}$/;
 
 function roundMoney(value) {
   return Math.round((value + Number.EPSILON) * 100) / 100;
@@ -70,7 +71,7 @@ export function totalsByMonth(records, dateOf, amountOf) {
   const totals = new Map();
   for (const record of records) {
     const key = String(dateOf(record) || '').slice(0, 7);
-    if (!/^\d{4}-\d{2}$/.test(key)) continue;
+    if (!monthKeyPattern.test(key)) continue;
     totals.set(key, (totals.get(key) || 0) + Number(amountOf(record) || 0));
   }
   return totals;

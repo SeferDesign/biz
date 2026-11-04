@@ -52,7 +52,7 @@ export default function recurringExpensesRouter(store) {
   router.post('/recurring-expenses', async (req, res) => {
     const error = validateRule(req.body || {});
     if (error) return res.status(400).json({ error });
-    if (req.body.vendor_id && !await store.getVendor(Number(req.body.vendor_id))) {
+    if (req.body.vendor_id && !await store.hasVendor(Number(req.body.vendor_id))) {
       return res.status(400).json({ error: 'Vendor not found' });
     }
     const result = await store.createRecurringExpenseRule(normalizeRule(req.body));
@@ -78,7 +78,7 @@ export default function recurringExpensesRouter(store) {
     const next = { ...current, ...input };
     const error = validateRule(next);
     if (error) return res.status(400).json({ error });
-    if (input.vendor_id && !await store.getVendor(Number(input.vendor_id))) {
+    if (input.vendor_id && !await store.hasVendor(Number(input.vendor_id))) {
       return res.status(400).json({ error: 'Vendor not found' });
     }
     return res.json(await store.updateRecurringExpenseRule(id, normalizeRule(input)));

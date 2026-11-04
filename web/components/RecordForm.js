@@ -17,6 +17,8 @@ import { Skeleton } from './ui/skeleton.js';
 import { Spinner } from './ui/spinner.js';
 
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const formTitlePrefixPattern = /^(New|Edit)\s+/i;
+const recordPlaceholderPattern = /:(id|year)\b/g;
 
 function initialValue(field, initialValues) {
   const value = initialValues[field.name] ?? field.defaultValue ?? (field.type === 'checkbox' ? false : '');
@@ -196,7 +198,7 @@ export default function RecordForm({ title, description, fields, initialValues =
           return;
         }
       }
-      const resourceLabel = title.replace(/^(New|Edit)\s+/i, '');
+      const resourceLabel = title.replace(formTitlePrefixPattern, '');
       if (saveMethod === 'POST') {
         const recordName = String(body?.name ?? values.name ?? '').trim()
           || (values.year ? String(values.year) : '')
@@ -204,7 +206,7 @@ export default function RecordForm({ title, description, fields, initialValues =
           || (body?.display_id ? `${resourceLabel} ${body.display_id}` : '')
           || `${resourceLabel}${body?.id != null ? ` #${body.id}` : ''}`;
         const recordHref = createdRecordHref && body?.id != null
-          ? createdRecordHref.replace(/:(id|year)\b/g, (placeholder, key) => encodeURIComponent(String(body[key])))
+          ? createdRecordHref.replace(recordPlaceholderPattern, (placeholder, key) => encodeURIComponent(String(body[key])))
           : null;
         toast.success(recordName, {
           description: `${resourceLabel} created`,

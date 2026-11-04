@@ -43,7 +43,7 @@ export default function invoiceTemplatesRouter(store) {
     const input = normalizeTemplate(req.body || {});
     const error = validateTemplate(input);
     if (error) return res.status(400).json({ error });
-    if (input.client_id != null && !await store.getClient(input.client_id)) {
+    if (input.client_id != null && !await store.hasClient(input.client_id)) {
       return res.status(400).json({ error: 'Client not found' });
     }
     return res.status(201).json(await store.createInvoiceTemplate(input));
@@ -56,7 +56,7 @@ export default function invoiceTemplatesRouter(store) {
     if (!Object.keys(input).length) return res.status(400).json({ error: 'At least one template field is required' });
     const error = validateTemplate(input, { partial: true });
     if (error) return res.status(400).json({ error });
-    if (input.client_id != null && !await store.getClient(input.client_id)) {
+    if (input.client_id != null && !await store.hasClient(input.client_id)) {
       return res.status(400).json({ error: 'Client not found' });
     }
     const template = await store.updateInvoiceTemplate(id, input);

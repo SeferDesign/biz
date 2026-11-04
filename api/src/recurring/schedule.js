@@ -1,11 +1,12 @@
 const intervalUnits = new Set(['week', 'month', 'year']);
+const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 
 function daysInMonth(year, month) {
   return new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
 }
 
 export function recurringDate(startDate, intervalUnit, intervalCount, occurrenceIndex) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !intervalUnits.has(intervalUnit) ||
+  if (!datePattern.test(startDate) || !intervalUnits.has(intervalUnit) ||
       !Number.isInteger(intervalCount) || intervalCount < 1 || !Number.isInteger(occurrenceIndex) || occurrenceIndex < 0) {
     throw new Error('Invalid recurring expense schedule');
   }

@@ -24,18 +24,19 @@ const invalidCredentials = { error: 'Invalid email, password, or two-factor code
 
 const resetRequestMessage = { message: 'If an account exists for that email, password reset instructions will be sent.' };
 const passwordResetTtlHours = 6;
+const ipv4Pattern = /^\d+\.\d+\.\d+\.\d+$/;
 
 function normalizeCookieDomain(value) {
   if (typeof value !== 'string') return '';
   const trimmed = value.trim().toLowerCase();
-  if (!trimmed || trimmed === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(trimmed)) return '';
+  if (!trimmed || trimmed === 'localhost' || ipv4Pattern.test(trimmed)) return '';
   return trimmed.startsWith('.') ? trimmed : `.${trimmed}`;
 }
 
 function inferCookieDomain(hostname) {
   if (typeof hostname !== 'string') return '';
   const lower = hostname.toLowerCase();
-  if (!lower || lower === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(lower)) return '';
+  if (!lower || lower === 'localhost' || ipv4Pattern.test(lower)) return '';
   const labels = lower.split('.').filter(Boolean);
   if (labels.length < 2) return '';
   return `.${labels.slice(-2).join('.')}`;
@@ -71,7 +72,7 @@ export function createAuthRouter(store, {
     ...webAuthn
   };
 
-  function relyingParty() {
+  const relyingParty = (() => {
     if (!publicAppUrl) return null;
     try {
       const appUrl = new URL(publicAppUrl);
@@ -81,7 +82,7 @@ export function createAuthRouter(store, {
     } catch {
       return null;
     }
-  }
+  })();
 
   function passkeyName(value) {
     return typeof value === 'string' && value.trim()
@@ -174,7 +175,7 @@ export function createAuthRouter(store, {
   });
 
   router.post('/passkeys/authentication/options', async (req, res) => {
-    const rp = relyingParty();
+    const rp = relyingParty;
     if (!rp) return res.status(503).json({ error: 'Passkey sign-in is not configured' });
     const options = await webAuthnApi.generateAuthenticationOptions({
       rpID: rp.id,
@@ -190,7 +191,7 @@ export function createAuthRouter(store, {
   });
 
   router.post('/passkeys/authentication/verify', async (req, res) => {
-    const rp = relyingParty();
+    const rp = relyingParty;
     const challengeId = req.body?.challenge_id;
     const response = req.body?.credential;
     if (!rp || typeof challengeId !== 'string' || typeof response?.id !== 'string') {
@@ -230,7 +231,7 @@ export function createAuthRouter(store, {
 
   router.post('/passkeys/registration/options', async (req, res) => {
     if (!requireUser(req, res)) return;
-    const rp = relyingParty();
+    const rp = relyingParty;
     if (!rp) return res.status(503).json({ error: 'Passkey enrollment is not configured' });
     const user = await store.getUserProfile(req.authUser.id);
     if (!user) return res.status(404).json({ error: 'User not found' });
@@ -263,7 +264,7 @@ export function createAuthRouter(store, {
 
   router.post('/passkeys/registration/verify', async (req, res) => {
     if (!requireUser(req, res)) return;
-    const rp = relyingParty();
+    const rp = relyingParty;
     const challengeId = req.body?.challenge_id;
     const response = req.body?.credential;
     if (!rp || typeof challengeId !== 'string' || !response || typeof response !== 'object') {
@@ -318,7 +319,7 @@ export function createAuthRouter(store, {
   router.post('/password-reset', async (req, res) => {
     const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
     if (email && email.length <= 255) {
-      const user = await store.getUserByEmail(email);
+      const user = await store.getPasswordResetUser(email);
       if (user) {
         const token = randomBytes(32).toString('base64url');
         const tokenDigest = createHash('sha256').update(token).digest('hex');

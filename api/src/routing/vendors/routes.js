@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { hasText, parseId, parsePagination } from '../shared/validation.js';
 import { historyFields, writeHistory } from '../shared/history.js';
+const leadingArticlePattern = /^(the|a|an)\s+/i;
 
 export default function vendorsRouter(store) {
   const router = Router();
@@ -12,8 +13,8 @@ export default function vendorsRouter(store) {
       const result = await store.listVendors(pagination);
       return res.json({ ...result, page: pagination.page, pageSize: pagination.pageSize });
     }
-    const vendors = (await store.getSnapshot()).vendors;
-    const sortableName = (name) => name.replace(/^(the|a|an)\s+/i, '');
+    const vendors = (await store.getSnapshot({ vendors: true })).vendors;
+    const sortableName = (name) => name.replace(leadingArticlePattern, '');
     return res.json([...vendors].sort((left, right) => sortableName(left.name).localeCompare(sortableName(right.name))));
   });
 

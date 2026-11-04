@@ -7,6 +7,8 @@ if (!publicApiBaseUrl) {
 const apiBaseUrl = (process.env.API_INTERNAL_URL || publicApiBaseUrl).replace(/\/$/, '');
 
 const defaultApiVersion = 'v1';
+const surroundingSlashesPattern = /^\/+|\/+$/g;
+const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 
 export const browserApiBaseUrl = `${publicApiBaseUrl}/${defaultApiVersion}`;
 export const recordsPerPage = 12;
@@ -20,7 +22,7 @@ export function parsePage(value) {
 export async function getApiData(path, { version = defaultApiVersion, accessToken } = {}) {
   try {
     const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-    const versionPrefix = version ? `/${String(version).replace(/^\/+|\/+$/g, '')}` : '';
+    const versionPrefix = version ? `/${String(version).replace(surroundingSlashesPattern, '')}` : '';
     const headers = accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined;
     const response = await fetch(`${apiBaseUrl}${versionPrefix}${normalizedPath}`, { cache: 'no-store', headers });
     const body = await response.json().catch(() => null);
@@ -47,7 +49,7 @@ export function formatDate(value) {
 export function formatTableDate(value) {
   if (!value) return '-';
   const normalized = String(value).slice(0, 10);
-  return /^\d{4}-\d{2}-\d{2}$/.test(normalized) ? normalized : '-';
+  return datePattern.test(normalized) ? normalized : '-';
 }
 
 export function formatDateTime(value) {

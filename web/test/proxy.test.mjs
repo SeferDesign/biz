@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { registerHooks } from 'node:module';
 import { NextRequest } from 'next/server.js';
+import { requestOrigin, isSameOriginRequest } from '../lib/request-origin.js';
 
 const hooks = registerHooks({
   resolve(specifier, context, nextResolve) {
@@ -9,6 +10,7 @@ const hooks = registerHooks({
   }
 });
 const { proxy } = await import('../proxy.js');
+const { POST: redirectApiRequest } = await import('../app/api/[...path]/route.js');
 hooks.deregister();
 
 function request(path = '/invoices?year=2026', token = 'signed-session') {
@@ -94,4 +96,44 @@ test('public pages bypass session checks and valid record links remain accessibl
   assert.equal(fetchMock.mock.callCount(), 0);
   assert.equal((await proxy(request('/invoices/1?access_token=public-link', ''))).headers.get('x-middleware-next'), '1');
   assert.equal(fetchMock.mock.callCount(), 1);
+});
+
+test('API redirects preserve methods, encoded paths, and raw query strings', async () => {
+  const response = await redirectApiRequest(new NextRequest('https://biz.example.test/api/v1/clients?q=a%2Bb&next=%2Finvoices', {
+    method: 'POST'
+  }), { params: Promise.resolve({ path: ['v1', 'clients', 'a/b'] }) });
+  assert.equal(response.status, 307);
+  assert.ok(response.headers.get('location').endsWith('/v1/clients/a%2Fb?q=a%2Bb&next=%2Finvoices'));
+});
+
+test('request origins reuse Next URLs while preserving canonicalization and forwarded headers', (context) => {
+  const previous = process.env.PUBLIC_APP_URL;
+  delete process.env.PUBLIC_APP_URL;
+  context.after(() => {
+    if (previous === undefined) delete process.env.PUBLIC_APP_URL;
+    else process.env.PUBLIC_APP_URL = previous;
+  });
+  const incoming = new NextRequest('https://biz.example.test/settings', {
+    headers: { host: 'biz.example.test', origin: 'https://biz.example.test' }
+  });
+  assert.equal(requestOrigin(incoming), 'https://biz.example.test');
+  assert.equal(isSameOriginRequest(incoming), true);
+  incoming.headers.set('origin', 'https://biz.example.test:443');
+  assert.equal(isSameOriginRequest(incoming), true);
+  incoming.headers.set('origin', 'https://attacker.example.test');
+  assert.equal(isSameOriginRequest(incoming), false);
+  incoming.headers.set('origin', 'not a URL');
+  assert.equal(isSameOriginRequest(incoming), false);
+  incoming.headers.set('x-forwarded-host', 'PUBLIC.example.test:443, internal:3000');
+  incoming.headers.set('x-forwarded-proto', 'https, http');
+  assert.equal(requestOrigin(incoming), 'https://public.example.test');
+  assert.equal(requestOrigin(new Request('http://internal/settings', { headers: { host: 'internal' } })), 'http://internal');
+  process.env.PUBLIC_APP_URL = 'https://configured.example.test/base';
+  assert.equal(requestOrigin(incoming), 'https://configured.example.test');
+  assert.equal(requestOrigin(incoming), 'https://configured.example.test');
+  process.env.PUBLIC_APP_URL = 'https://changed.example.test';
+  assert.equal(requestOrigin(incoming), 'https://changed.example.test');
+  process.env.PUBLIC_APP_URL = 'file:///tmp/index.html';
+  incoming.headers.set('origin', 'null');
+  assert.equal(isSameOriginRequest(incoming), false);
 });

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+const recordLinkPattern = /^\/(?:clients|invoices)\/\d+$/;
 
 const apiBaseUrl = (
   process.env.API_INTERNAL_URL ||
@@ -24,7 +25,7 @@ async function isValidSession(token) {
 async function isValidRecordLink(request) {
   if (request.method !== 'GET') return false;
   const path = request.nextUrl.pathname;
-  if (!/^\/(?:clients|invoices)\/\d+$/.test(path)) return false;
+  if (!recordLinkPattern.test(path)) return false;
   const accessToken = request.nextUrl.searchParams.get('access_token');
   if (!accessToken) return false;
 

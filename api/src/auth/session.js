@@ -2,13 +2,17 @@ import { createCipheriv, createDecipheriv, createHash, createHmac, pbkdf2Sync, r
 
 export const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30;
 const base32Alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+const sessionTokenPattern = /^[A-Za-z0-9_-]{43}$/;
+const base32PaddingPattern = /[=\s]/g;
+const whitespacePattern = /\s+/g;
+const otpCodePattern = /^\d{6}$/;
 
 export function createSessionToken() {
   return randomBytes(32).toString('base64url');
 }
 
 export function hashSessionToken(token) {
-  if (typeof token !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(token)) return null;
+  if (typeof token !== 'string' || !sessionTokenPattern.test(token)) return null;
   return createHash('sha256').update(token).digest('hex');
 }
 
@@ -73,7 +77,7 @@ function decryptOtpSecret(user, encryptionKey) {
 
 function decodeBase32(value) {
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-  const normalized = value.toUpperCase().replace(/[=\s]/g, '');
+  const normalized = value.toUpperCase().replace(base32PaddingPattern, '');
   let bits = '';
   for (const character of normalized) {
     const index = alphabet.indexOf(character);
@@ -111,8 +115,8 @@ export function isOtpEnabled(user) {
 }
 
 export function validOtpTimestep(user, otpAttempt, encryptionKey, now = Date.now()) {
-  const code = typeof otpAttempt === 'string' ? otpAttempt.replace(/\s+/g, '') : '';
-  if (!/^\d{6}$/.test(code)) return null;
+  const code = typeof otpAttempt === 'string' ? otpAttempt.replace(whitespacePattern, '') : '';
+  if (!otpCodePattern.test(code)) return null;
   const secret = decryptOtpSecret(user, encryptionKey);
   if (!secret) return null;
 

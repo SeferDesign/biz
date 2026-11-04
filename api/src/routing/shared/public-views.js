@@ -5,6 +5,7 @@ const clientFields = [
 ];
 const invoiceFields = ['id', 'display_id_number', 'display_id', 'date', 'cost', 'total', 'currency', 'description', 'status', 'paid', 'paiddate', 'paymenttype', 'payment_status'];
 const lineFields = ['id', 'invoice_id', 'description', 'hourly', 'hours', 'rate', 'total', 'amount', 'discount'];
+export const invoiceClientFields = ['name', 'contact', 'address1', 'address2', 'city', 'state', 'zipcode', 'intinfo', 'payment_terms'];
 
 const pick = (record, fields) => Object.fromEntries(fields.filter((field) => record[field] !== undefined).map((field) => [field, record[field]]));
 
@@ -17,7 +18,7 @@ export function publicInvoice(invoice, client) {
   if (!view.paid && view.status !== 'paid') view.status = view.payment_status === 'processing' ? 'processing' : 'due';
   return {
     ...view,
-    client: client ? pick(client, ['name', 'contact', 'address1', 'address2', 'city', 'state', 'zipcode', 'intinfo', 'payment_terms']) : null
+    client: client ? pick(client, invoiceClientFields) : null
   };
 }
 

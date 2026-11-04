@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+const whitespacePattern = /\s+/;
 
 function Table({ className, ...props }) {
   return <table data-slot="table" className={cn('w-full caption-bottom text-sm', className)} {...props} />;
@@ -21,7 +22,7 @@ function TableRow({ className, ...props }) {
 }
 
 function TableHead({ className, ...props }) {
-  const alignment = className?.split(/\s+/).includes('numeric-cell') ? 'text-end' : 'text-left';
+  const alignment = className?.split(whitespacePattern).includes('numeric-cell') ? 'text-end' : 'text-left';
   return <th data-slot="table-head" className={cn('h-10 px-2 align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0', alignment, className)} {...props} />;
 }
 

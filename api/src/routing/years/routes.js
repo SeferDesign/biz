@@ -31,7 +31,7 @@ export default function yearsRouter(store) {
   const router = Router();
 
   router.get('/years', async (req, res) => {
-    const years = (await store.getSnapshot()).years;
+    const years = (await store.getSnapshot({ years: true })).years;
     return res.json([...years].sort((left, right) => right.year - left.year));
   });
 
@@ -59,7 +59,7 @@ export default function yearsRouter(store) {
   });
 
   router.get('/years/:id/income', async (req, res) => {
-    const snapshot = await store.getSnapshot();
+    const snapshot = await store.getSnapshot({ years: ['id', 'year'], clients: ['id', 'name'], invoices: true });
     const year = findYear(req.params.id, snapshot.years);
     if (!year) return res.status(404).json({ error: 'Year not found' });
     const clientsById = new Map(snapshot.clients.map((client) => [Number(client.id), client]));
@@ -69,7 +69,7 @@ export default function yearsRouter(store) {
   });
 
   router.get('/years/:id/expenses', async (req, res) => {
-    const snapshot = await store.getSnapshot();
+    const snapshot = await store.getSnapshot({ years: ['id', 'year'], expenses: true });
     const year = findYear(req.params.id, snapshot.years);
     if (!year) return res.status(404).json({ error: 'Year not found' });
     const records = yearExpenses(year.year, snapshot.expenses);
@@ -77,7 +77,10 @@ export default function yearsRouter(store) {
   });
 
   router.get('/years/:id/income/csv', async (req, res) => {
-    const snapshot = await store.getSnapshot();
+    const snapshot = await store.getSnapshot({
+      years: ['id', 'year'], clients: ['id', 'name'],
+      invoices: ['id', 'client_id', 'date', 'paiddate', 'paid', 'status', 'cost', 'paymenttype', 'description']
+    });
     const year = findYear(req.params.id, snapshot.years);
     if (!year) return res.status(404).json({ error: 'Year not found' });
     const clients = new Map(snapshot.clients.map((client) => [client.id, client]));
@@ -94,7 +97,10 @@ export default function yearsRouter(store) {
   });
 
   router.get('/years/:id/expenses/csv', async (req, res) => {
-    const snapshot = await store.getSnapshot();
+    const snapshot = await store.getSnapshot({
+      years: ['id', 'year'], vendors: ['id', 'name', 'category'],
+      expenses: ['id', 'vendor_id', 'date', 'name', 'account', 'cost', 'notes', 'is_planned']
+    });
     const year = findYear(req.params.id, snapshot.years);
     if (!year) return res.status(404).json({ error: 'Year not found' });
     const vendors = new Map(snapshot.vendors.map((vendor) => [vendor.id, vendor]));
@@ -110,7 +116,7 @@ export default function yearsRouter(store) {
   });
 
   router.get('/years/:id/edit', async (req, res) => {
-    const years = (await store.getSnapshot()).years;
+    const years = (await store.getSnapshot({ years: true })).years;
     const year = findYear(req.params.id, years);
     if (!year) return res.status(404).json({ error: 'Year not found' });
     return res.json({ year });
@@ -169,7 +175,10 @@ export default function yearsRouter(store) {
   });
 
   router.get('/years/:id', async (req, res) => {
-    const snapshot = await store.getSnapshot();
+    const snapshot = await store.getSnapshot({
+      years: true, invoices: ['date', 'paiddate', 'paid', 'status', 'cost'],
+      expenses: ['date', 'cost', 'is_planned']
+    });
     const year = findYear(req.params.id, snapshot.years);
     if (!year) return res.status(404).json({ error: 'Year not found' });
     const income = sum(yearIncome(year.year, snapshot.invoices).map(invoiceAmount));

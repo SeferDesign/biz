@@ -27,6 +27,11 @@ import { sendPaymentNotification as deliverPaymentNotification } from '../email/
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const bearerPattern = /^Bearer\s+(.+)$/i;
+const invoiceCheckoutPattern = /^\/invoices\/\d+\/checkout$/;
+const clientAccessPattern = /^\/clients\/(\d+)(?:\/invoices)?$/;
+const invoiceAccessPattern = /^\/invoices\/(\d+)(?:\/(?:stripe|pdf|payment-options|checkout))?$/;
+const invoiceLinesPattern = /^\/invoices\/(\d+)\/lines$/;
 
 const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
   .split(',')
@@ -59,7 +64,7 @@ function readCookie(req, name) {
 
 function createAuthenticationMiddleware(store, apiAccessToken) {
   return async (req, res, next) => {
-    const bearerToken = req.get('authorization')?.match(/^Bearer\s+(.+)$/i)?.[1];
+    const bearerToken = req.get('authorization')?.match(bearerPattern)?.[1];
     const cookieToken = readCookie(req, 'biz_session');
     if (tokenMatches(bearerToken || req.query.access_token, apiAccessToken)) {
       req.authSource = 'api_access_token';
@@ -86,24 +91,24 @@ function createAuthenticationMiddleware(store, apiAccessToken) {
       }
     }
 
-    const isInvoiceCheckout = req.method === 'POST' && /^\/invoices\/\d+\/checkout$/.test(req.path);
+    const isInvoiceCheckout = req.method === 'POST' && invoiceCheckoutPattern.test(req.path);
     if ((req.method === 'GET' || isInvoiceCheckout) && typeof req.query.access_token === 'string') {
-      const clientMatch = req.method === 'GET' && req.path.match(/^\/clients\/(\d+)(?:\/invoices)?$/);
-      const invoiceMatch = req.path.match(/^\/invoices\/(\d+)(?:\/(?:stripe|pdf|payment-options|checkout))?$/);
-      const invoiceLinesMatch = req.path.match(/^\/invoices\/(\d+)\/lines$/);
+      const clientMatch = req.method === 'GET' && req.path.match(clientAccessPattern);
+      const invoiceMatch = req.path.match(invoiceAccessPattern);
+      const invoiceLinesMatch = req.path.match(invoiceLinesPattern);
       const record = clientMatch
-        ? await store.getClient(clientMatch[1])
+        ? await store.getClientAccess(clientMatch[1])
         : invoiceMatch
-          ? await store.getInvoice(invoiceMatch[1])
+          ? await store.getInvoiceAccess(invoiceMatch[1])
           : invoiceLinesMatch
-            ? await store.getInvoice(invoiceLinesMatch[1])
+            ? await store.getInvoiceAccess(invoiceLinesMatch[1])
           : null;
       if (record?.access_token && tokenMatches(req.query.access_token, record.access_token)) {
         req.recordAccess = { type: clientMatch ? 'client' : 'invoice', id: record.id };
         return next();
       }
       if ((invoiceMatch || invoiceLinesMatch) && record?.client_id) {
-        const client = await store.getClient(record.client_id);
+        const client = await store.getClientAccess(record.client_id);
         if (client?.access_token && tokenMatches(req.query.access_token, client.access_token)) {
           req.recordAccess = { type: 'client', id: client.id };
           return next();

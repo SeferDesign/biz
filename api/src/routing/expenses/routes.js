@@ -19,7 +19,7 @@ async function validateExpenseVendors(store, expenses) {
     .map((expense) => expense.vendor_id)
     .filter(Boolean)
     .map(Number))];
-  const vendors = await Promise.all(vendorIds.map((vendorId) => store.getVendor(vendorId)));
+  const vendors = await Promise.all(vendorIds.map((vendorId) => store.hasVendor(vendorId)));
   return vendors.some((vendor) => !vendor) ? 'Vendor not found' : null;
 }
 
@@ -35,7 +35,7 @@ export default function expensesRouter(store) {
       const result = await store.listExpenses({ ...pagination, filter });
       return res.json({ ...result, page: pagination.page, pageSize: pagination.pageSize });
     }
-    const expenses = (await store.getSnapshot()).expenses;
+    const expenses = (await store.getSnapshot({ expenses: true })).expenses;
     if (req.query.all === 'true') {
       return res.json(expenses.sort((left, right) => left.date.localeCompare(right.date) || left.name.localeCompare(right.name)));
     }
@@ -120,7 +120,7 @@ export default function expensesRouter(store) {
     }
     if (!isExpenseAccount(req.body?.account)) return res.status(400).json({ error: 'Account must be Business or Personal' });
     if (!parseId(vendorId)) return res.status(400).json({ error: 'Vendor is required' });
-    if (!await store.getVendor(Number(vendorId))) return res.status(400).json({ error: 'Vendor not found' });
+    if (!await store.hasVendor(Number(vendorId))) return res.status(400).json({ error: 'Vendor not found' });
     const expense = await store.createExpense(req.body);
     await writeHistory(store, req, { entityType: 'expense', entityId: expense.id, action: 'created', after: expense, fields: historyFields.expense });
     return res.status(201).json(expense);
@@ -140,7 +140,7 @@ export default function expensesRouter(store) {
     if (!current) return res.status(404).json({ error: 'Expense not found' });
     const resultingVendorId = input.vendor_id === undefined ? current.vendor_id : input.vendor_id;
     if (!parseId(resultingVendorId)) return res.status(400).json({ error: 'Vendor is required' });
-    if (!await store.getVendor(Number(resultingVendorId))) return res.status(400).json({ error: 'Vendor not found' });
+    if (!await store.hasVendor(Number(resultingVendorId))) return res.status(400).json({ error: 'Vendor not found' });
     const before = current ? structuredClone(current) : null;
     const expense = await store.updateExpense(id, input);
     if (!expense) return res.status(404).json({ error: 'Expense not found' });
@@ -158,7 +158,7 @@ export default function expensesRouter(store) {
     }
     if (!isExpenseAccount(req.body?.account)) return res.status(400).json({ error: 'Account must be Business or Personal' });
     if (!parseId(vendorId)) return res.status(400).json({ error: 'Vendor is required' });
-    if (!await store.getVendor(Number(vendorId))) return res.status(400).json({ error: 'Vendor not found' });
+    if (!await store.hasVendor(Number(vendorId))) return res.status(400).json({ error: 'Vendor not found' });
     const current = await store.getExpense(id);
     const before = current ? structuredClone(current) : null;
     const expense = await store.updateExpense(id, req.body);

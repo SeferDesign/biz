@@ -1,3 +1,5 @@
+const nonAlphanumericPattern = /[^0-9A-Za-z]/g;
+
 export const companyInfo = {
   legalEntity: 'Sefer Design Company LLC',
   name: 'Sefer Design Co.',
@@ -39,7 +41,7 @@ export function displayIdNumber(id) {
 export function displayId(clientName, id) {
   const normalizedClient = String(clientName || '')
     .toLowerCase()
-    .replace(/[^0-9A-Za-z]/g, '')
+    .replace(nonAlphanumericPattern, '')
     .slice(0, 21);
   return `${normalizedClient}-${displayIdNumber(id)}`;
 }

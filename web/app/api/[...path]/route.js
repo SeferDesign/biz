@@ -5,9 +5,7 @@ const apiBaseUrl = (process.env.NEXT_PUBLIC_API_URL || process.env.API_INTERNAL_
 async function redirectApiRequest(request, context) {
   const { path } = await context.params;
   const apiPath = path.map((segment) => encodeURIComponent(segment)).join('/');
-  const target = new URL(`${apiBaseUrl}/${apiPath}`);
-  target.search = new URL(request.url).search;
-  return NextResponse.redirect(target, 307);
+  return NextResponse.redirect(`${apiBaseUrl}/${apiPath}${request.nextUrl.search}`, 307);
 }
 
 export const GET = redirectApiRequest;

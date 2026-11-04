@@ -1420,14 +1420,14 @@ test('clients, vendors, years, and expenses support validated CRUD', async () =>
 
 test('expenses support transactional bulk creation and updates', async () => {
   const store = createMemoryStore();
-  const getVendor = store.getVendor.bind(store);
+  const hasVendor = store.hasVendor.bind(store);
   let activeVendorLookups = 0;
   let maximumVendorLookups = 0;
-  store.getVendor = async (id) => {
+  store.hasVendor = async (id) => {
     activeVendorLookups += 1;
     maximumVendorLookups = Math.max(maximumVendorLookups, activeVendorLookups);
     try {
-      return await getVendor(id);
+      return await hasVendor(id);
     } finally {
       activeVendorLookups -= 1;
     }

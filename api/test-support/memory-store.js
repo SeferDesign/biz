@@ -48,8 +48,41 @@ export function createMemoryStore() {
     invoicePayments,
     recurringExpenseRules,
     history,
+    async getClientAccess(id) {
+      const client = snapshot.clients.find((item) => item.id === Number(id));
+      return client ? { id: client.id, access_token: client.access_token } : undefined;
+    },
+    async getInvoiceAccess(id) {
+      const invoice = snapshot.invoices.find((item) => item.id === Number(id));
+      return invoice ? { id: invoice.id, client_id: invoice.client_id, access_token: invoice.access_token } : undefined;
+    },
+    async hasClient(id) {
+      return snapshot.clients.some((item) => item.id === Number(id));
+    },
+    async hasVendor(id) {
+      return snapshot.vendors.some((item) => item.id === Number(id));
+    },
+    async hasInvoice(id) {
+      return snapshot.invoices.some((item) => item.id === Number(id));
+    },
+    async getClientName(id) {
+      const client = snapshot.clients.find((item) => item.id === Number(id));
+      return client ? { name: client.name } : undefined;
+    },
+    async getInvoiceLine(invoiceId, id) {
+      return snapshot.lines.find((item) => item.invoice_id === Number(invoiceId) && item.id === Number(id));
+    },
+    async getClientInvoices(clientId) {
+      return snapshot.invoices.filter((invoice) => invoice.client_id === Number(clientId) &&
+        (invoice.paid || invoice.status !== 'draft'))
+        .toSorted((left, right) => String(right.date || '').localeCompare(String(left.date || '')) || right.id - left.id);
+    },
     async getUserByEmail(email) {
       return users.find((user) => user.email.toLowerCase() === email.toLowerCase());
+    },
+    async getPasswordResetUser(email) {
+      const user = await this.getUserByEmail(email);
+      return user ? { id: user.id, email: user.email } : undefined;
     },
     async getUserPassword(id) {
       const user = users.find((item) => item.id === Number(id));
@@ -282,11 +315,16 @@ export function createMemoryStore() {
       apiKey.updated_at = new Date().toISOString();
       return true;
     },
-    async getSnapshot() {
-      return {
+    async getSnapshot(selection) {
+      const records = {
         ...snapshot,
         clients: sortClientsByRecentActivity(snapshot.clients, snapshot.invoices)
       };
+      if (!selection) return records;
+      return Object.fromEntries(Object.entries(records).map(([table, rows]) => [table,
+        !selection[table] ? [] : selection[table] === true ? rows : rows.map((row) =>
+          Object.fromEntries(selection[table].map((field) => [field, row[field]])))
+      ]));
     },
     async recordHistory(entry) {
       const record = {
@@ -437,8 +475,9 @@ export function createMemoryStore() {
       }).sort((left, right) => sortableName(left.name).localeCompare(sortableName(right.name)));
       return { items: vendors.slice(offset, offset + pageSize), total: vendors.length };
     },
-    async getClient(id) {
-      return snapshot.clients.find((item) => item.id === Number(id));
+    async getClient(id, fields = true) {
+      const client = snapshot.clients.find((item) => item.id === Number(id));
+      return client && fields !== true ? Object.fromEntries(fields.map((field) => [field, client[field]])) : client;
     },
     async listInvoiceTemplates(clientId) {
       return invoiceTemplates
@@ -727,8 +766,9 @@ export function createMemoryStore() {
       snapshot.invoices.push(invoice);
       return invoice;
     },
-    async getInvoice(id) {
-      return snapshot.invoices.find((item) => item.id === Number(id));
+    async getInvoice(id, fields = true) {
+      const invoice = snapshot.invoices.find((item) => item.id === Number(id));
+      return invoice && fields !== true ? Object.fromEntries(fields.map((field) => [field, invoice[field]])) : invoice;
     },
     async getInvoiceLines(invoiceId) {
       return snapshot.lines.filter((line) => Number(line.invoice_id) === Number(invoiceId));
@@ -765,10 +805,10 @@ export function createMemoryStore() {
       snapshot.lines = snapshot.lines.filter((line) => line.invoice_id !== Number(invoiceId));
       return Promise.all(inputs.map((input) => this.createInvoiceLine(invoiceId, input)));
     },
-    async updateInvoice(id, updates) {
+    async updateInvoice(id, updates, fields = true) {
       const invoice = snapshot.invoices.find((item) => item.id === Number(id));
       if (invoice) Object.assign(invoice, updates);
-      return invoice;
+      return this.getInvoice(id, fields);
     },
     async deleteInvoice(id) {
       const invoiceId = Number(id);

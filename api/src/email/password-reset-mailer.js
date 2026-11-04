@@ -22,7 +22,7 @@ function getTransporter() {
 }
 
 export async function sendPasswordResetEmail({ email, token, expiresInHours }, transport) {
-  const appUrl = process.env.PUBLIC_APP_URL?.replace(/\/$/, '');
+  const appUrl = process.env.PUBLIC_APP_URL;
   if (!appUrl) throw new Error('PUBLIC_APP_URL is required to create a password reset link');
   const resetUrl = new URL('/reset-password', appUrl);
   resetUrl.searchParams.set('token', token);

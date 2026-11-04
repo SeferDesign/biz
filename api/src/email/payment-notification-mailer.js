@@ -2,6 +2,7 @@ import nodemailer from 'nodemailer';
 import { companyEmailFrom, companyInfo, displayId } from '@seferbiz/company';
 
 let transporter;
+const trailingSlashPattern = /\/$/;
 
 function getTransporter() {
   if (!process.env.SMTP_HOST) {
@@ -34,7 +35,7 @@ export async function sendPaymentNotification({ payment, invoice, client, livemo
   const invoiceNumber = displayId(client?.name, invoice.id);
   const amount = new Intl.NumberFormat('en-US', { style: 'currency', currency: payment.currency || 'USD' })
     .format(Number(payment.amount ?? invoice.cost ?? 0));
-  const appUrl = process.env.PUBLIC_APP_URL?.replace(/\/$/, '');
+  const appUrl = process.env.PUBLIC_APP_URL?.replace(trailingSlashPattern, '');
   const dashboardUrl = payment.stripe_payment_intent_id
     ? `https://dashboard.stripe.com/${livemode ? '' : 'test/'}payments/${payment.stripe_payment_intent_id}`
     : null;

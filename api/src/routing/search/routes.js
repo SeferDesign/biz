@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import { displayId } from '@seferbiz/company';
+const whitespacePattern = /\s+/;
 
 function matchRank(query, primaryValues, secondaryValues = []) {
-  const words = query.split(/\s+/).filter(Boolean);
+  const words = query.split(whitespacePattern).filter(Boolean);
   const primary = primaryValues.filter(Boolean).join(' ').toLowerCase();
   const searchable = [...primaryValues, ...secondaryValues].filter(Boolean).join(' ').toLowerCase();
   if (words.every((word) => primary.includes(word))) return 2;

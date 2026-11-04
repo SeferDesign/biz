@@ -1,11 +1,13 @@
 // Spreadsheet apps execute cells starting with these characters as formulas.
 const formulaPrefix = /^[=+\-@\t\r]/;
+const csvSpecialCharacters = /[",\r\n]/;
+const quotePattern = /"/g;
 
 function csvCell(value) {
   if (value == null) return '';
   let text = String(value);
   if (typeof value === 'string' && formulaPrefix.test(text)) text = `'${text}`;
-  return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+  return csvSpecialCharacters.test(text) ? `"${text.replace(quotePattern, '""')}"` : text;
 }
 
 export function toCsv(headers, rows) {

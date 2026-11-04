@@ -7,6 +7,7 @@ import swaggerUi from 'swagger-ui-express';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const leadingArticlePattern = /^(the|a|an)\s+/i;
 
 const invoices = [
   { id: 1, client_id: 1, status: 'draft', total: 1200.0, currency: 'USD', date: '2025-01-10' },
@@ -271,7 +272,7 @@ export function createApp() {
   });
 
   app.get('/vendors', (req, res) => {
-    const sortableName = (name) => name.replace(/^(the|a|an)\s+/i, '');
+    const sortableName = (name) => name.replace(leadingArticlePattern, '');
     return res.json([...vendors].sort((left, right) => sortableName(left.name).localeCompare(sortableName(right.name))));
   });
 

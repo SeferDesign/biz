@@ -2,8 +2,27 @@ import { createHash, randomBytes } from 'node:crypto';
 import { getPool } from './pool.js';
 import { recurringDate } from '../recurring/schedule.js';
 import { businessDate } from '../date.js';
+import { escapeId } from 'mysql2';
 
 const createAccessToken = () => randomBytes(24).toString('base64url');
+const whitespacePattern = /\s+/;
+const likeEscapePattern = /[\\%_]/g;
+const snapshotTables = { clients: true, invoices: true, lines: true, expenses: true, vendors: true, years: true };
+const invoiceStatusSql = "CASE WHEN paid THEN 'paid' ELSE status END AS status";
+const paymentStatusSql = '(SELECT p.status FROM invoice_payments p WHERE p.invoice_id = invoices.id ORDER BY p.submitted_at DESC, p.id DESC LIMIT 1) AS payment_status';
+const snapshotAliases = {
+  clients: { email: 'c.email_accounting AS email' },
+  invoices: { total: 'cost AS total', status: invoiceStatusSql, payment_status: paymentStatusSql },
+  lines: { amount: 'total AS amount' }
+};
+
+function snapshotColumns(table, fields) {
+  const alias = table === 'clients' ? 'c' : table;
+  const aliases = snapshotAliases[table] || {};
+  return fields === true || !fields
+    ? [`${escapeId(alias)}.*`, ...Object.values(aliases)].join(', ')
+    : fields.map((field) => aliases[field] || escapeId(`${alias}.${field}`)).join(', ');
+}
 
 const clientFields = [
   'name', 'contact', 'site_url', 'address1', 'address2', 'zipcode', 'city', 'state',
@@ -30,6 +49,7 @@ async function insertPlannedExpense(connection, rule, date) {
 }
 
 function normalizeYear(year) {
+  if (!Object.hasOwn(year, 'goals_months')) return year;
   return {
     ...year,
     goals_months: typeof year.goals_months === 'string' ? JSON.parse(year.goals_months) : year.goals_months
@@ -81,6 +101,11 @@ export class MySqlStore {
       'SELECT id, encrypted_password FROM users WHERE id = ? LIMIT 1',
       [id]
     );
+    return rows[0];
+  }
+
+  async getPasswordResetUser(email) {
+    const [rows] = await this.database.execute('SELECT id, email FROM users WHERE email = ? LIMIT 1', [email]);
     return rows[0];
   }
 
@@ -302,7 +327,7 @@ export class MySqlStore {
 
   async consumePasskeyChallenge(challengeId, purpose, userId = null) {
     const [rows] = await this.database.execute(
-      `SELECT challenge_id, challenge, purpose, user_id FROM webauthn_challenges
+      `SELECT challenge FROM webauthn_challenges
        WHERE challenge_id = ? AND purpose = ? AND user_id <=> ? AND expires_at > CURRENT_TIMESTAMP LIMIT 1`,
       [challengeId, purpose, userId]
     );
@@ -410,9 +435,10 @@ export class MySqlStore {
     return result.affectedRows > 0;
   }
 
-  async getSnapshot() {
+  async getSnapshot(selection = snapshotTables) {
+    const query = (table, sql) => selection[table] ? this.database.query(sql) : [[]];
     const [clients, invoices, lines, expenses, vendors, years] = await Promise.all([
-      this.database.query(`SELECT c.*, c.email_accounting AS email
+      query('clients', `SELECT ${snapshotColumns('clients', selection.clients)}
         FROM clients c
         LEFT JOIN (
           SELECT client_id, MAX(created_at) AS last_invoice_created_at
@@ -425,13 +451,12 @@ export class MySqlStore {
           COALESCE(invoice_activity.last_invoice_created_at, '1970-01-01 00:00:00')
         ) DESC,
         c.id DESC`),
-      this.database.query(`SELECT *, cost AS total, CASE WHEN paid THEN 'paid' ELSE status END AS status,
-        (SELECT p.status FROM invoice_payments p WHERE p.invoice_id = invoices.id ORDER BY p.submitted_at DESC, p.id DESC LIMIT 1) AS payment_status
+      query('invoices', `SELECT ${snapshotColumns('invoices', selection.invoices)}
         FROM invoices ORDER BY id`),
-      this.database.query('SELECT *, total AS amount FROM `lines` ORDER BY id'),
-      this.database.query('SELECT * FROM expenses ORDER BY date, name'),
-      this.database.query('SELECT * FROM vendors ORDER BY name'),
-      this.database.query('SELECT * FROM years ORDER BY year DESC')
+      query('lines', `SELECT ${snapshotColumns('lines', selection.lines)} FROM \`lines\` ORDER BY id`),
+      query('expenses', `SELECT ${snapshotColumns('expenses', selection.expenses)} FROM expenses ORDER BY date, name`),
+      query('vendors', `SELECT ${snapshotColumns('vendors', selection.vendors)} FROM vendors ORDER BY name`),
+      query('years', `SELECT ${snapshotColumns('years', selection.years)} FROM years ORDER BY year DESC`)
     ]);
     return {
       clients: clients[0],
@@ -537,8 +562,9 @@ export class MySqlStore {
       this.database.execute(`SELECT DATE_FORMAT(date, '%Y-%m') AS month, COALESCE(SUM(cost), 0) AS total
         FROM expenses WHERE is_planned = FALSE AND date >= ? AND date < ?
         GROUP BY DATE_FORMAT(date, '%Y-%m')`, [rangeStart, rangeEnd]),
-      this.database.execute('SELECT * FROM years WHERE year BETWEEN ? AND ? ORDER BY year', [firstTrailingYear, year]),
-      this.database.execute(`SELECT invoices.*, invoices.cost AS total,
+      this.database.execute('SELECT year, goal_year, goals_months FROM years WHERE year BETWEEN ? AND ? ORDER BY year', [firstTrailingYear, year]),
+      this.database.execute(`SELECT invoices.id, invoices.client_id, invoices.date, invoices.cost, invoices.cost AS total,
+          invoices.paid, invoices.currency, invoices.paymenttype, invoices.description,
           CASE WHEN invoices.paid THEN 'paid' ELSE invoices.status END AS status,
           (SELECT p.status FROM invoice_payments p WHERE p.invoice_id = invoices.id ORDER BY p.submitted_at DESC, p.id DESC LIMIT 1) AS payment_status,
           clients.name AS client_name
@@ -566,8 +592,8 @@ export class MySqlStore {
   }
 
   async searchRecords(query) {
-    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
-    const patterns = terms.map((term) => `%${term.replace(/[\\%_]/g, '\\$&')}%`);
+    const terms = query.toLowerCase().split(whitespacePattern).filter(Boolean);
+    const patterns = terms.map((term) => `%${term.replace(likeEscapePattern, '\\$&')}%`);
     const condition = (columns) => terms.map(() =>
       `LOWER(CONCAT_WS(' ', ${columns.map((column) => `COALESCE(${column}, '')`).join(', ')})) COLLATE utf8mb4_unicode_ci LIKE ?`
     ).join(' AND ');
@@ -665,9 +691,34 @@ export class MySqlStore {
     return rows;
   }
 
-  async getClient(id) {
-    const [rows] = await this.database.query('SELECT *, email_accounting AS email FROM clients WHERE id = ?', [id]);
+  async getClient(id, fields = true) {
+    const [rows] = await this.database.query(`SELECT ${snapshotColumns('clients', fields)} FROM clients c WHERE c.id = ?`, [id]);
     return rows[0];
+  }
+
+  async getClientAccess(id) {
+    const [rows] = await this.database.execute('SELECT id, access_token FROM clients WHERE id = ?', [id]);
+    return rows[0];
+  }
+
+  async getClientName(id) {
+    const [rows] = await this.database.execute('SELECT name FROM clients WHERE id = ?', [id]);
+    return rows[0];
+  }
+
+  async hasClient(id) {
+    const [rows] = await this.database.execute('SELECT id FROM clients WHERE id = ?', [id]);
+    return rows.length > 0;
+  }
+
+  async hasVendor(id) {
+    const [rows] = await this.database.execute('SELECT id FROM vendors WHERE id = ?', [id]);
+    return rows.length > 0;
+  }
+
+  async hasInvoice(id) {
+    const [rows] = await this.database.execute('SELECT id FROM invoices WHERE id = ?', [id]);
+    return rows.length > 0;
   }
 
   async listInvoiceTemplates(clientId) {
@@ -729,7 +780,7 @@ export class MySqlStore {
       "UPDATE clients SET access_token = ? WHERE id = ? AND (access_token IS NULL OR access_token = '')",
       [createAccessToken(), id]
     );
-    return (await this.getClient(id))?.access_token;
+    return (await this.getClientAccess(id))?.access_token;
   }
 
   async setClientStripeCustomerId(id, customerId) {
@@ -961,7 +1012,8 @@ export class MySqlStore {
       await connection.beginTransaction();
       transactionStarted = true;
       const [rules] = await connection.execute(
-        `SELECT * FROM recurring_expense_rules
+        `SELECT id, name, vendor_id, cost, notes, account, next_index, next_date, start_date, interval_unit, interval_count, end_date
+         FROM recurring_expense_rules
          WHERE active = TRUE AND next_date IS NOT NULL AND next_date <= ?
          ORDER BY next_date, id FOR UPDATE`, [today]
       );
@@ -1104,11 +1156,9 @@ export class MySqlStore {
     return this.getInvoice(result.insertId);
   }
 
-  async getInvoice(id) {
+  async getInvoice(id, fields = true) {
     const [rows] = await this.database.query(
-      `SELECT *, cost AS total, CASE WHEN paid THEN 'paid' ELSE status END AS status,
-        (SELECT p.status FROM invoice_payments p WHERE p.invoice_id = invoices.id ORDER BY p.submitted_at DESC, p.id DESC LIMIT 1) AS payment_status
-       FROM invoices WHERE id = ?`,
+      `SELECT ${snapshotColumns('invoices', fields)} FROM invoices WHERE id = ?`,
       [id]
     );
     return rows[0];
@@ -1119,6 +1169,26 @@ export class MySqlStore {
       'SELECT *, total AS amount FROM `lines` WHERE invoice_id = ? ORDER BY id', [invoiceId]
     );
     return rows;
+  }
+
+  async getInvoiceLine(invoiceId, id) {
+    const [rows] = await this.database.execute(
+      'SELECT *, total AS amount FROM `lines` WHERE invoice_id = ? AND id = ?', [invoiceId, id]
+    );
+    return rows[0];
+  }
+
+  async getClientInvoices(clientId) {
+    const [rows] = await this.database.execute(
+      `SELECT invoices.*, cost AS total, ${invoiceStatusSql}, ${paymentStatusSql}
+       FROM invoices WHERE client_id = ? AND (paid OR status <> 'draft') ORDER BY date DESC, id DESC`, [clientId]
+    );
+    return rows;
+  }
+
+  async getInvoiceAccess(id) {
+    const [rows] = await this.database.execute('SELECT id, client_id, access_token FROM invoices WHERE id = ?', [id]);
+    return rows[0];
   }
 
   async getInvoicePayments(invoiceId) {
@@ -1228,19 +1298,19 @@ export class MySqlStore {
     }
   }
 
-  async updateInvoice(id, updates) {
+  async updateInvoice(id, updates, fields = true) {
     const allowed = [
       'client_id', 'date', 'cost', 'paid', 'paiddate', 'paymenttype', 'description',
       'status', 'currency', 'stripe_session_id'
     ];
-    const fields = allowed.filter((field) => updates[field] !== undefined);
-    if (fields.length) {
+    const changedFields = allowed.filter((field) => updates[field] !== undefined);
+    if (changedFields.length) {
       await this.database.execute(
-        `UPDATE invoices SET ${fields.map((field) => `${field} = ?`).join(', ')} WHERE id = ?`,
-        [...fields.map((field) => updates[field]), id]
+        `UPDATE invoices SET ${changedFields.map((field) => `${field} = ?`).join(', ')} WHERE id = ?`,
+        [...changedFields.map((field) => updates[field]), id]
       );
     }
-    return this.getInvoice(id);
+    return this.getInvoice(id, fields);
   }
 
   async deleteInvoice(id) {
@@ -1253,7 +1323,7 @@ export class MySqlStore {
       "UPDATE invoices SET access_token = ? WHERE id = ? AND (access_token IS NULL OR access_token = '')",
       [createAccessToken(), id]
     );
-    return (await this.getInvoice(id))?.access_token;
+    return (await this.getInvoiceAccess(id))?.access_token;
   }
 
   async setInvoiceStripeSession(id, sessionId) {

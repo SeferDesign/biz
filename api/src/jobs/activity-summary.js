@@ -9,7 +9,10 @@ if (!['weekly', 'monthly'].includes(period)) {
   process.exitCode = 1;
 } else {
   try {
-    const snapshot = await new MySqlStore().getSnapshot();
+    const snapshot = await new MySqlStore().getSnapshot({
+      invoices: ['date', 'paiddate', 'paid', 'status', 'cost'],
+      expenses: ['date', 'cost', 'is_planned']
+    });
     const { recipient, subject } = await sendActivitySummaryEmail({ period, snapshot });
     console.log(`Sent ${subject} to ${recipient}`);
   } catch (error) {

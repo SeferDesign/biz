@@ -37,7 +37,7 @@ export function paymentBreakdown(invoice, method) {
 
 export async function recordCheckoutPayment(store, session, status, { failureMessage = null, notify } = {}) {
   const invoiceId = parseId(session?.metadata?.invoice_id);
-  const invoice = invoiceId ? await store.getInvoice(invoiceId) : null;
+  const invoice = invoiceId ? await store.getInvoice(invoiceId, ['id', 'client_id', 'cost']) : null;
   if (!invoice) return;
   const payment = {
     invoice_id: invoiceId,
@@ -51,7 +51,7 @@ export async function recordCheckoutPayment(store, session, status, { failureMes
   };
   if (!await store.recordInvoicePayment(payment) || !notify) return;
   try {
-    const client = invoice.client_id ? await store.getClient(invoice.client_id) : null;
+    const client = invoice.client_id ? await store.getClientName(invoice.client_id) : null;
     await notify({ payment, invoice, client, livemode: Boolean(session.livemode) });
   } catch (error) {
     // A notification failure must not make Stripe retry an already-recorded event.

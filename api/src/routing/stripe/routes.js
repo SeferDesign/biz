@@ -12,6 +12,9 @@ import {
 
 const toAmount = (cents) => cents / 100;
 const toIsoDate = (seconds) => new Date(seconds * 1000).toISOString();
+const trailingSlashPattern = /\/$/;
+const paymentInvoiceFields = ['id', 'client_id', 'cost', 'paid', 'status', 'currency', 'payment_status', 'stripe_session_id', 'access_token'];
+const stripeClientFields = ['id', 'name', 'email', 'email_accounting', 'address1', 'address2', 'city', 'state', 'zipcode', 'stripe_customer_id'];
 
 export function createStripeWebhookHandler(store, { stripe, webhookSecret, notify }) {
   return async (req, res) => {
@@ -35,7 +38,7 @@ export function createStripeWebhookHandler(store, { stripe, webhookSecret, notif
         notify
       });
       // Release the failed session so the client can start a new payment.
-      const invoice = await store.getInvoice(parseId(session.metadata?.invoice_id));
+      const invoice = await store.getInvoice(parseId(session.metadata?.invoice_id), ['id', 'stripe_session_id']);
       if (invoice?.stripe_session_id === session.id) await store.setInvoiceStripeSession(invoice.id, null);
     }
     return res.json({ received: true });
@@ -45,15 +48,15 @@ export function createStripeWebhookHandler(store, { stripe, webhookSecret, notif
 export default function stripeRouter(store, { stripe, appUrl, notify }) {
   const router = Router();
   const enabled = Boolean(stripe && appUrl);
-  const baseAppUrl = appUrl?.replace(/\/$/, '');
+  const baseAppUrl = appUrl?.replace(trailingSlashPattern, '');
 
-  async function loadInvoice(req, res) {
+  async function loadInvoice(req, res, fields = paymentInvoiceFields) {
     const id = parseId(req.params.id);
     if (!id) {
       res.status(400).json({ error: 'Invoice id must be a positive integer' });
       return null;
     }
-    const invoice = await store.getInvoice(id);
+    const invoice = await store.getInvoice(id, fields);
     if (!invoice) res.status(404).json({ error: 'Invoice not found' });
     return invoice || null;
   }
@@ -93,7 +96,7 @@ export default function stripeRouter(store, { stripe, appUrl, notify }) {
 
       const [accessToken, client] = await Promise.all([
         invoice.access_token || store.ensureInvoiceAccessToken(invoice.id),
-        invoice.client_id ? store.getClient(invoice.client_id) : null
+        invoice.client_id ? store.getClient(invoice.client_id, stripeClientFields) : null
       ]);
       const customer = await ensureStripeCustomer(stripe, store, client);
       const breakdown = paymentBreakdown(invoice, method);
@@ -133,7 +136,7 @@ export default function stripeRouter(store, { stripe, appUrl, notify }) {
   });
 
   router.get('/invoices/:id/stripe', async (req, res) => {
-    const invoice = await loadInvoice(req, res);
+    const invoice = await loadInvoice(req, res, ['id']);
     if (!invoice) return undefined;
     const sessionId = req.query.session_id;
     if (typeof sessionId !== 'string' || !sessionId.startsWith('cs_')) {
@@ -152,7 +155,7 @@ export default function stripeRouter(store, { stripe, appUrl, notify }) {
     if (session.payment_status === 'paid') {
       await recordCheckoutPayment(store, session, 'succeeded', { notify });
       await fulfillCheckoutSession(store, session);
-      const updated = await store.getInvoice(invoice.id);
+      const updated = await store.getInvoice(invoice.id, ['paiddate']);
       return res.json({ invoice_id: invoice.id, status: 'paid', paiddate: updated?.paiddate ?? null });
     }
     if (session.status === 'complete') await recordCheckoutPayment(store, session, 'processing', { notify });
@@ -160,7 +163,7 @@ export default function stripeRouter(store, { stripe, appUrl, notify }) {
   });
 
   router.get('/invoices/:id/payments', async (req, res) => {
-    const invoice = await loadInvoice(req, res);
+    const invoice = await loadInvoice(req, res, ['id']);
     if (!invoice) return undefined;
     return res.json(await store.getInvoicePayments(invoice.id));
   });
