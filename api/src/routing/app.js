@@ -20,7 +20,7 @@ import historyRouter from './history/routes.js';
 import vendorsRouter from './vendors/routes.js';
 import yearsRouter from './years/routes.js';
 import stripeRouter, { createStripeWebhookHandler } from './stripe/routes.js';
-import { timingSafeEqual } from 'node:crypto';
+import { createHash, timingSafeEqual } from 'node:crypto';
 import { hashSessionToken } from '../auth/session.js';
 import { createStripeClient } from '../payments/stripe.js';
 import { sendPaymentNotification as deliverPaymentNotification } from '../email/payment-notification-mailer.js';
@@ -68,10 +68,12 @@ function createAuthenticationMiddleware(store, apiAccessToken) {
     const cookieToken = readCookie(req, 'biz_session');
     if (tokenMatches(bearerToken || req.query.access_token, apiAccessToken)) {
       req.authSource = 'api_access_token';
+      req.authRateLimitKey = 'api_access_token';
       return next();
     }
     if (typeof bearerToken === 'string' && bearerToken && await store.touchApiKeyLastUsed?.(bearerToken)) {
       req.authSource = 'api_key';
+      req.authRateLimitKey = `api_key:${createHash('sha256').update(bearerToken).digest('hex')}`;
       return next();
     }
     const sessionToken = bearerToken || cookieToken;
@@ -116,8 +118,7 @@ function createAuthenticationMiddleware(store, apiAccessToken) {
       }
     }
 
-    res.set('WWW-Authenticate', 'Bearer');
-    return res.status(401).json({ error: 'Unauthorized' });
+    return next();
   };
 }
 
@@ -174,7 +175,7 @@ export function createApp({
   });
 
   const limiters = createRateLimiters(rateLimits);
-  app.use('/v1', limiters.api, createOriginProtection(corsAllowedOrigins));
+  app.use('/v1', createOriginProtection(corsAllowedOrigins));
   app.use('/v1/auth', limiters.auth);
   app.use('/v1/auth/password-reset', limiters.reset);
   app.use(express.json({ limit: '100kb' }));
@@ -197,7 +198,13 @@ export function createApp({
       '/auth/login', '/auth/password-reset', '/auth/password-reset/confirm',
       '/auth/passkeys/authentication/options', '/auth/passkeys/authentication/verify'
     ].includes(req.path)) return next();
+    req.authenticationRequired = true;
     return authenticationMiddleware(req, res, next);
+  });
+  app.use('/v1', limiters.api, (req, res, next) => {
+    if (!req.authenticationRequired || req.authSource || req.recordAccess) return next();
+    res.set('WWW-Authenticate', 'Bearer');
+    return res.status(401).json({ error: 'Unauthorized' });
   });
   app.use('/v1/auth', createAuthRouter(store, {
     otpSecretEncryptionKey,

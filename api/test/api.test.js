@@ -69,12 +69,28 @@ test('authentication and password reset have separate stricter limits', async ()
 
 test('trusted proxies separate clients by IP while untrusted forwarded headers cannot bypass limits', async () => {
   const trusted = createTestApp({ trustProxy: 'loopback', rateLimits: { api: { limit: 1 } } });
-  assert.equal((await request(trusted).get('/v1/clients').set('X-Forwarded-For', '192.0.2.1')).status, 200);
-  assert.equal((await request(trusted).get('/v1/clients').set('X-Forwarded-For', '192.0.2.1')).status, 429);
-  assert.equal((await request(trusted).get('/v1/clients').set('X-Forwarded-For', '192.0.2.2')).status, 200);
+  assert.equal((await supertest(trusted).get('/v1/clients').set('X-Forwarded-For', '192.0.2.1')).status, 401);
+  assert.equal((await supertest(trusted).get('/v1/clients').set('X-Forwarded-For', '192.0.2.1')).status, 429);
+  assert.equal((await supertest(trusted).get('/v1/clients').set('X-Forwarded-For', '192.0.2.2')).status, 401);
   const untrusted = createTestApp({ rateLimits: { api: { limit: 1 } } });
-  assert.equal((await request(untrusted).get('/v1/clients')).status, 200);
-  assert.equal((await request(untrusted).get('/v1/clients').set('X-Forwarded-For', '192.0.2.3')).status, 429);
+  assert.equal((await supertest(untrusted).get('/v1/clients')).status, 401);
+  assert.equal((await supertest(untrusted).get('/v1/clients').set('X-Forwarded-For', '192.0.2.3')).status, 429);
+});
+
+test('verified users have separate limits behind a shared proxy and sessions share their user limit', async () => {
+  const store = createMemoryStore();
+  store.users.push({ id: 1, email: 'one@example.com' }, { id: 2, email: 'two@example.com' });
+  const tokens = [createSessionToken(), createSessionToken(), createSessionToken()];
+  for (const [index, token] of tokens.entries()) {
+    await store.createUserSession(index === 2 ? 2 : 1, hashSessionToken(token), SESSION_TTL_SECONDS);
+  }
+  const app = createTestApp({ store, rateLimits: { api: { limit: 1 } } });
+  assert.equal((await supertest(app).get('/v1/auth/session').set('Authorization', `Bearer ${tokens[0]}`)).status, 200);
+  assert.equal((await supertest(app).get('/v1/clients').set('Cookie', `biz_session=${tokens[1]}`)).status, 429);
+  assert.equal((await supertest(app).get('/v1/auth/session').set('Authorization', `Bearer ${tokens[2]}`)).status, 200);
+  assert.equal((await supertest(app).get('/v1/clients').set('Authorization', `Bearer ${createSessionToken()}`)).status, 401);
+  assert.equal((await supertest(app).get('/v1/clients').set('Authorization', `Bearer ${createSessionToken()}`)).status, 429);
+  assert.equal((await request(app).get('/v1/clients')).status, 200);
 });
 
 test('cookie-authenticated writes reject untrusted or missing origins but bearer clients still work', async () => {

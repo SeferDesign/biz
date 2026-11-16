@@ -1,4 +1,4 @@
-import { rateLimit } from 'express-rate-limit';
+import { ipKeyGenerator, rateLimit } from 'express-rate-limit';
 const bearerPattern = /^Bearer\s+\S+$/i;
 const sessionCookiePattern = /(?:^|;\s*)biz_session=/;
 
@@ -18,6 +18,9 @@ export function createRateLimiters(options = {}) {
     api: createLimiter('api', {
       windowMs: 60_000,
       limit: 300,
+      keyGenerator: (req) => req.authUser
+        ? `user:${req.authUser.id}`
+        : req.authRateLimitKey || ipKeyGenerator(req.ip),
       skip: (req) => req.method === 'OPTIONS' || req.path === '/health'
     }, options.api),
     auth: createLimiter('authentication', {
