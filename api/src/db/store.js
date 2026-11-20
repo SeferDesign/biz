@@ -543,7 +543,8 @@ export class MySqlStore {
   }
 
   async getDashboardSummary() {
-    const [year, month] = businessDate().split('-').map(Number);
+    const asOf = businessDate();
+    const [year, month] = asOf.split('-').map(Number);
     const monthKey = `${year}-${String(month).padStart(2, '0')}`;
     const trailingStart = new Date(Date.UTC(year, month - 5, 1));
     const yearStart = new Date(Date.UTC(year, 0, 1));
@@ -555,10 +556,11 @@ export class MySqlStore {
       this.database.query(`SELECT COUNT(*) AS count, COALESCE(SUM(cost), 0) AS total
         FROM invoices WHERE paid = FALSE AND status <> 'paid'`),
       this.database.execute(`SELECT DATE_FORMAT(COALESCE(paiddate, date), '%Y-%m') AS month,
-          COALESCE(SUM(cost), 0) AS total
+          COALESCE(SUM(cost), 0) AS total,
+          COALESCE(SUM(CASE WHEN COALESCE(paiddate, date) <= ? THEN cost END), 0) AS total_to_date
         FROM invoices
         WHERE (paid = TRUE OR status = 'paid') AND COALESCE(paiddate, date) >= ? AND COALESCE(paiddate, date) < ?
-        GROUP BY DATE_FORMAT(COALESCE(paiddate, date), '%Y-%m')`, [rangeStart, rangeEnd]),
+        GROUP BY DATE_FORMAT(COALESCE(paiddate, date), '%Y-%m')`, [asOf, rangeStart, rangeEnd]),
       this.database.execute(`SELECT DATE_FORMAT(date, '%Y-%m') AS month, COALESCE(SUM(cost), 0) AS total
         FROM expenses WHERE is_planned = FALSE AND date >= ? AND date < ?
         GROUP BY DATE_FORMAT(date, '%Y-%m')`, [rangeStart, rangeEnd]),
@@ -580,11 +582,13 @@ export class MySqlStore {
       .reduce((total, [, value]) => total + value, 0);
     return {
       year,
+      asOf,
       month: monthKey,
       openInvoices: { count: Number(openRows[0].count), total: Number(openRows[0].total) },
       monthlyRevenue,
       monthlyExpenses,
       yearRevenue: sumCurrentYear(monthlyRevenue),
+      yearRevenueToDate: sumCurrentYear(Object.fromEntries(revenueRows.map((row) => [row.month, Number(row.total_to_date)]))),
       yearExpenses: sumCurrentYear(monthlyExpenses),
       yearRecords: yearRows.map(normalizeYear),
       recentInvoices

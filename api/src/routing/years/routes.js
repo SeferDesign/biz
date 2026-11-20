@@ -193,11 +193,15 @@ export default function yearsRouter(store) {
     });
     const year = findYear(req.params.id, snapshot.years);
     if (!year) return res.status(404).json({ error: 'Year not found' });
-    const income = sum(yearIncome(year.year, snapshot.invoices).map(invoiceAmount));
+    const asOf = businessDate();
+    const paidInvoices = yearIncome(year.year, snapshot.invoices);
+    const income = sum(paidInvoices.map(invoiceAmount));
     const expenseTotal = sum(yearExpenses(year.year, snapshot.expenses).map((expense) => expense.cost));
     return res.json({
       ...year,
+      asOf,
       income_total: income,
+      income_to_date: sum(paidInvoices.filter((invoice) => invoiceDate(invoice) <= asOf).map(invoiceAmount)),
       expenses_total: expenseTotal,
       net_income: income - expenseTotal,
       tax_owed: income * year.taxrate

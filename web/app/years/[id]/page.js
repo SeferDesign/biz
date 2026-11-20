@@ -11,7 +11,7 @@ import { chartColors, financeBars, goalOutlines } from '../../../components/char
 import { browserApiBaseUrl, formatMoney, formatTableDate, parsePage } from '../../../lib/api.js';
 import { getApiData } from '../../../lib/api-server.js';
 import {
-  calendarMonths, monthlyFinances, monthlyRunRate, onOrBefore, quarterlyTaxes, totalsByCategory
+  annualRunRate, calendarMonths, monthlyFinances, monthlyRunRate, onOrBefore, quarterlyTaxes, totalsByCategory
 } from '../../../lib/chart-data.js';
 
 export const metadata = { title: 'Year Details' };
@@ -41,7 +41,12 @@ export default async function YearDetailPage({ params, searchParams }) {
   const expenses = expenseResult.data?.expenses || [];
   const monthlyData = monthlyFinances(calendarMonths(Number(year.year)), { invoices, expenses, years: [year] });
   const monthlyGoal = Number(year.goal_year) > 0 ? Number(year.goal_year) / 12 : null;
-  const runRate = monthlyRunRate(Number(year.income_total || 0), Number(year.year));
+  const now = new Date(year.asOf);
+  const income = year.income_to_date;
+  const runRate = monthlyRunRate(income, Number(year.year), now);
+  const projectedIncome = Number(year.year) === now.getUTCFullYear()
+    ? annualRunRate(income, Number(year.year), now)
+    : null;
   const quarters = quarterlyTaxes(monthlyData, year.taxrate);
   const expensesToDate = onOrBefore(expenses, (expense) => expense.date);
   const expenseCategories = totalsByCategory(expensesToDate, vendorResult.data || []);
@@ -63,6 +68,7 @@ export default async function YearDetailPage({ params, searchParams }) {
         ['Paid income', formatMoney(year.income_total)],
         ['Expenses', formatMoney(year.expenses_total)],
         ['Net income', formatMoney(year.net_income)],
+        ...(projectedIncome == null ? [] : [['Projected run rate', formatMoney(projectedIncome)]]),
         ['Tax rate', `${(Number(year.taxrate || 0) * 100).toFixed(1)}%`],
         ['Estimated tax', formatMoney(year.tax_owed)],
         ['Annual goal', formatMoney(year.goal_year)]

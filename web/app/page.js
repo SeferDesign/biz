@@ -7,7 +7,7 @@ import ColumnChart from '../components/charts/ColumnChart.js';
 import { financeBars, goalOutlines } from '../components/charts/theme.js';
 import { formatMoney, formatTableDate, invoiceStatus } from '../lib/api.js';
 import { getApiData } from '../lib/api-server.js';
-import { monthlyGoal, trailingMonths } from '../lib/chart-data.js';
+import { annualRunRate, monthlyGoal, trailingMonths } from '../lib/chart-data.js';
 import { iconColors } from '../lib/icon-colors.js';
 import { Badge } from '../components/ui/badge.js';
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card.js';
@@ -28,6 +28,7 @@ export default async function Home() {
   const yearRecord = yearRecords.find((year) => Number(year.year) === currentYear);
   const monthGoal = Number(yearRecord?.goals_months?.[monthIndex]);
   const monthKey = `${currentYear}-${String(monthNumber).padStart(2, '0')}`;
+  const yearRevenue = Number(summary.yearRevenue || 0);
   const trailingFinances = trailingMonths(5).map(({ key, year, month, label }) => {
     const revenue = Number(monthlyRevenue[key] || 0);
     const expenses = Number(monthlyExpenses[key] || 0);
@@ -52,8 +53,9 @@ export default async function Home() {
       label: String(currentYear),
       href: yearRecord ? `/years/${yearRecord.year}` : '/years',
       goal: Number(yearRecord?.goal_year || 0),
-      revenue: Number(summary.yearRevenue || 0),
+      revenue: yearRevenue,
       expenses: Number(summary.yearExpenses || 0),
+      runRate: summaryResult.error ? null : annualRunRate(summary.yearRevenueToDate, currentYear, new Date(summary.asOf)),
 			icon: CalendarDays
     }
   ].map((row) => ({
@@ -89,7 +91,14 @@ export default async function Home() {
                   <row.icon className={`size-4 ${iconColors.years}`} aria-hidden="true" />
                   {row.href ? <Link className="inline-link" href={row.href}>{row.label}</Link> : row.label}
                 </CardDescription>
-                <CardTitle className="w-full text-end text-2xl font-semibold tabular-nums">{formatMoney(row.revenue)}</CardTitle>
+                <div className="space-y-1 text-end">
+                  <CardTitle className="text-2xl font-semibold tabular-nums">{formatMoney(row.revenue)}</CardTitle>
+                  {row.runRate != null && (
+                    <p className="text-xs text-muted-foreground">
+                      Projected: <span className="tabular-nums">{formatMoney(row.runRate)}</span>
+                    </p>
+                  )}
+                </div>
                 <Badge variant={row.goalProgress === null ? 'secondary' : row.goalProgress >= 100 ? 'success' : 'info'} className="absolute right-4 top-4">
                   {row.goalProgress === null ? 'No goal' : `${row.goalProgress}% of goal`}
                 </Badge>

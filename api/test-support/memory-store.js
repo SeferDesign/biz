@@ -358,21 +358,25 @@ export function createMemoryStore() {
       return { items, total: filtered.length };
     },
     async getDashboardSummary() {
-      const [year, month] = businessDate().split('-').map(Number);
+      const asOf = businessDate();
+      const [year, month] = asOf.split('-').map(Number);
       const monthKey = `${year}-${String(month).padStart(2, '0')}`;
       const trailingStart = new Date(Date.UTC(year, month - 5, 1));
       const dataStart = new Date(Date.UTC(year, 0, 1));
       if (trailingStart < dataStart) dataStart.setTime(trailingStart.getTime());
       const firstMonth = dataStart.toISOString().slice(0, 7);
       const monthlyRevenue = {};
+      let yearRevenueToDate = 0;
       const monthlyExpenses = {};
       const addMonthly = (totals, key, amount) => {
         totals[key] = (totals[key] || 0) + Number(amount || 0);
       };
       for (const invoice of snapshot.invoices) {
-        const date = String(invoice.paiddate || invoice.date || '').slice(0, 7);
-        if ((invoice.paid === true || invoice.status === 'paid') && date >= firstMonth && date <= monthKey) {
-          addMonthly(monthlyRevenue, date, invoice.cost ?? invoice.total);
+        const date = String(invoice.paiddate || invoice.date || '');
+        const key = date.slice(0, 7);
+        if ((invoice.paid === true || invoice.status === 'paid') && key >= firstMonth && key <= monthKey) {
+          addMonthly(monthlyRevenue, key, invoice.cost ?? invoice.total);
+          if (key.startsWith(`${year}-`) && date <= asOf) yearRevenueToDate += Number(invoice.cost ?? invoice.total ?? 0);
         }
       }
       for (const expense of snapshot.expenses) {
@@ -396,6 +400,7 @@ export function createMemoryStore() {
         }));
       return {
         year,
+        asOf,
         month: monthKey,
         openInvoices: {
           count: openInvoices.length,
@@ -404,6 +409,7 @@ export function createMemoryStore() {
         monthlyRevenue,
         monthlyExpenses,
         yearRevenue: currentYearTotal(monthlyRevenue),
+        yearRevenueToDate,
         yearExpenses: currentYearTotal(monthlyExpenses),
         yearRecords,
         recentInvoices

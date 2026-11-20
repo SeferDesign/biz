@@ -46,10 +46,14 @@ export function daysElapsed(year, now = new Date()) {
   return Math.min(Math.max(elapsed, 0), daysInYear(year));
 }
 
-// Revenue per elapsed day, annualized, then spread across 12 months.
-export function monthlyRunRate(total, year, now = new Date()) {
+export function annualRunRate(total, year, now = new Date()) {
   const elapsed = daysElapsed(year, now);
-  return elapsed > 0 && total > 0 ? roundMoney((total / elapsed) * daysInYear(year) / 12) : null;
+  return elapsed > 0 && Number.isFinite(total) ? (total / elapsed) * daysInYear(year) : null;
+}
+
+export function monthlyRunRate(total, year, now = new Date()) {
+  const annual = annualRunRate(total, year, now);
+  return annual > 0 ? roundMoney(annual / 12) : null;
 }
 
 export function totalsByCategory(expenses, vendors) {

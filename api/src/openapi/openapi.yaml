@@ -334,7 +334,7 @@ paths:
       summary: Read bounded dashboard totals and recent invoices
       responses:
         '200':
-          description: Aggregated monthly and annual finance totals, receivables, goals, and up to six recent invoices
+          description: Aggregated monthly and annual finance totals, receivables, goals, and up to six recent invoices. Includes `yearRevenueToDate` through the business date `asOf`.
   /history:
     get:
       summary: List business record change history
@@ -599,7 +599,7 @@ paths:
         - $ref: '#/components/parameters/IdParam'
       responses:
         '200':
-          description: Year and totals
+          description: Year and totals, including `income_to_date` through the business date `asOf`.
         '404':
           description: Year not found
     put:

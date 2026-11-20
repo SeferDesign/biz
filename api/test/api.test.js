@@ -1010,6 +1010,30 @@ test('dashboard endpoint returns compact totals and recent invoice labels', asyn
   assert.equal(response.body.yearExpenses, 10);
 });
 
+test('dashboard and year detail include payments through the business date in run-rate revenue', async () => {
+  const store = createMemoryStore();
+  const today = businessDate();
+  const year = Number(today.slice(0, 4));
+  const tomorrow = new Date(`${today}T00:00:00Z`);
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+  const nextDate = tomorrow.toISOString().slice(0, 10);
+  if (!await store.getYear(year)) await store.createYear({ year, taxrate: 0 });
+  const app = createTestApp({ store });
+  const baseline = (await request(app).get('/v1/dashboard')).body.yearRevenueToDate;
+  await store.createInvoice({ status: 'paid', date: `${year - 1}-12-31`, paiddate: today, cost: 100 });
+  await store.createInvoice({ status: 'paid', date: today, paiddate: nextDate, cost: 300 });
+  await store.createInvoice({ status: 'sent', date: today, cost: 500 });
+
+  const dashboard = await request(app).get('/v1/dashboard');
+  const detail = await request(app).get(`/v1/years/${year}`);
+  assert.equal(dashboard.status, 200);
+  assert.equal(detail.status, 200);
+  assert.equal(dashboard.body.asOf, today);
+  assert.equal(detail.body.asOf, today);
+  assert.equal(dashboard.body.yearRevenueToDate, baseline + 100);
+  assert.equal(detail.body.income_to_date, dashboard.body.yearRevenueToDate);
+});
+
 test('client history records actor, redacted changes, updates, and deletion', async () => {
   const app = createTestApp();
   const created = await request(app).post('/v1/clients').send({ name: 'History Client', federalein: 'secret-ein' });
