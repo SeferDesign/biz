@@ -1121,6 +1121,24 @@ test('year endpoints return records and report totals', async () => {
   assert.equal((await request(app).get('/v1/years/1900')).status, 404);
 });
 
+test('year income ranks clients by total paid and counts their invoices by payment year', async () => {
+  const store = createMemoryStore();
+  const app = createTestApp({ store });
+  await store.createInvoice({ client_id: 2, status: 'paid', date: '2024-12-31', paiddate: '2025-01-02', cost: 1300.12 });
+  await store.createInvoice({ client_id: 2, status: 'paid', date: '2025-01-04', paiddate: '2025-01-05', cost: 1000.19 });
+  await store.createInvoice({ client_id: 1, status: 'paid', date: '2025-12-31', paiddate: '2026-01-02', cost: 500 });
+  await store.createInvoice({ client_id: null, status: 'paid', date: '2025-02-01', paiddate: '2025-02-02', cost: 15 });
+
+  const income = await request(app).get('/v1/years/2025/income');
+  assert.equal(income.status, 200);
+  assert.deepEqual(income.body.clients, [
+    { id: 2, name: 'Northwind', invoice_count: 2, total: 2300.31 },
+    { id: 1, name: 'Acme Inc.', invoice_count: 1, total: 2150 }
+  ]);
+  assert.equal(income.body.total, 4465.31);
+  assert.deepEqual((await request(app).get('/v1/years/2024/income')).body.clients, []);
+});
+
 test('year CSV exports list paid invoices and expenses', async () => {
   const app = createTestApp();
 

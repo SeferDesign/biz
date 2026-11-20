@@ -136,6 +136,22 @@ export default async function YearDetailPage({ params, searchParams }) {
           />
         </section>
       </div>
+      {!incomeResult.error && (
+        <section className="detail-section">
+          <div className="section-heading"><h2>Paid invoices by client</h2></div>
+          {incomeResult.data.clients.length ? (
+            <ResourcePage
+              hideHeading
+              data={incomeResult.data.clients}
+              columns={[
+                { key: 'name', label: 'Client', render: (client) => <Link className="table-link" href={`/clients/${client.id}`}>{client.name}</Link> },
+                { key: 'invoice_count', label: 'Invoices paid', className: 'numeric-cell' },
+                { key: 'total', label: 'Total paid', className: 'numeric-cell', render: (client) => formatMoney(client.total) }
+              ]}
+            />
+          ) : <p className="section-note">No client invoices were paid this year.</p>}
+        </section>
+      )}
       <section className="detail-section">
         <div className="section-heading">
           <h2>Paid invoices</h2>

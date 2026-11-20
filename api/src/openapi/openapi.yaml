@@ -652,7 +652,34 @@ paths:
         - $ref: '#/components/parameters/IdParam'
       responses:
         '200':
-          description: Income report
+          description: Income report with paid invoices and totals by client
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  year:
+                    type: integer
+                  invoices:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Invoice'
+                  total:
+                    type: number
+                  clients:
+                    type: array
+                    description: Clients with paid invoices, sorted by total paid descending. Invoices without a client still contribute to the report total.
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        invoice_count:
+                          type: integer
+                        total:
+                          type: number
         '404':
           description: Year not found
   /years/{id}/expenses:

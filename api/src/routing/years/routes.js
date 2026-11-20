@@ -65,7 +65,19 @@ export default function yearsRouter(store) {
     const clientsById = new Map(snapshot.clients.map((client) => [Number(client.id), client]));
     const records = yearIncome(year.year, snapshot.invoices)
       .map((invoice) => withInvoiceDisplayIds(invoice, clientsById.get(Number(invoice.client_id))?.name));
-    return res.json({ year: year.year, invoices: records, total: sum(records.map(invoiceAmount)) });
+    const amountsByClient = new Map();
+    for (const invoice of records) {
+      const client = clientsById.get(Number(invoice.client_id));
+      if (!client) continue;
+      if (!amountsByClient.has(client)) amountsByClient.set(client, []);
+      amountsByClient.get(client).push(invoiceAmount(invoice));
+    }
+    const clients = Array.from(amountsByClient, ([client, amounts]) => ({
+      ...client,
+      invoice_count: amounts.length,
+      total: sum(amounts)
+    })).sort((left, right) => right.total - left.total || left.name.localeCompare(right.name) || left.id - right.id);
+    return res.json({ year: year.year, invoices: records, total: sum(records.map(invoiceAmount)), clients });
   });
 
   router.get('/years/:id/expenses', async (req, res) => {
