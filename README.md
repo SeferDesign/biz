@@ -114,6 +114,12 @@ Set `BIZ_API_TOKEN` to an API key or bearer token. The server provides a generic
 `biz_api_request` tool and a `biz_api_openapi` tool for reading the API
 specification.
 
+The API also hosts the same tools as a remote, stateless Streamable HTTP MCP
+endpoint at `/v1/mcp` (for production, `https://api.biz.seferdesign.com/v1/mcp`).
+Send `Authorization: Bearer <API key>`; the key is forwarded to the API, so each
+client has exactly the access of its key. `biz_api_openapi` is served from the
+bundled spec, so it works in production builds too.
+
 ### Resource requirements
 
 `next build` and the Turbopack dev compiler need roughly 2 GB on their own. Give

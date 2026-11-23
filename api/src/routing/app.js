@@ -22,6 +22,7 @@ import yearsRouter from './years/routes.js';
 import stripeRouter, { createStripeWebhookHandler } from './stripe/routes.js';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { hashSessionToken } from '../auth/session.js';
+import { createMcpHttpHandler } from '@seferbiz/mcp/src/http.js';
 import { createStripeClient } from '../payments/stripe.js';
 import { sendPaymentNotification as deliverPaymentNotification } from '../email/payment-notification-mailer.js';
 
@@ -140,7 +141,8 @@ export function createApp({
   trustProxy = process.env.TRUST_PROXY === '1' ? 1 :
     process.env.TRUST_PROXY ? process.env.TRUST_PROXY.split(',').map((value) => value.trim()) : false,
   corsAllowedOrigins = allowedOrigins,
-  rateLimits = {}
+  rateLimits = {},
+  mcpApiUrl = `http://127.0.0.1:${process.env.PORT || 3000}/v1`
 } = {}) {
   const app = express();
   app.disable('x-powered-by');
@@ -180,11 +182,11 @@ export function createApp({
   app.use('/v1/auth/password-reset', limiters.reset);
   app.use(express.json({ limit: '100kb' }));
 
-  if (buildEnv === 'local') {
-    const openApiDocument = yaml.parse(
-      fs.readFileSync(path.join(__dirname, '../openapi/openapi.yaml'), 'utf8')
-    );
+  const openApiDocument = yaml.parse(
+    fs.readFileSync(path.join(__dirname, '../openapi/openapi.yaml'), 'utf8')
+  );
 
+  if (buildEnv === 'local') {
     app.get('/v1/openapi.json', (req, res) => {
       res.json(openApiDocument);
     });
@@ -206,6 +208,8 @@ export function createApp({
     res.set('WWW-Authenticate', 'Bearer');
     return res.status(401).json({ error: 'Unauthorized' });
   });
+  // Remote MCP endpoint: reuses the authentication and rate limiting above.
+  app.use('/v1/mcp', createMcpHttpHandler({ apiUrl: mcpApiUrl, openApiDocument }));
   app.use('/v1/auth', createAuthRouter(store, {
     otpSecretEncryptionKey,
     sessionCookieDomain,

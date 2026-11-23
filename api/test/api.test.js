@@ -1566,3 +1566,19 @@ test('invoice lines can be replaced on edit and invalid replacements are rejecte
   assert.deepEqual((await request(app).put(endpoint).send([])).body, []);
   assert.equal((await request(app).put('/v1/invoices/999/lines').send([])).status, 404);
 });
+
+test('remote MCP endpoint requires authentication and lists tools in production builds', async () => {
+  const app = createTestApp({ buildEnv: 'prod' });
+  const message = { jsonrpc: '2.0', id: 1, method: 'tools/list', params: {} };
+  const accept = 'application/json, text/event-stream';
+
+  assert.equal((await supertest(app).post('/v1/mcp').set('Accept', accept).send(message)).status, 401);
+
+  const listed = await supertest(app)
+    .post('/v1/mcp')
+    .set('Accept', accept)
+    .set('Authorization', `Bearer ${TEST_API_ACCESS_TOKEN}`)
+    .send(message);
+  assert.equal(listed.status, 200);
+  assert.deepEqual(listed.body.result.tools.map((tool) => tool.name).sort(), ['biz_api_openapi', 'biz_api_request']);
+});

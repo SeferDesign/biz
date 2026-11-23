@@ -75,7 +75,8 @@ export async function callBizApi({
 
 export function createMcpServer({
   apiUrl = process.env.BIZ_API_URL,
-  token = process.env.BIZ_API_TOKEN
+  token = process.env.BIZ_API_TOKEN,
+  openApiDocument
 } = {}) {
   const server = new McpServer({
     name: 'seferbiz-api',
@@ -116,6 +117,9 @@ export function createMcpServer({
       openWorldHint: true
     }
   }, async () => {
+    if (openApiDocument) {
+      return { content: [{ type: 'text', text: JSON.stringify(openApiDocument, null, 2) }] };
+    }
     const result = await callBizApi({
       apiUrl,
       token,
