@@ -100,6 +100,20 @@ The API hostname mirrors production: `api.biz.seferdesign.com` maps to
 `api.biz.loc` locally. Because the client and API are separate origins, the API
 only accepts browser requests from the hosts listed in `CORS_ALLOWED_ORIGINS`.
 
+### MCP server
+
+The repository includes a stdio MCP server for calling the Biz REST API:
+
+```bash
+BIZ_API_URL=https://api.biz.loc:9443/v1 \
+BIZ_API_TOKEN=local-development-api-token \
+npm run mcp
+```
+
+Set `BIZ_API_TOKEN` to an API key or bearer token. The server provides a generic
+`biz_api_request` tool and a `biz_api_openapi` tool for reading the API
+specification.
+
 ### Resource requirements
 
 `next build` and the Turbopack dev compiler need roughly 2 GB on their own. Give
