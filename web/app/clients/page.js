@@ -23,7 +23,6 @@ export default async function ClientsPage({ searchParams }) {
       page={page}
       columns={[
         { key: 'name', label: 'Company', render: (client) => <Link className="table-link" href={`/clients/${client.id}`}>{client.name || 'Unnamed client'}</Link> },
-        { key: 'parent_id', label: 'Parent', render: (client) => client.parent_name || '-' },
         { key: 'contact', label: 'Contact' },
         { key: 'email', label: 'Billing email', render: (client) => client.email_accounting || client.email || '-' },
         { key: 'rate', label: 'Hourly rate', className: 'numeric-cell', render: (client) => client.currentrate ? formatMoney(client.currentrate) : '-' },

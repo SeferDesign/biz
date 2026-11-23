@@ -60,12 +60,10 @@ export default async function ClientDetailPage({ params, searchParams }) {
         )}
       </div>
       <DetailGrid hideHeading={Boolean(accessToken)} items={[
-        ...(accessToken ? [] : [
-          ['Parent client', parent ? <Link className="table-link" href={`/clients/${parent.id}`}>{parent.name}</Link> : '-'],
-          ['Child clients', childClients.length ? childClients.map((child, index) => (
-            <span key={child.id}>{index > 0 ? ', ' : null}<Link className="table-link" href={`/clients/${child.id}`}>{child.name}</Link></span>
-          )) : '-']
-        ]),
+        ...(parent ? [['Parent', <Link className="table-link" href={`/clients/${parent.id}`}>{parent.name}</Link>]] : []),
+        ...(childClients.length ? [['Child Organizations', childClients.map((child, index) => (
+          <span key={child.id}>{index > 0 ? ', ' : null}<Link className="table-link" href={`/clients/${child.id}`}>{child.name}</Link></span>
+        ))]] : []),
         ['Contact', client.contact],
         [`Billing email${billingEmails.length > 1 ? 's' : ''}`, billingEmailsDisplay],
         ['Website', client.site_url ? <a href={client.site_url} rel="noreferrer" target="_blank">{client.site_url}</a> : '-'],
