@@ -24,6 +24,7 @@ COPY package.json package-lock.json ./
 COPY api/package.json ./api/package.json
 COPY web/package.json ./web/package.json
 COPY company/package.json ./company/package.json
+COPY mcp/package.json ./mcp/package.json
 RUN --mount=type=cache,target=/root/.npm \
 	npm ci --include=dev --no-audit --no-fund
 
@@ -36,6 +37,7 @@ ENV NODE_ENV=development
 COPY --from=deps /app/node_modules ./node_modules
 COPY package.json package-lock.json ./
 COPY company ./company
+COPY mcp ./mcp
 COPY api ./api
 EXPOSE 3000
 ENTRYPOINT ["/usr/local/bin/biz-entrypoint.sh"]
@@ -46,9 +48,11 @@ COPY package.json package-lock.json ./
 COPY api/package.json ./api/package.json
 COPY web/package.json ./web/package.json
 COPY company/package.json ./company/package.json
+COPY mcp/package.json ./mcp/package.json
 RUN --mount=type=cache,target=/root/.npm \
-	npm ci --omit=dev --workspace @seferbiz/api --workspace @seferbiz/company --include-workspace-root --no-audit --no-fund
+	npm ci --omit=dev --workspace @seferbiz/api --workspace @seferbiz/company --workspace @seferbiz/mcp --include-workspace-root --no-audit --no-fund
 COPY company ./company
+COPY mcp ./mcp
 COPY api ./api
 USER node
 EXPOSE 3000
@@ -87,6 +91,7 @@ COPY package.json package-lock.json ./
 COPY api/package.json ./api/package.json
 COPY web/package.json ./web/package.json
 COPY company/package.json ./company/package.json
+COPY mcp/package.json ./mcp/package.json
 RUN --mount=type=cache,target=/root/.npm \
 	npm ci --omit=dev --workspace @seferbiz/web --workspace @seferbiz/company --include-workspace-root --no-audit --no-fund
 COPY company ./company
