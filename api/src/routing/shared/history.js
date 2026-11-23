@@ -1,10 +1,10 @@
 const numericFields = new Set([
-  'account', 'client_id', 'cost', 'goal_year', 'hours', 'id', 'rate', 'recurring_rule_id', 'taxrate', 'total', 'vendor_id', 'year'
+  'account', 'client_id', 'parent_id', 'cost', 'goal_year', 'hours', 'id', 'rate', 'recurring_rule_id', 'taxrate', 'total', 'vendor_id', 'year'
 ]);
 const booleanFields = new Set(['discount', 'hourly', 'international', 'is_planned', 'paid']);
 
 export const historyFields = {
-  client: ['name', 'contact', 'site_url', 'logo', 'address1', 'address2', 'zipcode', 'city', 'state',
+  client: ['parent_id', 'name', 'contact', 'site_url', 'logo', 'address1', 'address2', 'zipcode', 'city', 'state',
     'international', 'intinfo', 'email_accounting', 'email_accounting_2', 'email_accounting_3',
     'preferred_paymenttype', 'currentrate', 'payment_terms'],
   invoice: ['client_id', 'date', 'cost', 'paid', 'paiddate', 'paymenttype', 'description', 'status', 'currency'],

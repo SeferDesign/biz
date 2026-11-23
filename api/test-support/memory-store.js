@@ -438,7 +438,13 @@ export function createMemoryStore() {
     },
     async listClients({ pageSize, offset }) {
       const clients = sortClientsByRecentActivity(snapshot.clients, snapshot.invoices);
-      return { items: clients.slice(offset, offset + pageSize), total: clients.length };
+      return {
+        items: clients.slice(offset, offset + pageSize).map((client) => ({
+          ...client,
+          parent_name: snapshot.clients.find((item) => item.id === client.parent_id)?.name || null
+        })),
+        total: clients.length
+      };
     },
     async listInvoices({ pageSize, offset }) {
       const statusOrder = { draft: 0, sent: 1, paid: 2 };
@@ -509,6 +515,7 @@ export function createMemoryStore() {
     async createClient(input) {
       const client = {
         id: Math.max(0, ...snapshot.clients.map((item) => item.id)) + 1,
+        parent_id: null,
         payment_terms: 'Net 15',
         created_at: new Date().toISOString(),
         ...input,
@@ -523,6 +530,9 @@ export function createMemoryStore() {
       return client;
     },
     async deleteClient(id) {
+      for (const client of snapshot.clients) {
+        if (client.parent_id === Number(id)) client.parent_id = null;
+      }
       return removeById(snapshot.clients, id);
     },
     async ensureClientAccessToken(id) {

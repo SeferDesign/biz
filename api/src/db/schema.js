@@ -75,6 +75,7 @@ const statements = [
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   `CREATE TABLE IF NOT EXISTS clients (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    parent_id BIGINT UNSIGNED NULL,
     name VARCHAR(255), contact VARCHAR(255), site_url VARCHAR(255), logo VARCHAR(255),
     address1 VARCHAR(255), address2 VARCHAR(255), zipcode VARCHAR(32), city VARCHAR(255),
     state VARCHAR(255), international BOOLEAN, intinfo VARCHAR(255),
@@ -83,7 +84,9 @@ const statements = [
     payment_terms VARCHAR(16) NOT NULL DEFAULT 'Net 15',
     gsheet_id VARCHAR(255), stripe_customer_id VARCHAR(255), access_token VARCHAR(255),
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT clients_parent_fk FOREIGN KEY (parent_id) REFERENCES clients(id) ON DELETE SET NULL,
+    INDEX clients_parent_idx (parent_id)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   `CREATE TABLE IF NOT EXISTS invoice_templates (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -244,6 +247,28 @@ export async function initializeSchema(database = getPool()) {
   );
   if (!columns.length) {
     await database.query("ALTER TABLE clients ADD COLUMN payment_terms VARCHAR(16) NOT NULL DEFAULT 'Net 15'");
+  }
+  const [parentColumns] = await database.query(
+    `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'clients' AND COLUMN_NAME = 'parent_id'`
+  );
+  if (!parentColumns.length) {
+    await database.query('ALTER TABLE clients ADD COLUMN parent_id BIGINT UNSIGNED NULL AFTER id');
+  }
+  const [parentIndexes] = await database.query(
+    `SELECT INDEX_NAME FROM INFORMATION_SCHEMA.STATISTICS
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'clients' AND INDEX_NAME = 'clients_parent_idx'`
+  );
+  if (!parentIndexes.length) {
+    await database.query('ALTER TABLE clients ADD INDEX clients_parent_idx (parent_id)');
+  }
+  const [parentForeignKeys] = await database.query(
+    `SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'clients' AND CONSTRAINT_NAME = 'clients_parent_fk'`
+  );
+  if (!parentForeignKeys.length) {
+    await database.query(`ALTER TABLE clients ADD CONSTRAINT clients_parent_fk
+      FOREIGN KEY (parent_id) REFERENCES clients(id) ON DELETE SET NULL`);
   }
   const [expenseColumns] = await database.query(
     `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS

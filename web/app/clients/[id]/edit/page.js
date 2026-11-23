@@ -10,8 +10,12 @@ export const metadata = { title: 'Edit Client' };
 
 export default async function EditClientPage({ params }) {
   const { id } = await params;
-  const result = await getApiData(`/clients/${encodeURIComponent(id)}`);
+  const [result, clientsResult] = await Promise.all([
+    getApiData(`/clients/${encodeURIComponent(id)}`),
+    getApiData('/clients')
+  ]);
   if (result.status === 404) notFound();
   if (result.error) return <Notice title="Client unavailable">{result.error}</Notice>;
-  return <RecordForm title="Edit Client" description="Update this client’s contact and billing details." fields={clientFields} initialValues={result.data} endpoint={`${browserApiBaseUrl}/clients/${result.data.id}`} method="PATCH" returnTo={`/clients/${result.data.id}`} submitLabel="Save Changes" />;
+  const clients = Array.isArray(clientsResult.data) ? clientsResult.data : [];
+  return <RecordForm title="Edit Client" description="Update this client’s contact and billing details." fields={clientFields(clients, result.data.id)} initialValues={result.data} endpoint={`${browserApiBaseUrl}/clients/${result.data.id}`} method="PATCH" returnTo={`/clients/${result.data.id}`} submitLabel="Save Changes" />;
 }

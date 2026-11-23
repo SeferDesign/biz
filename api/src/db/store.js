@@ -25,7 +25,7 @@ function snapshotColumns(table, fields) {
 }
 
 const clientFields = [
-  'name', 'contact', 'site_url', 'address1', 'address2', 'zipcode', 'city', 'state',
+  'parent_id', 'name', 'contact', 'site_url', 'address1', 'address2', 'zipcode', 'city', 'state',
   'international', 'intinfo', 'email_accounting', 'email_accounting_2', 'email_accounting_3',
   'preferred_paymenttype', 'currentrate', 'federalein', 'payment_terms'
 ];
@@ -471,8 +471,9 @@ export class MySqlStore {
   async listClients({ pageSize, offset }) {
     const [[countRows], [rows]] = await Promise.all([
       this.database.query('SELECT COUNT(*) AS total FROM clients'),
-      this.database.execute(`SELECT c.*, c.email_accounting AS email
+      this.database.execute(`SELECT c.*, c.email_accounting AS email, pc.name AS parent_name
         FROM clients c
+        LEFT JOIN clients pc ON pc.id = c.parent_id
         LEFT JOIN (
           SELECT client_id, MAX(created_at) AS last_invoice_created_at
           FROM invoices

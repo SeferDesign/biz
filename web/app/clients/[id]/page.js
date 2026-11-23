@@ -16,9 +16,10 @@ export default async function ClientDetailPage({ params, searchParams }) {
   const query = await searchParams;
   const accessToken = typeof query?.access_token === 'string' ? query.access_token : '';
   const accessTokenQuery = accessToken ? `?access_token=${encodeURIComponent(accessToken)}` : '';
-  const [clientResult, invoiceResult] = await Promise.all([
+  const [clientResult, invoiceResult, clientsResult] = await Promise.all([
     getApiData(`/clients/${encodeURIComponent(id)}${accessTokenQuery}`),
-    getApiData(accessToken ? `/clients/${encodeURIComponent(id)}/invoices${accessTokenQuery}` : '/invoices')
+    getApiData(accessToken ? `/clients/${encodeURIComponent(id)}/invoices${accessTokenQuery}` : '/invoices'),
+    accessToken ? Promise.resolve({ data: [] }) : getApiData('/clients')
   ]);
   if (clientResult.status === 404) notFound();
   if (clientResult.error) {
@@ -26,8 +27,12 @@ export default async function ClientDetailPage({ params, searchParams }) {
   }
 
   const client = clientResult.data;
+  const clients = Array.isArray(clientsResult.data) ? clientsResult.data : [];
+  const parent = client.parent_id ? clients.find((item) => Number(item.id) === Number(client.parent_id)) : null;
+  const childClients = accessToken ? [] : clients.filter((item) => Number(item.parent_id) === Number(client.id));
+  const groupedClientIds = new Set([Number(client.id), ...childClients.map((item) => Number(item.id))]);
   const invoices = (invoiceResult.data || [])
-    .filter((invoice) => accessToken || Number(invoice.client_id) === Number(client.id))
+    .filter((invoice) => accessToken || groupedClientIds.has(Number(invoice.client_id)))
     .sort(newestInvoicesFirst);
   const outstandingByCurrency = new Map();
   for (const invoice of invoices) {
@@ -55,6 +60,12 @@ export default async function ClientDetailPage({ params, searchParams }) {
         )}
       </div>
       <DetailGrid hideHeading={Boolean(accessToken)} items={[
+        ...(accessToken ? [] : [
+          ['Parent client', parent ? <Link className="table-link" href={`/clients/${parent.id}`}>{parent.name}</Link> : '-'],
+          ['Child clients', childClients.length ? childClients.map((child, index) => (
+            <span key={child.id}>{index > 0 ? ', ' : null}<Link className="table-link" href={`/clients/${child.id}`}>{child.name}</Link></span>
+          )) : '-']
+        ]),
         ['Contact', client.contact],
         [`Billing email${billingEmails.length > 1 ? 's' : ''}`, billingEmailsDisplay],
         ['Website', client.site_url ? <a href={client.site_url} rel="noreferrer" target="_blank">{client.site_url}</a> : '-'],

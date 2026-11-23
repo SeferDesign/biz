@@ -18,7 +18,36 @@ function invalidPreferredPaymentMethod(body) {
 }
 
 function normalizeClientInput(body) {
-  return body.preferred_paymenttype === '' ? { ...body, preferred_paymenttype: null } : body;
+  let input = body.preferred_paymenttype === '' ? { ...body, preferred_paymenttype: null } : body;
+  if (Object.hasOwn(input, 'parent_id')) {
+    const value = input.parent_id;
+    const validInteger = (typeof value === 'number' && Number.isInteger(value))
+      || (typeof value === 'string' && /^\d+$/.test(value.trim()));
+    input = {
+      ...input,
+      parent_id: value === '' || value == null
+        ? null
+        : validInteger ? Number(value) : NaN
+    };
+  }
+  return input;
+}
+
+async function invalidParent(store, id, parentId) {
+  if (parentId == null) return null;
+  if (!Number.isInteger(parentId) || parentId <= 0) return 'Parent client id must be a positive integer';
+  if (id != null && parentId === id) return 'A client cannot be its own parent';
+  let currentId = parentId;
+  const visited = new Set();
+  while (currentId != null) {
+    if (visited.has(currentId)) return 'Parent client relationship would create a cycle';
+    visited.add(currentId);
+    if (id != null && currentId === id) return 'Parent client relationship would create a cycle';
+    const parent = await store.getClient(currentId);
+    if (!parent) return 'Parent client not found';
+    currentId = parent.parent_id == null ? null : Number(parent.parent_id);
+  }
+  return null;
 }
 
 export default function clientsRouter(store) {
@@ -65,6 +94,8 @@ export default function clientsRouter(store) {
     if (!hasText(req.body?.name)) return res.status(400).json({ error: 'Client name is required' });
     if (invalidPaymentTerms(req.body)) return res.status(400).json({ error: 'Payment terms must be Net 15, Net 30, Net 60, or Net 90' });
     if (invalidPreferredPaymentMethod(req.body)) return res.status(400).json({ error: 'Preferred payment method is not supported' });
+    const parentError = await invalidParent(store, null, normalizeClientInput(req.body).parent_id);
+    if (parentError) return res.status(400).json({ error: parentError });
     const client = await store.createClient(normalizeClientInput(req.body));
     await writeHistory(store, req, { entityType: 'client', entityId: client.id, action: 'created', after: client, fields: historyFields.client });
     return res.status(201).json(client);
@@ -78,6 +109,10 @@ export default function clientsRouter(store) {
     }
     if (invalidPaymentTerms(req.body)) return res.status(400).json({ error: 'Payment terms must be Net 15, Net 30, Net 60, or Net 90' });
     if (invalidPreferredPaymentMethod(req.body)) return res.status(400).json({ error: 'Preferred payment method is not supported' });
+    if (Object.hasOwn(req.body || {}, 'parent_id')) {
+      const parentError = await invalidParent(store, id, normalizeClientInput(req.body).parent_id);
+      if (parentError) return res.status(400).json({ error: parentError });
+    }
     if (!Object.keys(req.body || {}).length) {
       return res.status(400).json({ error: 'At least one client field is required' });
     }
@@ -95,6 +130,10 @@ export default function clientsRouter(store) {
     if (!hasText(req.body?.name)) return res.status(400).json({ error: 'Client name is required' });
     if (invalidPaymentTerms(req.body)) return res.status(400).json({ error: 'Payment terms must be Net 15, Net 30, Net 60, or Net 90' });
     if (invalidPreferredPaymentMethod(req.body)) return res.status(400).json({ error: 'Preferred payment method is not supported' });
+    if (Object.hasOwn(req.body || {}, 'parent_id')) {
+      const parentError = await invalidParent(store, id, normalizeClientInput(req.body).parent_id);
+      if (parentError) return res.status(400).json({ error: parentError });
+    }
     const current = await store.getClient(id);
     const before = current ? structuredClone(current) : null;
     const client = await store.updateClient(id, normalizeClientInput(req.body));
