@@ -839,6 +839,32 @@ test('omni-search finds clients, vendors, expenses, invoices, and line items', a
   assert.equal(tooShort.status, 400);
 });
 
+test('clients support one optional parent and reject invalid or cyclic relationships', async () => {
+  const app = createTestApp();
+
+  const parent = await request(app).post('/v1/clients').send({ name: 'Parent Co' });
+  const child = await request(app).post('/v1/clients').send({ name: 'Child Co', parent_id: parent.body.id });
+  assert.equal(parent.status, 201);
+  assert.equal(child.status, 201);
+  assert.equal(child.body.parent_id, parent.body.id);
+
+  const self = await request(app).patch(`/v1/clients/${parent.body.id}`).send({ parent_id: parent.body.id });
+  assert.equal(self.status, 400);
+  assert.equal(self.body.error, 'A client cannot be its own parent');
+
+  const cycle = await request(app).patch(`/v1/clients/${parent.body.id}`).send({ parent_id: child.body.id });
+  assert.equal(cycle.status, 400);
+  assert.equal(cycle.body.error, 'Parent client relationship would create a cycle');
+
+  const cleared = await request(app).patch(`/v1/clients/${child.body.id}`).send({ parent_id: null });
+  assert.equal(cleared.status, 200);
+  assert.equal(cleared.body.parent_id, null);
+
+  const missing = await request(app).post('/v1/clients').send({ name: 'Orphan Co', parent_id: 999 });
+  assert.equal(missing.status, 400);
+  assert.equal(missing.body.error, 'Parent client not found');
+});
+
 test('resource lists support pagination without changing unpaged responses', async () => {
   const app = createTestApp();
   const clients = await request(app).get('/v1/clients?page=1&page_size=1');

@@ -1,4 +1,8 @@
-export const clientFields = [
+export function clientFields(clients = [], currentClientId = null) {
+  return [
+  { name: 'parent_id', label: 'Parent client', type: 'relation', options: clients
+    .filter((client) => client.id !== currentClientId)
+    .map((client) => ({ value: client.id, label: client.name })) },
   { name: 'name', label: 'Company name', required: true },
   { name: 'contact', label: 'Contact' },
   { name: 'email_accounting', label: 'Billing email', type: 'email' },
@@ -16,7 +20,8 @@ export const clientFields = [
   { name: 'federalein', label: 'Federal EIN' },
   { name: 'international', label: 'International client', type: 'checkbox' },
   { name: 'intinfo', label: 'International billing information', wide: true }
-];
+  ];
+}
 
 export const vendorFields = [
   { name: 'name', label: 'Vendor name', required: true },
